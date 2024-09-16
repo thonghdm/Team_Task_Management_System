@@ -2,17 +2,17 @@ const mongoose = require('mongoose')
 
 // Define the user schema
 const userSchema = new mongoose.Schema({
-    email: String,
+    email: { type: String, required: true, unique: true }, // ensure email is unique and required
     password: { type: String },
     googleId: { type: String, unique: true, sparse: true },
-    image: String,
+    image: { type: String },
     displayName: String,
-    tokenLogin: { type: String, default: '' },
+    tokenLogin: { type: String },
+    is_active: { type: Boolean, default: true }, // whether the account is active
     refreshToken: String, // New field to store the refresh token
     isAdmin: { type: Boolean, default: false }
 }, { timestamps: true })
 
-// Create the user model
 const User = mongoose.model('User', userSchema)
 
 module.exports = User

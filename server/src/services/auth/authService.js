@@ -12,7 +12,7 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
             const token = jwt.sign(
                 { id: user._id, email: user.email },
                 process.env.JWT_ACCESS_SECRET,
-                { expiresIn: '60s' }
+                { expiresIn: '1d' }
             )
             const refreshToken = jwt.sign(
                 { id: user._id },
@@ -75,7 +75,7 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                 const newAccessToken = jwt.sign(
                     { id: user._id, email: user.email },
                     process.env.JWT_ACCESS_SECRET,
-                    { expiresIn: '60s' }
+                    { expiresIn: '1d' }
                 )
                 const newRefreshToken = jwt.sign(
                     { id: user._id },

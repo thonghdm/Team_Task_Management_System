@@ -4,7 +4,6 @@ const authService = require('~/services/auth/authService')
 const authController = {
     loginSuccess: async (req, res) => {
         const { id, tokenLogin } = req.body
-        console.log('id', 1)
         try {
             if (!id || !tokenLogin) {
                 return res.status(400).json({

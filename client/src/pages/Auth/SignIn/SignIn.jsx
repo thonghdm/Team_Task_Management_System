@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -10,17 +10,30 @@ import Typography from '@mui/material/Typography';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Card from '@mui/material/Card';
+import { loginWithEmail } from '~/redux/actions/authAction'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom';
 
 
 
 export default function SignIn() {
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
     const [emailError, setEmailError] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    const [password, setPassword] = useState('');
+    const [password, setPassword] = useState("000000");
     const [showPassword, setShowPassword] = useState(false);
-    const handlePasswordChange = (event) => setPassword(event.target.value);
+    const [email, setGmail] = useState("thongdzpro100@gmail.co3m");
+
+    const { isLoggedIn,typeLogin, error } = useSelector(state => state.auth);
+    useEffect(() => {
+        console.log(isLoggedIn,typeLogin) 
+        if (isLoggedIn&&typeLogin) {
+            navigate('/user'); // Redirect to Home page after login
+        }
+    }, [isLoggedIn, typeLogin,navigate]);
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
     const validateInputs = () => {
@@ -48,22 +61,20 @@ export default function SignIn() {
         return isValid;
     };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
+    const handleSubmit = (e) => {
+        e.preventDefault();
         if (validateInputs()) {
-            const data = new FormData(event.currentTarget);
-            console.log({
-                email: data.get('email'),
-                password: data.get('password'),
-            });
+            dispatch(loginWithEmail(email, password));
         }
-    };
 
+    };
 
     const handleLogin = (type) => {
         window.open(`http://localhost:5000/api/auth/${type}`, '_self')
         console.log('Login with Google');
     }
+
+
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -99,6 +110,7 @@ export default function SignIn() {
                             autoFocus
                             required
                             fullWidth
+                            value={email}
                             variant="outlined"
                             sx={{
                                 '& .MuiOutlinedInput-root': {
@@ -107,6 +119,7 @@ export default function SignIn() {
                                 },
                             }}
                             color={emailError ? 'error' : 'primary'}
+                            onChange={(e) => setGmail(e.target.value)}
                         />
                     </FormControl>
                     <FormControl>
@@ -134,15 +147,16 @@ export default function SignIn() {
                             variant="outlined"
                             size="small"
                             value={password}
-                            onChange={handlePasswordChange}
+                            onChange={(e) => setPassword(e.target.value)}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
-                                    height: '40px'                                },
+                                    height: '40px'
+                                },
                             }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        {password!==''&&<IconButton
+                                        {password !== '' && <IconButton
                                             aria-label="toggle password visibility"
                                             onClick={togglePasswordVisibility}
                                             edge="end"
@@ -153,6 +167,7 @@ export default function SignIn() {
                                 ),
                             }}
                             color={passwordError ? 'error' : 'primary'}
+
                         />
                     </FormControl>
                     <Button type="submit" fullWidth variant="contained">
@@ -176,8 +191,8 @@ export default function SignIn() {
                     </Button>
                 </Box>
             </Card>
-            
+
         </Box>
-        
+
     );
 }

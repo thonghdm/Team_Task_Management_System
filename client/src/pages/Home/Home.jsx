@@ -7,9 +7,8 @@ import { apiGetOne } from '~/apis/User/userService'
 const Home = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const { isLoggedIn, token } = useSelector(state => state.auth)
-    const [userData, setUserData] = useState({})
-
+    const { isLoggedIn,typeLogin, token, userData  } = useSelector(state => state.auth)
+    const [userDataGG, setUserData] = useState({})
     useEffect(() => {
         const fetchUser = async () => {
             let response = await apiGetOne(token)
@@ -21,8 +20,12 @@ const Home = () => {
             }
         }
         fetchUser()
-    }, [isLoggedIn])
+    }, [isLoggedIn,isLoggedIn,typeLogin])
 
+    let data = {}
+    if (isLoggedIn) {
+        data = typeLogin ? userData : userDataGG
+    }
     return (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginTop: '32px' }} >
             <div>
@@ -40,9 +43,9 @@ const Home = () => {
 
             </div>
             <div>
-                <h4>{userData?.displayName}</h4>
-                <h4>{userData?.email}</h4>
-                {userData?.image && <img src={userData?.image} alt="avatar" style={{ width: '200px', height: '200px', objectFit: 'cover' }} />}
+                <h4>{data?.displayName}</h4>
+                <h4>{data?.email}</h4>
+                {data?.image && <img src={data?.image} alt="avatar" style={{ width: '200px', height: '200px', objectFit: 'cover' }} />}
             </div>
 
         </div>

@@ -15,5 +15,13 @@ export const apiLoginSuccess = (id, tokenLogin) => new Promise(async (resolve, r
     }
 });
 
+export const apiLoginWithEmail = async (email, password) => {
+    return await axios.post('http://localhost:5000/api/auth/email-login', {
+        email,
+        password
+    });
+};
+
+
 // No need to set .default.withCredentials separately
 // The withCredentials is set directly in the axios call
