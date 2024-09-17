@@ -1,5 +1,5 @@
 //dang nhap
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -11,21 +11,30 @@ import Typography from '@mui/material/Typography';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Card from '@mui/material/Card';
+import { registerWithEmail } from '~/redux/actions/authAction'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom';
 
 export default function SignUp() {
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth);
+
     const [emailError, setEmailError] = useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
 
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
 
-    const [password, setPassword] = useState('');
+    const [password1, setPassword] = useState("000000");
     const [showPassword, setShowPassword] = useState(false);
 
     const [nameError, setNameError] = React.useState(false);
     const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+    const [email, setGmail] = useState("thongdzpro100@gmail.co3m");
+    const [displayName, setDisplayName] = useState("Thongdz pro100");
 
-    const handlePasswordChange = (event) => setPassword(event.target.value);
+
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
     const validateInputs = () => {
@@ -65,14 +74,14 @@ export default function SignUp() {
         return isValid;
     };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
+    const handleSubmit = (e) => {
+        e.preventDefault();
         if (validateInputs()) {
-            const data = new FormData(event.currentTarget);
-            console.log({
-                email: data.get('email'),
-                password: data.get('password'),
-            });
+            console.log(displayName, email, password1)
+            dispatch(registerWithEmail(displayName, email, password1));
+        }
+        if (error) {
+            navigate('/'); // Redirect to Home page after login
         }
     };
 
@@ -115,6 +124,7 @@ export default function SignUp() {
                             autoFocus
                             required
                             fullWidth
+                            value={displayName}
                             variant="outlined"
                             sx={{
                                 '& .MuiOutlinedInput-root': {
@@ -123,12 +133,13 @@ export default function SignUp() {
                                 },
                             }}
                             color={nameError ? 'error' : 'primary'}
+                            onChange={(e) => setDisplayName(e.target.value)}
                         />
                     </FormControl>
                     <FormControl>
                         <FormLabel htmlFor="email">Email</FormLabel>
                         <TextField
-                            error={emailError}
+                            error={emailError || error ? true : false}
                             helperText={emailErrorMessage}
                             id="email"
                             type="email"
@@ -138,6 +149,7 @@ export default function SignUp() {
                             autoFocus
                             required
                             fullWidth
+                            value={email || error}
                             variant="outlined"
                             sx={{
                                 '& .MuiOutlinedInput-root': {
@@ -145,23 +157,16 @@ export default function SignUp() {
                                     padding: '0', // Control the padding
                                 },
                             }}
-                            color={emailError ? 'error' : 'primary'}
+                            color={(emailError || error) ? 'error' : 'primary'}
+                            onChange={(e) => setGmail(e.target.value)}
                         />
                     </FormControl>
                     <FormControl>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <FormLabel htmlFor="password">Password</FormLabel>
-                            <Link
-                                component="button"
-                                onClick={() => alert('Forgot password modal placeholder')}
-                                variant="body2"
-                                sx={{ alignSelf: 'baseline' }}
-                            >
-                                Forgot your password?
-                            </Link>
                         </Box>
                         <TextField
-                            error={passwordError}
+                            error={passwordError || error ? true : false}
                             helperText={passwordErrorMessage}
                             name="password"
                             placeholder="••••••"
@@ -172,8 +177,8 @@ export default function SignUp() {
                             fullWidth
                             variant="outlined"
                             size="small"
-                            value={password}
-                            onChange={handlePasswordChange}
+                            value={password1 || error}
+                            onChange={(e) => setPassword(e.target.value)}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
                                     height: '40px',
@@ -182,7 +187,7 @@ export default function SignUp() {
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        {password !== '' && <IconButton
+                                        {password1 !== '' && <IconButton
                                             aria-label="toggle password visibility"
                                             onClick={togglePasswordVisibility}
                                             edge="end"
@@ -194,6 +199,8 @@ export default function SignUp() {
                             }}
                             color={passwordError ? 'error' : 'primary'}
                         />
+                        {error && <FormLabel sx={{mt:1, paddingLeft: 2, fontSize: 12, color: '#d32f2f' }}>Email already in use</FormLabel>}
+
                     </FormControl>
                     <Button type="submit" fullWidth variant="contained">
                         Sign up

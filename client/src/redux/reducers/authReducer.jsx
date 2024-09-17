@@ -39,6 +39,17 @@ const authReducer = (state = initState, action) => {
                 typeLogin: true,
                 error: action.error,
             };
+        case actionTypes.USER_REGISTER_SUCCESS:
+            return {
+                ...state,
+                userData: action.userData || {},  // Update userData
+            };
+        case actionTypes.USER_REGISTER_FAILURE:
+            return {
+                ...state,
+                userData: {},  // Reset userData
+                error: action.error,
+            };
         default:
             return state;
     }

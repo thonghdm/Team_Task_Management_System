@@ -16,11 +16,38 @@ export const apiLoginSuccess = (id, tokenLogin) => new Promise(async (resolve, r
 });
 
 export const apiLoginWithEmail = async (email, password) => {
-    return await axios.post('http://localhost:5000/api/auth/email-login', {
-        email,
-        password
-    });
+    try {
+        const response = await axios.post('http://localhost:5000/api/auth/email-login', {
+            email,
+            password
+        });
+        return response;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            throw new Error(error.response.data.message || 'An error occurred');
+        }
+        throw new Error('An error occurred');
+    }
 };
+
+
+
+export const apiRegisterWithEmail = async (name,email, password) => {
+    try {
+        const response = await axios.post('http://localhost:5000/api/auth/email-register', {
+            name,
+            email,
+            password
+        });
+        return response;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            throw new Error(error.response.data.message || 'An error occurred');
+        }
+        throw new Error('An error occurred');
+    }
+};
+
 
 
 // No need to set .default.withCredentials separately

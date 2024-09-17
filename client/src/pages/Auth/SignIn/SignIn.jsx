@@ -24,16 +24,17 @@ export default function SignIn() {
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
     const [password, setPassword] = useState("000000");
+    
     const [showPassword, setShowPassword] = useState(false);
     const [email, setGmail] = useState("thongdzpro100@gmail.co3m");
 
-    const { isLoggedIn,typeLogin, error } = useSelector(state => state.auth);
+    const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth);
     useEffect(() => {
-        console.log(isLoggedIn,typeLogin) 
-        if (isLoggedIn&&typeLogin) {
+        console.log(isLoggedIn, typeLogin)
+        if (isLoggedIn && typeLogin) {
             navigate('/user'); // Redirect to Home page after login
         }
-    }, [isLoggedIn, typeLogin,navigate]);
+    }, [isLoggedIn, typeLogin, navigate]);
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
     const validateInputs = () => {
@@ -66,7 +67,6 @@ export default function SignIn() {
         if (validateInputs()) {
             dispatch(loginWithEmail(email, password));
         }
-
     };
 
     const handleLogin = (type) => {
@@ -100,7 +100,7 @@ export default function SignIn() {
                     <FormControl>
                         <FormLabel htmlFor="email">Email</FormLabel>
                         <TextField
-                            error={emailError}
+                            error={emailError || error ? true : false}
                             helperText={emailErrorMessage}
                             id="email"
                             type="email"
@@ -118,7 +118,7 @@ export default function SignIn() {
                                     padding: '0', // Control the padding
                                 },
                             }}
-                            color={emailError ? 'error' : 'primary'}
+                            color={(emailError || error) ? 'error' : 'primary'}
                             onChange={(e) => setGmail(e.target.value)}
                         />
                     </FormControl>
@@ -135,7 +135,7 @@ export default function SignIn() {
                             </Link>
                         </Box>
                         <TextField
-                            error={passwordError}
+                            error={passwordError || error ? true : false}
                             helperText={passwordErrorMessage}
                             name="password"
                             placeholder="••••••"
@@ -146,7 +146,7 @@ export default function SignIn() {
                             fullWidth
                             variant="outlined"
                             size="small"
-                            value={password}
+                            value={password || error}
                             onChange={(e) => setPassword(e.target.value)}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
@@ -167,8 +167,9 @@ export default function SignIn() {
                                 ),
                             }}
                             color={passwordError ? 'error' : 'primary'}
-
                         />
+                        {error && <FormLabel sx={{paddingLeft:2, fontSize: 12, color: '#d32f2f' }}>The email address or password you entered isn't connected to an account</FormLabel>}
+
                     </FormControl>
                     <Button type="submit" fullWidth variant="contained">
                         Sign in
