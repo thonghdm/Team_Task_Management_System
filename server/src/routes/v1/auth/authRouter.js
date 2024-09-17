@@ -29,7 +29,7 @@ router.post('/login-success', authController.loginSuccess)
 
 router.post('/email-login', authControllerRegister.loginUser)
 
-router.post('/register', authControllerRegister.registerUser)
+router.post('/email-register', authControllerRegister.registerUser)
 
 
 

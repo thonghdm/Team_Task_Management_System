@@ -9,6 +9,7 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
         const newTokenLogin = uuidv4()
         let user = await User.findOne({ _id: id, tokenLogin }).lean()
         if (user) {
+
             const token = jwt.sign(
                 { id: user._id, email: user.email },
                 process.env.JWT_ACCESS_SECRET,
@@ -20,17 +21,15 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
                 { expiresIn: '7d' }
             )
 
-            // Update the user's tokenLogin and refreshToken in the database
             await User.updateOne(
                 { _id: id },
                 { tokenLogin: newTokenLogin, refreshToken: refreshToken }
             )
-            // Resolve the promise with the generated tokens
             resolve({
                 err: 0,
                 msg: 'OK',
                 token,
-                refreshToken // Return refresh token to set it as a cookie in the controller
+                refreshToken
             })
         } else {
             resolve({
@@ -59,8 +58,6 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                     msg: 'Refresh token is not valid'
                 })
             }
-
-            // Verify the refresh token
             jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, async (err) => {
                 if (err) {
                     // Remove the invalid refresh token from the user
@@ -71,7 +68,6 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                     })
                 }
 
-                // Generate new tokens
                 const newAccessToken = jwt.sign(
                     { id: user._id, email: user.email },
                     process.env.JWT_ACCESS_SECRET,
@@ -82,7 +78,6 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                     process.env.JWT_REFRESH_SECRET,
                     { expiresIn: '7d' }
                 )
-                // Update the user's refresh token in the database
                 await User.updateOne({ _id: user._id }, { refreshToken: newRefreshToken })
 
                 resolve({

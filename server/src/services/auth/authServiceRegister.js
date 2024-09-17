@@ -1,8 +1,7 @@
+/* eslint-disable no-console */
 const User = require('~/models/user') // Import the Mongoose user model
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-const { v4: uuidv4 } = require('uuid')
-
 require('dotenv').config()
 
 
@@ -16,7 +15,7 @@ const authServiceRegister = {
             },
             process.env.JWT_ACCESS_SECRET,
             { expiresIn: '1d' }
-        );
+        )
     },
 
     // GENERATE REFRESH TOKEN
@@ -38,7 +37,6 @@ const authServiceRegister = {
         // Generate tokens
         const accessToken = authServiceRegister.generateAccessToken(user)
         const refreshToken = authServiceRegister.generateRefreshToken(user)
-
         // eslint-disable-next-line no-unused-vars
         const { password, ...userDataWithoutPassword } = user._doc
         return {
@@ -48,11 +46,10 @@ const authServiceRegister = {
         }
     },
     registerUser: async (userData) => {
-        const newTokenLogin = uuidv4()
-
         try {
             // Check if email already exists
             const existingUser = await User.findOne({ email: userData.email })
+            console.log(userData)
             if (existingUser) {
                 return { error: 'Email already exists' }
             }
@@ -61,13 +58,13 @@ const authServiceRegister = {
             const hashed = await bcrypt.hash(userData.password, salt)
 
             const newUser = new User({
-                displayName: userData.displayName,
+                displayName: userData.name,
                 email: userData.email,
-                password: hashed,
-                tokenLogin: newTokenLogin
+                password: hashed
             })
 
             const savedUser = await newUser.save()
+            // eslint-disable-next-line no-unused-vars
             const { password, ...userWithoutPassword } = savedUser._doc
 
             return { user: userWithoutPassword }
@@ -75,7 +72,7 @@ const authServiceRegister = {
             console.error('Registration error:', error)
             return { error: 'An error occurred during registration' }
         }
-    },
+    }
 }
 
 module.exports = authServiceRegister
