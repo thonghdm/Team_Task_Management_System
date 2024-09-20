@@ -32,7 +32,7 @@ export const apiLoginWithEmail = async (email, password) => {
 
 
 
-export const apiRegisterWithEmail = async (name,email, password) => {
+export const apiRegisterWithEmail = async (name, email, password) => {
     try {
         const response = await axios.post('http://localhost:5000/api/auth/email-register', {
             name,
@@ -41,13 +41,10 @@ export const apiRegisterWithEmail = async (name,email, password) => {
         });
         return response;
     } catch (error) {
-        if (error.response && error.response.data) {
-            throw new Error(error.response.data.message || 'An error occurred');
-        }
-        throw new Error('An error occurred');
+        console.error('Registration error:', error.response?.data || error.message);
+        throw error;
     }
 };
-
 
 
 // No need to set .default.withCredentials separately

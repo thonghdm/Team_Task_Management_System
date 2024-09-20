@@ -1,5 +1,6 @@
-//dang nhap
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -11,93 +12,73 @@ import Typography from '@mui/material/Typography';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Card from '@mui/material/Card';
-import { registerWithEmail } from '~/redux/actions/authAction'
-import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom';
+import { registerWithEmail } from '~/redux/actions/authAction';
 
 export default function SignUp() {
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
-    const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const [emailError, setEmailError] = useState(false);
-    const [emailErrorMessage, setEmailErrorMessage] = useState('');
-
-    const [passwordError, setPasswordError] = useState(false);
-    const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-
-    const [password1, setPassword] = useState("000000");
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-
-    const [nameError, setNameError] = React.useState(false);
-    const [nameErrorMessage, setNameErrorMessage] = React.useState('');
-    const [email, setGmail] = useState("thongdzpro100@gmail.co3m");
-    const [displayName, setDisplayName] = useState("Thongdz pro100");
-
+    const [nameError, setNameError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [generalError, setGeneralError] = useState('');
 
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
     const validateInputs = () => {
-        const email = document.getElementById('email');
-        const password = document.getElementById('password');
-        const name = document.getElementById('name');
-
         let isValid = true;
 
-        if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-            setEmailError(true);
-            setEmailErrorMessage('Please enter a valid email address.');
+        if (!name.trim()) {
+            setNameError('Name is required');
             isValid = false;
         } else {
-            setEmailError(false);
-            setEmailErrorMessage('');
+            setNameError('');
         }
 
-        if (!password.value || password.value.length < 6) {
-            setPasswordError(true);
-            setPasswordErrorMessage('Password must be at least 6 characters long.');
+        if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+            setEmailError('Please enter a valid email address');
             isValid = false;
         } else {
-            setPasswordError(false);
-            setPasswordErrorMessage('');
+            setEmailError('');
         }
 
-        if (!name.value || name.value.length < 1) {
-            setNameError(true);
-            setNameErrorMessage('Name is required.');
+        if (password.length < 6) {
+            setPasswordError('Password must be at least 6 characters long');
             isValid = false;
         } else {
-            setNameError(false);
-            setNameErrorMessage('');
+            setPasswordError('');
         }
 
         return isValid;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        setGeneralError('');
+
         if (validateInputs()) {
-            console.log(displayName, email, password1)
-            dispatch(registerWithEmail(displayName, email, password1));
-        }
-        if (error) {
-            navigate('/'); // Redirect to Home page after login
+            try {
+                await dispatch(registerWithEmail(name, email, password));
+                navigate('/login-email');
+            } catch (error) {
+                setGeneralError(error.message || 'Registration failed. Please try again.');
+            }
         }
     };
 
     const handleLogin = (type) => {
-        window.open(`http://localhost:5000/api/auth/${type}`, '_self')
-    }
-
+        window.open(`http://localhost:5000/api/auth/${type}`, '_self');
+    };
 
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
             <Card variant="outlined" sx={{ padding: '2rem', width: '100%', maxWidth: '400px' }}>
-                <Typography
-                    component="h1"
-                    variant="h4"
-                    sx={{ width: '100%', textAlign: 'center', marginBottom: '1.5rem' }}
-                >
+                <Typography component="h1" variant="h4" sx={{ width: '100%', textAlign: 'center', marginBottom: '1.5rem' }}>
                     Sign up
                 </Typography>
                 <Box
@@ -114,51 +95,48 @@ export default function SignUp() {
                     <FormControl>
                         <FormLabel htmlFor="name">Full name</FormLabel>
                         <TextField
-                            error={nameError}
-                            helperText={nameErrorMessage}
+                            error={!!nameError}
+                            helperText={nameError}
                             id="name"
-                            type="name"
+                            type="text"
                             name="name"
                             placeholder="Peter Parker"
                             autoComplete="name"
                             autoFocus
                             required
                             fullWidth
-                            value={displayName}
+                            value={name}
                             variant="outlined"
                             sx={{
                                 '& .MuiOutlinedInput-root': {
-                                    height: '40px', // Adjust the height
-                                    padding: '0', // Control the padding
+                                    height: '40px',
+                                    padding: '0',
                                 },
                             }}
-                            color={nameError ? 'error' : 'primary'}
-                            onChange={(e) => setDisplayName(e.target.value)}
+                            onChange={(e) => setName(e.target.value)}
                         />
                     </FormControl>
                     <FormControl>
                         <FormLabel htmlFor="email">Email</FormLabel>
                         <TextField
-                            error={emailError || error ? true : false}
-                            helperText={emailErrorMessage}
+                            error={!!emailError}
+                            helperText={emailError}
                             id="email"
                             type="email"
                             name="email"
                             placeholder="your@email.com"
                             autoComplete="email"
-                            autoFocus
                             required
                             fullWidth
-                            value={email || error}
+                            value={email}
                             variant="outlined"
                             sx={{
                                 '& .MuiOutlinedInput-root': {
-                                    height: '40px', // Adjust the height
-                                    padding: '0', // Control the padding
+                                    height: '40px',
+                                    padding: '0',
                                 },
                             }}
-                            color={(emailError || error) ? 'error' : 'primary'}
-                            onChange={(e) => setGmail(e.target.value)}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                     </FormControl>
                     <FormControl>
@@ -166,18 +144,17 @@ export default function SignUp() {
                             <FormLabel htmlFor="password">Password</FormLabel>
                         </Box>
                         <TextField
-                            error={passwordError || error ? true : false}
-                            helperText={passwordErrorMessage}
+                            error={!!passwordError}
+                            helperText={passwordError}
                             name="password"
                             placeholder="••••••"
                             type={showPassword ? 'text' : 'password'}
                             id="password"
-                            autoComplete="current-password"
+                            autoComplete="new-password"
                             required
                             fullWidth
                             variant="outlined"
-                            size="small"
-                            value={password1 || error}
+                            value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
@@ -187,21 +164,23 @@ export default function SignUp() {
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        {password1 !== '' && <IconButton
+                                        <IconButton
                                             aria-label="toggle password visibility"
                                             onClick={togglePasswordVisibility}
                                             edge="end"
                                         >
                                             {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                                        </IconButton>}
+                                        </IconButton>
                                     </InputAdornment>
                                 ),
                             }}
-                            color={passwordError ? 'error' : 'primary'}
                         />
-                        {error && <FormLabel sx={{mt:1, paddingLeft: 2, fontSize: 12, color: '#d32f2f' }}>Email already in use</FormLabel>}
-
                     </FormControl>
+                    {generalError && (
+                        <Typography color="error" variant="body2">
+                            {generalError}
+                        </Typography>
+                    )}
                     <Button type="submit" fullWidth variant="contained">
                         Sign up
                     </Button>
@@ -214,11 +193,7 @@ export default function SignUp() {
                 </Box>
                 <Divider sx={{ my: 2 }}>or</Divider>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        onClick={() => handleLogin('google')}
-                    >
+                    <Button fullWidth variant="outlined" onClick={() => handleLogin('google')}>
                         Sign up with Google
                     </Button>
                 </Box>

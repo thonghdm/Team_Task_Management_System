@@ -5,8 +5,8 @@ import { BorderColor } from '@mui/icons-material'
 
 const theme = extendTheme({
     app: {
-        appBarHeight: '50',
-        boardBarHeight: '50'
+        appBarHeight: '100px',
+        boardBarHeight: '100'
     },
     colorSchemes: {
         light: {

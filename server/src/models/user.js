@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true }, // ensure email is unique and required
     password: { type: String },
-    googleId: { type: String, unique: true, sparse: true },
+    googleId: { type: String, unique: true, sparse: true, default: '' },
     image: { type: String },
     displayName: String,
     tokenLogin: { type: String },

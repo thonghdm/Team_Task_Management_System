@@ -56,26 +56,23 @@ export const registerWithEmail = (name, email, password) => async (dispatch) => 
     try {
         dispatch({ type: actionTypes.LOGIN_REQUEST });
 
-        let response = await apiRegisterWithEmail(name, email, password);
-        console.log(response)
-        if (response!==null) {
+        const response = await apiRegisterWithEmail(name, email, password);
+        
+        if (response && response.data && response.data.userWithToken) {
             dispatch({
-                type: actionTypes.EMAIL_LOGIN_SUCCESS,
-                data: response.data.userWithToken.accessToken,
-                userData: response.data.userWithToken // Save user data if needed
-
+                type: actionTypes.USER_REGISTER_SUCCESS,
+                payload: {
+                    token: response.data.userWithToken.accessToken,
+                    user: response.data.userWithToken
+                }
             });
         } else {
-            dispatch({
-                type: actionTypes.EMAIL_LOGIN_FAILURE,
-                error: response?.data?.message || 'Login failed'
-            });
+            throw new Error('Invalid response format');
         }
-
     } catch (error) {
         dispatch({
-            type: actionTypes.EMAIL_LOGIN_FAILURE,
-            error: error.message || 'An error occurred'
+            type: actionTypes.USER_REGISTER_FAILURE,
+            payload: error.response?.data?.message || error.message || 'Registration failed'
         });
     }
 };

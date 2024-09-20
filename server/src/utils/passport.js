@@ -4,7 +4,6 @@ const passport = require('passport')
 const { v4: uuidv4 } = require('uuid')
 const User = require('~/models/user') // Import the Mongoose user model
 
-
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -14,28 +13,30 @@ passport.use(new GoogleStrategy({
 
     try {
         if (profile?.id) {
-            // Check if the user already exists
             let user = await User.findOne({ googleId: profile.id })
 
             if (!user) {
-                // Create a new user if not found
-                user = await User.create({
-                    googleId: profile.id,
-                    email: profile.emails[0]?.value,
-                    displayName: profile?.displayName,
-                    image: profile?.photos[0]?.value,
-                    tokenLogin
-                })
-            } else {
-                // Update tokenLogin for the existing user
-                user = await User.findOneAndUpdate(
-                    { googleId: profile.id },
-                    { tokenLogin },
-                    { new: true } // Return the updated document
-                )
-            }
+                user = await User.findOne({ email: profile.emails[0]?.value, googleId: '' })
 
-            // Attach the user to the profile object
+                if (user) {
+                    user.googleId = profile.id
+                    user.displayName = profile?.displayName
+                    user.image = profile?.photos[0]?.value
+                    user.tokenLogin = tokenLogin
+                    await user.save()
+                } else {
+                    user = await User.create({
+                        googleId: profile.id,
+                        email: profile.emails[0]?.value,
+                        displayName: profile?.displayName,
+                        image: profile?.photos[0]?.value,
+                        tokenLogin
+                    })
+                }
+            } else {
+                user.tokenLogin = tokenLogin
+                await user.save()
+            }
             profile = user
         }
 
@@ -45,4 +46,3 @@ passport.use(new GoogleStrategy({
     return cb(null, profile)
 }
 ))
-
