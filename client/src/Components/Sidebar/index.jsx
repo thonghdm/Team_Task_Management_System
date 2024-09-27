@@ -1,62 +1,97 @@
 import React from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ListItemSide from '~/Components/ItemsSide/ListItemSide';
-const Sidebar = ({ isOpen, toggleNav, width, collapsedWidth }) => (
-  <Box
-    sx={{
-      width: isOpen ? `${width}px` : `${collapsedWidth}px`,
-      backgroundColor: 'blue',
-      color: 'white',
-      transition: 'width 0.3s',
-      position: 'relative',
-    }}
-  >
-    <Box sx={{ overflow: 'hidden' }}>
-      <Box sx={{ width: `${width}px`, padding: 2, overflow: 'hidden' }}>
-        <Typography>navs</Typography>
+import {
+  Box,
+  Drawer,
+  Toolbar,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import {
+  Dashboard as DashboardIcon,
+  Task as TaskIcon,
+  Pending as PendingIcon,
+  People as PeopleIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
+import { useLocation } from 'react-router-dom';
+import SidebarList from '../SidebarList';
 
-        <Box sx={{'&:hover': {
-          backgroundColor: 'darkblue'}}}>
-          <ListItemSide iconName="chevronLeft" titlePlan="Plan" toggleNav={toggleNav} />
+const drawerWidth = 240;
+
+const StyledDrawer = styled(Drawer)(({ theme, open }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+  boxSizing: 'border-box',
+  ...(open && {
+    ...openedMixin(theme),
+    '& .MuiDrawer-paper': openedMixin(theme),
+  }),
+  ...(!open && {
+    ...closedMixin(theme),
+    '& .MuiDrawer-paper': closedMixin(theme),
+  }),
+}));
+
+const openedMixin = (theme) => ({
+  width: drawerWidth,
+  transition: theme.transitions.create('width', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  overflowX: 'hidden',
+  backgroundColor: '#f1ada6',
+  color: '#FFFFFF',
+});
+
+const closedMixin = (theme) => ({
+  transition: theme.transitions.create('width', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  overflowX: 'hidden',
+  width: theme.spacing(7),
+  backgroundColor: '#f1ada6',
+  color: '#FFFFFF',
+});
+
+const linkData = [
+  { label: 'Dashboard', link: 'dashboard', icon: <DashboardIcon /> },
+  { label: 'Tasks', link: 'tasks', icon: <TaskIcon /> },
+  { label: 'To Do', link: 'todo', icon: <PendingIcon /> },
+  { label: 'Team', link: 'team', icon: <PeopleIcon /> },
+  { label: 'Trash', link: 'trashed', icon: <DeleteIcon /> },
+];
+
+const linkDataSetting = [
+  { label: 'Account', link: 'account', icon: <DashboardIcon /> },
+  { label: 'Setting', link: 'setting', icon: <TaskIcon /> },
+];
+
+const Sidebar = ({ open }) => {
+  const location = useLocation();
+
+  return (
+    <StyledDrawer variant="permanent" open={open}>
+      <Toolbar />
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          overflow: 'auto',
+          overflowX: 'hidden'
+        }}
+      >
+        <Box flex={1}>
+          <SidebarList linkData={linkData} open={open} />
         </Box>
-
-        <Box sx={{'&:hover': {
-          backgroundColor: 'darkblue'}}}>
-          <ListItemSide iconName="chevronLeft" titlePlan="Plan" toggleNav={toggleNav} />
-        </Box>
-
-        <Box sx={{'&:hover': {
-          backgroundColor: 'darkblue'}}}>
-          <ListItemSide iconName="chevronLeft" titlePlan="Plan" toggleNav={toggleNav} />
+        
+        <Box sx={{ mt: 'auto', mb: 2 }}>
+          <SidebarList linkData={linkDataSetting} open={open} />
         </Box>
       </Box>
-    </Box>
-    <IconButton
-      sx={{
-        position: 'absolute',
-        right: isOpen ? 0 : `-${collapsedWidth}px`,
-        top: 0,
-        color: 'white',
-        display: 'flex',
-        backgroundColor: 'blue',
-        '&:hover': {
-          backgroundColor: 'darkblue',
-        },
-      }}
-      onClick={toggleNav}
-    >
-      {isOpen ? (
-        <ChevronLeftIcon sx={{ fontSize: 30 }} />
-      ) : (
-        <ArrowForwardIosIcon sx={{ fontSize: 18, overflow: 'visible', }} />
-      )}
-
-      
-    </IconButton>
-
-  </Box>
-);
+    </StyledDrawer>
+  );
+};
 
 export default Sidebar;

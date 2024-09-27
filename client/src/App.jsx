@@ -12,7 +12,7 @@ import SingUp from './pages/Auth/SignUp/SignUp'
 import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 import LoginSuccess from './components/LoginSuccess'
 import Home from './pages/Home/Home'
-import Dashboard from '~/pages/Dashboard'
+import Boards from '~/pages/Boards'
 
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
@@ -59,7 +59,7 @@ function App() {
       {/* <ModeSelect />
       <Box sx={{ color: 'primary.main' }}>aaaaaaaaaaaaaa</Box>
       <TextField id="outlined-search" label="Search..." type='search' size='small' /> */}
-<Dashboard/>
+<Boards/>
       {/* <Routes>
         <Route path='/' element={<SignIn />} />
         <Route path='/sign-in' element={<SignIn />} />
