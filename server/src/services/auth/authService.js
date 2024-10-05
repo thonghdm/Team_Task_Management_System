@@ -61,11 +61,7 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                     })
                 }
 
-                const newAccessToken = jwt.sign(
-                    { id: user._id, email: user.email },
-                    process.env.JWT_ACCESS_SECRET,
-                    { expiresIn: '1d' }
-                )
+                const newAccessToken = token.generateAccessToken(user._id)
 
                 resolve({
                     err: 0,

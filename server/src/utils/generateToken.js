@@ -6,5 +6,6 @@ const generateAccessToken = (_id) => {
 const generateRefreshToken = (_id) => {
     return jwt.sign({ _id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '60s' })
 }
+
 exports.generateAccessToken = generateAccessToken
 exports.generateRefreshToken = generateRefreshToken

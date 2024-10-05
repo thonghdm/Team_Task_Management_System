@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 const User = require('~/models/user') // Import the Mongoose user model
-const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const token = require('~/utils/generateToken')
 require('dotenv').config()
