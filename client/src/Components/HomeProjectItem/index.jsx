@@ -8,13 +8,13 @@ const HomeProjectItem = ({ icon, title, subtitle, color, onClick }) => (
       display: 'flex',
       alignItems: 'center',
       mb: 2,
-      width: '100%', // Makes the button take the full width of the container
-      justifyContent: 'flex-start', // Align items to the start
-      textTransform: 'none', // Prevent uppercase transformation
-      padding: 1, // Add padding for better click area
-      backgroundColor: 'transparent', // Optional: to maintain a transparent background
+      width: '100%',
+      justifyContent: 'flex-start', 
+      textTransform: 'none', 
+      padding: 1, 
+      backgroundColor: 'transparent', 
       '&:hover': {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)', // Change background on hover
+        backgroundColor: 'rgba(255, 255, 255, 0.1)', 
       },
     }}
   >
@@ -28,13 +28,14 @@ const HomeProjectItem = ({ icon, title, subtitle, color, onClick }) => (
         alignItems: 'center',
         justifyContent: 'center',
         mr: 2,
+        border: '1px dotted white',
       }}
     >
       {icon}
     </Box>
     <Box>
-      <Typography variant="subtitle1" sx={{ color: 'white' }}>
-        {title}
+      <Typography variant="subtitle1" sx={{ color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+        {title.length > 18 ? `${title.substring(0, 18)}...` : title}
       </Typography>
       {subtitle && (
         <Typography variant="body2" sx={{ color: '#aaa' }}>

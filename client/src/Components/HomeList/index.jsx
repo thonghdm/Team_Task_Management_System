@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Tabs, Tab, Button } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import HomeItem from '../HomeItem';
+import '../HomeProjectList/styles.css'; // Ensure styles are imported
 
 const HomeList = () => {
   const [value, setValue] = React.useState(0);
@@ -15,8 +16,24 @@ const HomeList = () => {
     upcoming: [
       { title: 'Draft project brief', date: 'Today - Oct 8' },
       { title: 'Schedule kickoff meeting', date: 'Oct 7 - 9' },
+      { title: 'Draft project brief', date: 'Today - Oct 8' },
+      { title: 'Schedule kickoff meeting', date: 'Oct 7 - 9' },
+      { title: 'Draft project brief', date: 'Today - Oct 8' },
+      { title: 'Schedule kickoff meeting', date: 'Oct 7 - 9' },
+      { title: 'Draft project brief', date: 'Today - Oct 8' },
+      { title: 'Schedule kickoff meeting', date: 'Oct 7 - 9' },
+      { title: 'Draft project brief', date: 'Today - Oct 8' },
+      { title: 'Schedule kickoff meeting', date: 'Oct 7 - 9' },
     ],
     overdue: [
+      { title: 'Old task 1', date: 'Oct 1' },
+      { title: 'Old task 2', date: 'Oct 2' },
+      { title: 'Old task 1', date: 'Oct 1' },
+      { title: 'Old task 2', date: 'Oct 2' },
+      { title: 'Old task 1', date: 'Oct 1' },
+      { title: 'Old task 2', date: 'Oct 2' },
+      { title: 'Old task 1', date: 'Oct 1' },
+      { title: 'Old task 2', date: 'Oct 2' },
       { title: 'Old task 1', date: 'Oct 1' },
       { title: 'Old task 2', date: 'Oct 2' },
     ],
@@ -52,11 +69,13 @@ const HomeList = () => {
         </Box>
       )}
 
-      {selectedTasks.map((task, index) => (
-        <HomeItem key={index} task={task.title} date={task.date}
-          color={colorMapping[value === 0 ? 'upcoming' : value === 1 ? 'overdue' : 'completed']}
-        />
-      ))}
+      <Box className="scrollable" sx={{maxHeight:300}}>
+        {selectedTasks.map((task, index) => (
+          <HomeItem key={index} task={task.title} date={task.date}
+            color={colorMapping[value === 0 ? 'upcoming' : value === 1 ? 'overdue' : 'completed']}
+          />
+        ))}
+      </Box>
     </Box>
   );
 };
