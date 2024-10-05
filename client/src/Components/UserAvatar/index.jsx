@@ -8,22 +8,25 @@ import {
   ListItemIcon, 
   ListItemText,
   IconButton,
+  Typography,
+  Divider,
+  Box,
 } from '@mui/material';
 import { 
   Person as PersonIcon,
-  Lock as LockIcon,
+  Settings as SettingsIcon,
   Logout as LogoutIcon,
+  QuestionMark as QuestionMarkIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
-// import { getInitials } from "../utils";
 
 const UserAvatar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [openPassword, setOpenPassword] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
-  const imageUrl = 'httsps://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTA5L3Jhd3BpeGVsX29mZmljZV8yOF9mZW1hbGVfbWluaW1hbF9yb2JvdF9mYWNlX29uX2RhcmtfYmFja2dyb3VuZF81ZDM3YjhlNy04MjRkLTQ0NWUtYjZjYy1hZmJkMDI3ZTE1NmYucG5n.png';
-  const nameUser = 'Travis Howard';
+  const imageUrl = 'https://example.com/path-to-your-image.png';
+  const nameUser = 'LV';
+  const email = 'thongdzpro100@gmail.com';
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,16 +39,6 @@ const UserAvatar = () => {
     setAnchorEl(null);
   };
 
-  const handleProfileClick = () => {
-    setOpen(true);
-    handleClose();
-  };
-
-  const handlePasswordClick = () => {
-    setOpenPassword(true);
-    handleClose();
-  };
-
   const logoutHandler = () => {
     console.log("logout");
     handleClose();
@@ -53,55 +46,88 @@ const UserAvatar = () => {
 
   return (
     <div>
-      <IconButton onClick={handleClick}>
-        <Avatar 
-         src={imageUrl}
-         alt={nameUser}
-          sx={{ 
-            width: { xs: 40, '2xl': 48 }, 
-            height: { xs: 40, '2xl': 48 }, 
-            bgcolor: 'primary.main',
-            fontSize: { xs: 16, '2xl': 20 }
-          }}
-        >
-          {/* {getInitials(user?.name)} */}
-        </Avatar>
-      </IconButton>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <IconButton onClick={handleClick}>
+          <Avatar 
+            sx={{ 
+              width: 32, 
+              height: 32, 
+              bgcolor: 'warning.main',
+              color: 'warning.contrastText',
+              fontSize: 16
+            }}
+          >
+            {nameUser}
+          </Avatar>
+        </IconButton>
+      </Box>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
         PaperProps={{
-          elevation: 8,
+          elevation: 0,
           sx: {
-            width: 224,
+            width: 300,
             maxWidth: '100%',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            bgcolor: 'background.paper',
+            color: 'text.primary',
           },
         }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handleProfileClick}>
+        <MenuItem sx={{ py: 2, px: 2 }}>
+          <Avatar 
+            sx={{ 
+              width: 48, 
+              height: 48, 
+              bgcolor: 'warning.main',
+              color: 'warning.contrastText',
+              fontSize: 20,
+              mr: 2
+            }}
+          >
+            {nameUser}
+          </Avatar>
+          <Box>
+            <Typography variant="subtitle1">My workspace</Typography>
+            <Typography variant="body2" color="text.secondary">{email}</Typography>
+          </Box>
+        </MenuItem>
+        <Divider />
+        <MenuItem>
+          <ListItemIcon>
+            <SettingsIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Admin console</ListItemText>
+        </MenuItem>
+        <MenuItem>
+          <ListItemIcon>
+            <AddIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>New workspace</ListItemText>
+        </MenuItem>
+        <MenuItem>
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
+          <ListItemText>Invite to Asana</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem>
           <ListItemText>Profile</ListItemText>
         </MenuItem>
-
-
-        <MenuItem onClick={handlePasswordClick}>
-          <ListItemIcon>
-            <LockIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Change Password</ListItemText>
+        <MenuItem>
+          <ListItemText>Settings</ListItemText>
         </MenuItem>
-
-
-        <MenuItem onClick={logoutHandler} sx={{ color: 'error.main' }}>
-          <ListItemIcon>
-            <LogoutIcon fontSize="small" color="error" />
-          </ListItemIcon>
-          <ListItemText>Logout</ListItemText>
+        <MenuItem>
+          <ListItemText>Add another account</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={logoutHandler}>
+          <ListItemText>Log out</ListItemText>
         </MenuItem>
       </Menu>
     </div>

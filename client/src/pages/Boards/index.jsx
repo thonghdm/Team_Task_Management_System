@@ -3,8 +3,9 @@ import { Box } from '@mui/material';
 import Header from '~/Components/Header';
 import Sidebar from '~/Components/Sidebar';
 import Dashboard from '~/Components/Dashboard';
-import Task from '~/Components/Task';
-import Team from '~/Components/Team';
+import Task from '~/pages/Task';
+import Team from '~/pages/Team';
+import Home from '~/pages/Homes';
 import { Routes, Route } from 'react-router-dom'; // Ensure these imports
 
 
@@ -13,6 +14,7 @@ const Boards = () => {
 
   const toggleDrawer = () => {
     setOpen(!open);
+    console.log(open);
   };
 
   return (
@@ -22,8 +24,9 @@ const Boards = () => {
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/tasks" element={<Task />} /> {/* Ensure this matches the Sidebar link */}
-          <Route path="/team" element={<Team />} /> {/* Ensure this matches the Sidebar link */}
+          <Route path="/home" element={<Home />} />
+          <Route path="/tasks" element={<Task />} />
+          <Route path="/team" element={<Team />} /> 
         </Routes>
       </Box>
     </Box>
