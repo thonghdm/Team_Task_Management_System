@@ -18,7 +18,8 @@ const authControllerRegister = {
 
 
             res.status(200).json({
-                userWithToken
+                userWithToken,
+                message: 'Login successful'
             })
         } catch (err) {
             res.status(500).json({ error: 'Internal server error' })
