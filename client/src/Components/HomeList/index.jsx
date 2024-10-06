@@ -3,9 +3,11 @@ import { Box, Tabs, Tab, Button } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import HomeItem from '../HomeItem';
 import '../HomeProjectList/styles.css'; // Ensure styles are imported
+import { useTheme } from '@mui/material/styles';
 
 const HomeList = () => {
   const [value, setValue] = React.useState(0);
+  const theme = useTheme();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -43,7 +45,7 @@ const HomeList = () => {
     ],
   };
   const colorMapping = {
-    upcoming: 'white',
+    upcoming: theme.palette.text.primary,
     overdue: 'red',
     completed: 'green',
   };
@@ -53,11 +55,11 @@ const HomeList = () => {
     value === 0 ? tasks.upcoming : value === 1 ? tasks.overdue : tasks.completed;
 
   return (
-    <Box sx={{ color: 'white' }}>
+    <Box sx={{ color: theme.palette.text.primary }}>
       <Tabs value={value} onChange={handleChange} sx={{ mb: 2 }}>
-        <Tab label="Upcoming" sx={{ color: 'white' }} />
-        <Tab label="Overdue" sx={{ color: 'white' }} />
-        <Tab label="Completed" sx={{ color: 'white' }} />
+        <Tab label="Upcoming" sx={{ color: theme.palette.text.primary }} />
+        <Tab label="Overdue" sx={{ color: theme.palette.text.primary }} />
+        <Tab label="Completed" sx={{ color: theme.palette.text.primary }} />
       </Tabs>
 
       {value === 0 && (

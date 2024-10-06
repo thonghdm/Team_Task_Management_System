@@ -1,30 +1,33 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Avatar, 
-  Menu, 
-  MenuItem, 
-  ListItemIcon, 
+import {
+  Avatar,
+  Menu,
+  MenuItem,
+  ListItemIcon,
   ListItemText,
   IconButton,
   Typography,
   Divider,
   Box,
 } from '@mui/material';
-import { 
+import {
   Person as PersonIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   QuestionMark as QuestionMarkIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
+import ModeSelect from '../ModeSelect';
+
+
 
 const UserAvatar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const { user } = useSelector((state) => state.auth);
 
-  const imageUrl = 'https://example.com/path-to-your-image.png';
+  const userImage = 'https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes-thumbnail.png';
   const nameUser = 'LV';
   const email = 'thongdzpro100@gmail.com';
 
@@ -48,17 +51,19 @@ const UserAvatar = () => {
     <div>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton onClick={handleClick}>
-          <Avatar 
-            sx={{ 
-              width: 32, 
-              height: 32, 
+          <Avatar
+            sx={{
+              width: 32,
+              height: 32,
               bgcolor: 'warning.main',
               color: 'warning.contrastText',
               fontSize: 16
             }}
+            src={userImage ? userImage : undefined}  // Set the image if available
           >
-            {nameUser}
+            {!userImage && nameUser}  {/* Display initials if no image */}
           </Avatar>
+
         </IconButton>
       </Box>
       <Menu
@@ -80,21 +85,22 @@ const UserAvatar = () => {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <MenuItem sx={{ py: 2, px: 2 }}>
-          <Avatar 
-            sx={{ 
-              width: 48, 
-              height: 48, 
+          <Avatar
+            sx={{
+              width: 48,
+              height: 48,
               bgcolor: 'warning.main',
               color: 'warning.contrastText',
               fontSize: 20,
               mr: 2
             }}
+            src={userImage ? userImage : undefined}  // Set the image if available
           >
-            {nameUser}
-          </Avatar>
+            {!userImage && nameUser}  {/* Display initials if no image */}
+            </Avatar>
           <Box>
-            <Typography variant="subtitle1">My workspace</Typography>
-            <Typography variant="body2" color="text.secondary">{email}</Typography>
+            <Typography variant="subtitle1">{nameUser}</Typography>
+            <Typography variant="body2" color="text.primary">{email}</Typography>
           </Box>
         </MenuItem>
         <Divider />
@@ -117,6 +123,9 @@ const UserAvatar = () => {
           <ListItemText>Invite to Asana</ListItemText>
         </MenuItem>
         <Divider />
+        <ModeSelect />
+        <Divider />
+
         <MenuItem>
           <ListItemText>Profile</ListItemText>
         </MenuItem>
@@ -126,6 +135,7 @@ const UserAvatar = () => {
         <MenuItem>
           <ListItemText>Add another account</ListItemText>
         </MenuItem>
+
         <MenuItem onClick={logoutHandler}>
           <ListItemText>Log out</ListItemText>
         </MenuItem>

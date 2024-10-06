@@ -5,6 +5,7 @@ import HomeProjectItem from '~/Components/HomeProjectItem';
 import { getRandomColor } from '~/utils/radomColor';
 import HomeLable from '../HomeLable';
 import './styles.css'
+import { useTheme } from '@mui/material/styles';
 
 
 const projectsLinkData = [
@@ -21,6 +22,7 @@ const projectsLinkData = [
 
 const HomeProjectList = () => {
   const [projectColors, setProjectColors] = useState([]);
+  const theme = useTheme();
 
   useEffect(() => {
     const colors = projectsLinkData.map(() => getRandomColor());
@@ -28,13 +30,13 @@ const HomeProjectList = () => {
   }, []);
 
   return (
-    <Paper elevation={3} sx={{ p: 2, backgroundColor: '#333', color: 'white', mt: 3 }}>
+    <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
       <HomeLable lable={"Projects"} />
       <Box className="scrollable">
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <HomeProjectItem
-              icon={<AddIcon sx={{ color: 'white' }} />}
+              icon={<AddIcon sx={{ color: theme.palette.text.primary }} />}
               title="Create project"
               color="transparent"
             />
@@ -43,7 +45,7 @@ const HomeProjectList = () => {
           {projectsLinkData.map((project, index) => (
             <Grid item xs={6} key={index}>
               <HomeProjectItem
-                icon={<Typography sx={{ color: 'white' }}>{project.label.charAt(0)}</Typography>} // Use the first letter of the label for the icon
+                icon={<Typography sx={{ color: theme.palette.text.primary }}>{project.label.charAt(0)}</Typography>} // Use the first letter of the label for the icon
                 title={project.label}
                 color={projectColors[index]} // Apply the stored random color
               />

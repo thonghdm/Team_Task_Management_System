@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Paper, IconButton, InputBase } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { useTheme } from '@mui/material/styles';
 
 const SearchWithFilters = ({ width }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -9,6 +10,7 @@ const SearchWithFilters = ({ width }) => {
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
+  const theme = useTheme();
 
   return (
     <Paper
@@ -16,7 +18,7 @@ const SearchWithFilters = ({ width }) => {
       sx={{
         display: 'flex',
         alignItems: 'center',
-        backgroundColor: '#424242',
+        backgroundColor: theme.palette.background.paper, // Access theme background color
         width: width,
         minWidth: '200px', // Đảm bảo thanh tìm kiếm không quá nhỏ
         maxWidth: '500px', // Giới hạn kích thước tối đa
@@ -28,7 +30,7 @@ const SearchWithFilters = ({ width }) => {
         <SearchIcon />
       </IconButton>
       <InputBase
-        sx={{ ml: 1, flex: 1, color: '#fff' }}
+        sx={{ ml: 1, flex: 1, color: "inherit" }}
         placeholder="Search"
         value={searchTerm}
         onChange={handleSearchChange}
