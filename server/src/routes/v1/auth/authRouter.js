@@ -32,5 +32,4 @@ router.post('/email-login', authControllerRegister.loginUser)
 router.post('/email-register', authControllerRegister.registerUser)
 
 
-
 module.exports = router

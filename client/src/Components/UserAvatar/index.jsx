@@ -46,12 +46,6 @@ const UserAvatar = () => {
     data = typeLogin ? userData : userDataGG
   }
 
-  const userImage = 'https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes-thumbnail.png';
-  const nameUser = 'LV';
-  const email = 'thongdzpro100@gmail.com';
-
-
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
