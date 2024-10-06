@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Drawer,
@@ -18,17 +18,18 @@ import {
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import SidebarList from '../SidebarList';
+import { useTheme } from '@mui/material/styles';
+
+
 
 const drawerWidth = 240;
 
-const StyledDrawer = styled(Drawer)(({ theme, open  }) => ({
+const StyledDrawer = styled(Drawer)(({ theme, open }) => ({
   width: drawerWidth,
   flexShrink: 0,
   '& .MuiDrawer-paper': {
     width: drawerWidth,
     boxSizing: 'border-box',
-    backgroundColor: '#2d2d2d',
-    color: '#FFFFFF',
   },
   whiteSpace: 'nowrap',
   boxSizing: 'border-box',
@@ -48,8 +49,8 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: '#f1ada6',
-  color: '#FFFFFF',
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.text.primary,
 });
 
 const closedMixin = (theme) => ({
@@ -59,8 +60,8 @@ const closedMixin = (theme) => ({
   }),
   overflowX: 'hidden',
   width: theme.spacing(1),
-  backgroundColor: '#f1ada6',
-  color: '#FFFFFF',
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.text.primary,
 });
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
@@ -73,30 +74,30 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
   paddingLeft: theme.spacing(2),
 }));
 const TrialInfo = styled(Box)(({ theme }) => ({
-  backgroundColor: '#3d3d3d',
+  backgroundColor: theme.palette.background.paper,
   borderRadius: 5,
   padding: theme.spacing(2),
   margin: theme.spacing(2),
 }));
 
 const ScrollableSection = styled(Box)(({ theme }) => ({
-  maxHeight: '43vh',
+  maxHeight: '52vh',
   overflowY: 'auto',
   '&::-webkit-scrollbar': {
     width: '6px',
   },
   '&::-webkit-scrollbar-thumb': {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: theme.palette.background.paper,
     borderRadius: '3px',
   },
   fontSize: '14px',
 }));
 const AddBillingButton = styled(Button)(({ theme }) => ({
-  backgroundColor: '#ffc107',
+  backgroundColor: theme.palette.primary.main,
   color: '#000',
   fontWeight: 'bold',
   '&:hover': {
-    backgroundColor: '#ffca28',
+    backgroundColor: theme.palette.secondary.main,
   },
 }));
 const mainLinkData = [
@@ -112,9 +113,9 @@ const insightsLinkData = [
 ];
 
 const projectsLinkData = [
-  { label: 'Cross-functional project p...', link: 'project1', color: '#00BCD4' },
-  { label: 'My first portfolio', link: 'project2', color: '#9E9E9E' },
-  { label: 'uijjj', link: 'project3', color: '#2196F3' },
+  { label: 'Cross-functional project p...', link: 'project1' },
+  { label: 'My first portfolio', link: 'project2'},
+  { label: 'uijjj', link: 'project3'},
   // Add more projects here to test scrolling
 ];
 
@@ -124,9 +125,9 @@ const teamLinkData = [
 
 ];
 
-const Sidebar = ({open}) => {
+const Sidebar = ({ open }) => {
   const location = useLocation();
-
+  const theme = useTheme();
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Toolbar />
@@ -144,19 +145,19 @@ const Sidebar = ({open}) => {
 
 
         <ScrollableSection>
+          {/* <Box>
+            <SectionTitle>INSIGHTS</SectionTitle>
+            <SidebarList linkData={insightsLinkData} open={open} />
+          </Box> */}
+
           <Box>
-          <SectionTitle>INSIGHTS</SectionTitle>
-          <SidebarList linkData={insightsLinkData} open={open}/>
+            <SectionTitle>PROJECTS</SectionTitle>
+            <SidebarList linkData={projectsLinkData} isProject={true} open={open}/>
           </Box>
 
           <Box>
-          <SectionTitle>PROJECTS</SectionTitle>
-          <SidebarList linkData={projectsLinkData} isProject={true}open={open}/>
-          </Box>
-
-          <Box>
-          <SectionTitle>TEAM</SectionTitle>
-          <SidebarList linkData={teamLinkData}open={open} />
+            <SectionTitle>TEAM</SectionTitle>
+            <SidebarList linkData={teamLinkData} open={open} />
           </Box>
         </ScrollableSection>
 
@@ -169,7 +170,7 @@ const Sidebar = ({open}) => {
                   width: 20,
                   height: 20,
                   borderRadius: '50%',
-                  backgroundColor: '#4CAF50',
+                  backgroundColor: theme.palette.success.main,
                   marginRight: 1,
                 }}
               />
@@ -181,9 +182,12 @@ const Sidebar = ({open}) => {
             </AddBillingButton>
           </TrialInfo>
           <Box textAlign="center" mb={2}>
-            <Typography color="#4CAF50" sx={{ cursor: 'pointer' }}>
-              <AddIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-              Invite teammates
+            <Typography
+              sx={{
+                color: (theme) => theme.palette.success.main, 
+                cursor: 'pointer',
+              }}
+            >              
             </Typography>
           </Box>
         </Box>

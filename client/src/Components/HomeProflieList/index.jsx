@@ -5,6 +5,7 @@ import HomeProjectItem from '~/Components/HomeProjectItem';
 import { getRandomColor } from '~/utils/radomColor';
 import HomeLable from '../HomeLable';
 import '../HomeProjectList/styles.css'; // Ensure styles are imported
+import { useTheme } from '@mui/material/styles';
 
 const profilesLinkData = [
   { id: 1, name: 'Le Thi Be', email: 'hi@gmail.com', image: "https://w7.pngwing.com/pngs/895/199/png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png" },
@@ -17,21 +18,22 @@ const profilesLinkData = [
 ];
 
 const HomeProflieList = () => {
-  const [projectColors, setProjectColors] = useState([]);
+  const theme = useTheme();
 
+  const [projectColors, setProjectColors] = useState([]);
   useEffect(() => {
     const colors = profilesLinkData.map(() => getRandomColor());
     setProjectColors(colors);
   }, []); // This only runs once on mount
 
   return (
-    <Paper elevation={3} sx={{ p: 2, backgroundColor: '#333', color: 'white', mt: 3 }}>
+    <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
       <HomeLable lable={"Members"} />
       <Box className="scrollable">
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <HomeProjectItem
-              icon={<AddIcon sx={{ color: 'white' }} />}
+              icon={<AddIcon sx={{ color: theme.palette.text.primary }} />}
               title="Invite member"
               color="transparent"
             />
@@ -48,7 +50,7 @@ const HomeProflieList = () => {
                       style={{ width: 40, height: 40, borderRadius: '50%' }} // Rounded profile image
                     />
                   ) : (
-                    <Typography sx={{ color: 'white' }}>
+                    <Typography sx={{ color: theme.palette.text.primary }}>
                       {profile.name.charAt(0)} {/* First letter of name if no image */}
                     </Typography>
                   )

@@ -8,10 +8,12 @@ import {
   Box,
 } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
 
-const SidebarList = ({ linkData, isProject = false }) => {
+const SidebarList = ({ linkData, isProject = false,color }) => {
   const location = useLocation();
   const path = location.pathname.split('/')[1];
+  const theme = useTheme();
 
   return (
     <List disablePadding>
@@ -35,7 +37,7 @@ const SidebarList = ({ linkData, isProject = false }) => {
                     width: 12,
                     height: 12,
                     borderRadius: 1,
-                    backgroundColor: item.color,
+                    backgroundColor: theme.palette.primary.main,
                   }}
                 />
               ) : (
