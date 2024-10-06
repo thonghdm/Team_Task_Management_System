@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import {
   Avatar,
   Menu,
@@ -20,19 +19,32 @@ import {
   Add as AddIcon,
 } from '@mui/icons-material';
 import ModeSelect from '../ModeSelect';
+import { apiGetOne } from '~/apis/User/userService'
 
 
 
 const UserAvatar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const { user } = useSelector((state) => state.auth);
+  const { isLoggedIn, typeLogin, token, userData } = useSelector(state => state.auth)
+  const [userDataGG, setUserData] = useState({})
 
-  const userImage = 'https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes-thumbnail.png';
-  const nameUser = 'LV';
-  const email = 'thongdzpro100@gmail.com';
+  useEffect(() => {
+    const fetchUser = async () => {
+      let response = await apiGetOne(token)
+      console.log(response);
+      if (response?.data.err === 0) {
+        setUserData(response.data?.response)
+      } else {
+        setUserData({})
+      }
+    }
+    fetchUser()
+  }, [isLoggedIn, isLoggedIn, typeLogin])
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  let data = {}
+  if (isLoggedIn) {
+    data = typeLogin ? userData : userDataGG
+  }
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -59,9 +71,9 @@ const UserAvatar = () => {
               color: 'warning.contrastText',
               fontSize: 16
             }}
-            src={userImage ? userImage : undefined}  // Set the image if available
+            src={data?.image ? data?.image : undefined}  // Set the image if available
           >
-            {!userImage && nameUser}  {/* Display initials if no image */}
+            {!data?.image && data?.displayName}  {/* Display initials if no image */}
           </Avatar>
 
         </IconButton>
@@ -94,13 +106,13 @@ const UserAvatar = () => {
               fontSize: 20,
               mr: 2
             }}
-            src={userImage ? userImage : undefined}  // Set the image if available
+            src={data?.image ? data?.image : undefined}  // Set the image if available
           >
-            {!userImage && nameUser}  {/* Display initials if no image */}
+            {!data?.image && data?.displayName}  {/* Display initials if no image */}
             </Avatar>
           <Box>
-            <Typography variant="subtitle1">{nameUser}</Typography>
-            <Typography variant="body2" color="text.primary">{email}</Typography>
+            <Typography variant="subtitle1">{data?.displayName}</Typography>
+            <Typography variant="body2" color="text.primary">{data?.email}</Typography>
           </Box>
         </MenuItem>
         <Divider />

@@ -24,7 +24,7 @@ const HomeChart = () => {
 
     return (
         <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
-            <HomeLable lable={"Statistics"} />
+            <HomeLable lable="Statistics" />
             <Grid container spacing={3}>
                 <Grid item xs={12} md={9}>
                     <Card sx={{ backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
@@ -34,7 +34,11 @@ const HomeChart = () => {
                                 <BarChart data={data}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="date" />
-                                    <YAxis />
+                                    <YAxis 
+                                        allowDecimals={false}
+                                        domain={[0, 'auto']}
+                                        tickCount={5}
+                                    />
                                     <Tooltip />
                                     <Legend />
                                     <Bar dataKey="created" name="Created issues" fill="#8884d8" />
@@ -81,10 +85,9 @@ const HomeChart = () => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center'
-
                                     }}
                                 >
-                                    <Typography variant="h4" component="div"  sx={{ color: theme.palette.text.primary }}>
+                                    <Typography variant="h4" component="div" sx={{ color: theme.palette.text.primary }}>
                                         {`${progressPercentage}%`}
                                     </Typography>
                                 </Box>
