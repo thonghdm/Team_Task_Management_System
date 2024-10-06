@@ -13,8 +13,8 @@ const authServiceRegister = {
             const validPassword = await bcrypt.compare(userData.password, user.password)
             if (!validPassword) throw new Error('Incorrect password')
             // Generate tokens
-            const accessToken = token.generateAccessToken(user._id)
-            const refreshToken = token.generateRefreshToken(user._id)
+            const accessToken = token.generateAccessToken(user._id, user.email)
+            const refreshToken = token.generateRefreshToken(user._id, user.email)
             // lưu refreshToken vào database
             user.refreshToken = refreshToken
             await user.save()

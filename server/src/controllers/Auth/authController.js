@@ -11,7 +11,7 @@ const authController = {
             }
 
             let response = await authService.loginSuccessService(id, tokenLogin)
-            if (response.token && response.refreshToken) {
+            if (response.accesstoken && response.refreshToken) {
                 res.cookie('refreshToken', response.refreshToken, {
                     httpOnly: true,
                     path: '/',
@@ -22,8 +22,8 @@ const authController = {
             }
             res.status(200).json({
                 err: response.err,
-                msg: response.msg+ ' Login success ddd',
-                token: response.token || null
+                msg: response.msg,
+                accesstoken: response.accesstoken || null
             })
 
         } catch (error) {

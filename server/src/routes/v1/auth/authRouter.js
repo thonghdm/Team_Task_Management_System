@@ -21,7 +21,7 @@ router.get('/google/callback', (req, res, next) => {
         next()
     })(req, res, next)
 }, (req, res) => {
-    res.redirect(`${process.env.URL_CLIENT}/login-success/${req.user?.id}/${req.user.tokenLogin}`)
+    res.redirect(`${process.env.URL_CLIENT}/login-success/${req.user?._id}/${req.user.tokenLogin}`)
 })
 
 router.post('/refresh', authController.requestAccessToken)

@@ -11,8 +11,8 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
         let user = await User.findOne({ _id: id, tokenLogin }).lean()
         if (user) {
 
-            const accesstoken = token.generateAccessToken(user._id)
-            const refreshToken = token.generateRefreshToken(user._id)
+            const accesstoken = token.generateAccessToken(user._id, user.email)
+            const refreshToken = token.generateRefreshToken(user._id, user.email)
 
             await User.updateOne(
                 { _id: id },
@@ -28,7 +28,7 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
             resolve({
                 err: 3,
                 msg: 'User not found or failed to login!',
-                token: null,
+                accesstoken: null,
                 refreshToken: null
             })
         }
@@ -61,7 +61,7 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                     })
                 }
 
-                const newAccessToken = token.generateAccessToken(user._id)
+                const newAccessToken = token.generateAccessToken(user._id, user.email)
 
                 resolve({
                     err: 0,
