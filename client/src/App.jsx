@@ -11,7 +11,7 @@ import SignIn from './pages/Auth/SignIn/SignIn'
 import SingUp from './pages/Auth/SignUp/SignUp'
 import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 import LoginSuccess from './components/LoginSuccess'
-import Home from './pages/Home/Home'
+import Homes from '~/pages/Homes'
 import Boards from '~/pages/Boards'
 
 function ModeSelect() {
@@ -59,15 +59,13 @@ function App() {
       {/* <ModeSelect />
       <Box sx={{ color: 'primary.main' }}>aaaaaaaaaaaaaa</Box>
       <TextField id="outlined-search" label="Search..." type='search' size='small' /> */}
-<Boards/>
-      {/* <Routes>
+      <Routes>
         <Route path='/' element={<SignIn />} />
         <Route path='/sign-in' element={<SignIn />} />
         <Route path='/sign-up' element={<SingUp />} />
         <Route path='/login-success/:userId/:tokenLogin' element={<LoginSuccess />} />
-        <Route path='/user' element={<Home />} />
-
-      </Routes> */}
+        <Route path='/board/*' element={<Boards />} />
+      </Routes>
 
     </>
   )

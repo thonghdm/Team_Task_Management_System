@@ -12,11 +12,11 @@ const LoginSuccess = () => {
         if (userId && tokenLogin) {
             dispatch(loginSuccess(userId, tokenLogin))
         }
-    }, [dispatch, userId, tokenLogin]);  // Ensure it only runs when necessary
+    }, [dispatch, userId, tokenLogin]);
 
     return (
         <div>
-            {isLoggedIn ? <Navigate to={'/user'} replace={true} /> : <h3>Yêu cầu bạn hãy đăng nhập</h3>}
+            {isLoggedIn ? <Navigate to='/board/home' replace={true} /> : <h3>Yêu cầu bạn hãy đăng nhập</h3>}
         </div>
     )
 }
