@@ -7,7 +7,7 @@ export const loginSuccess = (id, tokenLogin) => async (dispatch) => {
         if (response?.data.err === 0) {
             dispatch({
                 type: actionTypes.LOGIN_SUCCESS,
-                data: response.data.token
+                data: response.data.accesstoken
             })
         } else {
             dispatch({
