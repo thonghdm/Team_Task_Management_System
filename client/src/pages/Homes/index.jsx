@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import { Box, Typography, Paper, Avatar, Chip, IconButton, Tab, Tabs } from '@mui/material';
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material';
 import HomeList from '~/Components/HomeList';
@@ -6,14 +6,41 @@ import HomeProjectList from '~/Components/HomeProjectList';
 import HomeProflieList from '~/Components/HomeProflieList';
 import HomeChart from '~/Components/HomeChart';
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom'
+import { logout } from '~/redux/actions/authAction'
+import { useDispatch, useSelector } from 'react-redux'
+import { apiGetOne } from '~/apis/User/userService'
 
-const Home = () => {
+
+const Homes = () => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { isLoggedIn, typeLogin, token, userData } = useSelector(state => state.auth)
+  const [userDataGG, setUserData] = useState({})
+  useEffect(() => {
+    const fetchUser = async () => {
+      let response = await apiGetOne(token)
+      console.log(response);
+      if (response?.data.err === 0) {
+        setUserData(response.data?.response)
+      } else {
+        setUserData({})
+      }
+    }
+    fetchUser()
+  }, [isLoggedIn, isLoggedIn, typeLogin])
+
+  let data = {}
+  if (isLoggedIn) {
+    data = typeLogin ? userData : userDataGG
+  }
 
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: theme.palette.grey[50], minHeight: '100vh' }}>
@@ -46,7 +73,9 @@ const Home = () => {
 
       <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Avatar sx={{ mr: 1 }}>L</Avatar>
+          <Avatar sx={{ mr: 1 }}
+          src={data?.image ? data?.image : undefined}
+          >{!data?.image && data?.displayName} </Avatar>
           <Typography variant="h6">My tasks</Typography>
           <Box sx={{ flexGrow: 1 }} />
           <IconButton sx={{ color: theme.palette.text.primary }}>
@@ -70,4 +99,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Homes;
