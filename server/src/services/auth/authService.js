@@ -1,5 +1,6 @@
 const User = require('~/models/user') // Import the Mongoose user model
 const jwt = require('jsonwebtoken')
+const token = require('~/utils/generateToken')
 const { v4: uuidv4 } = require('uuid')
 require('dotenv').config()
 
@@ -10,16 +11,8 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
         let user = await User.findOne({ _id: id, tokenLogin }).lean()
         if (user) {
 
-            const token = jwt.sign(
-                { id: user._id, email: user.email },
-                process.env.JWT_ACCESS_SECRET,
-                { expiresIn: '1d' }
-            )
-            const refreshToken = jwt.sign(
-                { id: user._id },
-                process.env.JWT_REFRESH_SECRET,
-                { expiresIn: '7d' }
-            )
+            const accesstoken = token.generateAccessToken(user._id)
+            const refreshToken = token.generateRefreshToken(user._id)
 
             await User.updateOne(
                 { _id: id },
@@ -28,7 +21,7 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
             resolve({
                 err: 0,
                 msg: 'OK',
-                token,
+                accesstoken,
                 refreshToken
             })
         } else {
@@ -68,23 +61,13 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                     })
                 }
 
-                const newAccessToken = jwt.sign(
-                    { id: user._id, email: user.email },
-                    process.env.JWT_ACCESS_SECRET,
-                    { expiresIn: '1d' }
-                )
-                const newRefreshToken = jwt.sign(
-                    { id: user._id },
-                    process.env.JWT_REFRESH_SECRET,
-                    { expiresIn: '7d' }
-                )
-                await User.updateOne({ _id: user._id }, { refreshToken: newRefreshToken })
+                const newAccessToken = token.generateAccessToken(user._id)
 
                 resolve({
                     err: 0,
                     msg: 'New tokens generated successfully',
                     token: newAccessToken,
-                    refreshToken: newRefreshToken
+                    refreshToken
                 })
             })
         } catch (error) {
@@ -95,9 +78,21 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
         }
     })()
 })
-
-
+const getUserService = (id) => new Promise((resolve, reject) => {
+    try {
+        const user = User
+            .findOne({ _id: id })
+            .select('-password')
+            .lean()
+        resolve(user)
+    } catch (error) {
+        reject(error)
+    }
+}
+)
 module.exports = {
     loginSuccessService,
-    refreshTokenService
+    refreshTokenService,
+    getUserService
 }
+

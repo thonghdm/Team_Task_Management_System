@@ -1,6 +1,4 @@
 const authService = require('~/services/auth/authService')
-
-
 const authController = {
     loginSuccess: async (req, res) => {
         const { id, tokenLogin } = req.body
@@ -24,7 +22,7 @@ const authController = {
             }
             res.status(200).json({
                 err: response.err,
-                msg: response.msg,
+                msg: response.msg+ ' Login success ddd',
                 token: response.token || null
             })
 
@@ -35,8 +33,7 @@ const authController = {
             })
         }
     },
-
-    requestRefreshToken: async (req, res) => {
+    requestAccessToken: async (req, res) => {
         const refreshToken = req.cookies.refreshToken
         if (!refreshToken) {
             return res.status(401).json({
@@ -69,6 +66,29 @@ const authController = {
             res.status(500).json({
                 err: -1,
                 msg: 'Fail at refresh token: ' + error.message
+            })
+        }
+    },
+    getUser: async (req, res) => {
+        try {
+            const userId = req.body._id
+            const user = await authService.getUserService(userId)
+            if (!user) {
+                return res.status(404).json({
+                    err: 1,
+                    msg: 'User not found'
+                })
+            }
+
+            res.status(200).json({
+                err: 0,
+                msg: 'Success',
+                data: user
+            })
+        } catch (error) {
+            res.status(500).json({
+                err: -1,
+                msg: 'Fail at get user: ' + error.message
             })
         }
     }
