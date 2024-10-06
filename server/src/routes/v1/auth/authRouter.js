@@ -3,7 +3,7 @@ const passport = require('passport')
 require('dotenv').config()
 const authController = require('~/controllers/Auth/authController')
 const authControllerRegister = require('~/controllers/Auth/authControllerRegister')
-const verifyToken = require('~/middlewares/verifyToken')
+// const verifyToken = require('~/middlewares/verifyToken')
 
 // // Middleware to log requests
 // router.use((req, res, next) => {
@@ -32,5 +32,4 @@ router.post('/email-login', authControllerRegister.loginUser)
 
 router.post('/email-register', authControllerRegister.registerUser)
 
-router.get('/get-user', verifyToken, authController.getUser)
 module.exports = router

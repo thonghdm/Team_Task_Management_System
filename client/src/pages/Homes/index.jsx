@@ -10,20 +10,16 @@ import { useNavigate } from 'react-router-dom'
 import { logout } from '~/redux/actions/authAction'
 import { useDispatch, useSelector } from 'react-redux'
 import { apiGetOne } from '~/apis/User/userService'
+import { formattedDate } from '~/utils/formattedDate';
+import { getTimeOfDay } from '~/utils/getTimeOfDay';
 
 
 const Homes = () => {
   const theme = useTheme();
-  const [value, setValue] = useState(0);
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  
   const { isLoggedIn, typeLogin, token, userData } = useSelector(state => state.auth)
   const [userDataGG, setUserData] = useState({})
+
   useEffect(() => {
     const fetchUser = async () => {
       let response = await apiGetOne(token)
@@ -42,13 +38,21 @@ const Homes = () => {
     data = typeLogin ? userData : userDataGG
   }
 
+  // const [timeOfDay, setTimeOfDay] = useState(getTimeOfDay());
+  // const [date, setDate] = useState(formattedDate);
+
+  // useEffect(() => {
+  //   setDate(formattedDate);
+  //   setTimeOfDay(getTimeOfDay());
+  // }, []);
+  const displayName = data?.displayName ? data.displayName.match(/^\S+/)[0] : 'User';
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: theme.palette.grey[50], minHeight: '100vh' }}>
       <Typography variant="h4" sx={{ color: theme.palette.text.primary, mb: 2 }}>Home</Typography>
 
       <Box sx={{ textAlign: 'center', mb: 4 }}>
-        <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>Saturday, October 5</Typography>
-        <Typography variant="h3" sx={{ color: theme.palette.text.primary }}>Good afternoon, Luyện</Typography>
+        <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>{formattedDate}</Typography>
+        <Typography variant="h3" sx={{ color: theme.palette.text.primary }}>Good {getTimeOfDay()}, {displayName}</Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Chip
