@@ -33,4 +33,5 @@ router.post('/email-login', authControllerRegister.loginUser)
 router.post('/email-register', authControllerRegister.registerUser)
 
 router.get('/get-user', verifyToken, authController.getUser)
+router.get('/logout', authController.logout)
 module.exports = router
