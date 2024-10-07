@@ -3,7 +3,7 @@ import actionTypes from "../actions/actionTypes";
 const initState = {
     isLoggedIn: false,
     typeLogin: false,
-    token: null,
+    accesstoken: null,
     userData: {},  // Add userData state
     error: null,
 };
@@ -15,7 +15,7 @@ const authReducer = (state = initState, action) => {
                 ...state,
                 isLoggedIn: action.data ? true : false,
                 typeLogin: false,
-                token: action.data
+                accesstoken: action.data.accesstoken
             }
         case actionTypes.LOGOUT:
             return {
@@ -25,7 +25,7 @@ const authReducer = (state = initState, action) => {
             return {
                 ...state,
                 isLoggedIn: true,
-                token: action.data,
+                accesstoken: action.data.accesstoken,
                 userData: action.userData || {},  // Update userData
                 typeLogin: true,
                 error: null,
@@ -34,7 +34,7 @@ const authReducer = (state = initState, action) => {
             return {
                 ...state,
                 isLoggedIn: false,
-                token: null,
+                accesstoken: null,
                 userData: {},  // Reset userData
                 typeLogin: true,
                 error: action.error,

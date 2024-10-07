@@ -7,7 +7,7 @@ export const loginSuccess = (id, tokenLogin) => async (dispatch) => {
         if (response?.data.err === 0) {
             dispatch({
                 type: actionTypes.LOGIN_SUCCESS,
-                data: response.data.accesstoken
+                data: response.data
             })
         } else {
             dispatch({
@@ -29,7 +29,7 @@ export const loginWithEmail = (email, password) => async (dispatch) => {
         dispatch({ type: actionTypes.LOGIN_REQUEST });
 
         let response = await apiLoginWithEmail(email, password);
-
+        
         if (response!==null) {
             dispatch({
                 type: actionTypes.EMAIL_LOGIN_SUCCESS,

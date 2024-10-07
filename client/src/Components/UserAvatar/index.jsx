@@ -25,12 +25,12 @@ import { apiGetOne } from '~/apis/User/userService'
 
 const UserAvatar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const { isLoggedIn, typeLogin, token, userData } = useSelector(state => state.auth)
+  const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
   const [userDataGG, setUserData] = useState({})
 
   useEffect(() => {
     const fetchUser = async () => {
-      let response = await apiGetOne(token)
+      let response = await apiGetOne(accesstoken)
       console.log(response);
       if (response?.data.err === 0) {
         setUserData(response.data?.response)
@@ -39,7 +39,7 @@ const UserAvatar = () => {
       }
     }
     fetchUser()
-  }, [isLoggedIn, isLoggedIn, typeLogin])
+  }, [accesstoken])
 
   let data = {}
   if (isLoggedIn) {
