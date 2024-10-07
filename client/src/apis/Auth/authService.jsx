@@ -46,6 +46,14 @@ export const apiRegisterWithEmail = async (name, email, password) => {
     }
 };
 
-
+export const apiLogOut = async () => {
+    try {
+        const response = await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+        return response;
+    } catch (error) {
+        console.error('Logout error:', error.response?.data || error.message);
+        throw error;
+    }
+};
 // No need to set .default.withCredentials separately
 // The withCredentials is set directly in the axios call

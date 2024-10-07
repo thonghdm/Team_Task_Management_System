@@ -32,7 +32,7 @@ export default function SignIn() {
     useEffect(() => {
         console.log(isLoggedIn, typeLogin)
         if (isLoggedIn && typeLogin) {
-            navigate('/user'); // Redirect to Home page after login
+            navigate('/'); // Redirect to Home page after login
         }
     }, [isLoggedIn, typeLogin, navigate]);
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);

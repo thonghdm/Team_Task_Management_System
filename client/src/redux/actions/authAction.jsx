@@ -80,6 +80,13 @@ export const registerWithEmail = (name, email, password) => async (dispatch) => 
 
 // http://localhost:5000/api/auth/login
 
-export const logout = () => ({
-    type: actionTypes.LOGOUT
-})
+export const logout = () => async (dispatch) =>{
+    try{
+        dispatch({ type: actionTypes.LOGOUT });
+        const response = await apiLogOut();
+    }
+    catch(error){
+        console.error('Logout error:', error.response?.data || error.message);
+        throw error;
+    }
+}

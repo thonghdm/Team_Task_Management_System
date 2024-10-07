@@ -27,7 +27,6 @@ const UserAvatar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
   const [userDataGG, setUserData] = useState({})
-
   useEffect(() => {
     const fetchUser = async () => {
       let response = await apiGetOne(accesstoken)
