@@ -23,8 +23,8 @@ const Boards = () => {
         <Routes>
           <Route index element={<Navigate to="home" replace />} />
           <Route path="home" element={<Homes />} />
-          <Route path="tasks" element={<Task />} />
-          <Route path="team" element={<Team />} /> 
+          <Route path="tasks/*" element={<Task />} />
+          <Route path="team" element={<Team />} />
         </Routes>
       </Box>
     </Box>
