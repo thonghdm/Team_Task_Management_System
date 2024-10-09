@@ -88,11 +88,28 @@ const getUserService = (id) => new Promise((resolve, reject) => {
     } catch (error) {
         reject(error)
     }
-}
-)
+})
+const logoutService = (refreshToken) => new Promise((resolve, reject) => {
+    (async () => {
+        try {//Xóa refreshToken khỏi db
+            await User.findOneAndUpdate({ refreshToken }, { refreshToken: '' }, { new: true })
+            resolve({
+                err: 0,
+                msg: 'Logout successful'
+            })
+        } catch (error) {
+            reject({
+                err: -1,
+                msg: 'Fail at refresh token service: ' + error.message
+            })
+        }
+    })()
+})
+
 module.exports = {
     loginSuccessService,
     refreshTokenService,
-    getUserService
+    getUserService,
+    logoutService
 }
 

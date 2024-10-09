@@ -69,6 +69,38 @@ const authController = {
             })
         }
     },
+    logout: async (req, res) => {
+        const refreshToken = req.cookies.refreshToken
+        if (!refreshToken) {
+            return res.status(401).json({
+                err: 1,
+                msg: 'You re not authenticated'
+            })
+        }
+        try {
+            let response = await authService.logoutService(refreshToken)
+            if (response.err === 0) {
+                res.clearCookie('refreshToken', {
+                    httpOnly: true,
+                    secure:true
+                })
+                res.status(200).json({
+                    err: 0,
+                    msg: 'Logout successful'
+                })
+            } else {
+                res.status(403).json({
+                    err: 3,
+                    msg: response.msg
+                })
+            }
+        } catch (error) {
+            res.status(500).json({
+                err: -1,
+                msg: 'Fail at logout: ' + error.message
+            })
+        }
+    },
     getUser: async (req, res) => {
         try {
             const userId = req.body._id

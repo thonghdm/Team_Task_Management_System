@@ -1,4 +1,5 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   Avatar,
@@ -20,26 +21,53 @@ import {
 } from '@mui/icons-material';
 import ModeSelect from '../ModeSelect';
 import { apiGetOne } from '~/apis/User/userService'
-
-
+import { apiLogOut, apiRefreshToken } from '~/apis/Auth/authService'
+import actionTypes from '~/redux/actions/actionTypes'
 
 const UserAvatar = () => {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
-  const { isLoggedIn, typeLogin, token, userData } = useSelector(state => state.auth)
+  const dispatch = useDispatch();
+  const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
   const [userDataGG, setUserData] = useState({})
-
   useEffect(() => {
     const fetchUser = async () => {
-      let response = await apiGetOne(token)
-      console.log(response);
-      if (response?.data.err === 0) {
-        setUserData(response.data?.response)
-      } else {
-        setUserData({})
+      try {
+        let response = await apiGetOne(accesstoken)
+        if (response?.data.err === 0) {
+          setUserData(response.data?.response)
+        } else {
+          setUserData({})
+        }
+      } catch (error) {
+        if (error.status === 401) {
+          try {
+            const response = await apiRefreshToken();
+            console.log(response);
+            dispatch({
+              type: actionTypes.LOGIN_SUCCESS,
+              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken }
+            })
+            console.log("accc", response.data.token, '123', accesstoken);
+          }
+          catch (error) {
+            console.log("error",error);
+            if (error.status === 403) {
+              alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+              dispatch({
+                type: actionTypes.LOGOUT,
+              });
+              navigate('/');
+            }
+          }
+        } else {
+          console.log(error.message);
+        }
+
       }
     }
     fetchUser()
-  }, [isLoggedIn, isLoggedIn, typeLogin])
+  }, [isLoggedIn, accesstoken, typeLogin])
 
   let data = {}
   if (isLoggedIn) {
@@ -54,11 +82,16 @@ const UserAvatar = () => {
     setAnchorEl(null);
   };
 
-  const logoutHandler = () => {
+  const logoutHandler = async () => {
     console.log("logout");
-    handleClose();
+    try {
+      const response = await apiLogOut();
+      console.log(response);
+      navigate('/');
+    } catch (error) {
+      handleClose();
+    };
   };
-
   return (
     <div>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -109,7 +142,7 @@ const UserAvatar = () => {
             src={data?.image ? data?.image : undefined}  // Set the image if available
           >
             {!data?.image && data?.displayName}  {/* Display initials if no image */}
-            </Avatar>
+          </Avatar>
           <Box>
             <Typography variant="subtitle1">{data?.displayName}</Typography>
             <Typography variant="body2" color="text.primary">{data?.email}</Typography>
