@@ -30,7 +30,7 @@ const Homes = () => {
       }
     }
     fetchUser()
-  }, [accesstoken])
+  }, [isLoggedIn,accesstoken,typeLogin])
 
   let data = {}
   if (isLoggedIn) {
