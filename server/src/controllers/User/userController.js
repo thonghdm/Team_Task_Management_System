@@ -2,11 +2,11 @@ const userService = require('~/services/user/userService')
 const getOne = async (req, res) => {
     const { currentUser } = req
     try {
-        if (!currentUser?.id) res.status(400).json({
+        if (!currentUser?._id) res.status(400).json({
             err: 1,
             msg: 'Missing inputs'
         })
-        let response = await userService.getOneService(currentUser?.id)
+        let response = await userService.getOneService(currentUser?._id)
         res.status(200).json(response)
 
     } catch (error) {

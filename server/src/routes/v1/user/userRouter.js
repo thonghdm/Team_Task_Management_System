@@ -4,5 +4,4 @@ const verifyToken = require('~/middlewares/verifyToken')
 
 router.get('/get-one', verifyToken, userController.getOne)
 
-
 module.exports = router
