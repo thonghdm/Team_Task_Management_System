@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
     tokenLogin: { type: String },
     is_active: { type: Boolean, default: true }, // whether the account is active
     refreshToken: String, // New field to store the refresh token
-    isAdmin: { type: Boolean, default: false }
+    isAdmin: { type: Boolean, default: false },
+    verifiedForgotPassWord: { type: Number }
 }, { timestamps: true })
 
 const User = mongoose.model('User', userSchema)
