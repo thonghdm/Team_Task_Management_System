@@ -21,11 +21,10 @@ const CustomCalendar = ({ label, onView, onNavigate, views }) => {
     };
 
     return (
-        <Box display="flex" alignItems="center" justifyContent="space-between" padding={2} className="toolbar-container">
-            <Typography sx={{color:theme.palette.text.primary}} variant="h5" className="mesAno">{label}</Typography>
+        <Box display="flex" alignItems="center" justifyContent="space-between" padding={2}>
+            <Typography sx={{color:theme.palette.text.primary}} variant="h5" >{label}</Typography>
             
             <Box display="flex" alignItems="center" className="dirtop">
-                {/* Dropdown for views */}
                 <Button
                     variant="contained"
                     color="secondary"
@@ -49,13 +48,13 @@ const CustomCalendar = ({ label, onView, onNavigate, views }) => {
                 </Menu>
 
                 {/* Navigation buttons */}
-                <Box ml={2} className="toolbar-navegation">
+                <Box ml={2}>
                     <Button 
                         variant="contained" 
                         color="secondary" 
                         onClick={() => onNavigate('TODAY')}
                     >
-                        Hoje
+                        Default
                     </Button>
                     <IconButton 
                         onClick={() => onNavigate('PREV')} 

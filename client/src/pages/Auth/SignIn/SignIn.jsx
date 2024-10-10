@@ -23,10 +23,10 @@ export default function SignIn() {
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    const [password, setPassword] = useState("000000");
+    const [password, setPassword] = useState("111111");
     
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setGmail] = useState("thongdzpro100@gmail.co3m");
+    const [email, setGmail] = useState("thon2long@gmail.com");
 
     const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth);
     useEffect(() => {
@@ -126,8 +126,7 @@ export default function SignIn() {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <FormLabel htmlFor="password">Password</FormLabel>
                             <Link
-                                component="button"
-                                onClick={() => alert('Forgot password modal placeholder')}
+                                href="/reset-password"
                                 variant="body2"
                                 sx={{ alignSelf: 'baseline' }}
                             >

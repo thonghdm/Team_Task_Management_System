@@ -5,9 +5,10 @@ const Error = () => {
   const navigate = useNavigate();
   return (
     <>
-      <div style={{textAlign:"center"}}>
-        <h1>Error</h1>
-        <button style={{cursor:"pointer"}} onClick={()=>navigate("/")}>Back To Home</button>
+      <div style={{ textAlign: "center" }}>
+        <h1>Oops! Something went wrong.</h1>
+        <p>It seems you've reached this page in error.</p>
+        <button style={{ cursor: "pointer" }} onClick={() => navigate("/sign-in")}>Back To Home</button>
       </div>
     </>
   )

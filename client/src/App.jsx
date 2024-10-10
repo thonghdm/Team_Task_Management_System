@@ -13,6 +13,13 @@ import { Routes, Route } from 'react-router-dom'; // Import Routes and Route
 import LoginSuccess from './components/LoginSuccess'
 import Homes from '~/pages/Homes'
 import Boards from '~/pages/Boards'
+import OTP from '~/Components/OTP'
+import SignUpSuccess from '~/pages/Auth/SignUp/SignUpSuccess'
+import ProtectedRoute from '~/pages/Auth/SignUp/ProtectedRoute'
+import { AuthProvider } from '~/pages/Auth/SignUp/AuthContext';
+import Error from './pages/Error'
+import ResetPassword from '~/pages/Auth/ResetPassword'
+import NewPassword from '~/pages/Auth/ResetPassword/NewPassword'
 
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
@@ -55,7 +62,7 @@ function ModeSelect() {
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       {/* <ModeSelect />
       <Box sx={{ color: 'primary.main' }}>aaaaaaaaaaaaaa</Box>
       <TextField id="outlined-search" label="Search..." type='search' size='small' /> */}
@@ -63,11 +70,17 @@ function App() {
         <Route path='/' element={<SignIn />} />
         <Route path='/sign-in' element={<SignIn />} />
         <Route path='/sign-up' element={<SingUp />} />
+        <Route path="/otp" element={<ProtectedRoute><OTP /></ProtectedRoute>} />
+        <Route path="/sign-up-success" element={<ProtectedRoute><SignUpSuccess /></ProtectedRoute>} /> {/* Example success route */}
+        <Route path='/error' element={<Error />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
+        <Route path='/new-password'element={<ProtectedRoute><NewPassword /></ProtectedRoute>} />
+        
         <Route path='/login-success/:userId/:tokenLogin' element={<LoginSuccess />} />
         <Route path='/board/*' element={<Boards />} />
       </Routes>
 
-    </>
+    </AuthProvider>
   )
 }
 
