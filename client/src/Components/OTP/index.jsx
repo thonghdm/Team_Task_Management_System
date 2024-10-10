@@ -15,7 +15,10 @@ const OTP = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
+
     const email = location.state?.email || '';
+    const typeOtp = location.state?.typeOtp || '';
+
     const { setIsSignedUp } = useAuth();
 
     useEffect(() => {
@@ -45,7 +48,11 @@ const OTP = () => {
         const enteredOtp = otp.join('');
         if (enteredOtp === '12345678') {
             setIsSignedUp(true);
-            navigate('/sign-up-success', { state: { email } });
+            if(typeOtp === 1){
+                navigate('/sign-up-success', { state: { email } });
+            }else{
+                navigate('/new-password', { state: { email } });
+            }
         } else {
             setOtpError('Invalid OTP. Please try again.');
         }

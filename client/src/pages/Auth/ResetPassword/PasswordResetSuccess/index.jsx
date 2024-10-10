@@ -3,7 +3,7 @@ import { Box, Typography, Button } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-const SignUpSuccess = () => {
+const PasswordResetSuccess = () => {
     const navigate = useNavigate();
     const theme = useTheme();
     const location = useLocation();
@@ -40,7 +40,7 @@ const SignUpSuccess = () => {
                 border: `1px solid ${theme.palette.divider}`,
             }}>
                 <Typography variant="h4" sx={{ color:  theme.palette.success.light, marginBottom: '20px', fontWeight:'bold' }}>
-                    Registration Successful!
+                Password Reset Successful!
                 </Typography>
                 <Typography variant="body1" sx={{ color:  theme.palette.success.light, marginBottom: '20px' }}>
                     Your account has been successfully created.
@@ -53,4 +53,4 @@ const SignUpSuccess = () => {
     );
 };
 
-export default SignUpSuccess;
+export default PasswordResetSuccess;
