@@ -43,12 +43,10 @@ const UserAvatar = () => {
         if (error.status === 401) {
           try {
             const response = await apiRefreshToken();
-            console.log(response);
             dispatch({
               type: actionTypes.LOGIN_SUCCESS,
-              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken }
+              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken, }
             })
-            console.log("accc", response.data.token, '123', accesstoken);
           }
           catch (error) {
             console.log("error",error);
@@ -86,7 +84,9 @@ const UserAvatar = () => {
     console.log("logout");
     try {
       const response = await apiLogOut();
-      console.log(response);
+      dispatch({
+        type: actionTypes.LOGOUT,
+      });
       navigate('/');
     } catch (error) {
       handleClose();

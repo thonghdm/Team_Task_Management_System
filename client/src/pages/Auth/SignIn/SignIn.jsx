@@ -23,20 +23,13 @@ export default function SignIn() {
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    const [password, setPassword] = useState("111111");
+    const [password, setPassword] = useState("22222");
     
     const [showPassword, setShowPassword] = useState(false);
     const [email, setGmail] = useState("thon2long@gmail.com");
 
-    const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth);
-    useEffect(() => {
-        console.log(isLoggedIn, typeLogin)
-        if (isLoggedIn && typeLogin) {
-            navigate('/'); // Redirect to Home page after login
-        }
-    }, [isLoggedIn, typeLogin, navigate]);
+    const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth)
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
-
     const validateInputs = () => {
         const email = document.getElementById('email').value;
         let isValid = true;
@@ -62,10 +55,13 @@ export default function SignIn() {
         return isValid;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateInputs()) {
-            dispatch(loginWithEmail(email, password));
+            const result = await dispatch(loginWithEmail(email, password));
+            if (result) {
+                navigate('/board/home');
+            }
         }
     };
 

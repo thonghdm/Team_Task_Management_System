@@ -2,7 +2,6 @@ import aixos from 'axios'
 
 
 export const apiGetOne = (accesstoken) => new Promise(async (resolve, reject) => {
-    console.log(accesstoken)
     try {
         let response = await aixos({
             method: 'get',
