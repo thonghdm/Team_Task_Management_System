@@ -29,19 +29,19 @@ export const loginWithEmail = (email, password) => async (dispatch) => {
         dispatch({ type: actionTypes.LOGIN_REQUEST });
 
         let response = await apiLoginWithEmail(email, password);
-        
-        if (response!==null) {
+        if (response) {
             dispatch({
                 type: actionTypes.EMAIL_LOGIN_SUCCESS,
-                data: response.data.userWithToken.accessToken,
+                data: {accesstoken: response.data.userWithToken.accessToken},
                 userData: response.data.userWithToken // Save user data if needed
-
             });
+            return response
         } else {
             dispatch({
                 type: actionTypes.EMAIL_LOGIN_FAILURE,
                 error: response?.data?.message || 'Login failed'
             });
+            return null
         }
 
     } catch (error) {

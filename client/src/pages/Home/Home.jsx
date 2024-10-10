@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { logout } from '~/redux/actions/authAction'
 import { useDispatch, useSelector } from 'react-redux'
 import { apiGetOne } from '~/apis/User/userService'
-
+import { apiRefreshToken } from '~/apis/Auth/authService'
+import actionTypes from '~/redux/actions/actionTypes'
 const Home = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -11,15 +12,40 @@ const Home = () => {
     const [userDataGG, setUserData] = useState({})
     useEffect(() => {
         const fetchUser = async () => {
+          try {
             let response = await apiGetOne(accesstoken)
             if (response?.data.err === 0) {
-                setUserData(response.data?.response)
+              setUserData(response.data?.response)
             } else {
-                setUserData({})
+              setUserData({})
             }
+          } catch (error) {
+            if (error.status === 401) {
+              try {
+                const response = await apiRefreshToken();
+                dispatch({
+                  type: actionTypes.LOGIN_SUCCESS,
+                  data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken }
+                })
+              }
+              catch (error) {
+                console.log("error",error);
+                if (error.status === 403) {
+                  alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+                  dispatch({
+                    type: actionTypes.LOGOUT,
+                  });
+                  navigate('/');
+                }
+              }
+            } else {
+              console.log(error.message);
+            }
+    
+          }
         }
         fetchUser()
-    }, [isLoggedIn,accesstoken,typeLogin])
+      }, [isLoggedIn, accesstoken, typeLogin])
 
     let data = {}
     if (isLoggedIn) {

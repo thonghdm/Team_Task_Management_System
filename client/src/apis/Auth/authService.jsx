@@ -20,7 +20,7 @@ export const apiLoginWithEmail = async (email, password) => {
         const response = await axios.post('http://localhost:5000/api/auth/email-login', {
             email,
             password
-        });
+        }, { withCredentials: true });
         return response;
     } catch (error) {
         if (error.response && error.response.data) {
