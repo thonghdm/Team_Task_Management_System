@@ -5,7 +5,7 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
-import eventosPadrao from '~/pages/Task/Calendar/eventosPadrao';
+import duLieuDuAn from '~/pages/Task/Calendar/duLieuDuAn';
 import CustomCalendar from './CustomCalendar';
 import useStyles from '~/pages/Task/Calendar/useStyles';
 import { useTheme } from '@mui/material/styles';
@@ -19,8 +19,8 @@ const localizer = momentLocalizer(moment);
 function Calendario() {
     const theme = useTheme();
     const classes = useStyles(theme);
-    const [eventos, setEventos] = useState(eventosPadrao);
-    const [eventosFiltrados, setEventosFiltrados] = useState(eventosPadrao);
+    const [eventos, setEventos] = useState(duLieuDuAn);
+    const [eventosFiltrados, setEventosFiltrados] = useState(duLieuDuAn);
 
     const eventStyle = (event) => ({
         style: {
@@ -29,7 +29,7 @@ function Calendario() {
     });
 
     const moverEventos = ({ event, start, end }) => {
-        const updatedEvents = eventos.map((evt) => 
+        const updatedEvents = eventos.map((evt) =>
             evt.id === event.id ? { ...evt, start: new Date(start), end: new Date(end) } : evt
         );
         setEventos(updatedEvents);
@@ -46,6 +46,7 @@ function Calendario() {
                     defaultDate={moment().toDate()}
                     defaultView='month'
                     events={eventosFiltrados}
+                    views={['month', 'week', 'day', 'agenda']}
                     localizer={localizer}
                     resizable
                     onEventDrop={moverEventos}
@@ -56,6 +57,7 @@ function Calendario() {
                         toolbar: CustomCalendar,
                     }}
                 />
+
             </div>
         </div>
     );
