@@ -17,6 +17,7 @@ import OTP from '~/pages/Auth/OTP'
 import SignUpSuccess from '~/pages/Auth/SignUp/SignUpSuccess'
 import ProtectedRoute from '~/pages/Auth/SignUp/ProtectedRoute'
 import { AuthProvider } from '~/pages/Auth/SignUp/AuthContext';
+import Error from './pages/Error'
 
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
@@ -69,7 +70,7 @@ function App() {
         <Route path='/sign-up' element={<SingUp />} />
         <Route path="/otp" element={<ProtectedRoute><OTP /></ProtectedRoute>} />
         <Route path="/sign-up-success" element={<ProtectedRoute><SignUpSuccess /></ProtectedRoute>} /> {/* Example success route */}
-
+        <Route path='/error' element={<Error />} />
 
         <Route path='/login-success/:userId/:tokenLogin' element={<LoginSuccess />} />
         <Route path='/board/*' element={<Boards />} />

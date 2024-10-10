@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const SinUpSuccess = () => {
+const SignUpSuccess = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const email = location.state?.email || '';
+
+    useEffect(() => {
+        if (!email) {
+            navigate('/error');
+        }
+    }, [email, navigate]);
 
     const handleGoToDashboard = () => {
-        navigate('/dashboard');
+        navigate('/');
     };
 
     return (
@@ -42,4 +50,4 @@ const SinUpSuccess = () => {
     );
 };
 
-export default SinUpSuccess;
+export default SignUpSuccess;

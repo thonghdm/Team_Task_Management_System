@@ -14,12 +14,12 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Card from '@mui/material/Card';
 import { registerWithEmail } from '~/redux/actions/authAction';
 import { useAuth } from '~/pages/Auth/SignUp/AuthContext';
+
 export default function SignUp() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { setIsSignedUp } = useAuth();
 
-    
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');

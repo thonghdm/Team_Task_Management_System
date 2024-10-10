@@ -1,14 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, TextField, Link, Button } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTheme } from '@mui/material/styles';
-
+import { useAuth } from '~/pages/Auth/SignUp/AuthContext';
 
 const OTP = () => {
     const theme = useTheme();
-
     const [otp, setOtp] = useState(['', '', '', '', '', '', '', '']);
     const [otpError, setOtpError] = useState('');
     const [resentMessageVisible, setResentMessageVisible] = useState(false);
@@ -17,8 +16,13 @@ const OTP = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const email = location.state?.email || '';
+    const { setIsSignedUp } = useAuth();
 
-
+    useEffect(() => {
+        if (!email) {
+            navigate('/error');
+        }
+    }, [email, navigate]);
 
     const handleChange = (index, value) => {
         if (isNaN(value)) return;
@@ -40,8 +44,8 @@ const OTP = () => {
     const handleSubmit = () => {
         const enteredOtp = otp.join('');
         if (enteredOtp === '12345678') {
-            dispatch(setOtpVerified(true));
-            navigate('/sign-up-success');
+            setIsSignedUp(true);
+            navigate('/sign-up-success', { state: { email } });
         } else {
             setOtpError('Invalid OTP. Please try again.');
         }
