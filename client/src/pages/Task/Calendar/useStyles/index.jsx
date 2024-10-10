@@ -8,6 +8,7 @@ const useStyles = makeStyles((theme) => ({
         height: '100vh',
         width: '100%',
         overflow: 'auto',
+        textTransform: 'uppercase',
     }
 }));
 
