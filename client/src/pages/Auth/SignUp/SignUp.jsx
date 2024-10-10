@@ -13,18 +13,22 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Card from '@mui/material/Card';
 import { registerWithEmail } from '~/redux/actions/authAction';
+import { useAuth } from '~/pages/Auth/SignUp/AuthContext';
 
 export default function SignUp() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { setIsSignedUp } = useAuth();
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [nameError, setNameError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
     const [generalError, setGeneralError] = useState('');
 
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
@@ -53,6 +57,13 @@ export default function SignUp() {
             setPasswordError('');
         }
 
+        if (password !== confirmPassword) {
+            setConfirmPasswordError('Passwords do not match');
+            isValid = false;
+        } else {
+            setConfirmPasswordError('');
+        }
+
         return isValid;
     };
 
@@ -64,7 +75,8 @@ export default function SignUp() {
         if (validateInputs()) {
             try {
                 await dispatch(registerWithEmail(name, email, password));
-                navigate('/login-email');
+                setIsSignedUp(true);
+                navigate('/otp', { state: { email } }); // Pass email to OTP page
             } catch (error) {
                 setGeneralError(error.message || 'Registration failed. Please try again.');
             }
@@ -156,6 +168,43 @@ export default function SignUp() {
                             variant="outlined"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    height: '40px',
+                                },
+                            }}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={togglePasswordVisibility}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </FormControl>
+                    <FormControl>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+                        </Box>
+                        <TextField
+                            error={!!confirmPasswordError}
+                            helperText={confirmPasswordError}
+                            name="confirmPassword"
+                            placeholder="••••••"
+                            type={showPassword ? 'text' : 'password'}
+                            id="confirmPassword"
+                            autoComplete="new-password"
+                            required
+                            fullWidth
+                            variant="outlined"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
                                     height: '40px',
