@@ -32,7 +32,7 @@ export default function SignUp() {
     const [generalError, setGeneralError] = useState('');
 
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
-
+    const typeOtp = 1;
     const validateInputs = () => {
         let isValid = true;
 
@@ -76,7 +76,7 @@ export default function SignUp() {
             try {
                 await dispatch(registerWithEmail(name, email, password));
                 setIsSignedUp(true);
-                navigate('/otp', { state: { email } }); // Pass email to OTP page
+                navigate('/otp', { state: { email , typeOtp} }); // Pass email to OTP page
             } catch (error) {
                 setGeneralError(error.message || 'Registration failed. Please try again.');
             }
