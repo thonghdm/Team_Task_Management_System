@@ -4,6 +4,7 @@ import actionTypes from './actionTypes'
 export const loginSuccess = (id, tokenLogin) => async (dispatch) => {
     try {
         let response = await apiLoginSuccess(id, tokenLogin)
+        console.log('loginSuccess',response)
         if (response?.data.err === 0) {
             dispatch({
                 type: actionTypes.LOGIN_SUCCESS,
