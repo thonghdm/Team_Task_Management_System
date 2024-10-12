@@ -13,6 +13,7 @@ const Task = () => {
 
   const isMyTaskActive = location.pathname.endsWith('/mytask');
   const isCalendarActive = location.pathname.endsWith('/calendar');
+  const isTextEditorActive = location.pathname.endsWith('/texteditor');
 
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: '100vh' }}>
@@ -36,6 +37,13 @@ const Task = () => {
           onClick={() => navigate('calendar')}
         >
           Cal
+        </Button>
+
+        <Button 
+          variant={isTextEditorActive ? "contained" : "text"} 
+          onClick={() => navigate('texteditor')}
+        >
+          Note
         </Button>
       </Paper>
 

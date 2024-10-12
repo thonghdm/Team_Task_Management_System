@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Calendar from '~/pages/Task/Calendar';
 import TaskList from '~/pages/Task/MyTasks/TaskList';
 import { useTheme } from '@mui/material/styles';
-
+import TextEditor from '~/Components/TextEditor';
 
 const TaskContent = () => {
     const theme = useTheme();
@@ -14,6 +14,7 @@ const TaskContent = () => {
                 <Route path="/" element={<Navigate to="mytask" replace />} />
                 <Route path="mytask" element={<TaskList />} />
                 <Route path="calendar" element={<Calendar />} />
+                <Route path="texteditor" element={<TextEditor />} />
             </Routes>
         </Paper>
     );
