@@ -62,7 +62,6 @@ const UserAvatar = () => {
           setUserData({})
           console.log(error.message);
         }
-
       }
     }
     if(isLoggedIn) {fetchUser()}
@@ -70,6 +69,7 @@ const UserAvatar = () => {
   let data = {}
   if (isLoggedIn) {
     data = typeLogin ? userData : userDataGG
+    console.log(data?.image);
   }
   console.log('data',data.image)
 

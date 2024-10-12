@@ -53,7 +53,6 @@ const Homes = () => {
           setUserData({})
           console.log(error.message);
         }
-
       }
     }
     if(isLoggedIn) {fetchUser()}
