@@ -65,7 +65,7 @@ const UserAvatar = () => {
 
       }
     }
-    fetchUser()
+    if(isLoggedIn) {fetchUser()}
   }, [isLoggedIn, accesstoken, typeLogin])
   let data = {}
   if (isLoggedIn) {
@@ -107,6 +107,7 @@ const UserAvatar = () => {
               fontSize: 16
             }}
             src={data?.image ? data?.image : undefined}  // Set the image if available
+            referrerpolicy="no-referrer"
           >
             {!data?.image && data?.displayName}  {/* Display initials if no image */}
           </Avatar>
