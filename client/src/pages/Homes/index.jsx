@@ -22,44 +22,41 @@ const Homes = () => {
   const [userDataGG, setUserData] = useState({})
 
   useEffect(() => {
-    if (isLoggedIn) {
-      const fetchUser = async () => {
-        try {
-          let response = await apiGetOne(accesstoken);
-          if (response?.data.err === 0) {
-            setUserData(response.data?.response);
-          } else {
-            setUserData({});
-          }
-        } catch (error) {
-          if (error.status === 401) {
-            try {
-              const response = await apiRefreshToken();
-              dispatch({
-                type: actionTypes.LOGIN_SUCCESS,
-                data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken },
-              });
-            } catch (error) {
-              console.log("error", error);
-              if (error.status === 403) {
-                alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
-                dispatch({
-                  type: actionTypes.LOGOUT,
-                });
-                navigate('/');
-              }
-            }
-          } else {
-            console.log(error.message);
-          }
+    const fetchUser = async () => {
+      try {
+        let response = await apiGetOne(accesstoken)
+        if (response?.data.err === 0) {
+          setUserData(response.data?.response)
+        } else {
+          setUserData({})
         }
-      };
-  
-      fetchUser();
+      } catch (error) {
+        if (error.status === 401) {
+          try {
+            const response = await apiRefreshToken();
+            dispatch({
+              type: actionTypes.LOGIN_SUCCESS,
+              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken }
+            })
+          }
+          catch (error) {
+            console.log("error", error);
+            if (error.status === 403) {
+              alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+              dispatch({
+                type: actionTypes.LOGOUT,
+              });
+              navigate('/');
+            }
+          }
+        } else {
+          setUserData({})
+          console.log(error.message);
+        }
+      }
     }
-  }, [isLoggedIn, typeLogin,accesstoken]);
-  
-
+    if(isLoggedIn) {fetchUser()}
+  }, [isLoggedIn, accesstoken, typeLogin])
   let data = {}
   if (isLoggedIn) {
     data = typeLogin ? userData : userDataGG
@@ -105,7 +102,8 @@ const Homes = () => {
       <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar sx={{ mr: 1 }}
-          src={data?.image ? data?.image : undefined}
+            src={data?.image ? data?.image : undefined}
+            referrerpolicy="no-referrer"
           >{!data?.image && data?.displayName} </Avatar>
           <Typography variant="h6">My tasks</Typography>
           <Box sx={{ flexGrow: 1 }} />

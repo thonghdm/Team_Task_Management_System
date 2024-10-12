@@ -31,49 +31,48 @@ const UserAvatar = () => {
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
   const [userDataGG, setUserData] = useState({})
   useEffect(() => {
-    if (isLoggedIn) {
-      const fetchUser = async () => {
-        try {
-          let response = await apiGetOne(accesstoken);
-          if (response?.data.err === 0) {
-            setUserData(response.data?.response);
-          } else {
-            setUserData({});
-          }
-        } catch (error) {
-          if (error.status === 401) {
-            try {
-              const response = await apiRefreshToken();
-              dispatch({
-                type: actionTypes.LOGIN_SUCCESS,
-                data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken },
-              });
-            } catch (error) {
-              console.log("error", error);
-              if (error.status === 403) {
-                alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
-                dispatch({
-                  type: actionTypes.LOGOUT,
-                });
-                navigate('/');
-              }
-            }
-          } else {
-            console.log(error.message);
-          }
+    const fetchUser = async () => {
+      try {
+        let response = await apiGetOne(accesstoken)
+        if (response?.data.err === 0) {
+          setUserData(response.data?.response)
+        } else {
+          setUserData({})
         }
-      };
-  
-      fetchUser();
+      } catch (error) {
+        if (error.status === 401) {
+          try {
+            const response = await apiRefreshToken();
+            dispatch({
+              type: actionTypes.LOGIN_SUCCESS,
+              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken }
+            })
+          }
+          catch (error) {
+            console.log("error", error);
+            if (error.status === 403) {
+              alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+              dispatch({
+                type: actionTypes.LOGOUT,
+              });
+              navigate('/');
+            }
+          }
+        } else {
+          setUserData({})
+          console.log(error.message);
+        }
+      }
     }
-  }, [isLoggedIn, typeLogin,accesstoken]);
-  
-
+    if(isLoggedIn) {fetchUser()}
+  }, [isLoggedIn, accesstoken, typeLogin])
   let data = {}
   if (isLoggedIn) {
     data = typeLogin ? userData : userDataGG
     console.log(data?.image);
   }
+  console.log('data',data.image)
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -108,6 +107,7 @@ const UserAvatar = () => {
               fontSize: 16
             }}
             src={data?.image ? data?.image : undefined}  // Set the image if available
+            referrerpolicy="no-referrer"
           >
             {!data?.image && data?.displayName}  {/* Display initials if no image */}
           </Avatar>
