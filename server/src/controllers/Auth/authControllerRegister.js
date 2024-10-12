@@ -8,14 +8,12 @@ const authControllerRegister = {
                 return res.status(400).json({ error: result.error })
             }
             const { accessToken, refreshToken, userData } = result
-            if (accessToken && refreshToken) {
-                res.cookie('refreshToken', refreshToken, {
-                    httpOnly: true,
-                    path: '/',
-                    sameSite: 'strict', // CSRF protection
-                    maxAge: 7 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-                })
-            }
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: false,
+                path: '/',
+                sameSite: 'strict'
+            })
             const userWithToken = { ...userData, accessToken }
 
 
