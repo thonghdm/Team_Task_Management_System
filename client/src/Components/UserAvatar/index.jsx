@@ -66,7 +66,7 @@ const UserAvatar = () => {
   
       fetchUser();
     }
-  }, [isLoggedIn, typeLogin]);
+  }, [isLoggedIn, typeLogin,accesstoken]);
   
 
   let data = {}

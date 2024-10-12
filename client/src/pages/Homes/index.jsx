@@ -57,7 +57,7 @@ const Homes = () => {
   
       fetchUser();
     }
-  }, [isLoggedIn, typeLogin]);
+  }, [isLoggedIn, typeLogin,accesstoken]);
   
 
   let data = {}
