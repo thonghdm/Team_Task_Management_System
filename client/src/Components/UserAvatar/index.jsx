@@ -70,6 +70,7 @@ const UserAvatar = () => {
   let data = {}
   if (isLoggedIn) {
     data = typeLogin ? userData : userDataGG
+    console.log(data?.image);
   }
 
   const handleClick = (event) => {
