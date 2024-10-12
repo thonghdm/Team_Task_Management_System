@@ -31,41 +31,43 @@ const UserAvatar = () => {
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
   const [userDataGG, setUserData] = useState({})
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        let response = await apiGetOne(accesstoken)
-        if (response?.data.err === 0) {
-          setUserData(response.data?.response)
-        } else {
-          setUserData({})
-        }
-      } catch (error) {
-        if (error.status === 401) {
-          try {
-            const response = await apiRefreshToken();
-            dispatch({
-              type: actionTypes.LOGIN_SUCCESS,
-              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken, }
-            })
+    if (isLoggedIn) {
+      const fetchUser = async () => {
+        try {
+          let response = await apiGetOne(accesstoken);
+          if (response?.data.err === 0) {
+            setUserData(response.data?.response);
+          } else {
+            setUserData({});
           }
-          catch (error) {
-            console.log("error",error);
-            if (error.status === 403) {
-              alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+        } catch (error) {
+          if (error.status === 401) {
+            try {
+              const response = await apiRefreshToken();
               dispatch({
-                type: actionTypes.LOGOUT,
+                type: actionTypes.LOGIN_SUCCESS,
+                data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken },
               });
-              navigate('/');
+            } catch (error) {
+              console.log("error", error);
+              if (error.status === 403) {
+                alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+                dispatch({
+                  type: actionTypes.LOGOUT,
+                });
+                navigate('/');
+              }
             }
+          } else {
+            console.log(error.message);
           }
-        } else {
-          console.log(error.message);
         }
-
-      }
+      };
+  
+      fetchUser();
     }
-    fetchUser()
-  }, [isLoggedIn, accesstoken, typeLogin])
+  }, [isLoggedIn, typeLogin]);
+  
 
   let data = {}
   if (isLoggedIn) {
