@@ -12,6 +12,7 @@ const theme = extendTheme({
                 primary: teal,
                 secondary: {
                     main: '#4db6ac',
+                    contrastText: '#00c1c1',
                 },
                 background: {
                     default: '#f5f5f5',
@@ -33,6 +34,7 @@ const theme = extendTheme({
                 primary: cyan,
                 secondary: {
                     main: '#80deea',
+                    contrastText: '#ace9f1',
                 },
                 background: {
                     default: '#333',
