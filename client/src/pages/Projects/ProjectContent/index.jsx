@@ -2,8 +2,8 @@ import React from 'react';
 import { Paper } from '@mui/material';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import List from '~/pages/Projects/List';
-import Overview from '~/pages/Projects/Overview';
+import List from '~/pages/Projects/Content/List';
+import Overview from '~/pages/Projects/Content/Overview';
 
 const ProjectContent = () => {
     const theme = useTheme();

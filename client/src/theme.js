@@ -25,7 +25,7 @@ const theme = extendTheme({
                 },
                 text: {
                     primary: '#000',   // Primary text color
-                    secondary: '#666', // Secondary text color
+                    secondary: '#4d4d4d', // Secondary text color
                 },
             },
         },
@@ -47,7 +47,7 @@ const theme = extendTheme({
                 },
                 text: {
                     primary: '#fff',   // Primary text color
-                    secondary: '#666', // Secondary text color
+                    secondary: '#8c8c8c', // Secondary text color
                 },
             },
         },
