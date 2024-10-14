@@ -14,7 +14,7 @@ const TaskContent = () => {
                 <Route path="/" element={<Navigate to="mytask" replace />} />
                 <Route path="mytask" element={<TaskList />} />
                 <Route path="calendar" element={<Calendar />} />
-                <Route path="texteditor" element={<TextEditor />} />
+                <Route path="texteditor" element={<TextEditor value={``} />} />
             </Routes>
         </Paper>
     );

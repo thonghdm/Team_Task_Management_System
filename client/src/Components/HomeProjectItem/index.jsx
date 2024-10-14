@@ -43,7 +43,7 @@ const HomeProjectItem = ({ icon, title, subtitle, color, onClick }) => {
             {title.length > 18 ? `${title.substring(0, 18)}...` : title}
           </Typography>
           {subtitle && (
-            <Typography variant="body2" sx={{ color: theme.palette.grey[100] }}>
+            <Typography variant="body2" sx={{ color:"text.secondary", display: 'flex'}}>
               {subtitle}
             </Typography>
           )}

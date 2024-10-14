@@ -8,13 +8,13 @@ import Overview from '~/pages/Projects/Content/Overview';
 const ProjectContent = () => {
     const theme = useTheme();
     return (
-        <Paper elevation={3} sx={{ mt: 2, p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
+        // <Paper elevation={3} sx={{ mt: 2, p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
             <Routes>
                 <Route path="/" element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<Overview />} />
                 <Route path="list" element={<List />} />
             </Routes>
-        </Paper>
+        // </Paper>
     );
 };
 
