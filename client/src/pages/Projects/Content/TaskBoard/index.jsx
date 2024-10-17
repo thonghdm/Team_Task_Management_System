@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Box,
   Table,
@@ -16,8 +16,10 @@ import {
   MenuItem,
   Tooltip
 } from '@mui/material';
-import { MoreVert as MoreVertIcon, Add as AddIcon, QuestionAnswer as QuestionAnswerIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, QuestionAnswer as QuestionAnswerIcon, ExpandMore as ExpandMoreIcon, DensityMedium as DensityMediumIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
+import './styles.css';
+import ChangeList from './ChangeList';
 
 const tasks = [
   {
@@ -167,6 +169,11 @@ const updatedTasks = tasks.map(task => ({
 const TaskBoard = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [hoveredCell, setHoveredCell] = useState(null);
+
+  const [showNameMenu, setShowNameMenu] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+
+
   const theme = useTheme();
 
   const handleClick = (event) => {
@@ -186,8 +193,36 @@ const TaskBoard = () => {
     // Thêm logic xử lý khi click vào icon Add ở đây
   };
 
+  // Handle Name click
+  const handleOpenNameMenu = (task) => {
+    setSelectedTask(task);
+    setShowNameMenu(true);
+  };
+  const handleCloseNameMenu = () => {
+    setShowNameMenu(false);
+    setSelectedTask(null);
+  };
+
+  const handleNameClick = (taskId, cellId) => {
+    console.log(`Name clicked: taskId=${taskId}, cellId=${cellId}`);
+    handleOpenNameMenu(taskId);
+  };
+
+
   const renderTableCell = (content, taskId, cellId, isEmpty) => {
     const isTrulyEmpty = isEmpty || (typeof content === 'string' && content.trim() === '.');
+
+    const handleClick = () => {
+      console.log(cellId);
+      switch (cellId) {
+        case 'name':
+          handleNameClick(taskId, cellId);
+          break;
+        default:
+          console.log(`Unknown column type: ${cellId}`);
+      }
+    };
+
     return (
       <TableCell
         sx={{
@@ -198,6 +233,7 @@ const TaskBoard = () => {
         }}
         onMouseEnter={() => handleCellHover(`${taskId}-${cellId}`)}
         onMouseLeave={() => handleCellHover(null)}
+        onClick={handleClick} // Use handleClick function here
       >
         {content}
         {hoveredCell === `${taskId}-${cellId}` && (
@@ -217,7 +253,8 @@ const TaskBoard = () => {
                 '&:hover': { backgroundColor: theme.palette.action.hover },
               }}
             >
-              {isTrulyEmpty ? <AddIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              {isTrulyEmpty ? <AddIcon sx={{ width: '13px', height: '13px', cursor: 'pointer' }} />
+                : <ExpandMoreIcon sx={{ width: '13px', height: '13px', cursor: 'pointer' }} />}
             </IconButton>
           </Tooltip>
         )}
@@ -226,187 +263,229 @@ const TaskBoard = () => {
   };
 
   return (
-    <Paper elevation={3} sx={{ mt: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
-      <TableContainer sx={{ borderColor: theme.palette.divider }}>
-        <Table aria-label="task board table" sx={{ borderColor: theme.palette.divider }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>ID</TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Task</TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>List</TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>State</TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Labels</TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Members</TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Comment</TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
-                Due date
-                <IconButton
-                  aria-label="more"
-                  id="long-button"
-                  aria-controls={Boolean(anchorEl) ? 'long-menu' : undefined}
-                  aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
-                  aria-haspopup="true"
-                  onClick={handleClick}
-                  sx={{ color: theme.palette.text.primary }}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-                <Menu
-                  id="long-menu"
-                  MenuListProps={{
-                    'aria-labelledby': 'long-button',
-                  }}
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
-                >
-                  <MenuItem onClick={handleClose}>Sort ascending</MenuItem>
-                  <MenuItem onClick={handleClose}>Sort descending</MenuItem>
-                </Menu>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {updatedTasks.map((task) => (
-              <TableRow
-                key={task.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell
-                  component="th"
-                  scope="row"
-                  sx={{
-                    color: theme.palette.text.primary,
-                    '&:hover': { backgroundColor: theme.palette.action.hover },
-                    maxHeight: '100px' // Add maxHeight
-                  }}
-                >
-                  {task.id}
+    <>
+      <Paper elevation={3} sx={{ mt: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
+        <TableContainer className="scrollable" sx={{ borderColor: theme.palette.divider, maxHeight: 640 }}>
+          <Table stickyHeader aria-label="sticky table" sx={{ borderColor: theme.palette.divider }}>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold', textAlign: 'center' }}>ID</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Task</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>List</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>State</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Labels</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Members</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Comment</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
+                  Due date
+                  <IconButton
+                    aria-label="more"
+                    id="long-button"
+                    aria-controls={Boolean(anchorEl) ? 'long-menu' : undefined}
+                    aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
+                    aria-haspopup="true"
+                    onClick={handleClick}
+                    sx={{ color: theme.palette.text.primary }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    id="long-menu"
+                    MenuListProps={{
+                      'aria-labelledby': 'long-button',
+                    }}
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                  >
+                    <MenuItem onClick={handleClose}>Sort ascending</MenuItem>
+                    <MenuItem onClick={handleClose}>Sort descending</MenuItem>
+                  </Menu>
                 </TableCell>
-                {renderTableCell(
-                  <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                    {task.name.length > 50 ? `${task.name.slice(0, 50)}...` : task.name}
-                  </Box>,
-                  task.id,
-                  'name',
-                  !task.name || task.name === '.'
-                )}
-                {renderTableCell(task.list, task.id, 'list', !task.list || task.list === '.')}
-
-                {renderTableCell(
-                  <Box sx={{ display: 'flex' }}>
-                    {task.state && task.state !== '.' ? (
-                      <Box
-                        sx={{
-                          width: 10,
-                          height: 10,
-                          mt: '4px',
-                          borderRadius: '50%',
-                          marginRight: 1,
-                          backgroundColor: task.state === 'Completed'
-                            ? 'green'
-                            : task.state === 'To Do'
-                              ? 'red'
-                              : 'yellow'
-                        }}
-                      />
-                    ) : (
-                      <Box
-                        sx={{
-                          width: 10,
-                          height: 10,
-                          mt: '4px',
-                          borderRadius: '50%',
-                          marginRight: 1,
-                          backgroundColor: 'transparent'
-                        }}
-                      />
-                    )}
-                    {task.state || '.'}
-                  </Box>,
-                  task.id,
-                  'state',
-                  !task.state || task.state === '.'
-                )}
-
-                {renderTableCell(
-                  <Box sx={{ display: 'flex', flexWrap: 'nowrap', maxWidth: '90px', overflow: 'hidden' }}>
-                    {task.labels.slice(0, 2).map((label, index) => (
-                      <Chip
-                        key={index}
-                        label={label.name || '.'}
-                        size="small"
-                        sx={{
-                          backgroundColor: label.color || 'transparent',
-                          marginRight: 1,
-                          marginBottom: 1
-                        }}
-                      />
-                    ))}
-                    {task.labels.length > 2 && (
-                      <Chip
-                        label="..."
-                        size="small"
-                        sx={{ marginRight: 1, marginBottom: 1, backgroundColor: 'transparent' }}
-                      />
-                    )}
-                  </Box>,
-                  task.id,
-                  'labels',
-                  task.labels.length === 0 || (task.labels.length === 1 && task.labels[0] === '.')
-                )}
-
-                {renderTableCell(
-                  <AvatarGroup
-                    max={3}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {updatedTasks.map((task) => (
+                <TableRow
+                  key={task.id}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell
+                    key={task.id}
+                    component="th"
+                    scope="row"
                     sx={{
-                      justifyContent: 'left',
-                      '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' }
+                      color: theme.palette.text.primary,
+                      '&:hover': { backgroundColor: theme.palette.action.hover },
+                      maxHeight: '100px',
+                      position: 'relative',
+                      textAlign: 'center',
+                      justifyContent: 'space-between', // ensures the icon stays left and text right
+                    }}
+                    onMouseEnter={() => handleCellHover(task.id)}
+                    onMouseLeave={() => handleCellHover(null)}
+                  >
+                    {hoveredCell === task.id && (
+                      <Tooltip title="Expand">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddClick(task.id);
+                          }}
+                          sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '1px',
+                            transform: 'translateY(-50%)',
+                            backgroundColor: theme.palette.background.paper,
+                            '&:hover': { backgroundColor: theme.palette.action.hover },
+                          }}
+                        >
+                          <DensityMediumIcon
+                            sx={{
+                              width: '13px',
+                              height: '13px',
+                              cursor: 'pointer',
+                            }}
+                          />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    {task.id}
+                  </TableCell>
+                  {renderTableCell(
+                    <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                      {task.name.length > 50 ? `${task.name.slice(0, 50)}...` : task.name}
+                    </Box>,
+                    task.id,
+                    'name',
+                    !task.name || task.name === '.',
+                  )
+                  }
+
+                  {renderTableCell(task.list, task.id, 'list', !task.list || task.list === '.')}
+
+                  {renderTableCell(
+                    <Box sx={{ display: 'flex' }}>
+                      {task.state && task.state !== '.' ? (
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            mt: '4px',
+                            borderRadius: '50%',
+                            marginRight: 1,
+                            backgroundColor: task.state === 'Completed'
+                              ? 'green'
+                              : task.state === 'To Do'
+                                ? 'red'
+                                : 'yellow'
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            mt: '4px',
+                            borderRadius: '50%',
+                            marginRight: 1,
+                            backgroundColor: 'transparent'
+                          }}
+                        />
+                      )}
+                      {task.state || '.'}
+                    </Box>,
+                    task.id,
+                    'state',
+                    !task.state || task.state === '.'
+                  )}
+
+                  {renderTableCell(
+                    <Box sx={{ display: 'flex', flexWrap: 'nowrap', maxWidth: '90px', overflow: 'hidden' }}>
+                      {task.labels.slice(0, 2).map((label, index) => (
+                        <Chip
+                          key={index}
+                          label={label.name || '.'}
+                          size="small"
+                          sx={{
+                            backgroundColor: label.color || 'transparent',
+                            marginRight: 1,
+                            marginBottom: 1
+                          }}
+                        />
+                      ))}
+                      {task.labels.length > 2 && (
+                        <Chip
+                          label="..."
+                          size="small"
+                          sx={{ marginRight: 1, marginBottom: 1, backgroundColor: 'transparent' }}
+                        />
+                      )}
+                    </Box>,
+                    task.id,
+                    'labels',
+                    task.labels.length === 0 || (task.labels.length === 1 && task.labels[0] === '.')
+                  )}
+
+                  {renderTableCell(
+                    <AvatarGroup
+                      max={3}
+                      sx={{
+                        justifyContent: 'left',
+                        '& .MuiAvatar-root': { width: 24, height: 24, fontSize: '0.75rem' }
+                      }}
+                    >
+                      {task.members && task.members.length > 0 ? (
+                        task.members.map((member, index) => (
+                          member.avatar ? (
+                            <Avatar
+                              key={index}
+                              alt={member.name || '.'}
+                              src={member.avatar}
+                              sx={{ width: 24, height: 24 }}
+                            />
+                          ) : (
+                            <span key={index}>.</span>
+                          )
+                        ))
+                      ) : null}
+                    </AvatarGroup>,
+                    task.id,
+                    'members',
+                    task.members.length === 0 || (task.members.length === 1 && task.members[0].name === '.')
+                  )}
+
+                  <TableCell
+                    component="th"
+                    scope="row"
+                    sx={{
+                      color: theme.palette.text.primary,
+                      '&:hover': { backgroundColor: theme.palette.action.hover },
+                      maxHeight: '100px' // Add maxHeight
                     }}
                   >
-                    {task.members && task.members.length > 0 ? (
-                      task.members.map((member, index) => (
-                        member.avatar ? (
-                          <Avatar
-                            key={index}
-                            alt={member.name || '.'}
-                            src={member.avatar}
-                            sx={{ width: 24, height: 24 }}
-                          />
-                        ) : (
-                          <span key={index}>.</span>
-                        )
-                      ))
-                    ) : null}
-                  </AvatarGroup>,
-                  task.id,
-                  'members',
-                  task.members.length === 0 || (task.members.length === 1 && task.members[0].name === '.')
-                )}
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <QuestionAnswerIcon sx={{ marginRight: 1, fontSize: 'small' }} />
+                      {task.comment}
+                    </Box>
+                  </TableCell>
 
-                <TableCell
-                  component="th"
-                  scope="row"
-                  sx={{
-                    color: theme.palette.text.primary,
-                    '&:hover': { backgroundColor: theme.palette.action.hover },
-                    maxHeight: '100px' // Add maxHeight
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <QuestionAnswerIcon sx={{ marginRight: 1, fontSize: 'small' }} />
-                    {task.comment}
-                  </Box>
-                </TableCell>
+                  {renderTableCell(task.dueDate || '.', task.id, 'dueDate', !task.dueDate || task.dueDate === '.')}
 
-                {renderTableCell(task.dueDate || '.', task.id, 'dueDate', !task.dueDate || task.dueDate === '.')}
+                </TableRow>
+              ))}
+              {showNameMenu && selectedTask && (
+                <ChangeList open={showNameMenu} onClose={handleCloseNameMenu} taskId={selectedTask} />
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+
+    </>
   );
 };
 
