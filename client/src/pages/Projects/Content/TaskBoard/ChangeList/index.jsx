@@ -9,6 +9,11 @@ import {
 import ProjectDescription from '~/pages/Projects/Content/Overview/ProjectDescription';
 import CommentList from './CommentList';
 import ActivityLog from './ActivityLog';
+import DueDatePicker from '~/Components/DueDatePicker';
+import { useTheme } from '@mui/material/styles';
+import ColorPickerDialog from '~/Components/ColorPickerDialog';
+import FileUploadDialog from '~/Components/FileUploadDialog';
+import FileManagementDialogs from '~/Components/FileManagementDialogs';
 
 const dataProjectDescription = {
     content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to giveof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overvi people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
@@ -50,8 +55,9 @@ const activities = [
     { avatar: "LV", name: "Luyên Lê Văn", action: "created this task", timestamp: "Yesterday at 12:34am" },
     { avatar: "JD", name: "John Doe", action: "updated the description", timestamp: "2 hours ago" },
     // ... more activities
-  ];
+];
 const ChangeList = ({ open, onClose, taskId }) => {
+    const theme = useTheme();
     const [description, setDescription] = useState(dataProjectDescription.content);
     const [cmt, setCMT] = useState("Write a comment");
 
@@ -61,6 +67,28 @@ const ChangeList = ({ open, onClose, taskId }) => {
         setShowDetails((prev) => !prev);
     };
     //
+
+    // Color picker
+    const [openColorPicker, setOpenColorPicker] = useState(false);
+    const [label, setLabel] = useState({ title: '', color: '' });
+    const handleOpenColorPicker = () => setOpenColorPicker(true);
+    const handleCloseColorPicker = (color, title) => {
+        setOpenColorPicker(false);
+        if (color && title) setLabel({ title, color });
+    };
+    //
+
+    // Add File
+    const [openFile, setOpenFile] = useState(false);
+    const handleOpenFile = () => setOpenFile(true);
+    const handleCloseFile = () => setOpenFile(false);
+    //
+
+    // manage file
+    const [openManagement, setOpenManagement] = useState(false);
+    const handleOpenManagement = () => setOpenManagement(true);
+    const handleCloseManagement = () => setOpenManagement(false);
+    //
     return (
         <Dialog
             open={open}
@@ -68,7 +96,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
             fullWidth
             maxWidth="md" // loại bỏ giới hạn chiều rộng mặc định
             PaperProps={{
-                style: { backgroundColor: '#1e1f23', color: 'white' },
+                style: { backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary },
             }}
             className="scrollable"
             sx={{ maxHeight: '800px!important' }}
@@ -76,7 +104,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
             <DialogTitle>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="h6">Task Details: {taskId}</Typography>
-                    <IconButton onClick={onClose} sx={{ color: 'white' }}>
+                    <IconButton onClick={onClose} sx={{ color: theme.palette.text.primary }}>
                         <Close />
                     </IconButton>
                 </Box>
@@ -89,7 +117,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             avatar={<Avatar sx={{ bgcolor: '#c9b458' }}>LV</Avatar>}
                             label="Luyên Lê Văn"
                             //   onDelete={() => {}}
-                            sx={{ bgcolor: 'transparent', border: '1px solid #555' }}
+                            sx={{ bgcolor: 'transparent', border: `1px solid ${theme.palette.text.secondary}` }}
                         />
                     </Box>
 
@@ -98,7 +126,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Chip
                             label="Untitled section"
                             // onDelete={() => {}}
-                            sx={{ bgcolor: '#3b82f6', color: 'white' }}
+                            sx={{ bgcolor: '#3b82f6', color: theme.palette.text.primary }}
                         />
                     </Box>
 
@@ -107,16 +135,20 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Chip
                             label="Untitled section"
                             // onDelete={() => {}}
-                            sx={{ bgcolor: '#3b82f6', color: 'white' }}
+                            sx={{ bgcolor: '#3b82f6', color: theme.palette.text.primary }}
                         />
                         <Box sx={{ marginLeft: 'auto' }}>
-                            <Button startIcon={<Add />} sx={{ color: 'white', textTransform: 'none' }}>
+                            <Button onClick={handleOpenColorPicker} startIcon={<Add />} sx={{ color: theme.palette.text.primary, textTransform: 'none' }}>
                                 Add
                             </Button>
                         </Box>
+                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} />
+                        {label.title && (
+                            <p>Created Label: {label.title} (Color: {label.color})</p>
+                        )}
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ width: '100px' }}>Due date</Typography>
                         <Chip
                             icon={<CalendarToday fontSize="small" />}
@@ -124,31 +156,34 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             onDelete={() => { }}
                             sx={{ bgcolor: 'transparent', border: '1px solid #555' }}
                         />
-                    </Box>
+                    </Box> */}
+                    <DueDatePicker />
+
 
                     <Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography sx={{ width: '100px' }}>Attachments</Typography>
                             <Box sx={{ marginLeft: 'auto' }}>
-                                <Button startIcon={<Add />} sx={{ color: 'white', textTransform: 'none' }}>
+                                <Button onClick={handleOpenFile} startIcon={<Add />} sx={{ color: theme.palette.text.primary, textTransform: 'none' }}>
                                     Add
                                 </Button>
                             </Box>
-
+                            <FileUploadDialog open={openFile} onClose={handleCloseFile} />
                         </Box>
                         <Box sx={{ ml: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
                             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <InsertDriveFile sx={{ color: 'white' }} />
+                                    <InsertDriveFile sx={{ color: theme.palette.text.primary }} />
                                     <Box>
-                                        <Typography sx={{ color: 'white' }}>image.png</Typography>
-                                        <Typography sx={{ color: 'gray', fontSize: '0.8rem' }}>Added May 28, 2018, 9:47 AM</Typography>
+                                        <Typography sx={{ color: theme.palette.text.primary }}>image.png</Typography>
+                                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.8rem' }}>Added May 28, 2018, 9:47 AM</Typography>
                                     </Box>
                                 </Box>
                             </Box>
                             <IconButton>
-                                <MoreHoriz sx={{ color: 'white' }} />
+                                <MoreHoriz onClick={handleOpenManagement} sx={{ color: theme.palette.text.primary }} />
                             </IconButton>
+                            <FileManagementDialogs open={openManagement} onClose={handleCloseManagement} />
                         </Box>
                     </Box>
 
@@ -163,7 +198,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             <Typography sx={{ width: '100px' }}>Activity</Typography>
                             <Box sx={{ marginLeft: 'auto' }}>
                                 <Button
-                                    sx={{ color: 'white', textTransform: 'none' }}
+                                    sx={{ color: theme.palette.text.primary, textTransform: 'none' }}
                                     onClick={toggleDetails}
                                 >
                                     {showDetails ? 'Hide details' : 'Show details'}
@@ -172,8 +207,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         </Box>
                         {showDetails && (
                             <Box sx={{ mt: 2 }}>
-                                <Typography variant="body2" sx={{ color: 'white' }}>
-                                <ActivityLog activitys={activities}/>
+                                <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+                                    <ActivityLog activitys={activities} />
                                 </Typography>
                             </Box>
                         )}
@@ -186,8 +221,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Avatar sx={{ bgcolor: '#c9b458', width: 30, height: 30, fontSize: '0.8rem' }}>LV</Avatar>
                         <Box
                             sx={{
-                                border: '1px solid #ccc',  // Màu và kiểu viền
-                                backgroundColor: '#2e2f33', // Màu nền (tùy chỉnh theo yêu cầu)
+                                border: `1px solid ${theme.palette.background.paper}`, // Viền
+                                backgroundColor: theme.palette.background.default, // Màu nền (tùy chỉnh theo yêu cầu)
                                 borderRadius: '8px',        // Bo góc viền
                                 padding: 2,                 // Thêm khoảng cách giữa nội dung và viền
                                 width: '100%',
@@ -204,7 +239,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Typography variant="caption">Collaborators</Typography>
                         <Avatar sx={{ bgcolor: '#c9b458', width: 20, height: 20, fontSize: '0.7rem' }}>LV</Avatar>
                         <Avatar sx={{ bgcolor: '#555', width: 20, height: 20, fontSize: '0.7rem' }}>+</Avatar>
-                        <Button sx={{ color: 'white', textTransform: 'none', ml: 'auto' }}>Leave task</Button>
+                        <Button sx={{ color: theme.palette.text.primary, textTransform: 'none', ml: 'auto' }}>Leave task</Button>
                     </Box>
                 </Box>
             </DialogContent>
