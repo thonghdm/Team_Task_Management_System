@@ -52,6 +52,9 @@ const Overview = () => {
   return (
     <>
       <Paper className="scrollable" elevation={3} sx={{ maxHeight: 500, p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          Project description
+        </Typography>
         <ProjectDescription initialContent={dataProjectDescription.content} />
       </Paper>
       <Grid container spacing={2}>
