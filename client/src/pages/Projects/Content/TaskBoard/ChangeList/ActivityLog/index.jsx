@@ -6,17 +6,22 @@ import {
 import {
     Close, CalendarToday, Add
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 
-const ActivityLogEntry = ({ avatar, name, action, timestamp }) => (
-    <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, color: '#888' }}>
-        <Avatar sx={{ width: 30, height: 30, fontSize: '0.8rem', mr: 1, bgcolor: '#c9b458' }}>
-            {avatar}
-        </Avatar>
-        <Typography variant="body2">
-            <span style={{ color: 'white' }}>{name}</span> {action} • {timestamp}
-        </Typography>
-    </Box>
-);
+
+const ActivityLogEntry = ({ avatar, name, action, timestamp }) => {
+    const theme = useTheme();
+    return (
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, color: theme.palette.text.secondary }}>
+            <Avatar sx={{ width: 30, height: 30, fontSize: '0.8rem', mr: 1, bgcolor: '#c9b458' }}>
+                {avatar}
+            </Avatar>
+            <Typography variant="body2">
+                <span style={{ color: theme.palette.text.primary  }}>{name}</span> {action} • {timestamp}
+            </Typography>
+        </Box>
+    );
+}
 
 const ActivityLog = ({ activitys }) => {
     return (
