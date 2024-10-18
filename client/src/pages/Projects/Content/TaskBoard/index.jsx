@@ -20,6 +20,7 @@ import { MoreVert as MoreVertIcon, Add as AddIcon, QuestionAnswer as QuestionAns
 import { useTheme } from '@mui/material/styles';
 import './styles.css';
 import ChangeList from './ChangeList';
+import ButtonAdd from './ChangeList/ButtonAdd';
 
 const tasks = [
   {
@@ -484,6 +485,7 @@ const TaskBoard = () => {
         </TableContainer>
       </Paper>
 
+      <ButtonAdd />
 
     </>
   );
