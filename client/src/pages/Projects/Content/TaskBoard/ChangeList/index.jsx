@@ -14,6 +14,8 @@ import { useTheme } from '@mui/material/styles';
 import ColorPickerDialog from '~/Components/ColorPickerDialog';
 import FileUploadDialog from '~/Components/FileUploadDialog';
 import FileManagementDialogs from '~/Components/FileManagementDialogs';
+import AddMemberDialog from '~/Components/AddMemberDialog';
+
 
 const dataProjectDescription = {
     content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to giveof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overvi people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
@@ -89,6 +91,12 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const handleOpenManagement = () => setOpenManagement(true);
     const handleCloseManagement = () => setOpenManagement(false);
     //
+
+    // add member
+    const [openAvt, setOpenAvt] = useState(false);
+    const handleOpenAvt = () => setOpenAvt(true);
+    const handleCloseAvt = () => setOpenAvt(false);
+    //
     return (
         <Dialog
             open={open}
@@ -157,7 +165,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             sx={{ bgcolor: 'transparent', border: '1px solid #555' }}
                         />
                     </Box> */}
-                    <DueDatePicker />
+                    <DueDatePicker lableDate={"Due Date"} />
 
 
                     <Box>
@@ -237,10 +245,11 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                         <Typography variant="caption">Collaborators</Typography>
-                        <Avatar sx={{ bgcolor: '#c9b458', width: 20, height: 20, fontSize: '0.7rem' }}>LV</Avatar>
-                        <Avatar sx={{ bgcolor: '#555', width: 20, height: 20, fontSize: '0.7rem' }}>+</Avatar>
+                        <Avatar sx={{ bgcolor: '#c9b458', width: 25, height: 25, fontSize: '0.7rem' }}>LV</Avatar>
+                        <Avatar onClick={handleOpenAvt} sx={{ bgcolor: theme.palette.background.default,color: theme.palette.text.primary, width: 25, height: 25, fontSize: '0.7rem', cursor:'pointer' }}>+</Avatar>
                         <Button sx={{ color: theme.palette.text.primary, textTransform: 'none', ml: 'auto' }}>Leave task</Button>
                     </Box>
+                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} />
                 </Box>
             </DialogContent>
         </Dialog>

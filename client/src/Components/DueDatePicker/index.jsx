@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import { useTheme } from '@mui/material/styles';
 
 
-const DueDatePicker = () => {
+const DueDatePicker = ({lableDate}) => {
     const theme = useTheme();
     const [date, setDate] = useState(null);
     const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ const DueDatePicker = () => {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ width: '100px' }}>Due date</Typography>
+                <Typography sx={{ width: '100px' }}>{lableDate}</Typography>
                 <Chip
                     icon={date ? null : <CalendarToday fontSize="small" />} // Hiển thị icon nếu date là null
                     label={date ? dayjs(date).format('MMM DD, hh:mm A') : 'No due date'}
