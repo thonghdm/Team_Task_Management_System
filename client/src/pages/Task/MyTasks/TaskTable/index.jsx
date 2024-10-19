@@ -3,6 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableRow, Chip, Box, Typography
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 
+const defaultAvatar = 'https://i.pravatar.cc/300'
+
 const TaskTable = ({ tasks }) => {
   return (
     <Table>
@@ -30,7 +32,7 @@ const TaskTable = ({ tasks }) => {
                       key={index} 
                       alt={collaborator.name} 
                       src={collaborator.avatar} 
-                      onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }} // Fallback to default image
+                      onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar||""; }} // Fallback to default image
                     />
                   ))}
                 </AvatarGroup>
