@@ -20,6 +20,7 @@ import { AuthProvider } from '~/pages/Auth/SignUp/AuthContext';
 import Error from './pages/Error'
 import ResetPassword from '~/pages/Auth/ResetPassword'
 import NewPassword from '~/pages/Auth/ResetPassword/NewPassword'
+import Profile from '~/pages/Profile'
 
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
@@ -75,7 +76,7 @@ function App() {
         <Route path='/error' element={<Error />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/new-password'element={<ProtectedRoute><NewPassword /></ProtectedRoute>} />
-        
+        <Route path='/profile' element={<Profile />} />
         <Route path='/login-success/:userId/:tokenLogin' element={<LoginSuccess />} />
         <Route path='/board/*' element={<Boards />} />
       </Routes>

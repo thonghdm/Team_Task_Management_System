@@ -74,7 +74,7 @@ const Home = () => {
       <div>
         <h4>{data?.displayName}</h4>
         <h4>{data?.email}</h4>
-        {data?.image && <img src={data?.image} referrerpolicy="no-referrer" alt="avatar" style={{ width: '200px', height: '200px', objectFit: 'cover' }} />}
+        {data?.image && <img src={data?.image} alt="avatar" style={{ width: '200px', height: '200px', objectFit: 'cover' }} />}
       </div>
 
     </div>

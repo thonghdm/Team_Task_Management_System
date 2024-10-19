@@ -103,7 +103,6 @@ const Homes = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar sx={{ mr: 1 }}
             src={data?.image ? data?.image : undefined}
-            referrerpolicy="no-referrer"
           >{!data?.image && data?.displayName} </Avatar>
           <Typography variant="h6">My tasks</Typography>
           <Box sx={{ flexGrow: 1 }} />
