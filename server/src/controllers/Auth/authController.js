@@ -54,7 +54,9 @@ const authController = {
                 res.status(200).json({
                     err: 0,
                     msg: 'New tokens generated successfully',
-                    token: response.token || null
+                    token: response.token || null,
+                    userData: response.userData || null
+
                 })
             } else {
                 res.status(403).json({

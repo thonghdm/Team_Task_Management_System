@@ -15,8 +15,15 @@ const authReducer = (state = initState, action) => {
                 ...state,
                 isLoggedIn: action.data ? true : false,
                 typeLogin: false,
-                accesstoken: action.data.accesstoken
+                accesstoken: action.data.accesstoken,
+                userData: action.data.userData,  // Store user data (Google or email)
+                error: null,
             }
+        case actionTypes.LOGIN_FAILURE:
+            return {
+                ...initState,
+                error: action.error
+            };
         case actionTypes.LOGOUT:
             return {
                 ...initState
