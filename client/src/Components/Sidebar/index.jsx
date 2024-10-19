@@ -5,6 +5,7 @@ import {
   Toolbar,
   Typography,
   Button,
+  IconButton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
@@ -19,6 +20,7 @@ import {
 import { useLocation } from 'react-router-dom';
 import SidebarList from '../SidebarList';
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -114,8 +116,8 @@ const insightsLinkData = [
 
 const projectsLinkData = [
   { label: 'Cross-functional project p...', link: 'project1' },
-  { label: 'My first portfolio', link: 'project2'},
-  { label: 'uijjj', link: 'project3'},
+  { label: 'My first portfolio', link: 'project2' },
+  { label: 'uijjj', link: 'project3' },
   // Add more projects here to test scrolling
 ];
 
@@ -128,6 +130,8 @@ const teamLinkData = [
 const Sidebar = ({ open }) => {
   const location = useLocation();
   const theme = useTheme();
+  const navigate = useNavigate();
+
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Toolbar />
@@ -151,8 +155,13 @@ const Sidebar = ({ open }) => {
           </Box> */}
 
           <Box>
-            <SectionTitle>PROJECTS</SectionTitle>
-            <SidebarList linkData={projectsLinkData} isProject={true} open={open}/>
+            <Box display="flex" alignItems="center" justifyContent="space-between">
+              <SectionTitle>PROJECTS</SectionTitle>
+              <IconButton onClick={() => { navigate('/projects-new'), { state: { from: location.pathname } } }}>
+                <AddIcon sx={{ width: 17, mt: "3px" }} />
+              </IconButton>
+            </Box>
+            <SidebarList linkData={projectsLinkData} isProject={true} open={open} />
           </Box>
 
           <Box>
@@ -184,10 +193,10 @@ const Sidebar = ({ open }) => {
           <Box textAlign="center" mb={2}>
             <Typography
               sx={{
-                color: (theme) => theme.palette.success.main, 
+                color: (theme) => theme.palette.success.main,
                 cursor: 'pointer',
               }}
-            >              
+            >
             </Typography>
           </Box>
         </Box>
