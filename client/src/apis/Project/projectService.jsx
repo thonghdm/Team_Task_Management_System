@@ -1,8 +1,11 @@
 import axios from 'axios';
 
-export const getAllByOwnerId = async (ownerId) => {
+export const getAllByOwnerId = async (accesstoken,ownerId) => {
     try {
         const response = await axios.get(`http://localhost:5000/api/project?ownerId=${ownerId}`, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
             withCredentials: true
         }
         );
@@ -14,9 +17,12 @@ export const getAllByOwnerId = async (ownerId) => {
 };
 
 
-export const createNew = async (projectData) => {
+export const createNew = async (accesstoken,projectData) => {
     try {
         const response = await axios.post('http://localhost:5000/api/project', projectData, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
             withCredentials: true
         });
         return response.data;

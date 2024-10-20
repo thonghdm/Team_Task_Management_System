@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     Box,
     TextField,
@@ -20,9 +22,9 @@ import {
 import RoleSelect from '~/Components/ProjectRoleSelect';
 import { useTheme } from '@mui/material/styles';
 import { createNew } from '~/apis/Project/projectService';
-import { useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useRefreshToken } from '~/utils/useRefreshToken'
 
 const roles = [
     { value: 'Public', label: 'My workspace', description: 'Everyone in your workspace can find and access this project.' },
@@ -31,36 +33,62 @@ const roles = [
 
 const ProjectBlank = () => {
     const theme = useTheme();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [projectName, setProjectName] = useState('');
     const [defaultView, setDefaultView] = useState('list');
     const [privacy, setPrivacy] = useState('Public');
-    const { userData } = useSelector(state => state.auth);
+    const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
+    
+
 
     const handleViewChange = (event, newView) => {
         if (newView !== null) {
             setDefaultView(newView);
         }
     };
+    const refreshToken = useRefreshToken();
 
     const handleSubmit = async () => {
+        
         const projectData = {
             projectName,
             visibility: privacy,
             ownerId: userData._id,
             membersId: [userData._id],
         };
-
-        try {
-            const response = await createNew(projectData);
-            toast.success(response.message || 'Project created successfully!');
-            // Reset form state
+    
+        const resetFormState = () => {
             setProjectName('');
             setPrivacy('Public');
             setDefaultView('list');
-        } catch (err) {
-            toast.error(err.response?.data.message || 'Error creating project!');
+        };
+    
+        const handleSuccess = (message) => {
+            toast.success(message || 'Project created successfully!');
+            resetFormState();
+        };
+    
+        const createProject = async (token) => {
+            try {
+                const response = await createNew(token, projectData);
+                handleSuccess(response.message);
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    const newToken = await refreshToken();
+                    return createProject(newToken); // Retry with new token
+                }
+                throw error;
+            }
+        };
+    
+        try {
+            await createProject(accesstoken);
+        } catch (error) {
+            toast.error(error.response?.data.message || 'Error creating project!');
         }
     };
+    
 
     return (
         <Box sx={{ bgcolor: 'background.pager', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
