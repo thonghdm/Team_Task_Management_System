@@ -8,6 +8,8 @@ import Homes from '~/pages/Homes';
 import Task from '~/pages/Task';
 import Team from '~/pages/Team';
 import Projects from '~/pages/Projects';
+// import AddProjects from '~/pages/Projects/AddProjects';
+
 
 const Boards = () => {
   const [open, setOpen] = useState(true);
@@ -26,6 +28,7 @@ const Boards = () => {
           <Route path="home" element={<Homes />} />
           <Route path="tasks/*" element={<Task />} />
           <Route path="team" element={<Team />} />
+          {/* <Route path="/projects/new" element={<AddProjects />} /> */}
           <Route path=":projectId/*" element={<Projects />} />
         </Routes>
       </Box>

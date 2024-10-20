@@ -20,6 +20,9 @@ import { AuthProvider } from '~/pages/Auth/SignUp/AuthContext';
 import Error from './pages/Error'
 import ResetPassword from '~/pages/Auth/ResetPassword'
 import NewPassword from '~/pages/Auth/ResetPassword/NewPassword'
+import AddProjects from '~/pages/Projects/AddProjects';
+import ProjectTemplate from '~/pages/Projects/AddProjects/ProjectTemplate';
+import ProjectsBlank from './pages/Projects/AddProjects/ProjectsBlank'
 
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
@@ -74,10 +77,11 @@ function App() {
         <Route path="/sign-up-success" element={<ProtectedRoute><SignUpSuccess /></ProtectedRoute>} /> {/* Example success route */}
         <Route path='/error' element={<Error />} />
         <Route path='/reset-password' element={<ResetPassword />} />
-        <Route path='/new-password'element={<ProtectedRoute><NewPassword /></ProtectedRoute>} />
-        
+        <Route path='/new-password' element={<ProtectedRoute><NewPassword /></ProtectedRoute>} />
         <Route path='/login-success/:userId/:tokenLogin' element={<LoginSuccess />} />
         <Route path='/board/*' element={<Boards />} />
+        <Route path="/projects-new" element={<AddProjects />} />
+        <Route path="/projects-new/blank" element={<ProjectsBlank />} />
       </Routes>
 
     </AuthProvider>

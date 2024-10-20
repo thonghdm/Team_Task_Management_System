@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Drawer,
   Toolbar,
   Typography,
   Button,
+  IconButton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
@@ -19,7 +20,9 @@ import {
 import { useLocation } from 'react-router-dom';
 import SidebarList from '../SidebarList';
 import { useTheme } from '@mui/material/styles';
-
+import { useNavigate } from 'react-router-dom';
+import {getAllByOwnerId} from '~/apis/Project/projectService';
+import { useSelector, useDispatch } from 'react-redux';
 
 
 const drawerWidth = 240;
@@ -101,33 +104,43 @@ const AddBillingButton = styled(Button)(({ theme }) => ({
   },
 }));
 const mainLinkData = [
-  { label: 'Home', link: 'home', icon: <HomeIcon /> },
-  { label: 'My tasks', link: 'tasks', icon: <TaskIcon /> },
-  { label: 'Inbox', link: 'inbox', icon: <InboxIcon /> },
+  { projectName: 'Home', slug: 'home', icon: <HomeIcon /> },
+  { projectName: 'My tasks', slug: 'tasks', icon: <TaskIcon /> },
+  { projectName: 'Inbox', slug: 'inbox', icon: <InboxIcon /> },
 ];
 
-const insightsLinkData = [
-  { label: 'Reporting', link: 'reporting', icon: <ReportingIcon /> },
-  { label: 'Portfolios', link: 'portfolios', icon: <PortfoliosIcon /> },
-  { label: 'Goals', link: 'goals', icon: <GoalsIcon /> },
-];
 
 const projectsLinkData = [
-  { label: 'Cross-functional project p...', link: 'project1' },
-  { label: 'My first portfolio', link: 'project2'},
-  { label: 'uijjj', link: 'project3'},
+  { label: 'Cross-functional project p...', slug: 'project1' },
+  { label: 'My first portfolio', slug: 'project2' },
+  { label: 'uijjj', slug: 'project3' },
   // Add more projects here to test scrolling
 ];
 
 
 const teamLinkData = [
-  { label: 'Team', link: 'team', icon: <ReportingIcon /> },
-
+  { projectName: 'Team', slug: 'team', icon: <ReportingIcon /> },
 ];
 
 const Sidebar = ({ open }) => {
   const location = useLocation();
   const theme = useTheme();
+  const navigate = useNavigate();
+  const [projects, setProjects] = useState([]);
+  const { userData } = useSelector(state => state.auth)
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await getAllByOwnerId(userData._id);
+        setProjects(data.projects); 
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchProjects();
+  }, []);
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Toolbar />
@@ -151,8 +164,13 @@ const Sidebar = ({ open }) => {
           </Box> */}
 
           <Box>
-            <SectionTitle>PROJECTS</SectionTitle>
-            <SidebarList linkData={projectsLinkData} isProject={true} open={open}/>
+            <Box display="flex" alignItems="center" justifyContent="space-between">
+              <SectionTitle>PROJECTS</SectionTitle>
+              <IconButton onClick={() => { navigate('/projects-new'), { state: { from: location.pathname } } }}>
+                <AddIcon sx={{ width: 17, mt: "3px" }} />
+              </IconButton>
+            </Box>
+            <SidebarList linkData={projects} isProject={true} open={open} />
           </Box>
 
           <Box>
@@ -184,10 +202,10 @@ const Sidebar = ({ open }) => {
           <Box textAlign="center" mb={2}>
             <Typography
               sx={{
-                color: (theme) => theme.palette.success.main, 
+                color: (theme) => theme.palette.success.main,
                 cursor: 'pointer',
               }}
-            >              
+            >
             </Typography>
           </Box>
         </Box>
