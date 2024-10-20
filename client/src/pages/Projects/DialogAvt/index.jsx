@@ -43,6 +43,13 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     },
 }));
 
+const roles = [
+    { value: 'admin', label: 'Project admin', description: 'Full access to change settings, modify, or delete the project.' },
+    { value: 'editor', label: 'Editor', description: 'Can add, edit, and delete anything in the project.' },
+    { value: 'commenter', label: 'Commenter', description: "Can comment, but can't edit anything in the project." },
+    { value: 'viewer', label: 'Viewer', description: "Can view, but can't add comments or edit the project." },
+];
+
 const StyledButton = styled(Button)(({ theme }) => ({
     color: theme.palette.error.main,
     borderColor: theme.palette.error.main,
@@ -100,6 +107,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                         <RoleSelect
                             value={inviteRole}
                             onChange={(e) => setInviteRole(e.target.value)}
+                            DB={roles}
                         />
                         <Button variant="contained" color="primary">
                             Invite
@@ -144,6 +152,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                             <RoleSelect
                                 value={taskCollaborators}
                                 onChange={(e) => setTaskCollaborators(e.target.value)}
+                                DB={roles}
                             />
                         }>
                             <ListItemAvatar>
@@ -155,6 +164,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                             <RoleSelect
                                 value={MyWorkspace}
                                 onChange={(e) => setMyWorkspace(e.target.value)}
+                                DB={roles}
                             />
                         }>
                             <ListItemAvatar>

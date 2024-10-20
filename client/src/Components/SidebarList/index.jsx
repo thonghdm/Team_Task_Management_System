@@ -11,13 +11,13 @@ const SidebarList = ({ linkData, isProject = false, color }) => {
   return (
     <List disablePadding>
       {linkData.map((item) => (
-        <ListItem key={item.label} disablePadding>
+        <ListItem key={item.projectName} disablePadding>
           <ListItemButton
             component={Link}
-            to={`/board/${item.link}`}
-            selected={path === item.link}
+            to={`/board/${item.slug}`}
+            selected={path === item.slug}
             sx={{
-              backgroundColor: path === item.link ? 'rgba(255, 255, 255, 0.08)' : 'inherit',
+              backgroundColor: path === item.slug ? 'rgba(255, 255, 255, 0.08)' : 'inherit',
               '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.08)',
               },
@@ -38,7 +38,7 @@ const SidebarList = ({ linkData, isProject = false, color }) => {
               )}
             </ListItemIcon>
             <ListItemText 
-              primary={item.label}
+              primary={item.projectName}
               primaryTypographyProps={{
                 sx: { 
                   fontSize: 'inherit',

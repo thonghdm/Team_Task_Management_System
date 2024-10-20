@@ -3,19 +3,12 @@ import { Select, MenuItem, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
 
-const roles = [
-    { value: 'admin', label: 'Project admin', description: 'Full access to change settings, modify, or delete the project.' },
-    { value: 'editor', label: 'Editor', description: 'Can add, edit, and delete anything in the project.' },
-    { value: 'commenter', label: 'Commenter', description: "Can comment, but can't edit anything in the project." },
-    { value: 'viewer', label: 'Viewer', description: "Can view, but can't add comments or edit the project." },
-];
-
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     color: theme.palette.text.primary,
     '&:hover': {
         backgroundColor: theme.palette.mode === 'light'
             ? theme.palette.grey[50]
-            : theme.palette.grey[700],
+            : theme.palette.grey[500],
     },
     '&.Mui-selected': {
         backgroundColor: theme.palette.mode === 'light'
@@ -29,7 +22,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     },
 }));
 
-const RoleSelect = ({ value, onChange }) => {
+const RoleSelect = ({ value, onChange,DB,fullWidth }) => {
     const theme = useTheme();
 
     return (
@@ -37,19 +30,20 @@ const RoleSelect = ({ value, onChange }) => {
             value={value}
             onChange={onChange}
             size="small"
+            fullWidth={fullWidth || false}  // Sử dụng thuộc tính fullWidth khi cần
             sx={{ minWidth: 100, mr: 1 }}
             renderValue={(selected) => {
-                const selectedRole = roles.find((role) => role.value === selected);
+                const selectedRole = DB.find((role) => role.value === selected);
                 return selectedRole ? selectedRole.label : '';
             }}
         >
-            {roles.map((role) => (
+            {DB.map((role) => (
                 <StyledMenuItem key={role.value} value={role.value}>
                     <div>
                         <Typography variant="body2" sx={{ color: theme.palette.primary.main, fontWeight: 'bold' }}>
                             {role.label}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: 'grey.500', display: 'block' }}>
+                        <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontWeight: 'bold' ,display: 'block' }}>
                             {role.description}
                         </Typography>
                     </div>

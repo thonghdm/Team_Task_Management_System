@@ -17,6 +17,7 @@ const users = [
 
 ];
 
+const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
 const Projects = () => {
   const { projectId } = useParams();
   const location = useLocation();

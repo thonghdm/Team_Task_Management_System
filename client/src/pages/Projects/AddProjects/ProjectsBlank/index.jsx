@@ -6,11 +6,7 @@ import {
     ToggleButtonGroup,
     ToggleButton,
     Button,
-    Select,
-    MenuItem,
     Paper,
-    Grid,
-    Chip,
     FormLabel,
 } from '@mui/material';
 import Header from '../Header';
@@ -21,15 +17,48 @@ import {
     Timeline as TimelineIcon,
     CalendarToday as CalendarIcon
 } from '@mui/icons-material';
+import RoleSelect from '~/Components/ProjectRoleSelect';
+import { useTheme } from '@mui/material/styles';
+import { createNew } from '~/apis/Project/projectService';
+import { useSelector } from 'react-redux';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const roles = [
+    { value: 'Public', label: 'My workspace', description: 'Everyone in your workspace can find and access this project.' },
+    { value: 'Member', label: 'Private to members', description: 'Only invited members can find and access this project' },
+];
 
 const ProjectBlank = () => {
-    const [projectName, setProjectName] = useState();
-    const [projectUse, setProjectUse] = useState('To conduct initial testing or data analysis as part of a broader organizational initiative.');
+    const theme = useTheme();
+    const [projectName, setProjectName] = useState('');
     const [defaultView, setDefaultView] = useState('list');
+    const [privacy, setPrivacy] = useState('Public');
+    const { userData } = useSelector(state => state.auth);
 
     const handleViewChange = (event, newView) => {
         if (newView !== null) {
             setDefaultView(newView);
+        }
+    };
+
+    const handleSubmit = async () => {
+        const projectData = {
+            projectName,
+            visibility: privacy,
+            ownerId: userData._id,
+            membersId: [userData._id],
+        };
+
+        try {
+            const response = await createNew(projectData);
+            toast.success(response.message || 'Project created successfully!');
+            // Reset form state
+            setProjectName('');
+            setPrivacy('Public');
+            setDefaultView('list');
+        } catch (err) {
+            toast.error(err.response?.data.message || 'Error creating project!');
         }
     };
 
@@ -52,43 +81,38 @@ const ProjectBlank = () => {
                             InputProps={{
                                 sx: {
                                     height: '40px',
-                                    mt: "5px",
-                                    // Thêm box-shadow vào input
-                                    '& .MuiInputBase-root': {
-                                        boxShadow: '0 0 0 100px rgba(38, 103, 152, 0.5) inset', // Sử dụng rgba để điều chỉnh độ trong suốt
+                                    mt: '5px',
+                                    '& .MuiOutlinedInput-root': {
+                                        boxShadow: 'none',
+                                    },
+                                    '& input:-webkit-autofill': {
+                                        '-webkit-box-shadow': `0 0 0 100px ${theme.palette.background.default} inset !important`,
                                     },
                                 },
                             }}
-                            sx={{
-                                mb: 2,
-                            }}
+                            sx={{ mb: 2 }}
                         />
-
                     </Box>
                     <Box>
                         <FormLabel sx={{ color: 'text.secondary', fontWeight: 'bold' }} htmlFor="Privacy">Privacy</FormLabel>
                         <Box sx={{ mt: "5px" }}>
-                            <Select
-                                value="My workspace"
+                            <RoleSelect
+                                value={privacy}
+                                onChange={(e) => setPrivacy(e.target.value)}
+                                DB={roles}
                                 fullWidth
-                                displayEmpty
-                                renderValue={() => "My workspace"}
-                                sx={{ height: '40px' }}
-                            >
-                                <MenuItem value="My workspace">My workspace</MenuItem>
-                            </Select>
+                            />
                         </Box>
                     </Box>
 
-
-                    <Box  sx={{marginTop:'20px'}}>
-                        <FormLabel sx={{color: 'text.secondary', fontWeight: 'bold' }} htmlFor="Projectname">Default view</FormLabel>
+                    <Box sx={{ marginTop: '20px' }}>
+                        <FormLabel sx={{ color: 'text.secondary', fontWeight: 'bold' }} htmlFor="Projectname">Default view</FormLabel>
                         <ToggleButtonGroup
                             value={defaultView}
                             exclusive
                             onChange={handleViewChange}
                             aria-label="default view"
-                            sx={{marginTop:'10px'}}
+                            sx={{ marginTop: '10px' }}
                         >
                             <ToggleButton value="list" aria-label="list">
                                 <ListIcon /> List
@@ -104,7 +128,7 @@ const ProjectBlank = () => {
                             </ToggleButton>
                         </ToggleButtonGroup>
                     </Box>
-                    <Button variant="contained" fullWidth sx={{ mt: 3 }}>
+                    <Button variant="contained" fullWidth sx={{ mt: 3 }} onClick={handleSubmit}>
                         Create project
                     </Button>
                 </Box>
@@ -114,6 +138,7 @@ const ProjectBlank = () => {
                     </Paper>
                 </Box>
             </Box>
+            <ToastContainer /> {/* This is where notifications will be displayed */}
         </Box>
     );
 };

@@ -45,6 +45,7 @@ const theme = extendTheme({
                     50: '#4a4a4a',
                     100: '#aaa',
                     200: '#212121',
+                    500:'#ffffff1c',
                 },
                 text: {
                     primary: '#fff',   // Primary text color
