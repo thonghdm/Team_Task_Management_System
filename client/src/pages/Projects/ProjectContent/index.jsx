@@ -4,7 +4,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import TaskBoard from '~/pages/Projects/Content/TaskBoard';
 import Overview from '~/pages/Projects/Content/Overview';
-
+import Board from '~/pages/Projects/Content/Board';
+import mockData from '~/apis/mockData';
 const ProjectContent = () => {
     const theme = useTheme();
     return (
@@ -13,6 +14,7 @@ const ProjectContent = () => {
                 <Route path="/" element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<Overview />} />
                 <Route path="task-board" element={<TaskBoard />} />
+                <Route path="project-board" element={<Board board={mockData}/>} />
             </Routes>
         // </Paper>
     );

@@ -127,20 +127,21 @@ const Sidebar = ({ open }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
-  const { userData } = useSelector(state => state.auth)
+  const {accesstoken, userData } = useSelector(state => state.auth)
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const data = await getAllByOwnerId(userData._id);
+        const data = await getAllByOwnerId(accesstoken,userData._id);
         setProjects(data.projects); 
       } catch (err) {
         setError(err.message);
       }
     };
     fetchProjects();
-  }, []);
+  }, [accesstoken]);
+
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Toolbar />
