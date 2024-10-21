@@ -1,6 +1,5 @@
 const slugify = require('~/utils/formattersSlugify')
 const { Project } = require('~/models/ProjectSchema')
-
 const createNew = async (reqBody) => {
     try {
         const newProjectData = {
@@ -28,7 +27,7 @@ const getDetails = async (projectId) => {
 
 const getAllByOwnerId = async (ownerId) => {
     try {
-        const projects = await Project.find({ ownerId: ownerId })
+        const projects = await Project.find({ ownerId:  ownerId })
         if (!projects) {
             throw new Error('Project not found ownerId')
         }
@@ -38,4 +37,15 @@ const getAllByOwnerId = async (ownerId) => {
     }
 }
 
-module.exports = { createNew, getDetails, getAllByOwnerId }
+const getAllByMemberId = async (memberId) => {
+    try {
+        const projects = await Project.find({ membersId: memberId })
+        if (!projects || projects.length === 0) {
+            throw new Error('No projects found for this memberId')
+        }
+        return projects
+    } catch (error) {
+        throw new Error(error.message)
+    }
+}
+module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId }
