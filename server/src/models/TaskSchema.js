@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 
 const TaskSchema = new mongoose.Schema(
     {
-        project_id: { type: String, required: true }, // Ideally, use ObjectId if it's referencing a Project model
-        list_id: { type: String, required: true }, // Ideally, use ObjectId if it's referencing a List model
+        project_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Project' }, // Ideally, use ObjectId if it's referencing a Project model
+        list_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'List' }, // Ideally, use ObjectId if it's referencing a List model
         task_name: { type: String, required: true },
         description: { type: String },
         img: { type: String },
@@ -18,8 +18,8 @@ const TaskSchema = new mongoose.Schema(
             enum: ['Low', 'Medium', 'High'],
             default: 'Medium'
         },
-        assigned_to_id: [{ type: String }], // Consider using ObjectId if referencing a User model
-        created_by_id: { type: String, required: true }, // Consider using ObjectId
+        assigned_to_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Consider using ObjectId if referencing a User model
+        created_by_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },// Consider using ObjectId
         start_date: { type: Date },
         end_date: { type: Date },
         is_active: { type: Boolean, default: true },

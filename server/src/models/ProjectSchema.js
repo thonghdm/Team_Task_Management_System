@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-require('~/config/connectDB')
+
 const ProjectSchema = new mongoose.Schema({
     projectName: {
         type: String,
@@ -14,16 +14,23 @@ const ProjectSchema = new mongoose.Schema({
         type: String
     },
     ownerId: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
     },
     membersId: [
         {
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         }
     ],
     listId: {
-        type: [String],
+        type: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'List'
+            }
+        ],
         default: []
     },
     visibility: {
@@ -46,4 +53,4 @@ const ProjectSchema = new mongoose.Schema({
 
 const Project = mongoose.model('Project', ProjectSchema)
 
-module.exports = { Project }
+module.exports = Project
