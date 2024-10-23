@@ -30,6 +30,7 @@ const getDetails = async (projectId) => {
             resProject.lists.forEach(list => {
                 list.tasks = resProject.tasks.filter(task => task.list_id.toString() === list._id.toString())
             })
+            delete resProject.tasks
             return resProject
         }
         return projectDetails

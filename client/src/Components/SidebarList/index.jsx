@@ -14,10 +14,10 @@ const SidebarList = ({ linkData, isProject = false, color }) => {
         <ListItem key={item.projectName} disablePadding>
           <ListItemButton
             component={Link}
-            to={`/board/${item.slug}`}
-            selected={path === item.slug}
+            to={`/board/${item._id}`}
+            selected={path === item._id}
             sx={{
-              backgroundColor: path === item.slug ? 'rgba(255, 255, 255, 0.08)' : 'inherit',
+              backgroundColor: path === item._id ? 'rgba(255, 255, 255, 0.08)' : 'inherit',
               '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.08)',
               },

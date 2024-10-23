@@ -1,6 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, memo,useEffect } from 'react';
 import { Dialog, Box, DialogContent, DialogTitle, DialogActions, Button, List, ListItem, ListItemText, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import DueDatePicker from '~/Components/DueDatePicker';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux'
+import { createNew } from '~/apis/Project/listService'
+// import { createNew } from '~/apis/Project/taskService'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { getListIDProjectDetails } from '~/utils/getListIDProjectDetails';
+import { getProjectDetal } from '~/apis/Project/projectService'
 
 const DialogButtonAdd = ({ open, onClose }) => {
     const [addTaskDialogOpen, setAddTaskDialogOpen] = useState(false);
@@ -12,7 +21,10 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const [selectedList, setSelectedList] = useState('');
     const [startDate, setStartDate] = useState('');
     const [dueDate, setDueDate] = useState('');
-
+    
+    const { projectId } = useParams();
+    const [getNameIdList, setNameIdList] = useState(null);
+ 
     const handleAddTaskDialogOpen = () => {
         onClose();  // Đóng Dialog chính
         setAddTaskDialogOpen(true);
@@ -27,7 +39,17 @@ const DialogButtonAdd = ({ open, onClose }) => {
 
     const handleAddListDialogClose = () => setAddListDialogOpen(false);
 
+    // refresh token die
+    const refreshToken = useRefreshToken();
+    //
+
+    // bt add task
     const handleAddTask = () => {
+        // const taskData = {
+        //     task_name: newTaskName,
+        //     created_by_id: userData._id,
+        //     project_id: projectId,
+        // };
         if (newTaskName) {
             setTasks([...tasks, newTaskName]);
             setNewTaskName('');
@@ -35,13 +57,43 @@ const DialogButtonAdd = ({ open, onClose }) => {
         }
     };
 
-    const handleAddList = () => {
-        if (newListName) {
-            console.log(`New list added: ${newListName}`);
+    /// button submit add list
+    const handleAddList = async () => {
+        const listData = {
+            list_name: newListName,
+            created_by_id: userData._id,
+            project_id: projectId,
+        };
+        const resetFormState = () => {
             setNewListName('');
             handleAddListDialogClose();
+        };
+        const handleSuccess = (message) => {
+            toast.success(message || 'List created successfully!');
+            resetFormState();
+        };
+
+        const createList = async (token) => {
+            try {
+                const response = await createNew(token, listData);
+                handleSuccess(response.message);
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    const newToken = await refreshToken();
+                    return createList(newToken);
+                }
+                throw error;
+            }
+        };
+
+        try {
+            await createList(accesstoken);
+        } catch (error) {
+            toast.error(error.response?.data.message || 'Error creating list!');
         }
+
     };
+    ////
 
     return (
         <>
@@ -79,7 +131,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
                 open={addTaskDialogOpen}
                 onClose={handleAddTaskDialogClose}
                 maxWidth="sm"
-   
+
                 PaperProps={{
                     style: {
                         position: 'absolute',
@@ -133,6 +185,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
                 open={addListDialogOpen}
                 onClose={handleAddListDialogClose}
                 maxWidth="xs"
+                fullWidth
                 PaperProps={{
                     style: {
                         position: 'absolute',
@@ -153,15 +206,15 @@ const DialogButtonAdd = ({ open, onClose }) => {
                         onChange={(e) => setNewListName(e.target.value)}
                         placeholder="Enter list name..."
                     />
-                    <FormControl fullWidth variant="outlined" margin="normal">
-                        <InputLabel>Position</InputLabel>
-                        <Select
-                            value={8}
-                            label="Position"
-                        >
-                            <MenuItem value={8}>8</MenuItem>
-                        </Select>
-                    </FormControl>
+                    {/* <FormControl fullWidth variant="outlined" margin="normal">
+                            <InputLabel>Position</InputLabel>
+                            <Select
+                                value={8}
+                                label="Position"
+                            >
+                                <MenuItem value={8}>8</MenuItem>
+                            </Select>
+                        </FormControl> */}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleAddListDialogClose}>Cancel</Button>
@@ -170,8 +223,8 @@ const DialogButtonAdd = ({ open, onClose }) => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <ToastContainer />
         </>
     );
 };
-
-export default DialogButtonAdd;
+export default DialogButtonAdd
