@@ -21,9 +21,11 @@ import { useTheme } from '@mui/material/styles';
 import './styles.css';
 import ChangeList from './ChangeList';
 import ButtonAdd from './ChangeList/ButtonAdd';
-import { useProjects } from '~/pages/Projects/ProjectProvider';
 import { extractTasksInfo } from '~/utils/extractTasksInfo';
 import { formatDate } from '~/utils/formattedDate';
+import { getProjectDetal } from '~/apis/Project/projectService'
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux'
 
 
 
@@ -36,20 +38,23 @@ const TaskBoard = () => {
   const theme = useTheme();
 
   ////
-  const projects = useProjects();
   const [getTasksInfo, setTasksInfo] = useState([]);
+  const { projectId } = useParams();
+  const { accesstoken, userData } = useSelector(state => state.auth)
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const dataConverter = extractTasksInfo(projects);
+        const data = await getProjectDetal(accesstoken, projectId);
+        console.log(data.project);
+        const dataConverter = extractTasksInfo(data.project);
         setTasksInfo(dataConverter);
       } catch (err) {
         setError(err.message);
       }
     };
     fetchProjects();
-  }, [projects]);
+  }, [accesstoken,projectId]);
   console.log(getTasksInfo);
   ///
 

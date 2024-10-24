@@ -44,10 +44,9 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 const roles = [
-    { value: 'admin', label: 'Project admin', description: 'Full access to change settings, modify, or delete the project.' },
-    { value: 'editor', label: 'Editor', description: 'Can add, edit, and delete anything in the project.' },
-    { value: 'commenter', label: 'Commenter', description: "Can comment, but can't edit anything in the project." },
-    { value: 'viewer', label: 'Viewer', description: "Can view, but can't add comments or edit the project." },
+    { value: 'admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
+    { value: 'member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.'},
+    { value: 'viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
 ];
 
 const StyledButton = styled(Button)(({ theme }) => ({
@@ -64,9 +63,9 @@ const DialogAvt = ({ open, onClose, projectName }) => {
     const [accessSetting, setAccessSetting] = useState('private');
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const [inviteRole, setInviteRole] = useState('editor');
-    const [taskCollaborators, setTaskCollaborators] = useState('editor');
-    const [MyWorkspace, setMyWorkspace] = useState('editor');
+    const [inviteRole, setInviteRole] = useState('member');
+    const [taskCollaborators, setTaskCollaborators] = useState('member');
+    const [MyWorkspace, setMyWorkspace] = useState('member');
 
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const handleCloseAlert = () => {

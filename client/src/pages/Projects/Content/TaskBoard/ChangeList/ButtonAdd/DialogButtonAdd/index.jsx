@@ -44,7 +44,8 @@ const DialogButtonAdd = ({ open, onClose }) => {
             }
         };
         fetchProjects();
-    }, [accesstoken, projectId]);
+    }, [accesstoken, projectId,newTaskName,newListName]);
+
     const handleAddTaskDialogOpen = () => {
         onClose();  // Đóng Dialog chính
         setAddTaskDialogOpen(true);
