@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Box,
   Table,
@@ -21,11 +21,151 @@ import { useTheme } from '@mui/material/styles';
 import './styles.css';
 import ChangeList from './ChangeList';
 import ButtonAdd from './ChangeList/ButtonAdd';
-import { useProjects } from '~/pages/Projects/ProjectProvider';
-import { extractTasksInfo } from '~/utils/extractTasksInfo';
-import { formatDate } from '~/utils/formattedDate';
+
+const tasks = [
+  {
+    id: 1,
+    name: '[Example taskExample taskExample taskExakExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample tasmple taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExaExample taskExample taskExample taskExample taskExample taskmple taskExample taskExample taskExample task]',
+    list: 'Completed',
+    labels: [],
+    members: [
+      { name: 'John Doe', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
+      { name: 'Jane Smith', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
+      { name: 'John Doe', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
+      { name: 'Jane Smith', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
+      { name: 'John Doe', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
+      { name: 'Jane Smith', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' }
+    ],
+    dueDate: '12/12/2023',
+    state: 'Completed',
+    comment: 5
+  },
+  {
+    id: 2,
+    name: 'Backlog',
+    list: 'Backlog',
+    labels: [],
+    members: [],
+    dueDate: '12/12/2023',
+    state: 'In Progress',
+    comment: 5
+  },
+  {
+    id: 3,
+    name: '[Example task]',
+    list: 'Backlog',
+    labels: [],
+    members: [],
+    dueDate: '12/12/2023',
+    state: 'In Progress',
+    comment: 5
+  },
+  {
+    id: 4,
+    name: 'Design & Research',
+    list: 'Design',
+    labels: [],
+    members: [],
+    dueDate: '12/10/2023',
+    state: 'Completed',
+    comment: 5
+  },
+  {
+    id: 5,
+    name: '[Example task with designs]',
+    list: 'Design',
+    labels: [],
+    members: [],
+    dueDate: '12/10/2023',
+    state: 'Completed',
+    comment: 5
+  },
+  {
+    id: 6,
+    name: 'To Do',
+    list: 'To Do',
+    labels: [],
+    members: [],
+    dueDate: '12/10/2025',
+    state: 'In Progress',
+    comment: 5
+  },
+  {
+    id: 7,
+    name: 'Doing',
+    list: 'Doing',
+    labels: [],
+    members: [],
+    dueDate: '12/10/2025',
+    state: 'Completed',
+    comment: 5
+  },
+  {
+    id: 8,
+    name: '[Example task]',
+    list: 'Doing',
+    labels: [
+      { name: 'To Do', color: 'red' },
+      { name: 'To Do', color: 'red' },
+      { name: 'To Do', color: 'red' },
+      { name: 'To Do', color: 'red' }
+    ],
+    members: [],
+    dueDate: '12/10/2025',
+    state: 'Completed',
+    comment: 5
+  },
+  {
+    id: 9,
+    name: 'Code Review',
+    list: 'Code Review',
+    labels: [],
+    members: [],
+    dueDate: '12/10/2025',
+    state: 'To Do',
+    comment: 5
+  },
+  {
+    id: 11,
+    name: '[Example task]',
+    list: 'Code Review',
+    labels: [],
+    members: [],
+    dueDate: '12/10/2025',
+    state: 'To Do',
+    comment: 5
+  },
+  {
+    id: 12,
+    name: '[Example taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExample taskExaExample taskExample taskExample taskExample taskExample taskmple taskExample taskExample taskExample task]',
+    list: 'Code Review',
+    labels: [],
+    members: [],
+    dueDate: '12/10/2025',
+    state: 'To Do',
+    comment: 5
+  },
+  {
+    id: 13,
+    name: 'Testing',
+    list: '',
+    labels: [],
+    members: [],
+    dueDate: '',
+    state: '',
+    comment: 5
+  }
+];
 
 
+const updatedTasks = tasks.map(task => ({
+  ...task,
+  name: task.name || '.',
+  list: task.list || '.',
+  labels: task.labels.length === 0 ? ['.'] : task.labels,
+  members: task.members.length === 0 ? [{ name: '.', avatar: '' }] : task.members,
+  dueDate: task.dueDate || '.'
+}));
 
 const TaskBoard = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -33,36 +173,9 @@ const TaskBoard = () => {
 
   const [showNameMenu, setShowNameMenu] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+
+
   const theme = useTheme();
-
-  ////
-  const projects = useProjects();
-  const [getTasksInfo, setTasksInfo] = useState([]);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const dataConverter = extractTasksInfo(projects);
-        setTasksInfo(dataConverter);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    fetchProjects();
-  }, [projects]);
-  console.log(getTasksInfo);
-  ///
-
-
-  const updatedTasks = getTasksInfo.map(task => ({
-    ...task,
-    name: task.name || '.',
-    list: task.list || '.',
-    labels: task.labels.length === 0 ? ['.'] : task.labels,
-    comments: task.comments.length === 0 ? 0 : task.comments.length,
-    members: task.members.length === 0 ? [{ name: '.', avatar: '' }] : task.members,
-    dueDate: task.dueDate || '.'
-  }));
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -103,7 +216,7 @@ const TaskBoard = () => {
     const handleClick = () => {
       console.log(cellId);
       switch (cellId) {
-        case 'task_name':
+        case 'name':
           handleNameClick(taskId, cellId);
           break;
         default:
@@ -193,7 +306,7 @@ const TaskBoard = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {updatedTasks.map((task, index) => (
+              {updatedTasks.map((task) => (
                 <TableRow
                   key={task.id}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -240,23 +353,23 @@ const TaskBoard = () => {
                         </IconButton>
                       </Tooltip>
                     )}
-                    {index + 1} {/* Display the sequence number instead of task.id */}
+                    {task.id}
                   </TableCell>
                   {renderTableCell(
                     <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                      {task.task_name.length > 50 ? `${task.task_name.slice(0, 50)}...` : task.task_name}
+                      {task.name.length > 50 ? `${task.name.slice(0, 50)}...` : task.name}
                     </Box>,
                     task.id,
-                    'task_name',
-                    !task.task_name || task.task_name === '.',
+                    'name',
+                    !task.name || task.name === '.',
                   )
                   }
 
-                  {renderTableCell(task.list_name, task.id, 'list_name', !task.list_name || task.list_name === '.')}
+                  {renderTableCell(task.list, task.id, 'list', !task.list || task.list === '.')}
 
                   {renderTableCell(
                     <Box sx={{ display: 'flex' }}>
-                      {task.status && task.status !== '.' ? (
+                      {task.state && task.state !== '.' ? (
                         <Box
                           sx={{
                             width: 10,
@@ -264,9 +377,9 @@ const TaskBoard = () => {
                             mt: '4px',
                             borderRadius: '50%',
                             marginRight: 1,
-                            backgroundColor: task.status === 'Completed'
+                            backgroundColor: task.state === 'Completed'
                               ? 'green'
-                              : task.status === 'To Do'
+                              : task.state === 'To Do'
                                 ? 'red'
                                 : 'yellow'
                           }}
@@ -283,11 +396,11 @@ const TaskBoard = () => {
                           }}
                         />
                       )}
-                      {task.status || '.'}
+                      {task.state || '.'}
                     </Box>,
                     task.id,
-                    'status',
-                    !task.status || task.status === '.'
+                    'state',
+                    !task.state || task.state === '.'
                   )}
 
                   {renderTableCell(
@@ -356,11 +469,11 @@ const TaskBoard = () => {
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <QuestionAnswerIcon sx={{ marginRight: 1, fontSize: 'small' }} />
-                      {task.comments}
+                      {task.comment}
                     </Box>
                   </TableCell>
 
-                  {renderTableCell(formatDate(task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
+                  {renderTableCell(task.dueDate || '.', task.id, 'dueDate', !task.dueDate || task.dueDate === '.')}
 
                 </TableRow>
               ))}

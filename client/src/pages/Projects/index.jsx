@@ -10,7 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DialogAvt from '~/pages/Projects/DialogAvt';
 import { getProjectDetal } from '~/apis/Project/projectService'
 import { useDispatch, useSelector } from 'react-redux'
-
+import ProjectProvider from './ProjectProvider';
 const users = [
   { name: 'LV', imageUrl: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
   { name: 'JD', imageUrl: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
@@ -43,8 +43,6 @@ const Projects = () => {
     fetchProjects();
   }, [accesstoken, projectId]);
 
-  console.log(projects)
-
   const [isClicked, setIsClicked] = useState(false);
   const handleAvatarGroupClick = () => {
     setDialogOpen(true);
@@ -66,6 +64,7 @@ const Projects = () => {
   const isBoardActive = location.pathname.endsWith('/project-board');
 
   return (
+    <ProjectProvider projects={projects}>
       <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: 'calc(100vh - 64px)' }}>
         <Paper elevation={3} sx={{ p: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -169,6 +168,7 @@ const Projects = () => {
         />
 
       </Box>
+    </ProjectProvider>
   );
 };
 

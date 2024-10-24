@@ -1,5 +1,4 @@
 export function getListIDProjectDetails(projectData) {
-    console.log('getListIDProjectDetails',projectData)
     const project = projectData.project;
     const projectId = project._id;
     const projectName = project.projectName;

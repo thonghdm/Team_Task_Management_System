@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const createNew = async (accesstoken, taskData) => {
+export const createNewTask = async (accesstoken, taskData) => {
     try {
         const response = await axios.post('http://localhost:5000/api/task/by-owner', taskData, {
             headers: {
