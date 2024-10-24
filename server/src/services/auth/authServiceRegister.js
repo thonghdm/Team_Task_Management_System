@@ -34,13 +34,20 @@ const authServiceRegister = {
         try {
             // Check if email already exists
             const existingUser = await User.findOne({ email: userData.email })
-            console.log(userData)
-            if (existingUser) {
+            console.log(existingUser)
+            if (existingUser&&existingUser.password) {
+                console.log('Email already exists')
                 return { error: 'Email already exists' }
             }
 
             const salt = await bcrypt.genSalt(10)
             const hashed = await bcrypt.hash(userData.password, salt)
+            if (existingUser)
+            {
+                existingUser.password = hashed
+                await existingUser.save()
+                return { user: existingUser }
+            }
 
             const newUser = new User({
                 displayName: userData.name,

@@ -16,7 +16,7 @@ passport.use(new GoogleStrategy({
             let user = await User.findOne({ googleId: profile.id })
 
             if (!user) {
-                user = await User.findOne({ email: profile.emails[0]?.value, googleId: '' })
+                user = await User.findOne({ email: profile.emails[0]?.value, googleId: { $exists: false } })
 
                 if (user) {
                     user.googleId = profile.id

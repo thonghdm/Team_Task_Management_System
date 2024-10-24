@@ -1,32 +1,24 @@
-import { apiLoginSuccess, apiLoginWithEmail, apiRegisterWithEmail} from '~/apis/Auth/authService';
+import { apiLoginSuccess, apiLoginWithEmail, apiRegisterWithEmail, apiLogOut} from '~/apis/Auth/authService';
 import actionTypes from './actionTypes'
-import {apiGetOne} from '~/apis/User/userService';
 
 export const loginSuccess = (id, tokenLogin) => async (dispatch) => {
     try {
         let response = await apiLoginSuccess(id, tokenLogin)
         if (response?.data.err === 0) {
-            let accesstoken = response.data.accesstoken;
-            let googleData = await apiGetOne(accesstoken);  
-            if (googleData?.data.err === 0) {
-                dispatch({
-                    type: actionTypes.LOGIN_SUCCESS,
-                    data: {
-                        accesstoken,
-                        userData: googleData.data.response  // Store Google user data here
-                    }
-                });
-            }
+            dispatch({
+                type: actionTypes.LOGIN_SUCCESS,
+                data: response.data
+            })
         } else {
             dispatch({
-                type: actionTypes.LOGIN_FAILURE,
-                error: response.data.msg || 'Login failed'
+                type: actionTypes.LOGIN_SUCCESS,
+                data: null
             })
         }
     } catch (error) {
         dispatch({
-             type: actionTypes.LOGIN_FAILURE,
-            error: error.message || 'Login failed'
+            type: actionTypes.LOGIN_SUCCESS,
+            data: null
         })
     }
 }

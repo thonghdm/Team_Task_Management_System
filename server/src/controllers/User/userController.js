@@ -16,7 +16,28 @@ const getOne = async (req, res) => {
         })
     }
 }
+const updateUser = async (req, res) => {
+    const { currentUser } = req
+    try {
+        if (!currentUser?._id) res.status(400).json({
+            err: 1,
+            msg: 'Missing inputs'
+        })
+        const updates= { ...req.body }
+        if (req.file) {
+            updates.image = req.file.path
+        }
+        let response = await userService.updateService(currentUser?._id, updates)
+        res.status(200).json(response)
 
+    } catch (error) {
+        res.status(500).json({
+            err: -1,
+            msg: 'Fail at user controller ' + error
+        })
+    }
+}
 module.exports = {
-    getOne
+    getOne,
+    updateUser
 }

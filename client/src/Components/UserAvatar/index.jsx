@@ -23,6 +23,7 @@ import ModeSelect from '../ModeSelect';
 import { apiGetOne } from '~/apis/User/userService'
 import { apiLogOut, apiRefreshToken } from '~/apis/Auth/authService'
 import actionTypes from '~/redux/actions/actionTypes'
+import Profile from '~/pages/Profile';
 
 const UserAvatar = () => {
   const navigate = useNavigate();
@@ -68,6 +69,9 @@ const UserAvatar = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const ProfileHandle = () => {
+    navigate('/profile');
+  };
 
   const logoutHandler = async () => {
     console.log("logout");
@@ -94,7 +98,6 @@ const UserAvatar = () => {
               fontSize: 16
             }}
             src={data?.image ? data?.image : undefined}  // Set the image if available
-            referrerpolicy="no-referrer"
           >
             {!data?.image && data?.displayName}  {/* Display initials if no image */}
           </Avatar>
@@ -161,7 +164,7 @@ const UserAvatar = () => {
         <ModeSelect />
         <Divider />
 
-        <MenuItem>
+        <MenuItem onClick={ProfileHandle}>
           <ListItemText>Profile</ListItemText>
         </MenuItem>
         <MenuItem>
