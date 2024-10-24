@@ -3,7 +3,9 @@ const User = require('~/models/user') // Import the Mongoose user model
 const getOneService = (id) => new Promise((resolve, reject) => {
     (async () => {
         try {
-            const response = await User.findOne({ _id: id }).lean()
+            const response = await User.findOne({ _id: id })
+                .select('_id email displayName image isAdmin is_active createdAt')
+                .lean()
             resolve({
                 err: response ? 0 : 4,
                 msg: response ? 'OK' : 'User not found!',

@@ -21,6 +21,9 @@ import Error from './pages/Error'
 import ResetPassword from '~/pages/Auth/ResetPassword'
 import NewPassword from '~/pages/Auth/ResetPassword/NewPassword'
 import Profile from '~/pages/Profile'
+import AddProjects from '~/pages/Projects/AddProjects';
+import ProjectTemplate from '~/pages/Projects/AddProjects/ProjectTemplate';
+import ProjectsBlank from './pages/Projects/AddProjects/ProjectsBlank'
 
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
@@ -79,6 +82,8 @@ function App() {
         <Route path='/profile' element={<Profile />} />
         <Route path='/login-success/:userId/:tokenLogin' element={<LoginSuccess />} />
         <Route path='/board/*' element={<Boards />} />
+        <Route path="/projects-new" element={<AddProjects />} />
+        <Route path="/projects-new/blank" element={<ProjectsBlank />} />
       </Routes>
 
     </AuthProvider>
