@@ -2,7 +2,7 @@ import React from 'react';
 import { Paper } from '@mui/material';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import List from '~/pages/Projects/Content/List';
+import TaskBoard from '~/pages/Projects/Content/TaskBoard';
 import Overview from '~/pages/Projects/Content/Overview';
 
 const ProjectContent = () => {
@@ -12,7 +12,7 @@ const ProjectContent = () => {
             <Routes>
                 <Route path="/" element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<Overview />} />
-                <Route path="list" element={<List />} />
+                <Route path="task-board" element={<TaskBoard />} />
             </Routes>
         // </Paper>
     );

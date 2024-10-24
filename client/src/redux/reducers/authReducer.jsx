@@ -15,8 +15,15 @@ const authReducer = (state = initState, action) => {
                 ...state,
                 isLoggedIn: action.data ? true : false,
                 typeLogin: false,
-                accesstoken: action.data.accesstoken
+                accesstoken: action.data.accesstoken,
+                userData: action.data.userData,  // Store user data (Google or email)
+                error: null,
             }
+        case actionTypes.LOGIN_FAILURE:
+            return {
+                ...initState,
+                error: action.error
+            };
         case actionTypes.LOGOUT:
             return {
                 ...initState
@@ -45,6 +52,18 @@ const authReducer = (state = initState, action) => {
                 userData: action.userData || {},  // Update userData
             };
         case actionTypes.USER_REGISTER_FAILURE:
+            return {
+                ...state,
+                userData: {},  // Reset userData
+                error: action.error,
+            };
+        case actionTypes.USER_UPDATE_SUCCESS:
+            return {
+                ...state,
+                userData: action.data.userData || {},  // Update userData
+                
+            };
+        case actionTypes.USER_UPDATE_FAILURE:
             return {
                 ...state,
                 userData: {},  // Reset userData

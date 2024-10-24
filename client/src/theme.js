@@ -15,7 +15,7 @@ const theme = extendTheme({
                     contrastText: '#00c1c1',
                 },
                 background: {
-                    default: '#f5f5f5',
+                    default: '#f2f2f2',
                     paper: '#fff',
                 },
                 grey: {
@@ -26,6 +26,7 @@ const theme = extendTheme({
                 text: {
                     primary: '#000',   // Primary text color
                     secondary: '#4d4d4d', // Secondary text color
+                    disabled: '#e5e5e5',    // Disabled text color
                 },
             },
         },
@@ -48,6 +49,7 @@ const theme = extendTheme({
                 text: {
                     primary: '#fff',   // Primary text color
                     secondary: '#8c8c8c', // Secondary text color
+                    disabled: '#373737',    // Disabled text color
                 },
             },
         },
@@ -63,21 +65,21 @@ const theme = extendTheme({
         MuiInputLabel: {
             styleOverrides: {
                 root: ({ theme }) => ({
-                    color: theme.palette.primary.main,
+                    color: theme.palette.text.primary,
                 }),
             },
         },
         MuiOutlinedInput: {
             styleOverrides: {
                 root: ({ theme }) => ({
-                    color: theme.palette.primary.main,
+                    color: theme.palette.text.primary,
                     fontSize: '0.875rem',
                     '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: theme.palette.primary.light,
+                        borderColor: theme.palette.text.primary,
                     },
                     '&:hover': {
                         '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: theme.palette.primary.main,
+                            borderColor: theme.palette.secondary.contrastText,
                         },
                     },
                     '& fieldset': {

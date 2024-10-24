@@ -62,12 +62,12 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                 }
 
                 const newAccessToken = token.generateAccessToken(user._id, user.email)
-
                 resolve({
                     err: 0,
                     msg: 'New tokens generated successfully',
                     token: newAccessToken,
-                    refreshToken
+                    refreshToken,
+                    userData: user
                 })
             })
         } catch (error) {

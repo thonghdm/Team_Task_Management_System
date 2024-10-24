@@ -30,23 +30,17 @@ const UserAvatar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const dispatch = useDispatch();
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
-  const [userDataGG, setUserData] = useState({})
   useEffect(() => {
     const fetchUser = async () => {
       try {
         let response = await apiGetOne(accesstoken)
-        if (response?.data.err === 0) {
-          setUserData(response.data?.response)
-        } else {
-          setUserData({})
-        }
       } catch (error) {
         if (error.status === 401) {
           try {
             const response = await apiRefreshToken();
             dispatch({
               type: actionTypes.LOGIN_SUCCESS,
-              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken }
+              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userData }
             })
           }
           catch (error) {
@@ -60,20 +54,13 @@ const UserAvatar = () => {
             }
           }
         } else {
-          setUserData({})
           console.log(error.message);
         }
       }
     }
     if(isLoggedIn) {fetchUser()}
   }, [isLoggedIn, accesstoken, typeLogin])
-  let data = {}
-  if (isLoggedIn) {
-    data = typeLogin ? userData : userDataGG
-    console.log(data?.image);
-  }
-  console.log('data',data.image)
-
+  let data = isLoggedIn ? userData : {};
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);

@@ -1,10 +1,9 @@
-import { apiLoginSuccess, apiLoginWithEmail, apiRegisterWithEmail} from '~/apis/Auth/authService';
+import { apiLoginSuccess, apiLoginWithEmail, apiRegisterWithEmail, apiLogOut} from '~/apis/Auth/authService';
 import actionTypes from './actionTypes'
 
 export const loginSuccess = (id, tokenLogin) => async (dispatch) => {
     try {
         let response = await apiLoginSuccess(id, tokenLogin)
-        console.log('loginSuccess',response)
         if (response?.data.err === 0) {
             dispatch({
                 type: actionTypes.LOGIN_SUCCESS,

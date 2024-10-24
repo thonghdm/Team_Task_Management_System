@@ -19,24 +19,18 @@ const Homes = () => {
   const theme = useTheme();
   const dispatch = useDispatch()
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
-  const [userDataGG, setUserData] = useState({})
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        let response = await apiGetOne(accesstoken)
-        if (response?.data.err === 0) {
-          setUserData(response.data?.response)
-        } else {
-          setUserData({})
-        }
+        // let response = await apiGetOne(accesstoken)
       } catch (error) {
         if (error.status === 401) {
           try {
             const response = await apiRefreshToken();
             dispatch({
               type: actionTypes.LOGIN_SUCCESS,
-              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userWithToken }
+              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userData }
             })
           }
           catch (error) {
@@ -50,17 +44,13 @@ const Homes = () => {
             }
           }
         } else {
-          setUserData({})
           console.log(error.message);
         }
       }
     }
     if(isLoggedIn) {fetchUser()}
   }, [isLoggedIn, accesstoken, typeLogin])
-  let data = {}
-  if (isLoggedIn) {
-    data = typeLogin ? userData : userDataGG
-  }
+  let data = isLoggedIn ? userData : {};
 
   // const [timeOfDay, setTimeOfDay] = useState(getTimeOfDay());
   // const [date, setDate] = useState(formattedDate);
