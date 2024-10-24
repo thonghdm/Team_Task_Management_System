@@ -34,6 +34,11 @@ const UserAvatar = () => {
     const fetchUser = async () => {
       try {
         let response = await apiGetOne(accesstoken)
+        dispatch({
+          type: actionTypes.UPDATE_USER_DATA,
+          data: { typeLogin: true, userData: response.data.response }
+        })
+        console.log('data', response.data.response);
       } catch (error) {
         if (error.status === 401) {
           try {
@@ -58,10 +63,10 @@ const UserAvatar = () => {
         }
       }
     }
-    if(isLoggedIn) {fetchUser()}
+    if(isLoggedIn && accesstoken) {fetchUser()}
   }, [isLoggedIn, accesstoken, typeLogin])
   let data = isLoggedIn ? userData : {};
-
+  console.log('11',data);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
