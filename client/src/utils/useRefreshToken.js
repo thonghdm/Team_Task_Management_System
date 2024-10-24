@@ -1,32 +1,44 @@
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { apiLogOut, apiRefreshToken } from '~/apis/Auth/authService'
-import actionTypes from '~/redux/actions/actionTypes'
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { apiRefreshToken } from "~/apis/Auth/authService";
+import { loginSuccess, logout } from "~/redux/features/auth/authSlice";
 
 export const useRefreshToken = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const refreshToken = async () => {
-        try {
-            const { data: { token, userData } } = await apiRefreshToken();
-            dispatch({
-                type: actionTypes.LOGIN_SUCCESS,
-                data: { accesstoken: token, typeLogin: true, userData },
-            });
-            return token;
-        } catch (refreshError) {
-            if (refreshError.response?.status === 403) {
-                toast.error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
-                dispatch({ type: actionTypes.LOGOUT });
-                navigate('/');
-            } else {
-                toast.error(refreshError.response?.data.message || 'Error refreshing token!');
-            }
-            throw refreshError;
-        }
-    };
+  const refreshToken = async () => {
+    try {
+      const {
+        data: { token, userData },
+      } = await apiRefreshToken();
 
-    return refreshToken;
+      const result = await dispatch(
+        loginSuccess({
+          tokenLogin: token,
+          id: userData.id,
+        })
+      );
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      return token;
+    } catch (refreshError) {
+      if (refreshError.response?.status === 403) {
+        toast.error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+        await dispatch(logout());
+        navigate("/");
+      } else {
+        toast.error(
+          refreshError.response?.data.message || "Error refreshing token!"
+        );
+      }
+      throw refreshError;
+    }
+  };
+
+  return refreshToken;
 };

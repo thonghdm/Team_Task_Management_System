@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Avatar,
   Menu,
@@ -11,55 +11,64 @@ import {
   Typography,
   Divider,
   Box,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Person as PersonIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   QuestionMark as QuestionMarkIcon,
   Add as AddIcon,
-} from '@mui/icons-material';
-import ModeSelect from '../ModeSelect';
-import { apiGetOne } from '~/apis/User/userService'
-import { apiLogOut, apiRefreshToken } from '~/apis/Auth/authService'
-import actionTypes from '~/redux/actions/actionTypes'
-import Profile from '~/pages/Profile';
+} from "@mui/icons-material";
+import ModeSelect from "../ModeSelect";
+import { apiGetOne } from "~/apis/User/userService";
+import { apiRefreshToken } from "~/apis/Auth/authService";
+import { logout, loginSuccess } from "~/redux/features/auth/authSlice";
+import Profile from "~/pages/Profile";
 
 const UserAvatar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const dispatch = useDispatch();
-  const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
+  const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(
+    (state) => state.auth
+  );
+  console.log(isLoggedIn, typeLogin, accesstoken, userData);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        let response = await apiGetOne(accesstoken)
+        let response = await apiGetOne(accesstoken);
       } catch (error) {
         if (error.status === 401) {
           try {
             const response = await apiRefreshToken();
-            dispatch({
-              type: actionTypes.LOGIN_SUCCESS,
-              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userData }
-            })
-          }
-          catch (error) {
+            dispatch(
+              loginSuccess({
+                data: {
+                  accesstoken: response.data.token,
+                  typeLogin: true,
+                  userData: response.data.userData,
+                },
+              })
+            );
+          } catch (error) {
             console.log("error", error);
             if (error.status === 403) {
               alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
-              dispatch({
-                type: actionTypes.LOGOUT,
-              });
-              navigate('/');
+              dispatch(logout());
+              navigate("/");
             }
           }
         } else {
           console.log(error.message);
         }
       }
+    };
+    if (isLoggedIn) {
+      fetchUser();
     }
-    if(isLoggedIn) {fetchUser()}
-  }, [isLoggedIn, accesstoken, typeLogin])
+  }, [isLoggedIn, accesstoken, typeLogin]);
+
   let data = isLoggedIn ? userData : {};
 
   const handleClick = (event) => {
@@ -69,39 +78,38 @@ const UserAvatar = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   const ProfileHandle = () => {
-    navigate('/profile');
+    navigate("/profile");
   };
 
   const logoutHandler = async () => {
     console.log("logout");
     try {
-      const response = await apiLogOut();
-      dispatch({
-        type: actionTypes.LOGOUT,
-      });
-      navigate('/');
+      dispatch(logout());
+      navigate("/");
     } catch (error) {
       handleClose();
-    };
+    }
   };
+
   return (
     <div>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
         <IconButton onClick={handleClick}>
           <Avatar
             sx={{
               width: 32,
               height: 32,
-              bgcolor: 'warning.main',
-              color: 'warning.contrastText',
-              fontSize: 16
+              bgcolor: "warning.main",
+              color: "warning.contrastText",
+              fontSize: 16,
             }}
-            src={data?.image ? data?.image : undefined}  // Set the image if available
+            src={data?.image ? data?.image : undefined} // Set the image if available
           >
-            {!data?.image && data?.displayName}  {/* Display initials if no image */}
+            {!data?.image && data?.displayName}{" "}
+            {/* Display initials if no image */}
           </Avatar>
-
         </IconButton>
       </Box>
       <Menu
@@ -112,33 +120,36 @@ const UserAvatar = () => {
           elevation: 0,
           sx: {
             width: 300,
-            maxWidth: '100%',
-            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            maxWidth: "100%",
+            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
             mt: 1.5,
-            bgcolor: 'background.paper',
-            color: 'text.primary',
+            bgcolor: "background.paper",
+            color: "text.primary",
           },
         }}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         <MenuItem sx={{ py: 2, px: 2 }}>
           <Avatar
             sx={{
               width: 48,
               height: 48,
-              bgcolor: 'warning.main',
-              color: 'warning.contrastText',
+              bgcolor: "warning.main",
+              color: "warning.contrastText",
               fontSize: 20,
-              mr: 2
+              mr: 2,
             }}
-            src={data?.image ? data?.image : undefined}  // Set the image if available
+            src={data?.image ? data?.image : undefined} // Set the image if available
           >
-            {!data?.image && data?.displayName}  {/* Display initials if no image */}
+            {!data?.image && data?.displayName}{" "}
+            {/* Display initials if no image */}
           </Avatar>
           <Box>
             <Typography variant="subtitle1">{data?.displayName}</Typography>
-            <Typography variant="body2" color="text.primary">{data?.email}</Typography>
+            <Typography variant="body2" color="text.primary">
+              {data?.email}
+            </Typography>
           </Box>
         </MenuItem>
         <Divider />
