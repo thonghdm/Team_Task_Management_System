@@ -10,7 +10,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DialogAvt from '~/pages/Projects/DialogAvt';
 import { getProjectDetal } from '~/apis/Project/projectService'
 import { useDispatch, useSelector } from 'react-redux'
-import ProjectProvider from './ProjectProvider';
+import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
+
 const users = [
   { name: 'LV', imageUrl: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
   { name: 'JD', imageUrl: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
@@ -24,25 +25,16 @@ const Projects = () => {
   const { projectId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-
-  //ferch data project
-
-  const [projects, setProjects] = useState([]);
-  const { accesstoken, userData } = useSelector(state => state.auth)
-  const [error, setError] = useState(null);
-
+  const { accesstoken } = useSelector(state => state.auth)
+  const dispatch = useDispatch();
+  const { projectData} = useSelector((state) => state.projectDetail);
+  
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const data = await getProjectDetal(accesstoken, projectId);
-        setProjects(data.project); // Update based on response structure
-      } catch (err) {
-        setError(err.message);
-      }
+    dispatch(fetchProjectDetail({ accesstoken, projectId }));
+    return () => {
+      dispatch(resetProjectDetail());
     };
-    fetchProjects();
-  }, [accesstoken, projectId]);
-
+  }, [dispatch, projectId]);
   const [isClicked, setIsClicked] = useState(false);
   const handleAvatarGroupClick = () => {
     setDialogOpen(true);
@@ -64,12 +56,11 @@ const Projects = () => {
   const isBoardActive = location.pathname.endsWith('/project-board');
 
   return (
-    <ProjectProvider projects={projects}>
       <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: 'calc(100vh - 64px)' }}>
         <Paper elevation={3} sx={{ p: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', }}>
-              <Typography variant="h6">{projects.projectName}</Typography>
+            {projectData && <Typography variant="h6">{projectData.projectName}</Typography>}
               <IconButton
                 sx={{ color: isClicked ? 'gold' : 'text.primary', ml: 1 }}
                 onClick={handleIconClick}
@@ -168,7 +159,6 @@ const Projects = () => {
         />
 
       </Box>
-    </ProjectProvider>
   );
 };
 

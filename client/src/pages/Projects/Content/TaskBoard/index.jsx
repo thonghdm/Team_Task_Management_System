@@ -21,7 +21,6 @@ import { useTheme } from '@mui/material/styles';
 import './styles.css';
 import ChangeList from './ChangeList';
 import ButtonAdd from './ChangeList/ButtonAdd';
-import { useProjects } from '~/pages/Projects/ProjectProvider';
 import { extractTasksInfo } from '~/utils/extractTasksInfo';
 import { formatDate } from '~/utils/formattedDate';
 
@@ -36,21 +35,20 @@ const TaskBoard = () => {
   const theme = useTheme();
 
   ////
-  const projects = useProjects();
   const [getTasksInfo, setTasksInfo] = useState([]);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const dataConverter = extractTasksInfo(projects);
-        setTasksInfo(dataConverter);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    fetchProjects();
-  }, [projects]);
-  console.log(getTasksInfo);
+  // useEffect(() => {
+  //   const fetchProjects = async () => {
+  //     try {
+  //       const dataConverter = extractTasksInfo(projects);
+  //       setTasksInfo(dataConverter);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     }
+  //   };
+  //   fetchProjects();
+  // }, [projects]);
+  // console.log(getTasksInfo);
   ///
 
 
