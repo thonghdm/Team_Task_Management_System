@@ -15,10 +15,10 @@ export default function ButtonAdd() {
         setOpen(false);
     };
     // 
-
     return (
         <>
             <Button
+                type="button"
                 variant="outlined"
                 startIcon={<AddIcon />}
                 sx={{

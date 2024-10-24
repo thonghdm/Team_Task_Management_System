@@ -1,6 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, memo, useEffect } from 'react';
 import { Dialog, Box, DialogContent, DialogTitle, DialogActions, Button, List, ListItem, ListItemText, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import DueDatePicker from '~/Components/DueDatePicker';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux'
+import { createNew } from '~/apis/Project/listService'
+import { createNewTask } from '~/apis/Project/taskService'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { getListIDProjectDetails } from '~/utils/getListIDProjectDetails';
+import { getProjectDetal } from '~/apis/Project/projectService'
 
 const DialogButtonAdd = ({ open, onClose }) => {
     const [addTaskDialogOpen, setAddTaskDialogOpen] = useState(false);
@@ -10,9 +19,32 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const [newTaskName, setNewTaskName] = useState('');
     const [newListName, setNewListName] = useState('');
     const [selectedList, setSelectedList] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [dueDate, setDueDate] = useState('');
+    const [startDate, setStartDate] =useState(null);
+    const [dueDate, setDueDate] = useState(null);
+    const handleStartDateChange = (date) => {
+        setStartDate(date);
+    };
+    const handleDueDateChange = (date) => {
+        setDueDate(date);
+    };
+    const { projectId } = useParams();
+    
+    const [getNameIdList, setNameIdList] = useState([]); 
+    const { accesstoken, userData } = useSelector(state => state.auth)
+    const [error, setError] = useState(null);
 
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const data = await getProjectDetal(accesstoken, projectId);
+                const dataConverter = getListIDProjectDetails(data);
+                setNameIdList(dataConverter.lists); // Update based on response structure
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+        fetchProjects();
+    }, [accesstoken, projectId]);
     const handleAddTaskDialogOpen = () => {
         onClose();  // Đóng Dialog chính
         setAddTaskDialogOpen(true);
@@ -27,21 +59,101 @@ const DialogButtonAdd = ({ open, onClose }) => {
 
     const handleAddListDialogClose = () => setAddListDialogOpen(false);
 
-    const handleAddTask = () => {
-        if (newTaskName) {
-            setTasks([...tasks, newTaskName]);
+    // refresh token die
+    const refreshToken = useRefreshToken();
+    //
+
+    // bt add task
+    const handleAddTask = async () => {
+        if (!newTaskName || !selectedList) {
+            toast.error('Task name or list is missing!');
+            return;
+        }
+        if (new Date(startDate) > new Date(dueDate)) {
+            toast.error('Start date must be before equal or due date!');
+            return;
+        }  
+        const taskData = {
+            task_name: newTaskName,
+            list_id: selectedList,
+            created_by_id: userData._id,
+            project_id: projectId,
+            start_date: startDate,
+            due_date: dueDate,
+        };
+        
+        const resetFormState = () => {
             setNewTaskName('');
-            handleAddTaskDialogClose();
+            handleAddListDialogClose();
+        };
+    
+        const handleSuccess = (message) => {
+            toast.success(message || 'Task created successfully!');
+            resetFormState();
+        };
+    
+        const createTask = async (token) => {
+            try {
+                const response = await createNewTask(token, taskData);
+                handleSuccess(response.message);
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    const newToken = await refreshToken();
+                    return createTask(newToken);
+                }
+                throw error;
+            }
+        };
+    
+        try {
+            await createTask(accesstoken);
+        } catch (error) {
+            toast.error('Error creating task!' || error.response?.data.message);
         }
     };
+    
 
-    const handleAddList = () => {
-        if (newListName) {
-            console.log(`New list added: ${newListName}`);
+    /// button submit add list
+    const handleAddList = async () => {
+        if (!newListName) {
+            toast.error('List name is missing!');
+            return;
+        }
+        const listData = {
+            list_name: newListName,
+            created_by_id: userData._id,
+            project_id: projectId,
+        };
+        const resetFormState = () => {
             setNewListName('');
             handleAddListDialogClose();
+        };
+        const handleSuccess = (message) => {
+            toast.success(message || 'List created successfully!');
+            resetFormState();
+        };
+
+        const createList = async (token) => {
+            try {
+                const response = await createNew(token, listData);
+                handleSuccess(response.message);
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    const newToken = await refreshToken();
+                    return createList(newToken);
+                }
+                throw error;
+            }
+        };
+
+        try {
+            await createList(accesstoken);
+        } catch (error) {
+            toast.error(error.response?.data.message || 'Error creating list!');
         }
+
     };
+    ////
 
     return (
         <>
@@ -79,7 +191,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
                 open={addTaskDialogOpen}
                 onClose={handleAddTaskDialogClose}
                 maxWidth="sm"
-   
+
                 PaperProps={{
                     style: {
                         position: 'absolute',
@@ -108,17 +220,17 @@ const DialogButtonAdd = ({ open, onClose }) => {
                             onChange={(e) => setSelectedList(e.target.value)}
                             label="List"
                         >
-                            <MenuItem value="">
-                                <em>.</em>
-                            </MenuItem>
-                            <MenuItem value="list1">List 1</MenuItem>
-                            <MenuItem value="list2">List 2</MenuItem>
+                            {getNameIdList.map((list) => (
+                                <MenuItem key={list.listId} value={list.listId}>
+                                    {list.listName}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
 
-                    <DueDatePicker lableDate={"Start date"} />
+                    <DueDatePicker lableDate={"Start date"} onDateChange={handleStartDateChange}/>
                     <Box sx={{ mt: 2 }} />
-                    <DueDatePicker lableDate={"Due date"} />
+                    <DueDatePicker lableDate={"Due date"} onDateChange={handleDueDateChange}/>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleAddTaskDialogClose}>Cancel</Button>
@@ -133,6 +245,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
                 open={addListDialogOpen}
                 onClose={handleAddListDialogClose}
                 maxWidth="xs"
+                fullWidth
                 PaperProps={{
                     style: {
                         position: 'absolute',
@@ -153,15 +266,15 @@ const DialogButtonAdd = ({ open, onClose }) => {
                         onChange={(e) => setNewListName(e.target.value)}
                         placeholder="Enter list name..."
                     />
-                    <FormControl fullWidth variant="outlined" margin="normal">
-                        <InputLabel>Position</InputLabel>
-                        <Select
-                            value={8}
-                            label="Position"
-                        >
-                            <MenuItem value={8}>8</MenuItem>
-                        </Select>
-                    </FormControl>
+                    {/* <FormControl fullWidth variant="outlined" margin="normal">
+                            <InputLabel>Position</InputLabel>
+                            <Select
+                                value={8}
+                                label="Position"
+                            >
+                                <MenuItem value={8}>8</MenuItem>
+                            </Select>
+                        </FormControl> */}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleAddListDialogClose}>Cancel</Button>
@@ -170,8 +283,8 @@ const DialogButtonAdd = ({ open, onClose }) => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <ToastContainer />
         </>
     );
 };
-
-export default DialogButtonAdd;
+export default DialogButtonAdd

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const getAllByOwnerId = async (accesstoken,ownerId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/project/projects/by-owner?ownerId=${ownerId}`, {
+        const response = await axios.get(`http://localhost:5000/api/project/by-owner?ownerId=${ownerId}`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -16,10 +16,24 @@ export const getAllByOwnerId = async (accesstoken,ownerId) => {
     }
 };
 
+export const getProjectDetal = async (accesstoken, projectId) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/project/${projectId}`, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching project data:', error.message);
+        throw error;
+    }
+};
 
 export const createNew = async (accesstoken,projectData) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/project', projectData, {
+        const response = await axios.post('http://localhost:5000/api/project/by-owner', projectData, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },

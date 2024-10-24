@@ -104,22 +104,22 @@ const AddBillingButton = styled(Button)(({ theme }) => ({
   },
 }));
 const mainLinkData = [
-  { projectName: 'Home', slug: 'home', icon: <HomeIcon /> },
-  { projectName: 'My tasks', slug: 'tasks', icon: <TaskIcon /> },
-  { projectName: 'Inbox', slug: 'inbox', icon: <InboxIcon /> },
+  { projectName: 'Home', _id: 'home', icon: <HomeIcon /> },
+  { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon /> },
+  { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon /> },
 ];
 
 
 const projectsLinkData = [
-  { label: 'Cross-functional project p...', slug: 'project1' },
-  { label: 'My first portfolio', slug: 'project2' },
-  { label: 'uijjj', slug: 'project3' },
+  { label: 'Cross-functional project p...', _id: 'project1' },
+  { label: 'My first portfolio', _id: 'project2' },
+  { label: 'uijjj', _id: 'project3' },
   // Add more projects here to test scrolling
 ];
 
 
 const teamLinkData = [
-  { projectName: 'Team', slug: 'team', icon: <ReportingIcon /> },
+  { projectName: 'Team', _id: 'team', icon: <ReportingIcon /> },
 ];
 
 const Sidebar = ({ open }) => {
