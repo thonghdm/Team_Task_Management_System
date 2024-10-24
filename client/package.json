@@ -23,6 +23,7 @@
         "@reduxjs/toolkit": "^2.2.7",
         "axios": "^1.5.1",
         "dayjs": "^1.11.13",
+        "dnd-kit": "^0.0.2",
         "dotenv": "^16.4.5",
         "material-ui-confirm": "^3.0.16",
         "moment": "^2.30.1",
