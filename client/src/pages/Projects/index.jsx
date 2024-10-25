@@ -35,7 +35,10 @@ const Projects = () => {
       dispatch(resetProjectDetail());
     };
   }, [dispatch, projectId]);
+
+  
   const [isClicked, setIsClicked] = useState(false);
+
   const handleAvatarGroupClick = () => {
     setDialogOpen(true);
   };
