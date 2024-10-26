@@ -7,6 +7,7 @@ import { apiRefreshToken } from '~/apis/Auth/authService';
 import actionTypes from '~/redux/actions/actionTypes';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 const ProfilePage = () => {
     const theme = useTheme();
     const dispatch = useDispatch();
@@ -83,20 +84,6 @@ const ProfilePage = () => {
             setTempAvatarFile(file);
         }
     };
-    const uploadImageToCloudinary = async (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', 'images_preset'); // Xóa preset nếu bạn không muốn sử dụng
-
-        try {
-            const res = await axios.post(`https://api.cloudinary.com/v1_1/doic9eqgd/image/upload`, formData);
-            console.log('Upload ảnh lên Cloudinary thành công:', res.data.secure_url);
-            return res.data.secure_url; // Trả về URL của ảnh
-        } catch (error) {
-            console.error('Lỗi khi upload ảnh lên Cloudinary:', error);
-            throw error; // Trả về null nếu có lỗi
-        }
-    };
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         if (name === 'phoneNumber') {
@@ -111,17 +98,11 @@ const ProfilePage = () => {
     const updateUserInfo = async () => {
         setIsUploadingAvatar(true);
         try {
+            const data = new FormData();
             // Upload ảnh mới lên Cloudinary nếu có
             if (tempAvatarFile) {
-                imageUrl = await uploadImageToCloudinary(tempAvatarFile); 
-                setUserInfo((prevInfo) => ({
-                    ...prevInfo,
-                    image: imageUrl,
-                }));
-                console.log('imageUrl:', userInfo.image);
+                data.append('image', tempAvatarFile);
             }
-            const data = new FormData();
-            data.append('image', imageUrl);
             data.append('displayName', userInfo.displayName);
             data.append('jobTitle', userInfo.jobTitle);
             data.append('department', userInfo.department);
@@ -158,8 +139,9 @@ const ProfilePage = () => {
 
     const refreshTokenAndUpdate = async () => {
         const data = new FormData();
-        console.log('userInfo.image222:', imageUrl);
-        data.append('image', imageUrl);
+       if (tempAvatarFile) {
+                data.append('image', tempAvatarFile);
+            }
         data.append('displayName', userInfo.displayName);
         data.append('jobTitle', userInfo.jobTitle);
         data.append('department', userInfo.department);
