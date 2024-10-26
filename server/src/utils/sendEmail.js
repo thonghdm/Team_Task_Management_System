@@ -6,8 +6,8 @@ const sendEmail = async (options) => {
         auth: {
             user: process.env.GMAIL_USER,
             pass: process.env.GMAIL_PASS
-        },
-    });
+        }
+    })
 
     const mailOptions = {
         from: { name: 'DTPROJECT', address: process.env.GMAIL_USER },
