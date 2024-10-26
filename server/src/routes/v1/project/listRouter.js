@@ -5,6 +5,6 @@ const Router = require('express').Router()
 
 // Route to get all projects by ownerId
 Router.route('/by-owner')
-    .post( listController.createNew)
+    .post(verifyToken, listController.createNew)
 
 module.exports = Router

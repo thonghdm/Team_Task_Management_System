@@ -28,6 +28,13 @@ import { generatePlaceholderCard } from '~/utils/formatters';
 //   moveCardTodifferentColumn
 // } from '~/redux/thunk/column';
 
+
+import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux'
+
+
+
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD'
@@ -50,6 +57,22 @@ const Board = ({ board }) => {
     useEffect(() => {
       setOrderedColumnsState(board.columns);
     }, [board]);
+
+
+
+    ////////////////////////////////
+    const dispatch = useDispatch();
+    const { projectData} = useSelector((state) => state.projectDetail);
+    const { projectId } = useParams();
+      const { accesstoken } = useSelector(state => state.auth)
+
+    useEffect(() => {
+      dispatch(fetchProjectDetail({ accesstoken, projectId }));
+      return () => {
+        dispatch(resetProjectDetail());
+      };
+    }, [dispatch, projectId,accesstoken]);
+    ////
     
   // Tìm column đang chứa cardId (làm dữ liệu cards rồi mới làm cho orderCard)
   const findColumnByCardId = (cardId) => {

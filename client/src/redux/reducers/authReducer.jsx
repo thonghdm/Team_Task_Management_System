@@ -69,6 +69,11 @@ const authReducer = (state = initState, action) => {
                 userData: {},  // Reset userData
                 error: action.error,
             };
+        case actionTypes.UPDATE_USER_DATA:
+            return {
+                ...state,
+                userData: action.data.userData || {},  // Update userData
+            };
         default:
             return state;
     }

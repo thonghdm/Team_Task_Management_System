@@ -23,7 +23,7 @@ import ChangeList from './ChangeList';
 import ButtonAdd from './ChangeList/ButtonAdd';
 import { extractTasksInfo } from '~/utils/extractTasksInfo';
 import { formatDate } from '~/utils/formattedDate';
-import { getProjectDetal } from '~/apis/Project/projectService'
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -38,25 +38,25 @@ const TaskBoard = () => {
   const theme = useTheme();
 
   ////
-  const [getTasksInfo, setTasksInfo] = useState([]);
+  const { accesstoken } = useSelector(state => state.auth)
+  const dispatch = useDispatch();
+  const { projectData } = useSelector((state) => state.projectDetail);
   const { projectId } = useParams();
-  const { accesstoken, userData } = useSelector(state => state.auth)
+  const [getTasksInfo, setTasksInfo] = useState([]);
+  useEffect(() => {
+    dispatch(fetchProjectDetail({ accesstoken, projectId }));
+    return () => {
+      dispatch(resetProjectDetail());
+    };
+  }, [dispatch, projectId, accesstoken]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const data = await getProjectDetal(accesstoken, projectId);
-        console.log(data.project);
-        const dataConverter = extractTasksInfo(data.project);
-        setTasksInfo(dataConverter);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    fetchProjects();
-  }, [accesstoken,projectId]);
-  console.log(getTasksInfo);
-  ///
+    if (projectData) {
+      const tasksInfo = extractTasksInfo(projectData?.project);
+      setTasksInfo(tasksInfo);
+    }
+  }, [projectData]);
+
 
 
   const updatedTasks = getTasksInfo.map(task => ({

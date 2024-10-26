@@ -21,9 +21,8 @@ import { useLocation } from 'react-router-dom';
 import SidebarList from '../SidebarList';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import {getAllByOwnerId} from '~/apis/Project/projectService';
 import { useSelector, useDispatch } from 'react-redux';
-
+import {fetchProjectsByOwnerId} from '~/redux/project/project-slice';
 
 const drawerWidth = 240;
 
@@ -125,23 +124,16 @@ const teamLinkData = [
 const Sidebar = ({ open }) => {
   const location = useLocation();
   const theme = useTheme();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
+  
   const {accesstoken, userData } = useSelector(state => state.auth)
-  const [error, setError] = useState(null);
-
+  const { projects} = useSelector((state) => state.projects);
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const data = await getAllByOwnerId(accesstoken,userData._id);
-        setProjects(data.projects); 
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    fetchProjects();
-  }, [accesstoken]);
-
+    if (accesstoken && userData?._id) {
+      dispatch(fetchProjectsByOwnerId({ accesstoken, ownerId: userData._id }));
+    }
+  }, [dispatch, accesstoken, userData?._id]);
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Toolbar />
@@ -171,7 +163,7 @@ const Sidebar = ({ open }) => {
                 <AddIcon sx={{ width: 17, mt: "3px" }} />
               </IconButton>
             </Box>
-            <SidebarList linkData={projects} isProject={true} open={open} />
+            <SidebarList linkData={projects.projects} isProject={true} open={open} />
           </Box>
 
           <Box>
