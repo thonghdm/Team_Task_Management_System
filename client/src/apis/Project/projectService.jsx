@@ -11,7 +11,6 @@ export const getAllByOwnerId = async (accesstoken,ownerId) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error fetching projects:', error.response?.data || error.message);
         throw error;
     }
 };
@@ -26,7 +25,6 @@ export const getProjectDetal = async (accesstoken, projectId) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error fetching project data:', error.message);
         throw error;
     }
 };
@@ -41,7 +39,6 @@ export const createNew = async (accesstoken,projectData) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error creating project:', error.response?.data || error.message);
         throw error;
     }
 };

@@ -24,49 +24,61 @@ import { apiGetOne } from '~/apis/User/userService'
 import { apiLogOut, apiRefreshToken } from '~/apis/Auth/authService'
 import actionTypes from '~/redux/actions/actionTypes'
 import Profile from '~/pages/Profile';
+import { jwtDecode } from 'jwt-decode';
 
 const UserAvatar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const dispatch = useDispatch();
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
+  const [hasFetchedUser, setHasFetchedUser] = useState(false); // Track if user data has been fetched
+
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+    try {
+      const decodedToken = jwtDecode(token);
+      return decodedToken.exp < Date.now() / 1000;
+    } catch {
+      return true;
+    }
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
+      setHasFetchedUser(true); 
       try {
-        let response = await apiGetOne(accesstoken)
+        const response = await apiGetOne(accesstoken);
         dispatch({
           type: actionTypes.UPDATE_USER_DATA,
-          data: { typeLogin: true, userData: response.data.response }
-        })
-        console.log('data', response.data.response);
+          data: { typeLogin: true, userData: response.data.response },
+        });
       } catch (error) {
-        if (error.status === 401) {
+        if (error.response?.status === 401) {
           try {
             const response = await apiRefreshToken();
             dispatch({
               type: actionTypes.LOGIN_SUCCESS,
-              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userData }
-            })
-          }
-          catch (error) {
-            console.log("error", error);
-            if (error.status === 403) {
+              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userData },
+            });
+            setHasFetchedUser(false);
+          } catch (refreshError) {
+            if (refreshError.response?.status === 403) {
               alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
-              dispatch({
-                type: actionTypes.LOGOUT,
-              });
+              dispatch({ type: actionTypes.LOGOUT });
               navigate('/');
             }
           }
-        } else {
-          console.log(error.message);
         }
       }
+    };
+
+    if (isLoggedIn && (!userData || (isTokenExpired(accesstoken) && !hasFetchedUser))) {
+      fetchUser();
     }
-    if(isLoggedIn && accesstoken) {fetchUser()}
-  }, [isLoggedIn, accesstoken, typeLogin])
+  }, [isLoggedIn, accesstoken, userData, hasFetchedUser, dispatch, navigate]);
+  
+
   let data = isLoggedIn ? userData : {};
-  console.log('11',data);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };

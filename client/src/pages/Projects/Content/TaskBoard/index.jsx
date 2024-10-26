@@ -21,9 +21,11 @@ import { useTheme } from '@mui/material/styles';
 import './styles.css';
 import ChangeList from './ChangeList';
 import ButtonAdd from './ChangeList/ButtonAdd';
-import { useProjects } from '~/pages/Projects/ProjectProvider';
 import { extractTasksInfo } from '~/utils/extractTasksInfo';
 import { formatDate } from '~/utils/formattedDate';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux'
 
 
 
@@ -36,22 +38,25 @@ const TaskBoard = () => {
   const theme = useTheme();
 
   ////
-  const projects = useProjects();
+  const { accesstoken } = useSelector(state => state.auth)
+  const dispatch = useDispatch();
+  const { projectData } = useSelector((state) => state.projectDetail);
+  const { projectId } = useParams();
   const [getTasksInfo, setTasksInfo] = useState([]);
+  useEffect(() => {
+    dispatch(fetchProjectDetail({ accesstoken, projectId }));
+    return () => {
+      dispatch(resetProjectDetail());
+    };
+  }, [dispatch, projectId, accesstoken]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const dataConverter = extractTasksInfo(projects);
-        setTasksInfo(dataConverter);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-    fetchProjects();
-  }, [projects]);
-  console.log(getTasksInfo);
-  ///
+    if (projectData) {
+      const tasksInfo = extractTasksInfo(projectData?.project);
+      setTasksInfo(tasksInfo);
+    }
+  }, [projectData]);
+
 
 
   const updatedTasks = getTasksInfo.map(task => ({
