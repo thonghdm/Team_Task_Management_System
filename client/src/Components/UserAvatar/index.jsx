@@ -63,10 +63,10 @@ const UserAvatar = () => {
         }
       }
     }
-    if(isLoggedIn && accesstoken) {fetchUser()}
+    console.log(1)
+    if(isLoggedIn && accesstoken) { fetchUser() }
   }, [isLoggedIn, accesstoken, typeLogin])
   let data = isLoggedIn ? userData : {};
-  console.log('11',data);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };

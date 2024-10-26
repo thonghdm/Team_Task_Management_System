@@ -8,7 +8,6 @@ import { MoreHoriz as MoreHorizIcon, Grade as GradeIcon, Share as ShareIcon } fr
 import ProjectContent from '~/pages/Projects/ProjectContent';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DialogAvt from '~/pages/Projects/DialogAvt';
-import { getProjectDetal } from '~/apis/Project/projectService'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
@@ -34,7 +33,7 @@ const Projects = () => {
     return () => {
       dispatch(resetProjectDetail());
     };
-  }, [dispatch, projectId]);
+  }, [dispatch, projectId,accesstoken]);
 
   
   const [isClicked, setIsClicked] = useState(false);
@@ -63,7 +62,7 @@ const Projects = () => {
         <Paper elevation={3} sx={{ p: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', }}>
-            {projectData && <Typography variant="h6">{projectData.projectName}</Typography>}
+            {projectData && <Typography variant="h6">{projectData?.project?.projectName}</Typography>}
               <IconButton
                 sx={{ color: isClicked ? 'gold' : 'text.primary', ml: 1 }}
                 onClick={handleIconClick}

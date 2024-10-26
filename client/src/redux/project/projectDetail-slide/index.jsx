@@ -7,7 +7,7 @@ export const fetchProjectDetail = createAsyncThunk(
   async ({ accesstoken, projectId }, thunkAPI) => {
     try {
       const data = await getProjectDetal(accesstoken, projectId);
-      return data.project;
+      return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }
@@ -48,7 +48,7 @@ const projectDetailSlice = createSlice({
 });
 
 // Export actions
-export const { resetProjectDetail } = projectDetailSlice.actions;
+export const { resetProjectDetail} = projectDetailSlice.actions;
 
 // Export reducer
 export default projectDetailSlice.reducer;

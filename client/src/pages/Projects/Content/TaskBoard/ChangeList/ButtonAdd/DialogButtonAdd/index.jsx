@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { getListIDProjectDetails } from '~/utils/getListIDProjectDetails';
 import { getProjectDetal } from '~/apis/Project/projectService'
+import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
 const DialogButtonAdd = ({ open, onClose }) => {
     const [addTaskDialogOpen, setAddTaskDialogOpen] = useState(false);
@@ -19,8 +20,9 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const [newTaskName, setNewTaskName] = useState('');
     const [newListName, setNewListName] = useState('');
     const [selectedList, setSelectedList] = useState('');
-    const [startDate, setStartDate] =useState(null);
+    const [startDate, setStartDate] = useState(null);
     const [dueDate, setDueDate] = useState(null);
+    const dispatch = useDispatch();
     const handleStartDateChange = (date) => {
         setStartDate(date);
     };
@@ -28,16 +30,18 @@ const DialogButtonAdd = ({ open, onClose }) => {
         setDueDate(date);
     };
     const { projectId } = useParams();
-    
-    const [getNameIdList, setNameIdList] = useState([]); 
+
+    const [getNameIdList, setNameIdList] = useState([]);
     const { accesstoken, userData } = useSelector(state => state.auth)
     const [error, setError] = useState(null);
-
+    ///
     useEffect(() => {
         const fetchProjects = async () => {
             try {
                 const data = await getProjectDetal(accesstoken, projectId);
+                console.log(data);  
                 const dataConverter = getListIDProjectDetails(data);
+                console.log("dataConverter", dataConverter);  
                 setNameIdList(dataConverter.lists); // Update based on response structure
             } catch (err) {
                 setError(err.message);
@@ -45,6 +49,24 @@ const DialogButtonAdd = ({ open, onClose }) => {
         };
         fetchProjects();
     }, [accesstoken, projectId]);
+    
+    const { projectData } = useSelector((state) => state.projectDetail);
+    
+    useEffect(() => {
+        dispatch(fetchProjectDetail({ accesstoken, projectId }));
+        return () => {
+            dispatch(resetProjectDetail());
+        };
+    }, [dispatch, projectId]);
+    console.log("1" ,projectData);
+
+    // useEffect(() => {
+    //     if (projectData) {
+    //         const dataConverter = getListIDProjectDetails(projectData);
+    //         setNameIdList(dataConverter.lists);
+    //     }
+    // }, [projectData]);
+    
     const handleAddTaskDialogOpen = () => {
         onClose();  // Đóng Dialog chính
         setAddTaskDialogOpen(true);
@@ -72,7 +94,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
         if (new Date(startDate) > new Date(dueDate)) {
             toast.error('Start date must be before equal or due date!');
             return;
-        }  
+        }
         const taskData = {
             task_name: newTaskName,
             list_id: selectedList,
@@ -81,20 +103,21 @@ const DialogButtonAdd = ({ open, onClose }) => {
             start_date: startDate,
             due_date: dueDate,
         };
-        
+
         const resetFormState = () => {
             setNewTaskName('');
             handleAddListDialogClose();
         };
-    
+
         const handleSuccess = (message) => {
             toast.success(message || 'Task created successfully!');
             resetFormState();
         };
-    
+
         const createTask = async (token) => {
             try {
                 const response = await createNewTask(token, taskData);
+                dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                 handleSuccess(response.message);
             } catch (error) {
                 if (error.response?.status === 401) {
@@ -104,14 +127,15 @@ const DialogButtonAdd = ({ open, onClose }) => {
                 throw error;
             }
         };
-    
+
         try {
             await createTask(accesstoken);
+
         } catch (error) {
             toast.error('Error creating task!' || error.response?.data.message);
         }
     };
-    
+
 
     /// button submit add list
     const handleAddList = async () => {
@@ -228,9 +252,9 @@ const DialogButtonAdd = ({ open, onClose }) => {
                         </Select>
                     </FormControl>
 
-                    <DueDatePicker lableDate={"Start date"} onDateChange={handleStartDateChange}/>
+                    <DueDatePicker lableDate={"Start date"} onDateChange={handleStartDateChange} />
                     <Box sx={{ mt: 2 }} />
-                    <DueDatePicker lableDate={"Due date"} onDateChange={handleDueDateChange}/>
+                    <DueDatePicker lableDate={"Due date"} onDateChange={handleDueDateChange} />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleAddTaskDialogClose}>Cancel</Button>
