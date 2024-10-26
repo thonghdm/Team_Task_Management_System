@@ -10,7 +10,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { getListIDProjectDetails } from '~/utils/getListIDProjectDetails';
 import { getProjectDetal } from '~/apis/Project/projectService'
-import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import './styles.css'; // Ensure this import is correct
+
 
 const DialogButtonAdd = ({ open, onClose }) => {
     const [addTaskDialogOpen, setAddTaskDialogOpen] = useState(false);
@@ -30,28 +32,25 @@ const DialogButtonAdd = ({ open, onClose }) => {
         setDueDate(date);
     };
     const { projectId } = useParams();
-
     const [getNameIdList, setNameIdList] = useState([]);
     const { accesstoken, userData } = useSelector(state => state.auth)
     const [error, setError] = useState(null);
-    
-    
     const { projectData } = useSelector((state) => state.projectDetail);
     useEffect(() => {
         dispatch(fetchProjectDetail({ accesstoken, projectId }));
         return () => {
-          dispatch(resetProjectDetail());
+            dispatch(resetProjectDetail());
         };
-      }, [dispatch, projectId, accesstoken,newListName]);
-      console.log("2",projectData);
+    }, [dispatch, projectId, accesstoken, newListName]);
+    console.log("2", projectData);
 
     useEffect(() => {
         if (projectData) {
-          const tasksInfo = getListIDProjectDetails(projectData);
-          setNameIdList(tasksInfo.lists);
+            const tasksInfo = getListIDProjectDetails(projectData);
+            setNameIdList(tasksInfo.lists);
         }
-      }, [projectData]);
-    
+    }, [projectData]);
+
     const handleAddTaskDialogOpen = () => {
         onClose();  // Đóng Dialog chính
         setAddTaskDialogOpen(true);
@@ -200,7 +199,6 @@ const DialogButtonAdd = ({ open, onClose }) => {
                 open={addTaskDialogOpen}
                 onClose={handleAddTaskDialogClose}
                 maxWidth="sm"
-
                 PaperProps={{
                     style: {
                         position: 'absolute',
@@ -225,12 +223,22 @@ const DialogButtonAdd = ({ open, onClose }) => {
                     <FormControl fullWidth variant="outlined" margin="normal">
                         <InputLabel>List</InputLabel>
                         <Select
+                        
                             value={selectedList}
                             onChange={(e) => setSelectedList(e.target.value)}
                             label="List"
+                            MenuProps={{
+                                PaperProps: {
+                                    className: 'scrollable',
+                                    style: {
+                                        maxHeight: 200, // Set the maximum height for the dropdown
+                                    },
+                                },
+                            }}
                         >
                             {getNameIdList.map((list) => (
-                                <MenuItem key={list.listId} value={list.listId}>
+                                <MenuItem key={list.listId} value={list.listId} 
+                                >
                                     {list.listName}
                                 </MenuItem>
                             ))}
