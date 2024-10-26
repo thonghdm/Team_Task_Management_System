@@ -28,12 +28,12 @@ const Projects = () => {
   const dispatch = useDispatch();
   const { projectData} = useSelector((state) => state.projectDetail);
   
-  useEffect(() => {
-    dispatch(fetchProjectDetail({ accesstoken, projectId }));
-    return () => {
-      dispatch(resetProjectDetail());
-    };
-  }, [dispatch, projectId,accesstoken]);
+  // useEffect(() => {
+  //   dispatch(fetchProjectDetail({ accesstoken, projectId }));
+  //   return () => {
+  //     dispatch(resetProjectDetail());
+  //   };
+  // }, [dispatch, projectId, accesstoken, location.pathname]);
 
   
   const [isClicked, setIsClicked] = useState(false);

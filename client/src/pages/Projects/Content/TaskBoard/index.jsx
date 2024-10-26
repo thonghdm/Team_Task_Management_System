@@ -23,7 +23,7 @@ import ChangeList from './ChangeList';
 import ButtonAdd from './ChangeList/ButtonAdd';
 import { extractTasksInfo } from '~/utils/extractTasksInfo';
 import { formatDate } from '~/utils/formattedDate';
-import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -40,7 +40,7 @@ const TaskBoard = () => {
   ////
   const { accesstoken } = useSelector(state => state.auth)
   const dispatch = useDispatch();
-  const { projectData} = useSelector((state) => state.projectDetail);
+  const { projectData } = useSelector((state) => state.projectDetail);
   const { projectId } = useParams();
   const [getTasksInfo, setTasksInfo] = useState([]);
   useEffect(() => {
@@ -48,14 +48,16 @@ const TaskBoard = () => {
     return () => {
       dispatch(resetProjectDetail());
     };
-  }, [dispatch, projectId],accesstoken);
+  }, [dispatch, projectId, accesstoken]);
 
   useEffect(() => {
     if (projectData) {
-      const tasksInfo = extractTasksInfo(projectData);
+      const tasksInfo = extractTasksInfo(projectData?.project);
       setTasksInfo(tasksInfo);
     }
   }, [projectData]);
+
+
 
   const updatedTasks = getTasksInfo.map(task => ({
     ...task,

@@ -34,38 +34,23 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const [getNameIdList, setNameIdList] = useState([]);
     const { accesstoken, userData } = useSelector(state => state.auth)
     const [error, setError] = useState(null);
-    ///
-    useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const data = await getProjectDetal(accesstoken, projectId);
-                console.log(data);  
-                const dataConverter = getListIDProjectDetails(data);
-                console.log("dataConverter", dataConverter);  
-                setNameIdList(dataConverter.lists); // Update based on response structure
-            } catch (err) {
-                setError(err.message);
-            }
-        };
-        fetchProjects();
-    }, [accesstoken, projectId]);
+    
     
     const { projectData } = useSelector((state) => state.projectDetail);
-    
     useEffect(() => {
         dispatch(fetchProjectDetail({ accesstoken, projectId }));
         return () => {
-            dispatch(resetProjectDetail());
+          dispatch(resetProjectDetail());
         };
-    }, [dispatch, projectId]);
-    console.log("1" ,projectData);
+      }, [dispatch, projectId, accesstoken,newListName]);
+      console.log("2",projectData);
 
-    // useEffect(() => {
-    //     if (projectData) {
-    //         const dataConverter = getListIDProjectDetails(projectData);
-    //         setNameIdList(dataConverter.lists);
-    //     }
-    // }, [projectData]);
+    useEffect(() => {
+        if (projectData) {
+          const tasksInfo = getListIDProjectDetails(projectData);
+          setNameIdList(tasksInfo.lists);
+        }
+      }, [projectData]);
     
     const handleAddTaskDialogOpen = () => {
         onClose();  // Đóng Dialog chính
