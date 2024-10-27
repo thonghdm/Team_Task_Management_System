@@ -24,6 +24,8 @@ import RoleSelect from '~/Components/ProjectRoleSelect';
 import { useTheme } from '@mui/material/styles';
 import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
 import './styles.css';
+import UserSearchExample from '~/Components/UserSearchExample'
+
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     color: theme.palette.text.primary,
     '&:hover': {
@@ -45,7 +47,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 
 const roles = [
     { value: 'admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
-    { value: 'member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.'},
+    { value: 'member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
     { value: 'viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
 ];
 
@@ -84,8 +86,10 @@ const DialogAvt = ({ open, onClose, projectName }) => {
         console.log("User is leaving the project");
         setIsAlertOpen(true);
     };
+
+
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" className="scrollable">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'background.default', color: 'text.primary' }}>
                 <Typography variant="h6">{projectName}</Typography>
                 <IconButton onClick={onClose} size="small">
@@ -95,23 +99,9 @@ const DialogAvt = ({ open, onClose, projectName }) => {
             <DialogContent sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
                 <Box sx={{ fontSize: '0.75rem' }}>
                     <Typography variant="subtitle1" sx={{ mb: 1 }}>Invite with email</Typography>
-                    <Box sx={{ display: 'flex', mb: 2 }}>
-                        <TextField
-                            fullWidth
-                            placeholder="Add members by name or email..."
-                            variant="outlined"
-                            size="small"
-                            sx={{ mr: 1 }}
-                        />
-                        <RoleSelect
-                            value={inviteRole}
-                            onChange={(e) => setInviteRole(e.target.value)}
-                            DB={roles}
-                        />
-                        <Button variant="contained" color="primary">
-                            Invite
-                        </Button>
-                    </Box>
+                    
+                    <UserSearchExample/>
+
                     <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>Access settings</Typography>
                     <Select
                         fullWidth
@@ -146,7 +136,55 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                         <Typography variant="subtitle1">Members</Typography>
                     </Box>
 
-                    <List>
+                    <List className="scrollable"  sx={{ maxHeight: '300px'}}>
+                        <ListItem secondaryAction={
+                            <RoleSelect
+                                value={taskCollaborators}
+                                onChange={(e) => setTaskCollaborators(e.target.value)}
+                                DB={roles}
+                            />
+                        }>
+                            <ListItemAvatar>
+                                <Avatar>TC</Avatar>
+                            </ListItemAvatar>
+                            <ListItemText primary="Task collaborators" />
+                        </ListItem>
+                        <ListItem secondaryAction={
+                            <RoleSelect
+                                value={taskCollaborators}
+                                onChange={(e) => setTaskCollaborators(e.target.value)}
+                                DB={roles}
+                            />
+                        }>
+                            <ListItemAvatar>
+                                <Avatar>TC</Avatar>
+                            </ListItemAvatar>
+                            <ListItemText primary="Task collaborators" />
+                        </ListItem>
+                        <ListItem secondaryAction={
+                            <RoleSelect
+                                value={taskCollaborators}
+                                onChange={(e) => setTaskCollaborators(e.target.value)}
+                                DB={roles}
+                            />
+                        }>
+                            <ListItemAvatar>
+                                <Avatar>TC</Avatar>
+                            </ListItemAvatar>
+                            <ListItemText primary="Task collaborators" />
+                        </ListItem>
+                        <ListItem secondaryAction={
+                            <RoleSelect
+                                value={taskCollaborators}
+                                onChange={(e) => setTaskCollaborators(e.target.value)}
+                                DB={roles}
+                            />
+                        }>
+                            <ListItemAvatar>
+                                <Avatar>TC</Avatar>
+                            </ListItemAvatar>
+                            <ListItemText primary="Task collaborators" />
+                        </ListItem>
                         <ListItem secondaryAction={
                             <RoleSelect
                                 value={taskCollaborators}
@@ -209,14 +247,6 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                         </ListItem>
                     </List>
 
-                    <Button
-                        variant="outlined"
-                        startIcon={<ContentCopyIcon />}
-                        fullWidth
-                        sx={{ mt: 2 }}
-                    >
-                        Copy project link
-                    </Button>
                     <AlertLeave
                         open={isAlertOpen}
                         onClose={handleCloseAlert}

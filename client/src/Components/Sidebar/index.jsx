@@ -22,7 +22,7 @@ import SidebarList from '../SidebarList';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import {fetchProjectsByOwnerId} from '~/redux/project/project-slice';
+import {fetchProjectsByMemberId} from '~/redux/project/project-slice';
 
 const drawerWidth = 240;
 
@@ -131,7 +131,7 @@ const Sidebar = ({ open }) => {
   const { projects} = useSelector((state) => state.projects);
   useEffect(() => {
     if (accesstoken && userData?._id) {
-      dispatch(fetchProjectsByOwnerId({ accesstoken, ownerId: userData._id }));
+      dispatch(fetchProjectsByMemberId({ accesstoken, memberId: userData._id }));
     }
   }, [dispatch, accesstoken, userData?._id]);
   return (

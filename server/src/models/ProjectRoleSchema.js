@@ -19,6 +19,6 @@ const userSchema = new mongoose.Schema({
     }
 }, { timestamps: true })
 
-const User = mongoose.model('ProjectRole', userSchema)
+const ProjectRole = mongoose.model('ProjectRole', userSchema)
 
-module.exports = User
+module.exports = ProjectRole

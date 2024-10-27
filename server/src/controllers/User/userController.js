@@ -1,5 +1,7 @@
 const userService = require('~/services/user/userService')
 const cloudinary = require('cloudinary').v2
+const { StatusCodes } = require('http-status-codes')
+
 const getOne = async (req, res) => {
     const { currentUser } = req
     try {
@@ -73,7 +75,23 @@ const updateUser = async (req, res) => {
         });
     }
 }
+
+
+const searchUsers = async (req, res) => {
+    const { query } = req.query
+
+    try {
+        const users = await userService.searchUsers(query)
+        res.status(StatusCodes.OK).json({
+            users,
+            message: 'GET controller: API search user'
+        })
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: error.message }) // 400 for client errors
+    }
+}
 module.exports = {
     getOne,
-    updateUser
+    updateUser,
+    searchUsers
 }
