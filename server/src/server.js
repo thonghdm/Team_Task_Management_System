@@ -8,7 +8,7 @@ const userRouter = require('~/routes/v1/user/userRouter')
 const projectRouter = require('~/routes/v1/project/projectRouter')
 const listRoutes = require('~/routes/v1/project/listRouter')
 const taskRoutes = require('~/routes/v1/project/taskRouter')
-
+const projectRoleRoutes = require('~/routes/v1/project/projectRoleRoutes')
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
 
@@ -29,7 +29,7 @@ app.use('/api/user', userRouter)
 app.use('/api/project', projectRouter)
 app.use('/api/list', listRoutes)
 app.use('/api/task', taskRoutes)
-
+app.use('/api/project-role', projectRoleRoutes)
 
 app.use(errorHandling)
 const port = process.env.PORT || 8888

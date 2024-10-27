@@ -15,6 +15,22 @@ export const getAllByOwnerId = async (accesstoken,ownerId) => {
     }
 };
 
+
+export const getAllByMemberId= async (accesstoken,memberId) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/project/by-member?memberId=${memberId}`, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const getProjectDetal = async (accesstoken, projectId) => {
     try {
         const response = await axios.get(`http://localhost:5000/api/project/${projectId}`, {
