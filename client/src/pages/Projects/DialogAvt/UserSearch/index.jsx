@@ -269,8 +269,10 @@ const UserSearch = () => {
 
         const inviteMember = async (token) => {
             try {
-                const req = await dispatch(inviteMemberAsync({ accesstoken: token, inviteData: usersWithRole })).unwrap();
-                const update = await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
+                await dispatch(inviteMemberAsync({ accesstoken: token, inviteData: usersWithRole })).unwrap();
+                await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
+                await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+
                 handleSuccess();
             } catch (error) {
                 if (error.response?.status === 401) {
