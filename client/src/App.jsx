@@ -79,7 +79,7 @@ function App() {
         <Route path='/error' element={<Error />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/new-password'element={<ProtectedRoute><NewPassword /></ProtectedRoute>} />
-        <Route path='/profile' element={<Profile />} />
+        <Route path='/profile/*' element={<Profile />} />
         <Route path='/login-success/:userId/:tokenLogin' element={<LoginSuccess />} />
         <Route path='/board/*' element={<Boards />} />
         <Route path="/projects-new" element={<AddProjects />} />

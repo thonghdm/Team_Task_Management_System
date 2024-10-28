@@ -5,13 +5,14 @@ const userSchema = new mongoose.Schema({
     isRole: {
         type: String,
         enum: ['Admin', 'Member', 'Viewer'],
-        default: 'Viewer'
+        default: 'Member'
     },
     memberId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'User'
     },
+    is_active: { type: Boolean, default: true }, // whether the account is active
     projectId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,

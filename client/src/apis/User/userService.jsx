@@ -35,3 +35,21 @@ export const apiupdateUser= (accesstoken, data) => new Promise(async (resolve, r
     }
 })
 
+export const getAllMembers = (accesstoken) => new Promise(async (resolve, reject) => {
+    try {
+        let response = await axios({
+            method: 'get',
+            url: 'http://localhost:5000/api/user/all-member',
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true  // Set withCredentials here
+        })
+        resolve(response)
+
+    } catch (error) {
+        reject(error)
+    }
+})  
+
+

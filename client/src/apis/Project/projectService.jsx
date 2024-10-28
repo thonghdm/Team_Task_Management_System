@@ -54,10 +54,12 @@ export const createNew = async (accesstoken,projectData) => {
             withCredentials: true
         });
         return response.data;
-    } catch (error) {
+    } catch (error) {   
         throw error;
     }
 };
+
+
 
 
 

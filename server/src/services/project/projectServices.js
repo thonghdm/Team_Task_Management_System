@@ -1,5 +1,6 @@
 const slugify = require('~/utils/formattersSlugify')
 const Project = require('~/models/ProjectSchema')
+const ProjectRole = require('~/models/ProjectRoleSchema')
 const mongoose = require('mongoose')
 const _ = require('lodash')
 
@@ -11,11 +12,51 @@ const createNew = async (reqBody) => {
         }
         const newProject = new Project(newProjectData)
         const createdProject = await newProject.save()
-        return createdProject
+
+        const newRoleData = {
+            projectId: createdProject._id,
+            memberId: createdProject.membersId[0],
+            isRole: 'Admin'
+        }
+        const newRole = new ProjectRole(newRoleData)
+        const createdRole = await newRole.save()
+        return { createdRole, createdProject }
     } catch (error) {
         throw new Error(error)
     }
 }
+
+// // Create a new project
+// const createNew = async (reqBody) => {
+//     const session = await mongoose.startSession()
+//     session.startTransaction()
+//     try {
+//         const newProjectData = {
+//             ...reqBody,
+//             slug: slugify(reqBody.projectName)
+//         }
+//         const newProject = new Project(newProjectData)
+//         const createdProject = await newProject.save({ session })
+
+//         const newRoleData = {
+//             projectId: createdProject._id,
+//             memberId: createdProject.membersId[0],
+//             isRole: 'Admin'
+//         }
+//         const newRole = new ProjectRole(newRoleData)
+//         const createdRole = await newRole.save({ session })
+
+//         await session.commitTransaction()
+
+//         return { createdRole, createdProject }
+//     } catch (error) {
+//         await session.abortTransaction()
+//         throw new Error(error)
+//     } finally {
+//         // Kết thúc session
+//         session.endSession()
+//     }
+// }
 
 /// get data chi tiet
 const getDetails = async (projectId) => {

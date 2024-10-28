@@ -87,7 +87,7 @@ const UserAvatar = () => {
     setAnchorEl(null);
   };
   const ProfileHandle = () => {
-    navigate('/profile');
+    navigate(`/profile/${userData._id}`);
   };
 
   const logoutHandler = async () => {
