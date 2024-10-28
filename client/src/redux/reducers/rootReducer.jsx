@@ -5,7 +5,11 @@ import { persistReducer } from 'redux-persist'
 import autoMergeLevel2 from "redux-persist/es/stateReconciler/autoMergeLevel2";
 import projectsSlice from '~/redux/project/project-slice';
 import projectDetailSlice from '~/redux/project/projectDetail-slide';
+import memberSlice from '~/redux/member/member-slice';
+import inviteSlice from '~/redux/project/projectRole-slice/index';
+import memberProjectSlice from '~/redux/project/projectRole-slice/memberProjectSlice'
 
+// Cấu hình cho persist
 const commonConfig = {
     storage,
     stateReconciler: autoMergeLevel2
@@ -17,22 +21,45 @@ const authConfig = {
     whitelist: ['isLoggedIn', 'typeLogin' , 'accesstoken' , 'userData']
 }
 const projectsConfig = {
-    ...commonConfig, // Sử dụng lại commonConfig đã có
-    key: 'projects', // Đặt key cho projects
-    whitelist: ['projects'], // Added projectDetail to whitelist
+    ...commonConfig, 
+    key: 'projects', 
+    whitelist: ['projects'], 
 };
 
 const projectsDetailConfig = {
-    ...commonConfig, // Sử dụng lại commonConfig đã có
-    key: 'projectDetail', // Đặt key cho projects
-    whitelist: ['projectDetail'], // Added projectDetail to whitelist
+    ...commonConfig, 
+    key: 'projectDetail', 
+    whitelist: ['projectDetail'],
+};
+
+const memberAllDetailConfig = {
+    ...commonConfig, 
+    key: 'allMember', 
+    whitelist: ['memberData', 'loading', 'error'], 
+};
+
+
+const inviteMemberConfig = {
+    ...commonConfig, 
+    key: 'allMember', 
+    whitelist: ['success', 'loading', 'error'], 
+};
+
+const memberProjectConfig = {
+    ...commonConfig, 
+    key: 'memberProject', 
+    whitelist: ['members', 'loading', 'error'], 
 };
 
 
 const rootReducer = combineReducers({
     auth: persistReducer(authConfig, authReducer),
-    projects: persistReducer(projectsConfig, projectsSlice), // Sử dụng cấu hình cho projects
-    projectDetail: persistReducer(projectsDetailConfig, projectDetailSlice)
+    projects: persistReducer(projectsConfig, projectsSlice),
+    projectDetail: persistReducer(projectsDetailConfig, projectDetailSlice),
+    allMember: persistReducer(memberAllDetailConfig, memberSlice),
+    allMember: persistReducer(memberAllDetailConfig, memberSlice),
+    invite: persistReducer(inviteMemberConfig, inviteSlice),
+    memberProject: persistReducer(memberProjectConfig, memberProjectSlice),
 })
 
 

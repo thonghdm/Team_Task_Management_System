@@ -34,7 +34,6 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const { projectId } = useParams();
     const [getNameIdList, setNameIdList] = useState([]);
     const { accesstoken, userData } = useSelector(state => state.auth)
-    const [error, setError] = useState(null);
     const { projectData } = useSelector((state) => state.projectDetail);
     useEffect(() => {
         dispatch(fetchProjectDetail({ accesstoken, projectId }));
@@ -42,7 +41,6 @@ const DialogButtonAdd = ({ open, onClose }) => {
             dispatch(resetProjectDetail());
         };
     }, [dispatch, projectId, accesstoken, newListName]);
-    console.log("2", projectData);
 
     useEffect(() => {
         if (projectData) {

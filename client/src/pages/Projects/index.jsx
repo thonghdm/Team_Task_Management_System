@@ -10,6 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import DialogAvt from '~/pages/Projects/DialogAvt';
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 
 const users = [
   { name: 'LV', imageUrl: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
@@ -35,6 +36,10 @@ const Projects = () => {
   //   };
   // }, [dispatch, projectId, accesstoken, location.pathname]);
 
+  const { members } = useSelector((state) => state.memberProject);
+  useEffect(() => {
+    dispatch(fetchMemberProject({ accesstoken, projectId }));
+  }, [dispatch, projectId, accesstoken]);
   
   const [isClicked, setIsClicked] = useState(false);
 
@@ -72,7 +77,7 @@ const Projects = () => {
             </Box>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: 'flex' }}>
-              {users.length > 0 ? (
+              {members?.members.length > 0 ? (
                 <AvatarGroup
                   max={3}
                   onClick={handleAvatarGroupClick}
@@ -93,11 +98,11 @@ const Projects = () => {
                     }
                   }}
                 >
-                  {users.map((user, index) => (
+                  {members?.members.map((user, index) => (
                     <Avatar
                       key={index}
-                      alt={user.name}
-                      src={user.imageUrl}
+                      alt={user?.memberId?.displayName}
+                      src={user?.memberId?.image}
                       onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }}
                     />
                   ))}

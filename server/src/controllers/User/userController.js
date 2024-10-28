@@ -32,8 +32,7 @@ const updateUser = async (req, res) => {
         let imageUrl = user.image // Giữ nguyên ảnh cũ nếu không có upload mới
         if (req.file) {
             // Xóa ảnh cũ nếu có
-            if (user.image)
-            {await deleteFromCloudinary(user.image)}
+            if (user.image) { await deleteFromCloudinary(user.image) }
             imageUrl = await uploadToCloudinary(req.file)
         }
         const updates = { ...req.body }
@@ -60,7 +59,7 @@ const updateUser = async (req, res) => {
 }
 
 
-const searchUsers = async (req, res) => {
+const searchUsers = async (req, res, next) => {
     const { query } = req.query
 
     try {
@@ -70,11 +69,26 @@ const searchUsers = async (req, res) => {
             message: 'GET controller: API search user'
         })
     } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: error.message }) // 400 for client errors
+        next(error)
     }
 }
+
+const getAllMembers = async (req, res, next) => {
+    try {
+        const users = await userService.getAllMembers()
+        res.status(StatusCodes.OK).json({
+            users,
+            message: 'Successfully all members.'
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
 module.exports = {
     getOne,
     updateUser,
-    searchUsers
+    searchUsers,
+    getAllMembers
 }

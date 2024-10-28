@@ -6,8 +6,7 @@ import { apiupdateUser } from '~/apis/User/userService';
 import { apiRefreshToken } from '~/apis/Auth/authService';
 import actionTypes from '~/redux/actions/actionTypes';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import CryptoJS from 'crypto-js';
+
 const ProfilePage = () => {
     const theme = useTheme();
     const dispatch = useDispatch();

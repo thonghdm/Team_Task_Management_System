@@ -24,7 +24,7 @@ const projectRoleController = {
             next(error)
         }
     },
-    getAllMemberProject: async (req, res, next) => {
+    getAllMemberIdProject: async (req, res, next) => {
         try {
             const members = await projectRoleService.getAllMembersByProjectId(req.params.id)
             res.status(StatusCodes.OK).json({

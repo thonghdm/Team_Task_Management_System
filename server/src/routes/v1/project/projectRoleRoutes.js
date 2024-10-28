@@ -8,7 +8,7 @@ Router.route('/member')
 
 // Route to update a project role
 Router.route('/member/:id')
-    .get(projectRoleController.getAllMemberProject)
+    .get(projectRoleController.getAllMemberIdProject)
     .put(projectRoleController.updateRole)
 
 

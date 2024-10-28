@@ -24,7 +24,7 @@ import RoleSelect from '~/Components/ProjectRoleSelect';
 import { useTheme } from '@mui/material/styles';
 import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
 import './styles.css';
-import UserSearchExample from '~/Components/UserSearchExample'
+import UserSearch from '~/pages/Projects/DialogAvt/UserSearch'
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     color: theme.palette.text.primary,
@@ -89,7 +89,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
 
 
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" className='scrollable'>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'background.default', color: 'text.primary' }}>
                 <Typography variant="h6">{projectName}</Typography>
                 <IconButton onClick={onClose} size="small">
@@ -100,7 +100,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 <Box sx={{ fontSize: '0.75rem' }}>
                     <Typography variant="subtitle1" sx={{ mb: 1 }}>Invite with email</Typography>
                     
-                    <UserSearchExample/>
+                    <UserSearch/>
 
                     <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>Access settings</Typography>
                     <Select
@@ -136,7 +136,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                         <Typography variant="subtitle1">Members</Typography>
                     </Box>
 
-                    <List className="scrollable"  sx={{ maxHeight: '300px'}}>
+                    <List className="scrollable"  sx={{ maxHeight: '270px'}}>
                         <ListItem secondaryAction={
                             <RoleSelect
                                 value={taskCollaborators}

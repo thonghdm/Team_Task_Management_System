@@ -9,4 +9,9 @@ router.put('/update-user', verifyToken, upload.single('image'), userController.u
 router.route('/search-member')
     .get(userController.searchUsers)
 
+router.route('/all-member')
+    .get(userController.getAllMembers)
+
+
+
 module.exports = router
