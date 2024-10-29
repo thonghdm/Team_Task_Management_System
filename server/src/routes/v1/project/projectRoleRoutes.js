@@ -4,12 +4,13 @@ const Router = require('express').Router()
 
 // Route to create a new project role
 Router.route('/member')
-    .post(projectRoleController.createNewRole)
+    .post(verifyToken, projectRoleController.createNewRole)
+    .put(projectRoleController.deleteMemberProject)
 
 // Route to update a project role
 Router.route('/member/:id')
-    .get(projectRoleController.getAllMemberIdProject)
-    .put(projectRoleController.updateRole)
+    .get(verifyToken, projectRoleController.getAllMemberIdProject)
+    .put(verifyToken, projectRoleController.updateRole)
 
 
 module.exports = Router

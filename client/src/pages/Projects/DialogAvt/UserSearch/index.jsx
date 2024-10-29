@@ -228,12 +228,14 @@ const UserSearch = () => {
     };
     const { projectData } = useSelector((state) => state.projectDetail);
 
-    useEffect(() => {
-        dispatch(fetchProjectDetail({ accesstoken, projectId }));
-        return () => {
-            dispatch(resetProjectDetail());
-        };
-    }, [dispatch, projectId, accesstoken, location.pathname]);
+    // useEffect(() => {
+    //     dispatch(fetchProjectDetail({ accesstoken, projectId }));
+    //     return () => {
+    //         dispatch(resetProjectDetail());
+    //     };
+    // }, [dispatch, projectId, accesstoken]);
+
+    const refreshToken = useRefreshToken();
 
     const handleInvite = async () => {
         if (selectedUsers.length === 0) {
@@ -269,18 +271,23 @@ const UserSearch = () => {
 
         const inviteMember = async (token) => {
             try {
+                console.log(' token' + token);
                 await dispatch(inviteMemberAsync({ accesstoken: token, inviteData: usersWithRole })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
-                await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
-
+                await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                 handleSuccess();
             } catch (error) {
-                if (error.response?.status === 401) {
-                    const newToken = await refreshToken();
-                    return inviteMember(newToken);
-                } else {
-                    throw error;
+                if (error.err===2) {
+                    try {
+                        const newToken = await refreshToken();
+                        if (newToken) {
+                            await inviteMember(newToken);
+                        }
+                    } catch (refreshError) {
+                        toast.error(refreshError?.response?.data?.message || 'Error inviting members1!');
+                    }
                 }
+
             }
         };
 
@@ -314,7 +321,6 @@ const UserSearch = () => {
             <Button variant="contained" color="primary" onClick={handleInvite}>
                 Invite
             </Button>
-            <ToastContainer /> {/* This is where notifications will be displayed */}
         </Box>
     );
 };

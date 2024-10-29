@@ -72,7 +72,7 @@ const Board = ({ board }) => {
         dispatch(resetProjectDetail());
       };
     }, [dispatch, projectId,accesstoken]);
-    ////
+    //
     
   // Tìm column đang chứa cardId (làm dữ liệu cards rồi mới làm cho orderCard)
   const findColumnByCardId = (cardId) => {

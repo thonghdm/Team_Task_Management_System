@@ -9,7 +9,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { getListIDProjectDetails } from '~/utils/getListIDProjectDetails';
-import { getProjectDetal } from '~/apis/Project/projectService'
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import './styles.css'; // Ensure this import is correct
 
@@ -35,12 +34,13 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const [getNameIdList, setNameIdList] = useState([]);
     const { accesstoken, userData } = useSelector(state => state.auth)
     const { projectData } = useSelector((state) => state.projectDetail);
+    const [checkState, setCheckState] = useState(false);
     useEffect(() => {
         dispatch(fetchProjectDetail({ accesstoken, projectId }));
         return () => {
             dispatch(resetProjectDetail());
         };
-    }, [dispatch, projectId, accesstoken, newListName]);
+    }, [dispatch, projectId, accesstoken, checkState]);
 
     useEffect(() => {
         if (projectData) {
@@ -99,7 +99,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
         const createTask = async (token) => {
             try {
                 const response = await createNewTask(token, taskData);
-                dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                setCheckState(!checkState);
                 handleSuccess(response.message);
             } catch (error) {
                 if (error.response?.status === 401) {
@@ -142,6 +142,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
         const createList = async (token) => {
             try {
                 const response = await createNew(token, listData);
+                dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
                 handleSuccess(response.message);
             } catch (error) {
                 if (error.response?.status === 401) {
