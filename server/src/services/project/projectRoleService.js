@@ -39,6 +39,31 @@ const createNewRole = async (rolesArray) => {
     }
 }
 
+const deleteMemberProject = async (projectId, memberId) => {
+    try {
+        const updatedRole = await ProjectRole.findOneAndUpdate(
+            { projectId, memberId },
+            { is_active: false },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedRole) {
+            throw new Error(`Role with projectId ${projectId} and memberId ${memberId} not found`);
+        }
+
+        await Project.findByIdAndUpdate(
+            projectId,
+            {
+                $pull: { membersId: memberId }
+            },
+            { new: true }
+        );
+
+        return updatedRole;
+    } catch (error) {
+        throw new Error(`Error deactivating role: ${error.message}`)
+    }
+}
 
 const updateRole = async (roleId, updateData) => {
     try {
@@ -69,4 +94,4 @@ const getAllMembersByProjectId = async (projectId) => {
     }
 }
 
-module.exports = { createNewRole, updateRole, getAllMembersByProjectId }
+module.exports = { createNewRole, updateRole, getAllMembersByProjectId, deleteMemberProject }

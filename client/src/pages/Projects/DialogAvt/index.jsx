@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -25,6 +25,10 @@ import { useTheme } from '@mui/material/styles';
 import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
 import './styles.css';
 import UserSearch from '~/pages/Projects/DialogAvt/UserSearch'
+import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
+import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     color: theme.palette.text.primary,
@@ -46,10 +50,11 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 const roles = [
-    { value: 'admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
-    { value: 'member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
-    { value: 'viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
+    { value: 'Admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
+    { value: 'Member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
+    { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
 ];
+
 
 const StyledButton = styled(Button)(({ theme }) => ({
     color: theme.palette.error.main,
@@ -64,10 +69,25 @@ const DialogAvt = ({ open, onClose, projectName }) => {
     const theme = useTheme();
     const [accessSetting, setAccessSetting] = useState('private');
     const [anchorEl, setAnchorEl] = useState(null);
+    const { accesstoken, userData } = useSelector(state => state.auth)
 
-    const [inviteRole, setInviteRole] = useState('member');
-    const [taskCollaborators, setTaskCollaborators] = useState('member');
-    const [MyWorkspace, setMyWorkspace] = useState('member');
+    const [inviteRole, setInviteRole] = useState('Member');
+    const [taskCollaborators, setTaskCollaborators] = useState('Member');
+    const [myWorkspace, setMyWorkspace] = React.useState('');
+
+
+    const dispatch = useDispatch();
+    const { projectId } = useParams();
+    const { members } = useSelector((state) => state.memberProject);
+    
+    useEffect(() => {
+        dispatch(fetchMemberProject({ accesstoken, projectId }));
+    }, [dispatch, projectId, accesstoken]);
+
+////////
+console.log('members', members)
+
+////////
 
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const handleCloseAlert = () => {
@@ -99,8 +119,8 @@ const DialogAvt = ({ open, onClose, projectName }) => {
             <DialogContent sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
                 <Box sx={{ fontSize: '0.75rem' }}>
                     <Typography variant="subtitle1" sx={{ mb: 1 }}>Invite with email</Typography>
-                    
-                    <UserSearch/>
+
+                    <UserSearch />
 
                     <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>Access settings</Typography>
                     <Select
@@ -136,116 +156,60 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                         <Typography variant="subtitle1">Members</Typography>
                     </Box>
 
-                    <List className="scrollable"  sx={{ maxHeight: '270px'}}>
-                        <ListItem secondaryAction={
-                            <RoleSelect
-                                value={taskCollaborators}
-                                onChange={(e) => setTaskCollaborators(e.target.value)}
-                                DB={roles}
-                            />
-                        }>
-                            <ListItemAvatar>
-                                <Avatar>TC</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Task collaborators" />
-                        </ListItem>
-                        <ListItem secondaryAction={
-                            <RoleSelect
-                                value={taskCollaborators}
-                                onChange={(e) => setTaskCollaborators(e.target.value)}
-                                DB={roles}
-                            />
-                        }>
-                            <ListItemAvatar>
-                                <Avatar>TC</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Task collaborators" />
-                        </ListItem>
-                        <ListItem secondaryAction={
-                            <RoleSelect
-                                value={taskCollaborators}
-                                onChange={(e) => setTaskCollaborators(e.target.value)}
-                                DB={roles}
-                            />
-                        }>
-                            <ListItemAvatar>
-                                <Avatar>TC</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Task collaborators" />
-                        </ListItem>
-                        <ListItem secondaryAction={
-                            <RoleSelect
-                                value={taskCollaborators}
-                                onChange={(e) => setTaskCollaborators(e.target.value)}
-                                DB={roles}
-                            />
-                        }>
-                            <ListItemAvatar>
-                                <Avatar>TC</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Task collaborators" />
-                        </ListItem>
-                        <ListItem secondaryAction={
-                            <RoleSelect
-                                value={taskCollaborators}
-                                onChange={(e) => setTaskCollaborators(e.target.value)}
-                                DB={roles}
-                            />
-                        }>
-                            <ListItemAvatar>
-                                <Avatar>TC</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Task collaborators" />
-                        </ListItem>
-                        <ListItem secondaryAction={
-                            <RoleSelect
-                                value={MyWorkspace}
-                                onChange={(e) => setMyWorkspace(e.target.value)}
-                                DB={roles}
-                            />
-                        }>
-                            <ListItemAvatar>
-                                <Avatar>MW</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary="My workspace"
-                                secondary="3 members"
-                            />
-                        </ListItem>
-
-                        <ListItem
-                            secondaryAction={
-                                <Box>
-                                    <StyledButton
-                                        endIcon={<ExpandMoreIcon />}
-                                        onClick={handleClick}
-                                    >
-                                        Project admin
-                                    </StyledButton>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleClose}
-                                    >
-                                        <StyledMenuItem onClick={handleLeaveProject} sx={{ color: 'error.main' }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <ExitToAppIcon sx={{ mr: 1 }} />
-                                                <Typography>Leave project</Typography>
+                    <List className="scrollable" sx={{ maxHeight: '270px' }}>
+                        {members?.members
+                            .filter(member => member.is_active === true)
+                            .map((member) => (
+                                <ListItem
+                                    key={member._id}
+                                    secondaryAction={
+                                        member?.memberId?._id === userData?._id ? (
+                                            <Box>
+                                                <StyledMenuItem onClick={handleLeaveProject} sx={{ color: 'error.main' }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <ExitToAppIcon sx={{ mr: 1 }} />
+                                                        <Typography>Leave</Typography>
+                                                    </Box>
+                                                </StyledMenuItem>
                                             </Box>
-                                        </StyledMenuItem>
-                                    </Menu>
-                                </Box>
-                            }
-                        >
-                            <ListItemAvatar>
-                                <Avatar sx={{ bgcolor: 'warning.main' }}>LV</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary="Luyến Lê Văn"
-                                secondary="thongdzpro100@gmail.com"
-                            />
-                        </ListItem>
+                                        ) : (
+                                            <RoleSelect
+                                                value={member.isRole}
+                                                onChange={(e) => {
+                                                    const newRole = e.target.value;
+                                                    if (member.isRole === 'Member') {
+                                                        setTaskCollaborators(newRole);
+                                                    } else if (member.isRole === 'Viewer') {
+                                                        setMyWorkspace(newRole);
+                                                    }
+                                                }}
+                                                DB={roles}
+                                            />
+
+                                        )
+                                    }
+                                >
+                                    <ListItemAvatar>
+                                        <Avatar
+                                            src={member?.memberId?.image}
+                                            sx={member.isRole === 'Admin' ? { bgcolor: 'warning.main' } : {}}
+                                        >
+                                            {member?.memberId?.image}
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={
+                                            member?.memberId?._id === userData?._id
+                                                ? `${member?.memberId?.displayName} - ${member.isRole}`
+                                                : member?.memberId?.displayName
+                                        }
+                                        secondary={member?.memberId?.email}
+                                    />
+                                </ListItem>
+                            ))}
                     </List>
+
+
 
                     <AlertLeave
                         open={isAlertOpen}

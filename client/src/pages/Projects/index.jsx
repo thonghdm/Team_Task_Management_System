@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 
+
 const users = [
   { name: 'LV', imageUrl: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
   { name: 'JD', imageUrl: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
@@ -28,13 +29,7 @@ const Projects = () => {
   const { accesstoken } = useSelector(state => state.auth)
   const dispatch = useDispatch();
   const { projectData} = useSelector((state) => state.projectDetail);
-  
-  // useEffect(() => {
-  //   dispatch(fetchProjectDetail({ accesstoken, projectId }));
-  //   return () => {
-  //     dispatch(resetProjectDetail());
-  //   };
-  // }, [dispatch, projectId, accesstoken, location.pathname]);
+
 
   const { members } = useSelector((state) => state.memberProject);
   useEffect(() => {
@@ -61,6 +56,7 @@ const Projects = () => {
   const isOverViewActive = location.pathname.endsWith('/overview');
   const isListActive = location.pathname.endsWith('/task-board');
   const isBoardActive = location.pathname.endsWith('/project-board');
+
 
   return (
       <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: 'calc(100vh - 64px)' }}>
@@ -98,7 +94,9 @@ const Projects = () => {
                     }
                   }}
                 >
-                  {members?.members.map((user, index) => (
+                  {members?.members
+                  .filter(user => user.is_active === true)
+                  .map((user, index) => (
                     <Avatar
                       key={index}
                       alt={user?.memberId?.displayName}
@@ -162,7 +160,7 @@ const Projects = () => {
         <DialogAvt
           open={isShareDialogOpen}
           onClose={handleCloseShareDialog}
-          projectName={projectId}
+          projectName={projectData?.project?.projectName}
         />
 
       </Box>

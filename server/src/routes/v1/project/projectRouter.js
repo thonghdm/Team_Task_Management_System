@@ -12,7 +12,7 @@ Router.route('/by-member')
     .get(verifyToken, projectController.getAllByMemberId)
 
 Router.route('/:id')
-    .get(projectController.getDetails)
+    .get(verifyToken, projectController.getDetails)
     .put()
 
 module.exports = Router

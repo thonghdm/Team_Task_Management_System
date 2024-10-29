@@ -235,6 +235,8 @@ const UserSearch = () => {
         };
     }, [dispatch, projectId, accesstoken, location.pathname]);
 
+    const refreshToken = useRefreshToken();
+
     const handleInvite = async () => {
         if (selectedUsers.length === 0) {
             setError('Please select at least one user');
@@ -271,16 +273,24 @@ const UserSearch = () => {
             try {
                 await dispatch(inviteMemberAsync({ accesstoken: token, inviteData: usersWithRole })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
-                await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+                await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
 
                 handleSuccess();
             } catch (error) {
                 if (error.response?.status === 401) {
-                    const newToken = await refreshToken();
-                    return inviteMember(newToken);
-                } else {
-                    throw error;
-                }
+                    try {
+                      const newToken = await refreshToken();
+                      await dispatch(inviteMemberAsync({ accesstoken: newToken, inviteData: usersWithRole })).unwrap();
+                      await dispatch(fetchMemberProject({ accesstoken: newToken, projectId }));
+                      await dispatch(fetchProjectDetail({ accesstoken: newToken, projectId }));
+                      handleSuccess();
+                    } catch (refreshError) {
+                      toast.error(refreshError?.response?.data?.message || 'Error inviting members!');
+                    }
+                  } else {
+                    toast.error(error?.response?.data?.message || 'Error inviting members!');
+                  }
+
             }
         };
 

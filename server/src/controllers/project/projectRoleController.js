@@ -13,6 +13,18 @@ const projectRoleController = {
             next(error)
         }
     },
+    deleteMemberProject: async (req, res, next) => {
+        try {
+            const { projectId, memberId } = req.body
+            const deletedActivity = await projectRoleService.deleteMemberProject(projectId, memberId)
+            res.status(StatusCodes.OK).json({
+                message: 'Role deleted successfully!',
+                role: deletedActivity
+            })
+        } catch (error) {
+            next(error)
+        }
+    },
     updateRole: async (req, res, next) => {
         try {
             const updatedRole = await projectRoleService.updateRole(req.params.id, req.body)
