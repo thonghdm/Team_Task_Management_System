@@ -28,7 +28,7 @@ import UserSearch from '~/pages/Projects/DialogAvt/UserSearch'
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
-import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     color: theme.palette.text.primary,
@@ -53,60 +53,46 @@ const roles = [
     { value: 'Admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
     { value: 'Member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
     { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
+    { value: 'KickMember', label: 'KickMember', description: "KickMember" },
 ];
 
+// const getAvailableRoles = (isAdmin) => {
+//     if (isAdmin) {
+//         return [...roles, { value: 'KickMember', label: 'KickMember', description: "KickMember" }];
+//     }
+//     return roles;
+// };
 
-const StyledButton = styled(Button)(({ theme }) => ({
-    color: theme.palette.error.main,
-    borderColor: theme.palette.error.main,
-    border: `1px solid ${theme.palette.error.main}`,
-    '&:hover': {
-        backgroundColor: theme.palette.error.main,
-        color: theme.palette.common.white,
-    },
-}));
 const DialogAvt = ({ open, onClose, projectName }) => {
-    const theme = useTheme();
     const [accessSetting, setAccessSetting] = useState('private');
-    const [anchorEl, setAnchorEl] = useState(null);
     const { accesstoken, userData } = useSelector(state => state.auth)
-
-    const [inviteRole, setInviteRole] = useState('Member');
-    const [taskCollaborators, setTaskCollaborators] = useState('Member');
-    const [myWorkspace, setMyWorkspace] = React.useState('');
-
-
     const dispatch = useDispatch();
     const { projectId } = useParams();
     const { members } = useSelector((state) => state.memberProject);
-    
+
     useEffect(() => {
         dispatch(fetchMemberProject({ accesstoken, projectId }));
     }, [dispatch, projectId, accesstoken]);
 
-////////
-console.log('members', members)
+    ////////
+    console.log('members', members)
 
-////////
+    ////////
 
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const handleCloseAlert = () => {
         console.log("cancel leave project");
         setIsAlertOpen(false);
     };
-
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
     const handleLeaveProject = () => {
         console.log("User is leaving the project");
         setIsAlertOpen(true);
     };
 
+    const currentUserRole = members?.members.find(
+        member => member.memberId._id === userData?._id
+    )?.isRole;
+    const isAdmin = currentUserRole === 'Admin';
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" className='scrollable'>
@@ -165,7 +151,10 @@ console.log('members', members)
                                     secondaryAction={
                                         member?.memberId?._id === userData?._id ? (
                                             <Box>
-                                                <StyledMenuItem onClick={handleLeaveProject} sx={{ color: 'error.main' }}>
+                                                <StyledMenuItem
+                                                    onClick={handleLeaveProject}
+                                                    sx={{ color: 'error.main' }}
+                                                >
                                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                         <ExitToAppIcon sx={{ mr: 1 }} />
                                                         <Typography>Leave</Typography>
@@ -173,19 +162,24 @@ console.log('members', members)
                                                 </StyledMenuItem>
                                             </Box>
                                         ) : (
-                                            <RoleSelect
-                                                value={member.isRole}
-                                                onChange={(e) => {
-                                                    const newRole = e.target.value;
-                                                    if (member.isRole === 'Member') {
-                                                        setTaskCollaborators(newRole);
-                                                    } else if (member.isRole === 'Viewer') {
-                                                        setMyWorkspace(newRole);
-                                                    }
-                                                }}
-                                                DB={roles}
-                                            />
-
+                                            isAdmin ? (
+                                                <RoleSelect
+                                                    value={member.isRole}
+                                                    onChange={(e) => {
+                                                        const newRole = e.target.value;
+                                                        if (member.isRole === 'Member') {
+                                                            setTaskCollaborators(newRole);
+                                                        } else if (member.isRole === 'Viewer') {
+                                                            setMyWorkspace(newRole);
+                                                        }
+                                                    }}
+                                                    DB={roles}
+                                                />
+                                            ) : (
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {member.isRole}
+                                                </Typography>
+                                            )
                                         )
                                     }
                                 >

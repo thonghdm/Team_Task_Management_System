@@ -2,42 +2,45 @@ const ProjectRole = require('~/models/ProjectRoleSchema')
 const Project = require('~/models/ProjectSchema')
 const createNewRole = async (rolesArray) => {
     try {
+        const createdOrUpdatedRoles = []
+
         for (const role of rolesArray) {
             const { projectId, memberId } = role
+
+            // Check if the project exists
             const project = await Project.findById(projectId)
             if (!project) {
                 throw new Error(`Project with ID ${projectId} not found`)
             }
-            if (project.membersId.includes(memberId)) {
-                throw new Error(`User ${memberId} is already a member of project ${projectId}`)
+
+            let existingRole = await ProjectRole.findOne({ projectId, memberId })
+
+            if (existingRole) {
+                if (!existingRole.is_active) {
+                    existingRole.is_active = true
+                    await existingRole.save()
+                    createdOrUpdatedRoles.push(existingRole)
+                } else {
+                    throw new Error(`User ${memberId} is already an active member of project ${projectId}`)
+                }
+            } else {
+                const newRole = new ProjectRole({ ...role })
+                await newRole.save()
+                createdOrUpdatedRoles.push(newRole)
             }
-        }
 
-        const rolesData = rolesArray.map(role => ({
-            ...role
-        }))
-
-        const createdRoles = await ProjectRole.insertMany(rolesData)
-
-        const projectUpdates = createdRoles.map(async role => {
-            const { projectId, memberId } = role
-            return Project.findByIdAndUpdate(
+            await Project.findByIdAndUpdate(
                 projectId,
-                {
-                    $addToSet: {
-                        membersId: memberId
-                    }
-                },
+                { $addToSet: { membersId: memberId } },
                 { new: true }
             )
-        })
-        await Promise.all(projectUpdates)
-
-        return createdRoles
+        }
+        return createdOrUpdatedRoles
     } catch (error) {
-        throw new Error(`Error creating new roles: ${error.message}`)
+        throw new Error(`Error creating or updating roles: ${error.message}`)
     }
 }
+
 
 const deleteMemberProject = async (projectId, memberId) => {
     try {
@@ -45,10 +48,10 @@ const deleteMemberProject = async (projectId, memberId) => {
             { projectId, memberId },
             { is_active: false },
             { new: true } // Return the updated document
-        );
+        )
 
         if (!updatedRole) {
-            throw new Error(`Role with projectId ${projectId} and memberId ${memberId} not found`);
+            throw new Error(`Role with projectId ${projectId} and memberId ${memberId} not found`)
         }
 
         await Project.findByIdAndUpdate(
@@ -57,9 +60,9 @@ const deleteMemberProject = async (projectId, memberId) => {
                 $pull: { membersId: memberId }
             },
             { new: true }
-        );
+        )
 
-        return updatedRole;
+        return updatedRole
     } catch (error) {
         throw new Error(`Error deactivating role: ${error.message}`)
     }
