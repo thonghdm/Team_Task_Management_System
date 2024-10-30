@@ -11,7 +11,22 @@ export const getAllByOwnerId = async (accesstoken,ownerId) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error fetching projects:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+
+export const getAllByMemberId= async (accesstoken,memberId) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/project/by-member?memberId=${memberId}`, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        }
+        );
+        return response.data;
+    } catch (error) {
         throw error;
     }
 };
@@ -26,7 +41,6 @@ export const getProjectDetal = async (accesstoken, projectId) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error fetching project data:', error.message);
         throw error;
     }
 };
@@ -40,11 +54,12 @@ export const createNew = async (accesstoken,projectData) => {
             withCredentials: true
         });
         return response.data;
-    } catch (error) {
-        console.error('Error creating project:', error.response?.data || error.message);
+    } catch (error) {   
         throw error;
     }
 };
+
+
 
 
 

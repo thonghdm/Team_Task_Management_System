@@ -44,7 +44,6 @@ const Overview = () => {
   };
 
   const handleRemove = () => {
-    // Add your remove logic here
     console.log(`Removing user: ${selectedUser.name}`);
     handleClose();
   };

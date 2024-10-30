@@ -1,5 +1,7 @@
 const userService = require('~/services/user/userService')
 const cloudinary = require('cloudinary').v2
+const { StatusCodes } = require('http-status-codes')
+
 const User = require('~/models/user')
 const { uploadToCloudinary, deleteFromCloudinary } = require('~/utils/cloudinary')
 const getOne = async (req, res) => {
@@ -30,8 +32,7 @@ const updateUser = async (req, res) => {
         let imageUrl = user.image // Giữ nguyên ảnh cũ nếu không có upload mới
         if (req.file) {
             // Xóa ảnh cũ nếu có
-            if (user.image)
-            {await deleteFromCloudinary(user.image)}
+            if (user.image) { await deleteFromCloudinary(user.image) }
             imageUrl = await uploadToCloudinary(req.file)
         }
         const updates = { ...req.body }
@@ -56,7 +57,38 @@ const updateUser = async (req, res) => {
         })
     }
 }
+
+
+const searchUsers = async (req, res, next) => {
+    const { query } = req.query
+
+    try {
+        const users = await userService.searchUsers(query)
+        res.status(StatusCodes.OK).json({
+            users,
+            message: 'GET controller: API search user'
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getAllMembers = async (req, res, next) => {
+    try {
+        const users = await userService.getAllMembers()
+        res.status(StatusCodes.OK).json({
+            users,
+            message: 'Successfully all members.'
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
 module.exports = {
     getOne,
-    updateUser
+    updateUser,
+    searchUsers,
+    getAllMembers
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -24,6 +24,12 @@ import RoleSelect from '~/Components/ProjectRoleSelect';
 import { useTheme } from '@mui/material/styles';
 import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
 import './styles.css';
+import UserSearch from '~/pages/Projects/DialogAvt/UserSearch'
+import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     color: theme.palette.text.primary,
     '&:hover': {
@@ -44,49 +50,52 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 const roles = [
-    { value: 'admin', label: 'Project admin', description: 'Full access to change settings, modify, or delete the project.' },
-    { value: 'editor', label: 'Editor', description: 'Can add, edit, and delete anything in the project.' },
-    { value: 'commenter', label: 'Commenter', description: "Can comment, but can't edit anything in the project." },
-    { value: 'viewer', label: 'Viewer', description: "Can view, but can't add comments or edit the project." },
+    { value: 'Admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
+    { value: 'Member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
+    { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
+    { value: 'KickMember', label: 'KickMember', description: "KickMember" },
 ];
 
-const StyledButton = styled(Button)(({ theme }) => ({
-    color: theme.palette.error.main,
-    borderColor: theme.palette.error.main,
-    border: `1px solid ${theme.palette.error.main}`,
-    '&:hover': {
-        backgroundColor: theme.palette.error.main,
-        color: theme.palette.common.white,
-    },
-}));
-const DialogAvt = ({ open, onClose, projectName }) => {
-    const theme = useTheme();
-    const [accessSetting, setAccessSetting] = useState('private');
-    const [anchorEl, setAnchorEl] = useState(null);
+// const getAvailableRoles = (isAdmin) => {
+//     if (isAdmin) {
+//         return [...roles, { value: 'KickMember', label: 'KickMember', description: "KickMember" }];
+//     }
+//     return roles;
+// };
 
-    const [inviteRole, setInviteRole] = useState('editor');
-    const [taskCollaborators, setTaskCollaborators] = useState('editor');
-    const [MyWorkspace, setMyWorkspace] = useState('editor');
+const DialogAvt = ({ open, onClose, projectName }) => {
+    const [accessSetting, setAccessSetting] = useState('private');
+    const { accesstoken, userData } = useSelector(state => state.auth)
+    const dispatch = useDispatch();
+    const { projectId } = useParams();
+    const { members } = useSelector((state) => state.memberProject);
+
+    useEffect(() => {
+        dispatch(fetchMemberProject({ accesstoken, projectId }));
+    }, [dispatch, projectId, accesstoken]);
+
+    ////////
+    console.log('members', members)
+
+    ////////
 
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const handleCloseAlert = () => {
         console.log("cancel leave project");
         setIsAlertOpen(false);
     };
-
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
     const handleLeaveProject = () => {
         console.log("User is leaving the project");
         setIsAlertOpen(true);
     };
+
+    const currentUserRole = members?.members.find(
+        member => member.memberId._id === userData?._id
+    )?.isRole;
+    const isAdmin = currentUserRole === 'Admin';
+
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" className="scrollable">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" className='scrollable'>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'background.default', color: 'text.primary' }}>
                 <Typography variant="h6">{projectName}</Typography>
                 <IconButton onClick={onClose} size="small">
@@ -96,23 +105,9 @@ const DialogAvt = ({ open, onClose, projectName }) => {
             <DialogContent sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
                 <Box sx={{ fontSize: '0.75rem' }}>
                     <Typography variant="subtitle1" sx={{ mb: 1 }}>Invite with email</Typography>
-                    <Box sx={{ display: 'flex', mb: 2 }}>
-                        <TextField
-                            fullWidth
-                            placeholder="Add members by name or email..."
-                            variant="outlined"
-                            size="small"
-                            sx={{ mr: 1 }}
-                        />
-                        <RoleSelect
-                            value={inviteRole}
-                            onChange={(e) => setInviteRole(e.target.value)}
-                            DB={roles}
-                        />
-                        <Button variant="contained" color="primary">
-                            Invite
-                        </Button>
-                    </Box>
+
+                    <UserSearch />
+
                     <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>Access settings</Typography>
                     <Select
                         fullWidth
@@ -147,77 +142,69 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                         <Typography variant="subtitle1">Members</Typography>
                     </Box>
 
-                    <List>
-                        <ListItem secondaryAction={
-                            <RoleSelect
-                                value={taskCollaborators}
-                                onChange={(e) => setTaskCollaborators(e.target.value)}
-                                DB={roles}
-                            />
-                        }>
-                            <ListItemAvatar>
-                                <Avatar>TC</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Task collaborators" />
-                        </ListItem>
-                        <ListItem secondaryAction={
-                            <RoleSelect
-                                value={MyWorkspace}
-                                onChange={(e) => setMyWorkspace(e.target.value)}
-                                DB={roles}
-                            />
-                        }>
-                            <ListItemAvatar>
-                                <Avatar>MW</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary="My workspace"
-                                secondary="3 members"
-                            />
-                        </ListItem>
-
-                        <ListItem
-                            secondaryAction={
-                                <Box>
-                                    <StyledButton
-                                        endIcon={<ExpandMoreIcon />}
-                                        onClick={handleClick}
-                                    >
-                                        Project admin
-                                    </StyledButton>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleClose}
-                                    >
-                                        <StyledMenuItem onClick={handleLeaveProject} sx={{ color: 'error.main' }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <ExitToAppIcon sx={{ mr: 1 }} />
-                                                <Typography>Leave project</Typography>
+                    <List className="scrollable" sx={{ maxHeight: '270px' }}>
+                        {members?.members
+                            .filter(member => member.is_active === true)
+                            .map((member) => (
+                                <ListItem
+                                    key={member._id}
+                                    secondaryAction={
+                                        member?.memberId?._id === userData?._id ? (
+                                            <Box>
+                                                <StyledMenuItem
+                                                    onClick={handleLeaveProject}
+                                                    sx={{ color: 'error.main' }}
+                                                >
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <ExitToAppIcon sx={{ mr: 1 }} />
+                                                        <Typography>Leave</Typography>
+                                                    </Box>
+                                                </StyledMenuItem>
                                             </Box>
-                                        </StyledMenuItem>
-                                    </Menu>
-                                </Box>
-                            }
-                        >
-                            <ListItemAvatar>
-                                <Avatar sx={{ bgcolor: 'warning.main' }}>LV</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary="Luyến Lê Văn"
-                                secondary="thongdzpro100@gmail.com"
-                            />
-                        </ListItem>
+                                        ) : (
+                                            isAdmin ? (
+                                                <RoleSelect
+                                                    value={member.isRole}
+                                                    onChange={(e) => {
+                                                        const newRole = e.target.value;
+                                                        if (member.isRole === 'Member') {
+                                                            setTaskCollaborators(newRole);
+                                                        } else if (member.isRole === 'Viewer') {
+                                                            setMyWorkspace(newRole);
+                                                        }
+                                                    }}
+                                                    DB={roles}
+                                                />
+                                            ) : (
+                                                <Typography variant="body2" color="textSecondary">
+                                                    {member.isRole}
+                                                </Typography>
+                                            )
+                                        )
+                                    }
+                                >
+                                    <ListItemAvatar>
+                                        <Avatar
+                                            src={member?.memberId?.image}
+                                            sx={member.isRole === 'Admin' ? { bgcolor: 'warning.main' } : {}}
+                                        >
+                                            {member?.memberId?.image}
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={
+                                            member?.memberId?._id === userData?._id
+                                                ? `${member?.memberId?.displayName} - ${member.isRole}`
+                                                : member?.memberId?.displayName
+                                        }
+                                        secondary={member?.memberId?.email}
+                                    />
+                                </ListItem>
+                            ))}
                     </List>
 
-                    <Button
-                        variant="outlined"
-                        startIcon={<ContentCopyIcon />}
-                        fullWidth
-                        sx={{ mt: 2 }}
-                    >
-                        Copy project link
-                    </Button>
+
+
                     <AlertLeave
                         open={isAlertOpen}
                         onClose={handleCloseAlert}
