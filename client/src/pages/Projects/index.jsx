@@ -61,12 +61,12 @@ const Projects = () => {
               onClick={handleIconClick}
             >
               <GradeIcon />
-              
+
             </IconButton>
           </Box>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: 'flex' }}>
-            {members?.members.length > 0 ? (
+            {members?.members?.length > 0 ? (
               <AvatarGroup
                 max={3}
                 onClick={handleAvatarGroupClick}
@@ -87,7 +87,7 @@ const Projects = () => {
                   }
                 }}
               >
-                {members?.members
+                {members.members
                   .filter(user => user.is_active === true)
                   .map((user, index) => (
                     <Avatar

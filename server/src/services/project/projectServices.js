@@ -127,9 +127,6 @@ const getAllByOwnerId = async (ownerId) => {
 const getAllByMemberId = async (memberId) => {
     try {
         const projects = await Project.find({ membersId: memberId })
-        if (!projects || projects.length === 0) {
-            throw new Error('No projects found for this memberId')
-        }
         return projects
     } catch (error) {
         throw new Error(error.message)

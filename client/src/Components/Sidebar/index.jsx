@@ -22,7 +22,8 @@ import SidebarList from '../SidebarList';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import {fetchProjectsByMemberId} from '~/redux/project/project-slice';
+import { fetchProjectsByMemberId } from '~/redux/project/project-slice';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
 const drawerWidth = 240;
 
@@ -126,14 +127,17 @@ const Sidebar = ({ open }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
-  const {accesstoken, userData } = useSelector(state => state.auth)
-  const { projects} = useSelector((state) => state.projects);
+
+  const { accesstoken, userData, isLoggedIn } = useSelector(state => state.auth)
+  const { projects } = useSelector((state) => state.projects);
+
   useEffect(() => {
-    if (accesstoken && userData?._id) {
+    if (accesstoken && userData) {
+      console.log('Dispatching with userData._id:', userData._id);
       dispatch(fetchProjectsByMemberId({ accesstoken, memberId: userData._id }));
     }
-  }, [dispatch, accesstoken, userData?._id]);
+  }, [dispatch, accesstoken, userData, isLoggedIn]);
+
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Toolbar />
@@ -163,7 +167,8 @@ const Sidebar = ({ open }) => {
                 <AddIcon sx={{ width: 17, mt: "3px" }} />
               </IconButton>
             </Box>
-            <SidebarList linkData={projects.projects} isProject={true} open={open} />
+            {projects?.projects&&<SidebarList linkData={projects?.projects} isProject={true} open={open} />
+            }
           </Box>
 
           <Box>
