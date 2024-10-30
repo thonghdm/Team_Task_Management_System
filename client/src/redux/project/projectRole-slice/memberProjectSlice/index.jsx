@@ -1,6 +1,6 @@
 // memberProjectSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getMemberProject } from '~/apis/Project/projectRoleService';
+import { getMemberProject} from '~/apis/Project/projectRoleService';
 
 // Async thunk for fetching project members
 export const fetchMemberProject = createAsyncThunk(
@@ -14,6 +14,8 @@ export const fetchMemberProject = createAsyncThunk(
         }
     }
 );
+
+
 
 // Slice for managing project members
 const memberProjectSlice = createSlice({
@@ -43,7 +45,7 @@ const memberProjectSlice = createSlice({
             .addCase(fetchMemberProject.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
-            });
+            })
     },
 });
 

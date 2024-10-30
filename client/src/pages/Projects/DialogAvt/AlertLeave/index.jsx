@@ -12,9 +12,7 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 
-const AlertLeave = ({ open, onClose, projectName }) => {
-    const theme = useTheme();
-   
+const AlertLeave = ({ open, onClose, projectName, lable, onConfirm }) => {
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'background.default', color: 'text.primary' }}>
@@ -24,15 +22,15 @@ const AlertLeave = ({ open, onClose, projectName }) => {
                 </IconButton>
             </DialogTitle>
             <DialogContent sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
-                <Typography variant="body1">
-                If you remove yourself, you'll lose your admin permissions to this project.
+                <Typography variant="body1" sx={{ pt: 2 }}>
+                    {lable}
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                    <Button onClick={onClose} variant="contained"  color="primary" sx={{ mr: 1 }}>
+                    <Button onClick={onClose} variant="contained" color="primary" sx={{ mr: 1 }}>
                         Cancel
                     </Button>
-                    <Button onClick={() => { console.log('cút'); }} variant="contained" color="error">
-                        Leave
+                    <Button onClick={onConfirm} variant="contained" color="error"> {/* Call confirm on click */}
+                        OK
                     </Button>
                 </Box>
             </DialogContent>
