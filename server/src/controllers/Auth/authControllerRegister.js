@@ -37,6 +37,28 @@ const authControllerRegister = {
             console.error('Registration controller error:', err)
             res.status(500).json({ error: 'Internal server error' })
         }
+    },
+    resendOTP: async (req, res) => {
+        try {
+            const result = await authServiceRegister.resendOTP(req.body)
+            if (result.error) {
+                return res.status(400).json({ error: result.error })
+            }
+            res.status(200).json(result)
+        } catch (err) {
+            res.status(500).json({ error: 'Internal server error' })
+        }
+    },
+    verifyEmail: async (req, res) => {
+        try {
+            const result = await authServiceRegister.verifyEmail(req.body)
+            if (result.error) {
+                return res.status(400).json({ error: result.error })
+            }
+            res.status(200).json(result)
+        } catch (err) {
+            res.status(500).json({ error: 'Internal server error' })
+        }
     }
 }
 

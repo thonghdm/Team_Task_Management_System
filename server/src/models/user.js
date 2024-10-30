@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String },
     googleId: { type: String, unique: true, sparse: true },
     image: { type: String },
-    displayName: String,
+    displayName: { type: String, required: true, maxlength: 255, minlength: 3 },
     tokenLogin: { type: String },
     is_active: { type: Boolean, default: true }, // whether the account is active
     refreshToken: String, // New field to store the refresh token
@@ -16,7 +16,11 @@ const userSchema = new mongoose.Schema({
     company: { type: String, default: '' },
     location: { type: String, default: '' },
     jobTitle: { type: String, default: '' },
-    department: { type: String, default: '' }
+    department: { type: String, default: '' },
+    username: { type: String },
+    otp_code: { type: String },
+    otp_expired: { type: Date },
+    is_verified: { type: Boolean, default: false }
 }, { timestamps: true })
 
 const User = mongoose.model('User', userSchema)
