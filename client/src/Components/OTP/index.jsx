@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTheme } from '@mui/material/styles';
 import { useAuth } from '~/pages/Auth/SignUp/AuthContext';
-
+import axios from 'axios';
 const OTP = () => {
     const theme = useTheme();
     const [otp, setOtp] = useState(['', '', '', '', '', '', '', '']);
@@ -46,29 +46,54 @@ const OTP = () => {
 
     const handleSubmit = () => {
         const enteredOtp = otp.join('');
-        if (enteredOtp === '12345678') {
-            setIsSignedUp(true);
-            if(typeOtp === 1){
-                navigate('/sign-up-success', { state: { email } });
-            }else{
-                navigate('/new-password', { state: { email } });
-            }
-        } else {
-            setOtpError('Invalid OTP. Please try again.');
-        }
+        verifyOtp(enteredOtp);
     };
 
     const handleResend = (e) => {
         e.preventDefault(); // Prevent page reload
-        setResentMessageVisible(true);
-        // Implement resend OTP logic here
+        resendOtp();
         console.log('Resend OTP');
     };
 
     const handleUpdateEmail = () => {
         navigate('/sign-up'); // Navigate back to registration page
     };
+    const resendOtp = async () => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/auth/resend-otp', {email});
+            console.log('Resend OTP response:', response.data);
+            if (response.data.user) {
+                setResentMessageVisible(true);
+            } else {
+                setOtpError('Failed to resend OTP. Please try again.');
+            }
+        }
+        catch (error) {
+            console.error('OTP resend error:', error);
+        }
+    };
+    const verifyOtp = async (enteredOtp) => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/auth/verify-email', {
+                email,
+                otp_code: enteredOtp,
+            });
 
+            if (response.data.user) {
+                setIsSignedUp(true);
+                if (typeOtp === 1) {
+                    navigate('/sign-up-success', { state: { email } });
+                } else {
+                    navigate('/new-password', { state: { email } });
+                }
+            } else {
+                setOtpError('Invalid OTP. Please try again.');
+            }
+        } catch (error) {
+            setOtpError('An error occurred during verification. Please try again.');
+            console.error('OTP verification error:', error);
+        }
+    };
     return (
         <Box 
         elevation={3}

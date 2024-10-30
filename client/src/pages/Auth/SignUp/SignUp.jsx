@@ -7,7 +7,7 @@ import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
-import { TextField, InputAdornment, IconButton } from '@mui/material';
+import { TextField, InputAdornment, IconButton, Alert, AlertTitle } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -30,14 +30,33 @@ export default function SignUp() {
     const [passwordError, setPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
     const [generalError, setGeneralError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
     const typeOtp = 1;
+    const isValidName = (name) => /^[^\d_!@#$%^&*()=+[\]{};':"|,.<>?~`]{3,255}$/.test(name);
+    const isStrongPassword = (password) => {
+        // Kiểm tra độ dài tối thiểu
+        const hasMinimumLength = password.length >= 8;
+        // Kiểm tra chữ hoa
+        const hasUpperCase = /[A-Z]/.test(password);
+        // Kiểm tra chữ thường
+        const hasLowerCase = /[a-z]/.test(password);
+        // Kiểm tra ký tự số
+        const hasNumber = /\d/.test(password);
+        // Kiểm tra ký tự đặc biệt
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+        return hasMinimumLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+    }
     const validateInputs = () => {
         let isValid = true;
 
         if (!name.trim()) {
             setNameError('Name is required');
+            isValid = false;
+        } else if (!isValidName(name)) {
+            setNameError('Name must be 3-255 characters long and contain only letters');
             isValid = false;
         } else {
             setNameError('');
@@ -50,8 +69,8 @@ export default function SignUp() {
             setEmailError('');
         }
 
-        if (password.length < 6) {
-            setPasswordError('Password must be at least 6 characters long');
+        if (!isStrongPassword(password)) {
+            setPasswordError('Password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special character');
             isValid = false;
         } else {
             setPasswordError('');
@@ -69,17 +88,26 @@ export default function SignUp() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         setGeneralError('');
+        setLoading(true);
 
         if (validateInputs()) {
             try {
-                await dispatch(registerWithEmail(name, email, password));
-                setIsSignedUp(true);
-                navigate('/otp', { state: { email , typeOtp} }); // Pass email to OTP page
+                const res=await dispatch(registerWithEmail(name, email, password));
+                if(res.success===true){
+                    setIsSignedUp(true);
+                    navigate('/otp', { state: { email, typeOtp } }); // Pass email to OTP page
+                }
+                else{
+                    setGeneralError(res.message);
+                }
             } catch (error) {
-                setGeneralError(error.message || 'Registration failed. Please try again.');
+                setGeneralError(error.message);
+            } finally {
+                setLoading(false);
             }
+        } else {
+            setLoading(false);
         }
     };
 
@@ -93,6 +121,12 @@ export default function SignUp() {
                 <Typography component="h1" variant="h4" sx={{ width: '100%', textAlign: 'center', marginBottom: '1.5rem' }}>
                     Sign up
                 </Typography>
+                {generalError && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        <AlertTitle>Error</AlertTitle>
+                        {generalError}
+                    </Alert>
+                )}
                 <Box
                     component="form"
                     onSubmit={handleSubmit}
@@ -225,13 +259,8 @@ export default function SignUp() {
                             }}
                         />
                     </FormControl>
-                    {generalError && (
-                        <Typography color="error" variant="body2">
-                            {generalError}
-                        </Typography>
-                    )}
-                    <Button type="submit" fullWidth variant="contained">
-                        Sign up
+                    <Button type="submit" fullWidth variant="contained" disabled={loading}>
+                        {loading ? 'Loading...' : 'Sign up'}
                     </Button>
                     <Typography sx={{ textAlign: 'center' }}>
                         Already have an account?{' '}
@@ -242,7 +271,7 @@ export default function SignUp() {
                 </Box>
                 <Divider sx={{ my: 2 }}>or</Divider>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Button fullWidth variant="outlined" onClick={() => handleLogin('google')}>
+                    <Button fullWidth variant="outlined" onClick={() => handleLogin('google')} disabled={loading}>
                         Sign up with Google
                     </Button>
                 </Box>
