@@ -9,11 +9,11 @@ require('dotenv').config()
 
 const getUsernameData = async () => {
     try {
-        const users = await User.find({}, 'username'); // Truy vấn chỉ lấy trường username
-        return users.map(user => user.username); // Trả về mảng username
+        const users = await User.find({}, 'username') // Truy vấn chỉ lấy trường username
+        return users.map(user => user.username) // Trả về mảng username
     } catch (error) {
-        console.error('Error fetching usernames:', error);
-        return []; // Trả về mảng rỗng nếu có lỗi
+        console.error('Error fetching usernames:', error)
+        return [] // Trả về mảng rỗng nếu có lỗi
     }
 }
 const isValidName = (name) => {
@@ -23,18 +23,18 @@ const isValidName = (name) => {
 }
 const isStrongPassword = (password) => {
     // Kiểm tra độ dài tối thiểu
-    const hasMinimumLength = password.length >= 8;
+    const hasMinimumLength = password.length >= 8
     // Kiểm tra chữ hoa
-    const hasUpperCase = /[A-Z]/.test(password);
+    const hasUpperCase = /[A-Z]/.test(password)
     // Kiểm tra chữ thường
-    const hasLowerCase = /[a-z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password)
     // Kiểm tra ký tự số
-    const hasNumber = /\d/.test(password);
+    const hasNumber = /\d/.test(password)
     // Kiểm tra ký tự đặc biệt
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
 
-    return hasMinimumLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
-};
+    return hasMinimumLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar
+}
 const authServiceRegister = {
     loginUser: async (userData) => {
         try {
@@ -108,12 +108,12 @@ const authServiceRegister = {
                 email: savedUser.email, // Địa chỉ email người nhận
                 subject: 'OTP Verification', // Tiêu đề email
                 message: `Your OTP code is ${otp}` // Nội dung email
-            };
+            }
             try {
-                await sendEmail(emailOptions);
-                console.log('Email sent successfully!');
+                await sendEmail(emailOptions)
+                console.log('Email sent successfully!')
             } catch (error) {
-                console.error('Error sending email:', error);
+                console.error('Error sending email:', error)
             }
             return { user: userWithoutPasswordOTP }
         } catch (error) {
@@ -124,44 +124,44 @@ const authServiceRegister = {
     resendOTP: async (userData) => {
         try {
             const user = await User.findOneAndUpdate(
-                { email: userData.email }, 
-                { otp_code: generateOTP(), otp_expired: new Date(Date.now() + 60000) }, 
+                { email: userData.email },
+                { otp_code: generateOTP(), otp_expired: new Date(Date.now() + 60000) },
                 { new: true }
-            );
+            )
             if (!user) {
-                return { error: 'User not found' };
+                return { error: 'User not found' }
             }
             const emailOptions = {
                 email: user.email,
                 subject: 'OTP Verification',
                 message: `Your OTP code is ${user.otp_code}`
-            };
+            }
             try {
-                await sendEmail(emailOptions);
-                console.log('Email sent successfully!');
+                await sendEmail(emailOptions)
+                console.log('Email sent successfully!')
             } catch (error) {
-                console.error('Error sending email:', error);
+                console.error('Error sending email:', error)
             }
             // eslint-disable-next-line no-unused-vars
             const { password, otp_code, ...userWithoutPasswordOTP } = user._doc
-            return { user: userWithoutPasswordOTP };
+            return { user: userWithoutPasswordOTP }
         } catch (error) {
-            console.error('Resend OTP error:', error);
-            return { error: 'An error occurred during OTP resend' };
+            console.error('Resend OTP error:', error)
+            return { error: 'An error occurred during OTP resend' }
         }
     },
     verifyEmail: async (userData) => {
         try {
-            const user = await User.findOne({ email: userData.email });
+            const user = await User.findOne({ email: userData.email })
             if (!user) {
-                return { error: 'User not found' };
+                return { error: 'User not found' }
             }
-            const OTPExpired = new Date() > new Date(user.otp_expired);
+            const OTPExpired = new Date() > new Date(user.otp_expired)
             if (user.otp_code !== userData.otp_code || OTPExpired) {
-                return { error: 'Invalid OTP code' };
+                return { error: 'Invalid OTP code' }
             }
             if (user.is_verified) {
-                return { error: 'Email already verified' };
+                return { error: 'Email already verified' }
             }
             user.otp_code = ''
             user.otp_expired = ''
@@ -171,8 +171,8 @@ const authServiceRegister = {
             const { password, otp_code, ...userWithoutPasswordOTP } = user._doc
             return { user: userWithoutPasswordOTP }
         } catch (error) {
-            console.error('Verify email error:', error);
-            return { error: 'An error occurred during email verification' };
+            console.error('Verify email error:', error)
+            return { error: 'An error occurred during email verification' }
         }
     }
 }

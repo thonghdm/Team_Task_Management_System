@@ -21,12 +21,12 @@ function convertToUsername(fullname) {
         'ù': 'u', 'ú': 'u', 'ụ': 'u', 'ủ': 'u', 'ũ': 'u',
         'ư': 'u', 'ừ': 'u', 'ứ': 'u', 'ự': 'u', 'ử': 'u', 'ữ': 'u',
         'ỳ': 'y', 'ý': 'y', 'ỵ': 'y', 'ỷ': 'y', 'ỹ': 'y',
-        'đ': 'd',
+        'đ': 'd'
     }
 
     // Hàm chuyển đổi ký tự có dấu thành không dấu
     const removeAccents = (str) => {
-        return str.toLowerCase().split('').map(char => vietnameseMap[char] || char).join('');
+        return str.toLowerCase().split('').map(char => vietnameseMap[char] || char).join('')
     }
 
     // Chuyển chuỗi thành chữ thường và tách thành mảng các từ

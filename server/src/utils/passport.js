@@ -6,11 +6,10 @@ const User = require('~/models/user') // Import the Mongoose user model
 const { generateUniqueUsername } = require('~/utils/convertToUsername')
 const getUsernameData = async () => {
     try {
-        const users = await User.find({}, 'username'); // Truy vấn chỉ lấy trường username
-        return users.map(user => user.username); // Trả về mảng username
+        const users = await User.find({}, 'username') // Truy vấn chỉ lấy trường username
+        return users.map(user => user.username) // Trả về mảng username
     } catch (error) {
-        console.error('Error fetching usernames:', error);
-        return []; // Trả về mảng rỗng nếu có lỗi
+        return [] // Trả về mảng rỗng nếu có lỗi
     }
 }
 passport.use(new GoogleStrategy({
@@ -19,7 +18,6 @@ passport.use(new GoogleStrategy({
     callbackURL: '/api/auth/google/callback'
 }, async function (accessToken, refreshToken, profile, cb) {
     const tokenLogin = uuidv4()
-    console.log(profile)
     try {
         if (profile?.id) {
             let user = await User.findOne({ googleId: profile.id })
@@ -34,12 +32,12 @@ passport.use(new GoogleStrategy({
                     user.tokenLogin = tokenLogin
                     await user.save()
                 } else {
-                    const usernameData = await getUsernameData();
-                    const username = generateUniqueUsername(profile.displayName, usernameData);
+                    const usernameData = await getUsernameData()
+                    const username = generateUniqueUsername(profile.displayName, usernameData)
 
                     // Kiểm tra xem username có hợp lệ không
                     if (!username) {
-                        throw new Error('Username generation failed');
+                        throw new Error('Username generation failed')
                     }
 
                     user = new User({
@@ -53,7 +51,7 @@ passport.use(new GoogleStrategy({
                     try {
                         await user.save()
                     } catch (error) {
-                        console.log(error)
+                        return cb(error, null)
                     }
 
                 }
