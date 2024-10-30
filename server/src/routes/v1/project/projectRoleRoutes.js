@@ -9,8 +9,8 @@ Router.route('/member')
 
 // Route to update a project role
 Router.route('/member/:id')
-    .get(verifyToken, projectRoleController.getAllMemberIdProject)
-    .put(verifyToken, projectRoleController.updateRole)
+    .get(projectRoleController.getAllMemberIdProject)
+    .put(projectRoleController.updateRole)
 
 
 module.exports = Router
