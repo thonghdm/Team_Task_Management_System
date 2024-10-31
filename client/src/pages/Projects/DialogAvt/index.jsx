@@ -32,7 +32,9 @@ import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectD
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { fetchDeleteMember, fetchUpdateMemberRole } from '~/redux/project/projectRole-slice/index';
+import { fetchDeleteMember, fetchUpdateMemberRole, fetchLeaveProjectAdmin} from '~/redux/project/projectRole-slice/index';
+import { useNavigate } from 'react-router-dom';
+
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     color: theme.palette.text.primary,
@@ -67,6 +69,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
     const { members } = useSelector((state) => state.memberProject);
     const [taskCollaborators, setTaskCollaborators] = useState();
     const [roleId, setRoleId] = useState();
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -102,16 +105,16 @@ const DialogAvt = ({ open, onClose, projectName }) => {
     const refreshToken = useRefreshToken();
 
     const handleRoleChange = (newRole, roleId, memberID) => {
-        if(newRole ==="KickMember"){
+        if (newRole === "KickMember") {
             setIsAlertOpenDelete(true);
-            setRoleId(memberID); 
-        }else{
+            setRoleId(memberID);
+        } else {
             setIsAlertOpenRole(true);
-            setTaskCollaborators(newRole); 
-            setRoleId(roleId); 
+            setTaskCollaborators(newRole);
+            setRoleId(roleId);
         }
     };
-    
+
     const confirmRoleChange = async () => {
         const dataUpdate = {
             isRole: taskCollaborators,
@@ -121,7 +124,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 await dispatch(fetchUpdateMemberRole({ accesstoken: token, data: dataUpdate, roleId })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
                 toast.success(`Role updated to ${taskCollaborators}`);
-                handleCloseAlertRole(); 
+                handleCloseAlertRole();
             } catch (error) {
                 console.error(error);
                 if (error?.err === 2) {
@@ -150,7 +153,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
                 await dispatch(fetchProjectDetail({ accesstoken, projectId }));
                 toast.success('Member deleted successfully');
-                handleCloseAlertDelete(); 
+                handleCloseAlertDelete();
             } catch (error) {
                 console.error(error);
                 if (error?.err === 2) {
@@ -167,6 +170,54 @@ const DialogAvt = ({ open, onClose, projectName }) => {
         }
     };
 
+    const confirmLeaveProject = async () => {
+        const dataDelete = {
+            projectId,
+            memberId: userData?._id
+        };
+
+        const currentProjectMembers = members?.members?.filter(
+            member => member?.projectId === projectId && member?.is_active === true
+        );
+
+        if (currentProjectMembers?.length <= 1) {
+            toast.error('The project must have more than one member.');
+            return;
+        }
+
+        const adminMembers = currentProjectMembers?.filter(
+            member => member?.isRole === 'Admin'
+        );
+
+        if (adminMembers?.length <= 1) {
+            toast.error('The project must have at least one active Admin.');
+            return;
+        }
+
+        const leaveProjectAdmin = async (token) => {
+            try {
+                await dispatch(fetchLeaveProjectAdmin({ accesstoken: token, data: dataDelete })).unwrap();
+                await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
+                await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                handleLeaveProject(); 
+                navigate('/board/tasks/mytask');
+
+            } catch (error) {
+                console.error(error);
+                if (error?.err === 2) {
+                    const newToken = await refreshToken();
+                    return leaveProjectAdmin(newToken); // Retry with new token
+                }
+                toast.error(error.response?.data.message || 'Error leave project!');
+            }
+        };
+        try {
+            await leaveProjectAdmin(accesstoken);
+        } catch (error) {
+            console.error("Error leave project:", error);
+        }
+    };
+
     return (
         <>
             <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" className='scrollable'>
@@ -179,9 +230,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 <DialogContent sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
                     <Box sx={{ fontSize: '0.75rem' }}>
                         <Typography variant="subtitle1" sx={{ mb: 1 }}>Invite with email</Typography>
-
                         <UserSearch />
-
                         <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>Access settings</Typography>
                         <Select
                             fullWidth
@@ -278,7 +327,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                             onClose={handleCloseAlert}
                             projectName={projectName}
                             lable="Are you sure you want to leave this project?"
-                            onConfirm={() => console.log("OK")}
+                            onConfirm={confirmLeaveProject}
                         />
 
                         <AlertLeave

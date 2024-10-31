@@ -3,6 +3,7 @@ import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import { useTheme } from '@mui/material/styles';
 import DialogButtonAdd from './DialogButtonAdd';
+
 export default function ButtonAdd() {
     const theme = useTheme();
 
@@ -36,6 +37,7 @@ export default function ButtonAdd() {
             >
                 Add
             </Button>
+
             <DialogButtonAdd open={open} onClose={handleClose} />
         </>
     );

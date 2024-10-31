@@ -81,7 +81,7 @@ const UserSearchInput = ({
         if (accesstoken) {
             dispatch(fetchAllMembers({ accesstoken }));
         }
-    }, [dispatch, accesstoken]);
+    }, [dispatch, accesstoken,inputValue]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -271,12 +271,12 @@ const UserSearch = () => {
 
         const inviteMember = async (token) => {
             try {
-                console.log(' token' + token);
                 await dispatch(inviteMemberAsync({ accesstoken: token, inviteData: usersWithRole })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
                 await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                 handleSuccess();
             } catch (error) {
+                console.error(message);
                 if (error.err===2) {
                     try {
                         const newToken = await refreshToken();
@@ -284,8 +284,11 @@ const UserSearch = () => {
                             await inviteMember(newToken);
                         }
                     } catch (refreshError) {
-                        toast.error(refreshError?.response?.data?.message || 'Error inviting members1!');
+                        toast.error(refreshError?.response?.data?.message || 'Error inviting members!');
                     }
+                }
+                else {
+                    toast.error(error?.response?.data?.message || 'One or more users already exist');
                 }
 
             }

@@ -133,7 +133,6 @@ const Sidebar = ({ open }) => {
 
   useEffect(() => {
     if (accesstoken && userData) {
-      console.log('Dispatching with userData._id:', userData._id);
       dispatch(fetchProjectsByMemberId({ accesstoken, memberId: userData._id }));
     }
   }, [dispatch, accesstoken, userData, isLoggedIn]);
