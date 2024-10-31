@@ -88,11 +88,11 @@ const TaskList = () => {
   
 
   // Task Filtering
-  const todayTasks = tasks.filter(task => new Date(task.dueDate).toDateString() === today.toDateString());
-  const nextWeekTasks = tasks.filter(task => new Date(task.dueDate) > today && new Date(task.dueDate) <= nextWeek);
-  const recentlyAssignedTasks = tasks.filter(task => new Date(task.dueDate) > today && new Date(task.dueDate) <= threeDaysLater);
-  const overdueTasks = tasks.filter(task => new Date(task.dueDate) < today);
-  const laterTasks = tasks.filter(task => new Date(task.dueDate) > nextWeek);
+  const todayTasks = tasks?.filter(task => new Date(task?.dueDate).toDateString() === today.toDateString());
+  const nextWeekTasks = tasks?.filter(task => new Date(task?.dueDate) > today && new Date(task?.dueDate) <= nextWeek);
+  const recentlyAssignedTasks = tasks?.filter(task => new Date(task?.dueDate) > today && new Date(task?.dueDate) <= threeDaysLater);
+  const overdueTasks = tasks?.filter(task => new Date(task?.dueDate) < today);
+  const laterTasks = tasks?.filter(task => new Date(task?.dueDate) > nextWeek);
 
   return (
     <Box sx={{ color: theme.palette.text.primary, bgcolor: theme.palette.background.default }}>
@@ -101,7 +101,7 @@ const TaskList = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Do today</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {todayTasks.length > 0 ? (
+          {todayTasks?.length > 0 ? (
             <TaskTable tasks={todayTasks} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
@@ -116,7 +116,7 @@ const TaskList = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Do next week</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {nextWeekTasks.length > 0 ? (
+          {nextWeekTasks?.length > 0 ? (
             <TaskTable tasks={nextWeekTasks} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
@@ -131,7 +131,7 @@ const TaskList = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Recently assigned</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {recentlyAssignedTasks.length > 0 ? (
+          {recentlyAssignedTasks?.length > 0 ? (
             <TaskTable tasks={recentlyAssignedTasks} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
@@ -146,7 +146,7 @@ const TaskList = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Do later</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {laterTasks.length > 0 ? (
+          {laterTasks?.length > 0 ? (
             <TaskTable tasks={laterTasks} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
@@ -161,7 +161,7 @@ const TaskList = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Overdue tasks</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {overdueTasks.length > 0 ? (
+          {overdueTasks?.length > 0 ? (
             <TaskTable tasks={overdueTasks} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>

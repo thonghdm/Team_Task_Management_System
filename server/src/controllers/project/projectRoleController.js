@@ -18,8 +18,21 @@ const projectRoleController = {
             const { projectId, memberId } = req.body
             const deletedActivity = await projectRoleService.deleteMemberProject(projectId, memberId)
             res.status(StatusCodes.OK).json({
-                message: 'Role deleted successfully!',
+                message: 'Member deleted successfully!',
                 role: deletedActivity
+            })
+        } catch (error) {
+            next(error)
+        }
+    },
+
+    leaveAdminProject: async (req, res, next) => {
+        try {
+            const { projectId, memberId } = req.body
+            const leavedActivity = await projectRoleService.leaveAdminProject(projectId, memberId)
+            res.status(StatusCodes.OK).json({
+                message: 'Leave project successfully!',
+                role: leavedActivity
             })
         } catch (error) {
             next(error)

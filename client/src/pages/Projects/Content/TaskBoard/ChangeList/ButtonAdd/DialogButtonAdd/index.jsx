@@ -11,6 +11,7 @@ import { useRefreshToken } from '~/utils/useRefreshToken'
 import { getListIDProjectDetails } from '~/utils/getListIDProjectDetails';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import './styles.css'; // Ensure this import is correct
+import dayjs from 'dayjs';
 
 
 const DialogButtonAdd = ({ open, onClose }) => {
@@ -21,15 +22,17 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const [newTaskName, setNewTaskName] = useState('');
     const [newListName, setNewListName] = useState('');
     const [selectedList, setSelectedList] = useState('');
-    const [startDate, setStartDate] = useState(null);
-    const [dueDate, setDueDate] = useState(null);
+    const [startDate, setStartDate] = useState(dayjs());
+    const [dueDate, setDueDate] = useState(new Date());
     const dispatch = useDispatch();
+
     const handleStartDateChange = (date) => {
         setStartDate(date);
     };
     const handleDueDateChange = (date) => {
         setDueDate(date);
     };
+
     const { projectId } = useParams();
     const [getNameIdList, setNameIdList] = useState([]);
     const { accesstoken, userData } = useSelector(state => state.auth)
@@ -83,9 +86,8 @@ const DialogButtonAdd = ({ open, onClose }) => {
             created_by_id: userData._id,
             project_id: projectId,
             start_date: startDate,
-            due_date: dueDate,
+            end_date: dueDate,
         };
-
         const resetFormState = () => {
             setNewTaskName('');
             handleAddListDialogClose();
@@ -299,7 +301,6 @@ const DialogButtonAdd = ({ open, onClose }) => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <ToastContainer />
         </>
     );
 };

@@ -1,6 +1,6 @@
 // inviteSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { inviteMember, deleteMemberProject, updateMemberRole } from '~/apis/Project/projectRoleService';
+import { inviteMember, deleteMemberProject, updateMemberRole, leaveProjectAdmin } from '~/apis/Project/projectRoleService';
 
 // Async thunk for inviting a member
 export const inviteMemberAsync = createAsyncThunk(
@@ -32,6 +32,18 @@ export const fetchUpdateMemberRole = createAsyncThunk(
     async ({ accesstoken, data, roleId }, thunkAPI) => {
         try {
             const response = await updateMemberRole(accesstoken, data, roleId);
+            return response;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const fetchLeaveProjectAdmin = createAsyncThunk(
+    'memberProject/leaveProjectAdmin',
+    async ({ accesstoken, data }, thunkAPI) => {
+        try {
+            const response = await leaveProjectAdmin(accesstoken, data);
             return response;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response?.data || error.message);
@@ -91,6 +103,18 @@ const inviteSlice = createSlice({
                 state.members = action.payload;
             })
             .addCase(fetchUpdateMemberRole.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(fetchLeaveProjectAdmin.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchLeaveProjectAdmin.fulfilled, (state, action) => {
+                state.loading = false;
+                state.members = action.payload;
+            })
+            .addCase(fetchLeaveProjectAdmin.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });

@@ -111,7 +111,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
         >
             <DialogTitle>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6">Task Details: {taskId}</Typography>
+                    <Typography variant="h6">{taskId}</Typography>
                     <IconButton onClick={onClose} sx={{ color: theme.palette.text.primary }}>
                         <Close />
                     </IconButton>

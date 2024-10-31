@@ -66,9 +66,8 @@ const TaskBoard = () => {
     labels: task.labels.length === 0 ? ['.'] : task.labels,
     comments: task.comments.length === 0 ? 0 : task.comments.length,
     members: task.members.length === 0 ? [{ name: '.', avatar: '' }] : task.members,
-    dueDate: task.dueDate || '.'
+    dueDate: task.end_date || '.'
   }));
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };

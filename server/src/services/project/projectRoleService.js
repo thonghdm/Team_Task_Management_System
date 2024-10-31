@@ -5,8 +5,7 @@ const createNewRole = async (rolesArray) => {
         const createdOrUpdatedRoles = []
 
         for (const role of rolesArray) {
-            const { projectId, memberId } = role
-
+            const { projectId, memberId, isRole } = role
             // Check if the project exists
             const project = await Project.findById(projectId)
             if (!project) {
@@ -18,10 +17,11 @@ const createNewRole = async (rolesArray) => {
             if (existingRole) {
                 if (!existingRole.is_active) {
                     existingRole.is_active = true
+                    existingRole.isRole = isRole // Update isRole when reactivating
                     await existingRole.save()
                     createdOrUpdatedRoles.push(existingRole)
                 } else {
-                    throw new Error(`User ${memberId} is already an active member of project ${projectId}`)
+                    throw new Error('One or more users already exist')
                 }
             } else {
                 const newRole = new ProjectRole({ ...role })
@@ -68,6 +68,43 @@ const deleteMemberProject = async (projectId, memberId) => {
     }
 }
 
+
+const leaveAdminProject = async (projectId, memberId) => {
+    try {
+        // Check if the project has more than one member
+        const project = await Project.findById(projectId)
+        if (!project || project.membersId.length <= 1) {
+            throw new Error('The project must have more than one member.')
+        }
+        // Check if there is at least one Admin role remaining after deletion
+        const adminRoles = await ProjectRole.find({
+            projectId,
+            isRole: 'Admin',
+            is_active: true,
+            memberId: { $ne: memberId }
+        })
+        if (adminRoles.length === 0) {
+            throw new Error('The project must have at least one active Admin.')
+        }
+        const leaveProject = await ProjectRole.findOneAndUpdate(
+            { projectId, memberId },
+            { is_active: false },
+            { new: true }
+        )
+        await Project.findByIdAndUpdate(
+            projectId,
+            {
+                $pull: { membersId: memberId }
+            },
+            { new: true }
+        )
+        return leaveProject
+    } catch (error) {
+        throw new Error(`Error deactivating role: ${error.message}`)
+    }
+}
+
+
 const updateRole = async (roleId, updateData) => {
     try {
         const updatedRole = await ProjectRole.findByIdAndUpdate(
@@ -79,7 +116,6 @@ const updateRole = async (roleId, updateData) => {
         if (!updatedRole) {
             throw new Error('Role not found')
         }
-
         return updatedRole
     } catch (error) {
         throw new Error(`Error updating role: ${error.message}`)
@@ -90,11 +126,11 @@ const getAllMembersByProjectId = async (projectId) => {
     try {
         const members = await ProjectRole.find({ projectId: projectId })
             .populate('memberId', 'displayName email image')
-            .select('memberId isRole createdAt is_active')
+            .select('memberId projectId isRole createdAt is_active')
         return members
     } catch (error) {
         throw new Error(`Error fetching members for project ${projectId}: ${error.message}`)
     }
 }
 
-module.exports = { createNewRole, updateRole, getAllMembersByProjectId, deleteMemberProject }
+module.exports = { createNewRole, updateRole, getAllMembersByProjectId, deleteMemberProject, leaveAdminProject }

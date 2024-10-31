@@ -24,6 +24,7 @@ import Profile from '~/pages/Profile'
 import AddProjects from '~/pages/Projects/AddProjects';
 import ProjectTemplate from '~/pages/Projects/AddProjects/ProjectTemplate';
 import ProjectsBlank from './pages/Projects/AddProjects/ProjectsBlank'
+import { ToastContainer, toast } from 'react-toastify';
 
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
@@ -67,6 +68,7 @@ function ModeSelect() {
 function App() {
   return (
     <AuthProvider>
+      <ToastContainer />
       {/* <ModeSelect />
       <Box sx={{ color: 'primary.main' }}>aaaaaaaaaaaaaa</Box>
       <TextField id="outlined-search" label="Search..." type='search' size='small' /> */}
@@ -78,7 +80,7 @@ function App() {
         <Route path="/sign-up-success" element={<ProtectedRoute><SignUpSuccess /></ProtectedRoute>} /> {/* Example success route */}
         <Route path='/error' element={<Error />} />
         <Route path='/reset-password' element={<ResetPassword />} />
-        <Route path='/new-password'element={<ProtectedRoute><NewPassword /></ProtectedRoute>} />
+        <Route path='/new-password' element={<ProtectedRoute><NewPassword /></ProtectedRoute>} />
         <Route path='/profile/*' element={<Profile />} />
         <Route path='/login-success/:userId/:tokenLogin' element={<LoginSuccess />} />
         <Route path='/board/*' element={<Boards />} />

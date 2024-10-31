@@ -166,7 +166,6 @@ const ProjectBlank = () => {
                     </Paper>
                 </Box>
             </Box>
-            <ToastContainer /> {/* This is where notifications will be displayed */}
         </Box>
     );
 };

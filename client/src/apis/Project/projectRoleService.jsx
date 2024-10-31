@@ -44,6 +44,21 @@ export const deleteMemberProject = async (accesstoken, data) => {
     }
 };
 
+
+export const leaveProjectAdmin = async (accesstoken, data) => {
+    try {
+        const response = await axios.put('http://localhost:5000/api/project-role/admin', data, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const updateMemberRole = async (accesstoken, data, roleId) => {
     try {
         const response = await axios.put(`http://localhost:5000/api/project-role/member/${roleId}`, data, {

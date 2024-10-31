@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 import ProjectMenu from './ProjectMenu';
+import { ToastContainer, toast } from 'react-toastify';
 
 const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
 const Projects = () => {
