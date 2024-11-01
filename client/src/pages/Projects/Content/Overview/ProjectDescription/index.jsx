@@ -53,7 +53,7 @@ const ProjectDescription = ({ initialContent }) => {
         <Typography
           variant="body1"
           dangerouslySetInnerHTML={{ __html: content }}
-          onClick={() => setIsEditing(true)}
+          onClick={() => { setIsEditing(true), setTempContent(""); }}
         />
       )}
     </div>

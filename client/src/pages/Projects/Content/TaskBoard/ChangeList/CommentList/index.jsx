@@ -2,8 +2,10 @@ import React from 'react';
 import { Box, Avatar, Typography, IconButton, Menu, MenuItem } from '@mui/material';
 import { MoreHoriz } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
+import {FormatterTimeAgo} from '~/utils/FormatterTimeAgo';    
+// import { formatDistanceToNow } from 'date-fns';
 
-const Comment = ({img, author, content, timestamp }) => {
+const Comment = ({ img, author, content, timestamp }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -15,6 +17,7 @@ const Comment = ({img, author, content, timestamp }) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  // const relativeTime = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
 
   return (
     <Box sx={{ display: 'flex', mb: 2, color: 'white' }}>
@@ -22,11 +25,11 @@ const Comment = ({img, author, content, timestamp }) => {
         {author.charAt(0).toUpperCase()}
       </Avatar>
       <Box sx={{
-        backgroundColor:  theme.palette.background.default, // Màu nền (tùy chỉnh theo yêu cầu)
+        backgroundColor: theme.palette.background.default, // Màu nền (tùy chỉnh theo yêu cầu)
         borderRadius: '8px',        // Bo góc viền
         padding: 2,                 // Thêm khoảng cách giữa nội dung và viền
         width: '100%',
-        padding: "8px!important" ,
+        padding: "8px!important",
         color: theme.palette.text.primary            // Chiều rộng
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
@@ -34,7 +37,8 @@ const Comment = ({img, author, content, timestamp }) => {
             {author}
           </Typography>
           <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-            {timestamp}
+            {/* {relativeTime} */}
+            {FormatterTimeAgo(timestamp)}
           </Typography>
           <IconButton
             size="small"
@@ -60,9 +64,15 @@ const Comment = ({img, author, content, timestamp }) => {
 
 const CommentList = ({ comments }) => {
   return (
-    <Box sx={{ mt: 2 }}>
-      {comments.map((comment, index) => (
-        <Comment key={index} {...comment} />
+    <Box sx={{ mt: 1 }}>
+      {comments?.map((comment) => (
+        <Comment
+          key={comment?._id}
+          img={comment?.user_id?.image}
+          author={comment?.user_id?.displayName}
+          content={comment?.content}
+          timestamp={new Date(comment?.createdAt).toLocaleString()}
+        />
       ))}
     </Box>
   );
