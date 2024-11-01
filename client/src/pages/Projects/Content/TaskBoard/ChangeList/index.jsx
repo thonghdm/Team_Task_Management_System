@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box, Typography, TextField, Button, Avatar, Chip,
     Dialog, DialogTitle, DialogContent, IconButton
@@ -15,7 +15,9 @@ import ColorPickerDialog from '~/Components/ColorPickerDialog';
 import FileUploadDialog from '~/Components/FileUploadDialog';
 import FileManagementDialogs from '~/Components/FileManagementDialogs';
 import AddMemberDialog from '~/Components/AddMemberDialog';
-
+import { fetchTaskById } from '~/redux/project/task-slice';
+import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom';
 
 const dataProjectDescription = {
     content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to giveof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overvi people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
@@ -62,6 +64,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const theme = useTheme();
     const [description, setDescription] = useState(dataProjectDescription.content);
     const [cmt, setCMT] = useState("Write a comment");
+    const dispatch = useDispatch();
 
     // Show details
     const [showDetails, setShowDetails] = useState(false);
@@ -97,6 +100,14 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const handleOpenAvt = () => setOpenAvt(true);
     const handleCloseAvt = () => setOpenAvt(false);
     //
+    const { accesstoken,userData } = useSelector(state => state.auth)
+    const { task } = useSelector(state => state.task);
+    useEffect(() => {
+        if (taskId) {
+            dispatch(fetchTaskById({ taskId, accesstoken }));
+        }
+    }, [taskId, dispatch, accesstoken]);
+    ///
     return (
         <Dialog
             open={open}
@@ -111,7 +122,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
         >
             <DialogTitle>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6">{taskId}</Typography>
+                    <Typography variant="h6">{task?.task_name}</Typography>
                     <IconButton onClick={onClose} sx={{ color: theme.palette.text.primary }}>
                         <Close />
                     </IconButton>
@@ -121,30 +132,38 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ width: '100px' }}>Assignee</Typography>
-                        <Chip
-                            avatar={<Avatar sx={{ bgcolor: '#c9b458' }}>LV</Avatar>}
-                            label="Luyên Lê Văn"
-                            //   onDelete={() => {}}
-                            sx={{ bgcolor: 'transparent', border: `1px solid ${theme.palette.text.secondary}` }}
-                        />
+                        {task?.assigned_to_id?.map(member => (
+                            <Chip
+                                key={member?._id}
+                                avatar={<Avatar sx={{ bgcolor: '#c9b458' }} src={member?.image} />}
+                                label={member?.displayName}
+                                // onDelete={() => {}}
+                                sx={{ bgcolor: 'transparent', border: `1px solid ${theme.palette.text.secondary}` }}
+                            />
+                        ))}
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ width: '100px' }}>Projects</Typography>
                         <Chip
-                            label="Untitled section"
+                            label={task?.project_id?.projectName}
                             // onDelete={() => {}}
-                            sx={{ bgcolor: '#3b82f6', color: theme.palette.text.primary }}
+                            sx={{ color: theme.palette.text.primary }}
                         />
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ width: '100px' }}>Lables</Typography>
-                        <Chip
-                            label="Untitled section"
-                            // onDelete={() => {}}
-                            sx={{ bgcolor: '#3b82f6', color: theme.palette.text.primary }}
-                        />
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 7 }}>
+                            {task?.label_id?.map(lb => (
+                                <Chip
+                                    key={lb?._id}
+                                    label={lb?.name}
+                                    onDelete={() => { }}
+                                    sx={{ bgcolor: `${lb?.color}`, p: 1, color: theme.palette.text.primary }}
+                                />
+                            ))}
+                        </Box>
                         <Box sx={{ marginLeft: 'auto' }}>
                             <Button onClick={handleOpenColorPicker} startIcon={<Add />} sx={{ color: theme.palette.text.primary, textTransform: 'none' }}>
                                 Add
@@ -165,8 +184,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             sx={{ bgcolor: 'transparent', border: '1px solid #555' }}
                         />
                     </Box> */}
-                    <DueDatePicker lableDate={"Due Date"} />
-
+                     <DueDatePicker
+                        lableDate="Start Date"
+                        onDateChange={() => console.log(task?.start_date)} 
+                        initialDate={task?.start_date}
+                    />
+                    <DueDatePicker
+                        lableDate="Due Date"
+                        onDateChange={() => console.log(task?.end_date)} 
+                        initialDate={task?.end_date}
+                    />
 
                     <Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -226,7 +253,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Typography>Comments</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
-                        <Avatar sx={{ bgcolor: '#c9b458', width: 30, height: 30, fontSize: '0.8rem' }}>LV</Avatar>
+                        <Avatar sx={{ bgcolor: '#c9b458', width: 30, height: 30, fontSize: '0.8rem' }} src={userData?.image}/>
                         <Box
                             sx={{
                                 border: `1px solid ${theme.palette.background.paper}`, // Viền
@@ -241,12 +268,12 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         </Box>
                     </Box>
 
-                    <CommentList comments={mockComments} />
+                    <CommentList comments={task?.comment_id} />
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                         <Typography variant="caption">Collaborators</Typography>
                         <Avatar sx={{ bgcolor: '#c9b458', width: 25, height: 25, fontSize: '0.7rem' }}>LV</Avatar>
-                        <Avatar onClick={handleOpenAvt} sx={{ bgcolor: theme.palette.background.default,color: theme.palette.text.primary, width: 25, height: 25, fontSize: '0.7rem', cursor:'pointer' }}>+</Avatar>
+                        <Avatar onClick={handleOpenAvt} sx={{ bgcolor: theme.palette.background.default, color: theme.palette.text.primary, width: 25, height: 25, fontSize: '0.7rem', cursor: 'pointer' }}>+</Avatar>
                         <Button sx={{ color: theme.palette.text.primary, textTransform: 'none', ml: 'auto' }}>Leave task</Button>
                     </Box>
                     <AddMemberDialog open={openAvt} onClose={handleCloseAvt} />

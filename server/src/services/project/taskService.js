@@ -41,6 +41,10 @@ const getTaskById = async (taskId) => {
                 select: 'name color createdAt'
             })
             .populate({
+                path: 'project_id',
+                select: 'projectName'
+            })
+            .populate({
                 path: 'comment_id',
                 match: { is_active: true },
                 select: 'content user_id createdAt',
