@@ -70,7 +70,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
     const [taskCollaborators, setTaskCollaborators] = useState();
     const [roleId, setRoleId] = useState();
     const navigate = useNavigate();
-
+    const { projectData } = useSelector((state) => state.projectDetail);
 
     useEffect(() => {
         dispatch(fetchMemberProject({ accesstoken, projectId }));
@@ -151,11 +151,11 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 console.log(dataDelete);
                 await dispatch(fetchDeleteMember({ accesstoken: token, data: dataDelete })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
-                await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                console.log('Member deleted successfully', members);
                 toast.success('Member deleted successfully');
                 handleCloseAlertDelete();
             } catch (error) {
-                console.error(error);
                 if (error?.err === 2) {
                     const newToken = await refreshToken();
                     return deleteMember(newToken); // Retry with new token
@@ -222,7 +222,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
         <>
             <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" className='scrollable'>
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'background.default', color: 'text.primary' }}>
-                    <Typography variant="h6">{projectName}</Typography>
+                    <Typography variant="h6">{projectData?.project?.projectName}</Typography>
                     <IconButton onClick={onClose} size="small">
                         <CloseIcon />
                     </IconButton>

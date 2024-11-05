@@ -27,6 +27,7 @@ const ProjectDescription = ({ initialContent }) => {
 
   const handleSave = () => {
     setContent(tempContent);
+    console.log('Save content:', content);
     setIsEditing(false);
   };
 
@@ -34,7 +35,9 @@ const ProjectDescription = ({ initialContent }) => {
     setTempContent(content); // Revert changes
     setIsEditing(false);
   };
-
+  useEffect(() => {
+    console.log('initialContent', content);
+  },[content]);
   return (
     <div>
       {isEditing ? (
