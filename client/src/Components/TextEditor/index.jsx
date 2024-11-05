@@ -66,11 +66,12 @@ const StyledToolbar = styled('div')(({ theme }) => ({
 }));
 
 
-function TextEditor({value}) {
+function TextEditor({value, onChange }) {
   const [content, setContent] = useState(value);
 
   const handleContentChange = (value) => {
     setContent(value);
+    onChange(value);
     console.log(value);
   };
 

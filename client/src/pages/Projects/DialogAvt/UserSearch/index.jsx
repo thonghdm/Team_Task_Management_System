@@ -271,12 +271,13 @@ const UserSearch = () => {
 
         const inviteMember = async (token) => {
             try {
+                console.log('Invite member successfully!');
                 await dispatch(inviteMemberAsync({ accesstoken: token, inviteData: usersWithRole })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
                 await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                 handleSuccess();
             } catch (error) {
-                console.error(message);
+
                 if (error.err===2) {
                     try {
                         const newToken = await refreshToken();
@@ -284,10 +285,12 @@ const UserSearch = () => {
                             await inviteMember(newToken);
                         }
                     } catch (refreshError) {
+
                         toast.error(refreshError?.response?.data?.message || 'Error inviting members!');
                     }
                 }
                 else {
+                    console.log('errorasasdasdadaaaaaaaaaaaaaaaaa');
                     toast.error(error?.response?.data?.message || 'One or more users already exist');
                 }
 
