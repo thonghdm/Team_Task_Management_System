@@ -9,6 +9,7 @@ import Task from '~/pages/Task';
 import Team from '~/pages/Team';
 import Projects from '~/pages/Projects';
 // import AddProjects from '~/pages/Projects/AddProjects';
+import Inbox from '~/pages/Inbox';
 
 
 const Boards = () => {
@@ -28,6 +29,7 @@ const Boards = () => {
           <Route path="home" element={<Homes />} />
           <Route path="tasks/*" element={<Task />} />
           <Route path="team" element={<Team />} />
+          <Route path="inbox/*" element={<Inbox />} />
           {/* <Route path="/projects/new" element={<AddProjects />} /> */}
           <Route path=":projectId/*" element={<Projects />} />
         </Routes>
