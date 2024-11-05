@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper, Menu, MenuItem } from '@mui/material';
 import ProjectDescription from '~/pages/Projects/Content/Overview/ProjectDescription';
 import HomeProjectItem from '~/Components/HomeProjectItem';
@@ -8,9 +8,16 @@ import { useParams } from 'react-router-dom';
 import './styles.css';
 import ProjectStats from '~/pages/Projects/Content/Overview/ProjectStats';
 import DialogAvt from '~/pages/Projects/DialogAvt';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { extractTasksInfo } from '~/utils/extractTasksInfo';
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { ToastContainer, toast } from 'react-toastify';
 
 const dataProjectDescription = {
-  content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to give people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
+  content: `<p>
+Enter your project description</p>`
 };
 
 const profile = [
@@ -25,11 +32,47 @@ const profile = [
 const Overview = () => {
   const theme = useTheme();
   const { projectId } = useParams();
-
+  const { projectData } = useSelector((state) => state.projectDetail);
+  const { members } = useSelector((state) => state.memberProject);
+  console.log('projectDataaaaaaaaaaaaa', projectData);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const { accesstoken } = useSelector(state => state.auth)
+  const [getTasksInfo, setTasksInfo] = useState([]);
+  const dispatch = useDispatch();
+  const refreshToken = useRefreshToken();
+  useEffect(() => {
+    
+    console.log('memberssssssssssssss', members);
+  }, [dispatch, projectId, accesstoken]);
+  console.log('members', members);
+  useEffect(() => {
+    const getProjectDetail = async (token) => {
+      try {
+        await dispatch(fetchProjectDetail({ accesstoken: token, projectId })).unwrap();
+      } catch (error) {
+        if (error?.err === 2) {
+          const newToken = await refreshToken();
+          return getProjectDetail(newToken);
+        }
+        toast.error(error.response?.data.message || 'Unable to load project information!');
+      } 
+    };
+  
+    getProjectDetail(accesstoken);
+  
+    return () => {
+      dispatch(resetProjectDetail());
+    };
+  }, [dispatch, projectId, accesstoken]);
 
+  useEffect(() => {
+    if (projectData) {
+      const tasksInfo = extractTasksInfo(projectData?.project);
+      setTasksInfo(tasksInfo);
+    }
+  }, [projectData]);
   const handleOpenShareDialog = () => setIsShareDialogOpen(true);
   const handleCloseShareDialog = () => setIsShareDialogOpen(false);
 
@@ -54,7 +97,7 @@ const Overview = () => {
         <Typography variant="h5" gutterBottom>
           Project description
         </Typography>
-        <ProjectDescription initialContent={dataProjectDescription.content} />
+        <ProjectDescription initialContent={projectData?.project?.description||dataProjectDescription.content} />
       </Paper>
       <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
@@ -72,16 +115,18 @@ const Overview = () => {
                     onClick={handleOpenShareDialog}
                   />
                 </Grid>
-                {profile.map((user) => {
-                  const role = user.id === 1 ? "Owner" : "Member";
+                {members?.members
+                                ?.filter(member => member.is_active === true)
+                                ?.map((member) => {
+                  const role = member.id === 1 ? "Owner" : "Member";
                   return (
-                    <Grid item xs={12} sm={6} md={3} key={user.id}>
+                    <Grid item xs={12} sm={6} md={3} key={member._id}>
                       <HomeProjectItem
                         icon={
-                          user.image ? (
+                          member?.memberId?.image ? (
                             <img
-                              src={user.image}
-                              alt={user.name}
+                              src={member?.memberId?.image}
+                              alt={member?.memberId?.displayName}
                               style={{ width: 40, height: 40, borderRadius: '50%' }}
                             />
                           ) : (
@@ -95,13 +140,13 @@ const Overview = () => {
                               backgroundColor: theme.palette.primary.main,
                               color: theme.palette.primary.contrastText
                             }}>
-                              {user.name.charAt(0).toUpperCase()}
+                              {member?.memberId?.displayName.charAt(0).toUpperCase()}
                             </Typography>
                           )
                         }
                         subtitle={role}
-                        title={user.name}
-                        onClick={(event) => role === "Member" ? handleClick(event, user) : null}
+                        title={member?.memberId?.displayName}
+                        onClick={(event) => role === "Member" ? handleClick(event, member) : null}
                       />
                     </Grid>
                   );
@@ -121,6 +166,7 @@ const Overview = () => {
         open={isShareDialogOpen}
         onClose={handleCloseShareDialog}
         projectName={projectId}
+        projectData={projectData}
       />
 
       <Menu

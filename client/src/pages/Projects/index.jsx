@@ -49,7 +49,7 @@ const Projects = () => {
   const isOverViewActive = location.pathname.endsWith('/overview');
   const isListActive = location.pathname.endsWith('/task-board');
   const isBoardActive = location.pathname.endsWith('/project-board');
-
+  console.log('chạy');
 
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: 'calc(100vh - 64px)' }}>
