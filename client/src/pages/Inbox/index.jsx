@@ -5,6 +5,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ChatSidebar from '~/pages/Inbox/ChatSidebar';
 import MainLayout from './MainLayout';
 import NoChat from '~/pages/Inbox/NoChat';
+import { useTheme } from '@mui/material/styles';
+
+
 const Inbox = () => {
     // Sample chat items array
     const chatItems = [
@@ -12,12 +15,13 @@ const Inbox = () => {
         { id: 2, name: "Dien", message: "Hello, how are you?", initials: "DL" },
         { id: 3, name: "Lonâg", message: "Meeting at 10AM", initials: "AL" },
     ];
+    const theme = useTheme();
 
     return (
-        <Box sx={{ flexGrow: 1, p: 2, mt: '64px', backgroundColor: '#f0f2f5' }}>
+        <Box sx={{ flexGrow: 1, p: 2, mt: '64px', backgroundColor: theme.palette.background.paper }}>
             <Paper elevation={3} sx={{ height: 'calc(100vh - 96px)', overflow: 'hidden' }}>
                 <Grid container sx={{ height: '100%' }}>
-                    <Grid item xs={3} sx={{ borderRight: '1px solid #ddd', backgroundColor: '#fff' }}>
+                    <Grid item xs={3} sx={{ borderRight: '1px solid #ddd', backgroundColor: theme.palette.background.default  }}>
                         {chatItems.length>0&&<ChatSidebar chatItems={chatItems} />}
                     </Grid>
                     <Grid item xs={9} sx={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#fff' }}>

@@ -56,11 +56,11 @@ const ProfilePage = () => {
     const validatePhoneNumber = (phone) => {
         const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
         if (!phone) {
-            setPhoneError('Số điện thoại không được để trống');
+            setPhoneError('Phone number cannot be left blank');
             return false;
         }
         if (!phoneRegex.test(phone)) {
-            setPhoneError('Số điện thoại không hợp lệ (Phải là số điện thoại Việt Nam)');
+            setPhoneError('Invalid phone number');
             return false;
         }
         setPhoneError('');
@@ -122,13 +122,13 @@ const ProfilePage = () => {
                 URL.revokeObjectURL(previewUrl);
                 setPreviewUrl('');
             }
-            showNotification('Cập nhật thông tin thành công!', 'success');
+            showNotification('Updated information successfully!', 'success');
         } catch (error) {
             
             if (error.response?.status === 401) {
                 await refreshTokenAndUpdate();
             } else {
-                showNotification('Cập nhật thất bại: ' + error.message, 'error');
+                showNotification('Update failed: ' + error.message, 'error');
             }
         }
         finally {
@@ -166,23 +166,23 @@ const ProfilePage = () => {
                 type: actionTypes.USER_UPDATE_SUCCESS,
                 data: { userData: res.data.response },
             });
-            showNotification('Cập nhật thông tin thành công!');
+            showNotification('Updated information successfully!');
             console.log('Cập nhật thành công sau khi refresh token');
         } catch (refreshError) {
             console.error("Lỗi làm mới token:", refreshError);
             if (refreshError.response?.status === 403) {
-                showNotification('Phiên đăng nhập hết hạn, vui lòng đăng nhập lại', 'error');
+                showNotification('Login session expired, please log in again', 'error');
                 dispatch({ type: actionTypes.LOGOUT });
             }
             else {
-                showNotification('Có lỗi xảy ra khi cập nhật thông tin', 'error');
+                showNotification('An error occurred while updating information', 'error');
             }
         }
     };
 
     const handleSaveProfile = async () => {
         if (!isUserInfoChanged()) {
-            showNotification('Không có thay đổi nào để lưu!', 'info');
+            showNotification('There are no changes to save!', 'info');
             return;
         }
         if (!validatePhoneNumber(userInfo.phoneNumber)) {
@@ -311,7 +311,7 @@ const ProfilePage = () => {
                                 }
                             }}
                         >
-                            {tempAvatarFile ? 'Chọn ảnh khác' : 'Thay đổi ảnh đại diện'}
+                            {tempAvatarFile ? 'Choose another photo' : 'Change your avatar'}
                         </Button>
                     </label>
                     {tempAvatarFile && (
@@ -322,7 +322,7 @@ const ProfilePage = () => {
                                 color: theme.palette.info.main
                             }}
                         >
-                            *Nhấn "Cập nhật thông tin" để lưu ảnh đại diện mới
+                            *Click "Update information" to save the new avatar
                         </Typography>
                     )}
                 </Box>
@@ -351,7 +351,7 @@ const ProfilePage = () => {
                             <TextField
                                 fullWidth
                                 variant="outlined"
-                                label="Chức danh của bạn"
+                                label="Job Title"
                                 name="jobTitle"
                                 value={userInfo.jobTitle || ''}
                                 onChange={handleInputChange}
@@ -379,7 +379,7 @@ const ProfilePage = () => {
                             <TextField
                                 fullWidth
                                 variant="outlined"
-                                label="Phòng ban của bạn"
+                                label="Department"
                                 name="department"
                                 value={userInfo.department || ''}
                                 onChange={handleInputChange}
@@ -406,7 +406,7 @@ const ProfilePage = () => {
                             /><TextField
                                 fullWidth
                                 variant="outlined"
-                                label="Công ty của bạn"
+                                label="Company"
                                 name="company"
                                 value={userInfo.company || ''}
                                 onChange={handleInputChange}
@@ -434,7 +434,7 @@ const ProfilePage = () => {
                             <TextField
                                 fullWidth
                                 variant="outlined"
-                                label="Vị trí của bạn"
+                                label="Location"
                                 name="location"
                                 value={userInfo.location || ''}
                                 onChange={handleInputChange}
@@ -462,7 +462,7 @@ const ProfilePage = () => {
                             <TextField
                                 fullWidth
                                 variant="outlined"
-                                label="Số điện thoại của bạn"
+                                label="Phone Number"
                                 name="phoneNumber"
                                 value={userInfo.phoneNumber || ''}
                                 onChange={handleInputChange}
@@ -534,7 +534,7 @@ const ProfilePage = () => {
                                         }
                                     }}
                                 >
-                                    Trở về trang chủ
+                                    Return to home page
                                 </Button>
                                 <Button
                                     variant="contained"
@@ -547,7 +547,7 @@ const ProfilePage = () => {
                                         }
                                     }}
                                 >
-                                    Cập nhật thông tin
+                                    Update information
                                 </Button>
 
                             </Box>

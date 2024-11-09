@@ -5,9 +5,11 @@ import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import SendIcon from '@mui/icons-material/Send';
+import { useTheme } from '@mui/material/styles';
 
 const ChatInput = () => {
     const [inputValue, setInputValue] = useState('');
+    const theme = useTheme();
 
     const handleInputChange = (event) => {
         setInputValue(event.target.value);
@@ -17,11 +19,12 @@ const ChatInput = () => {
         <Box
             sx={{
                 p: 2,
+                borderBottom: '1px solid #ddd',
                 borderTop: '1px solid #ddd',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
-                backgroundColor: '#f7f7f7'
+                backgroundColor: theme.palette.background.default,
             }}
         >
             <IconButton size="small">
@@ -35,11 +38,13 @@ const ChatInput = () => {
                 size="small"
                 value={inputValue}
                 onChange={handleInputChange}
+                multiline
+                maxRows={4}
                 sx={{
-                    backgroundColor: '#fff',
+                    backgroundColor: theme.palette.background.default,
                     '& .MuiOutlinedInput-root': {
                         borderRadius: '20px',
-                    }
+                    },
                 }}
             />
 

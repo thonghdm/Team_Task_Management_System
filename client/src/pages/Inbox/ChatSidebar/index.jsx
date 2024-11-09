@@ -18,7 +18,7 @@ const chatItems = [
 
 const ChatSidebar = () => {
     return (
-        <Box sx={{ height: '89vh', display: 'flex', flexDirection: 'column' }} className="scrollable">
+        <Box sx={{ height: '85vh', display: 'flex', flexDirection: 'column' }} className="scrollable">
             <SearchBar />
             {chatItems.length > 0 ? (
                 <List sx={{ flex: 1, overflowY: 'auto' }}>

@@ -10,7 +10,6 @@ export const createNewComment = async (accesstoken, data) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error creating comment:', error.response?.data || error.message);
         throw error;
     }
 };
@@ -24,7 +23,21 @@ export const getCommentById = async (accesstoken, taskId) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error getting task:', error.response?.data || error.message);
         throw error;
     }
 }
+
+
+export const updateComment = async (accesstoken, updateData) => {
+    try {
+        const response = await axios.put(`http://localhost:5000/api/comment/comments`, updateData, {
+            headers: {
+                Authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};

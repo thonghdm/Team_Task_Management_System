@@ -5,9 +5,11 @@ import BlockIcon from '@mui/icons-material/Block';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import './styles.css';
+import { useTheme } from '@mui/material/styles';
 
 const SidebarRight = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const theme = useTheme();
 
     const sentFilesAndLinks = [
         { name: 'Image.png', url: 'https://www.cityguide-dubai.com/fileadmin/_processed_/3/3/csm_img-worlds-of-adventures-teaser_40e4184da1.jpg', isImage: true },
@@ -43,7 +45,10 @@ const SidebarRight = () => {
     };
 
     return (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{
+            p: 2, borderLeft: '1px solid #ddd',
+            backgroundColor: theme.palette.background.default, color: theme.palette.text.primary
+        }}>
             {/* <Typography variant="h6" gutterBottom>
                 Details
             </Typography>
@@ -69,7 +74,12 @@ const SidebarRight = () => {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 fullWidth
-                sx={{ mb: 2 }}
+                sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                        backgroundColor: theme.palette.background.paper,
+                    },
+                }}
             />
             <Divider sx={{ mb: 2 }} />
 
@@ -146,14 +156,14 @@ const SidebarRight = () => {
                 <Button
                     startIcon={<ReportIcon />}
                     onClick={handleReport}
-                    sx={{ mb: 1 }}
+                    sx={{ mb: 1, color: theme.palette.error.main }}
                 >
                     Report
                 </Button>
                 <Button
                     startIcon={<DeleteIcon />}
                     onClick={handleDelete}
-                    sx={{ mb: 1 }}
+                    sx={{ mb: 1, color: theme.palette.error.main }}
                 >
                     Delete chat
                 </Button>

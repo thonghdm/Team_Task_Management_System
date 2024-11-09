@@ -23,6 +23,21 @@ const commentController = {
         } catch (error) {
             next(error)
         }
+    },
+    updateComment: async (req, res, next) => {
+        const { _id } = req.body
+        if (!_id) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: `Comment ${ _id} is required` })
+        }
+        try {
+            const updatedComment = await commentService.updateComment(_id, req.body)
+            res.status(StatusCodes.OK).json({
+                message: 'Comment updated successfully!',
+                comment: updatedComment
+            })
+        } catch (error) {
+            next(error)
+        }
     }
 
 }

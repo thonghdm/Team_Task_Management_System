@@ -10,7 +10,6 @@ export const createNewTask = async (accesstoken, taskData) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error creating task:', error.response?.data || error.message);
         throw error;
     }
 };
@@ -25,7 +24,6 @@ export const getTasksById = async (accesstoken, taskId) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error getting task:', error.response?.data || error.message);
         throw error;
     }
 }
@@ -40,7 +38,6 @@ export const inviteMemberTask = async (accesstoken, data) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error creating task:', error.response?.data || error.message);
         throw error;
     }
 };
