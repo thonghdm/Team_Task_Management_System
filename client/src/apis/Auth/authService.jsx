@@ -33,7 +33,7 @@ export const apiLoginWithEmail = async (email, password) => {
 
 
 export const apiRegisterWithEmail = async (name, email, password) => {
-    try {
+    try {   
         const response = await axios.post('http://localhost:5000/api/auth/email-register', {
             name,
             email,

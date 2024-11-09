@@ -4,20 +4,57 @@ import { MoreHoriz } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { FormatterTimeAgo } from '~/utils/FormatterTimeAgo';
 import ProjectDescription from '~/pages/Projects/Content/Overview/ProjectDescription';
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom';
+
+import { editComment } from '~/redux/project/comment-slice';
+import { fetchTaskById } from '~/redux/project/task-slice';
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 
 
 const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const { userData } = useSelector(state => state.auth)
+  const { userData, accesstoken } = useSelector(state => state.auth)
+  const { projectId } = useParams();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+
+  ///
+  const refreshToken = useRefreshToken();
+  const dispatch = useDispatch();
+  ///
+  const handleClose = async () => {
+    const commentData = {
+      _id: commentID,
+      is_active: false,
+    };
+    const editComments = async (token) => {
+      try {
+        const resultAction = await dispatch(editComment({ accesstoken: token, data: commentData }));
+
+        if (editComment.rejected.match(resultAction)) {
+          if (resultAction.payload?.err === 2) {
+            const newToken = await refreshToken();
+            return editComments(newToken);
+          }
+          throw new Error('Comment edit failed');
+        }
+        await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+        await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+        toast.success('Comment delete successfully!');
+      } catch (error) {
+        throw error;
+      }
+    };
+    editComments(accesstoken);
     setAnchorEl(null);
   };
 
@@ -67,7 +104,7 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
 const CommentList = ({ comments, taskId }) => {
   return (
     <Box sx={{ mt: 1 }}>
-      {[...comments]?.reverse().map((comment,index) => (
+      {[...comments]?.reverse().map((comment, index) => (
         <Comment
           key={`${comment?._id}-${index}`}
           img={comment?.user_id?.image}

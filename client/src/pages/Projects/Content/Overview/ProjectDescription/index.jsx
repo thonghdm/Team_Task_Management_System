@@ -6,9 +6,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
+import { useParams } from 'react-router-dom';
 
 import { createComment, editComment } from '~/redux/project/comment-slice';
 import { fetchTaskById } from '~/redux/project/task-slice';
+import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 
 const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true, context, taskId=null, commentID = "" }) => {
   const dispatch = useDispatch();
@@ -16,6 +18,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
   const [content, setContent] = useState(initialContent);
   const [tempContent, setTempContent] = useState(initialContent); // temporary content for editing
   const editorRef = useRef(null);
+  const { projectId } = useParams();
 
   const { userData, accesstoken } = useSelector(state => state.auth)
 
@@ -67,6 +70,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 throw new Error('Comment creation failed');
               }
               await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+              await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
               setIsEditing(false);
             } catch (error) {
               throw error; // Rethrow error nếu không phải error code 2

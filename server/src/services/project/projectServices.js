@@ -89,6 +89,7 @@ const getDetailsProject = async (projectId) => {
                     isActive: true
                 }
             },
+            // Lookup lists
             {
                 $lookup: {
                     from: 'lists',
@@ -97,20 +98,103 @@ const getDetailsProject = async (projectId) => {
                     as: 'lists'
                 }
             },
+            // Lookup tasks với labels
             {
                 $lookup: {
                     from: 'tasks',
-                    localField: '_id',
-                    foreignField: 'project_id',
+                    let: { projectId: '$_id' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ['$project_id', '$$projectId']
+                                }
+                            }
+                        },
+                        // Join với labels collection
+                        {
+                            $lookup: {
+                                from: 'labels',
+                                localField: 'label_id',
+                                foreignField: '_id',
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            is_active: true
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            name: 1,
+                                            color: 1,
+                                            createdAt: 1
+                                        }
+                                    }
+                                ],
+                                as: 'labels'
+                            }
+                        },
+                        // Join với comment collection
+                        {
+                            $lookup: {
+                                from: 'comments',
+                                localField: 'comment_id',
+                                foreignField: '_id',
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            is_active: true
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            content: 1
+                                        }
+                                    }
+                                ],
+                                as: 'comments'
+                            }
+                        },
+                        // Join với users collection
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'assigned_to_id',
+                                foreignField: '_id',
+                                pipeline: [
+                                    {
+                                        $match: {
+                                            is_active: true
+                                        }
+                                    },
+                                    {
+                                        $project: {
+                                            image: 1,
+                                            displayName: 1
+                                        }
+                                    }
+                                ],
+                                as: 'assigneds'
+                            }
+                        }
+                    ],
                     as: 'tasks'
+                }
+            },
+            // Thêm các thông tin thống kê (optional)
+            {
+                $addFields: {
+                    totalTasks: { $size: '$tasks' },
+                    totalLists: { $size: '$lists' }
                 }
             }
         ])
+
         return res[0] || {}
     } catch (error) {
-        throw new Error(`Error getDetailsProject: ${error.message}`)
+        throw new Error(`Error getDetailsProject: ${error.message}`);
     }
-}
+};
 ///
 const getAllByOwnerId = async (ownerId) => {
     try {

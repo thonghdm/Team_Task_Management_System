@@ -10,7 +10,6 @@ export const createNewLabel = async (accesstoken, data) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Error creating label:', error.response?.data || error.message);
         throw error;
     }
 };
