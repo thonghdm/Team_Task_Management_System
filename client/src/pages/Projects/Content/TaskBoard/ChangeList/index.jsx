@@ -18,42 +18,11 @@ import AddMemberDialog from '~/Components/AddMemberDialog';
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom';
+import { useRefreshToken } from '~/utils/useRefreshToken'
 
 const dataProjectDescription = {
     content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to giveof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overvi people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
 };
-const mockComments = [
-    {
-        img: 'https://i.pravatar.cc/300',
-        author: "Ku Huh",
-        content: "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSis task! Let's discuss the nis task! Let's discuss the nSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS",
-        timestamp: "just now"
-    },
-    {
-        img: 'https://i.pravatar.cc/300',
-        author: "Jane Doe",
-        content: "Great progress on this task! Let's discuss the next steps in our meeting tomorrow.",
-        timestamp: "2 hours ago"
-    },
-    {
-        img: 'https://i.pravatar.cc/300',
-        author: "John Smith",
-        content: "I've uploaded the latest design files to the shared folder. Please review when you have a chance.",
-        timestamp: "yesterday"
-    },
-    {
-        img: 'https://i.pravatar.cc/300',
-        author: "Alice Johnson",
-        content: "Don't forget we have a deadline coming up next week. We should prioritize the remaining tasks.",
-        timestamp: "2 days ago"
-    },
-    {
-        img: 'https://i.pravatar.cc/300',
-        author: "Bob Wilson",
-        content: "I've addressed the issues mentioned in the previous comment. The updated version is now live.",
-        timestamp: "3 days ago"
-    }
-];
 
 const activities = [
     { avatar: "LV", name: "Luyên Lê Văn", action: "created this task", timestamp: "Yesterday at 12:34am" },
@@ -100,20 +69,34 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const handleOpenAvt = () => setOpenAvt(true);
     const handleCloseAvt = () => setOpenAvt(false);
     //
-    const { accesstoken,userData } = useSelector(state => state.auth)
+    const { accesstoken, userData } = useSelector(state => state.auth)
     const { task } = useSelector(state => state.task);
+    const refreshToken = useRefreshToken();
+
     useEffect(() => {
-        if (taskId) {
-            dispatch(fetchTaskById({ taskId, accesstoken }));
-        }
-    }, [taskId, dispatch, accesstoken]);
-    ///
+        const getTaskDetail = async (token) => {
+            try {
+                const resultAction = await dispatch(fetchTaskById({ accesstoken: token, taskId }))
+                if (fetchTaskById.rejected.match(resultAction)) {
+                    if (resultAction.payload?.err === 2) {
+                        const newToken = await refreshToken();
+                        return getTaskDetail(newToken);
+                    }
+                    throw new Error('Comment creation failed');
+                }
+            } catch (error) {
+                throw error; // Rethrow error nếu không phải error code 2
+            }
+        };
+
+        getTaskDetail(accesstoken);
+    }, [dispatch, taskId, accesstoken]);
     return (
         <Dialog
             open={open}
             onClose={onClose}
             fullWidth
-            maxWidth="md" // loại bỏ giới hạn chiều rộng mặc định
+            maxWidth="lg" // loại bỏ giới hạn chiều rộng mặc định
             PaperProps={{
                 style: { backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary },
             }}
@@ -127,7 +110,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Close />
                     </IconButton>
                 </Box>
-            </DialogTitle>
+            </DialogTitle>  
             <DialogContent dividers>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -184,14 +167,14 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             sx={{ bgcolor: 'transparent', border: '1px solid #555' }}
                         />
                     </Box> */}
-                     <DueDatePicker
+                    <DueDatePicker
                         lableDate="Start Date"
-                        onDateChange={() => console.log(task?.start_date)} 
+                        onDateChange={() => console.log(task?.start_date)}
                         initialDate={task?.start_date}
                     />
                     <DueDatePicker
                         lableDate="Due Date"
-                        onDateChange={() => console.log(task?.end_date)} 
+                        onDateChange={() => console.log(task?.end_date)}
                         initialDate={task?.end_date}
                     />
 
@@ -224,7 +207,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Typography>Description</Typography>
-                        <ProjectDescription initialContent={description} />
+                        <ProjectDescription initialContent={description} context={"description"} />
                     </Box>
 
 
@@ -253,18 +236,18 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Typography>Comments</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
-                        <Avatar sx={{ bgcolor: '#c9b458', width: 30, height: 30, fontSize: '0.8rem' }} src={userData?.image}/>
+                        <Avatar sx={{ bgcolor: '#c9b458', width: 30, height: 30, fontSize: '0.8rem' }} src={userData?.image} />
                         <Box
                             sx={{
-                                border: `1px solid ${theme.palette.background.paper}`, // Viền
-                                backgroundColor: theme.palette.background.default, // Màu nền (tùy chỉnh theo yêu cầu)
-                                borderRadius: '8px',        // Bo góc viền
-                                padding: 2,                 // Thêm khoảng cách giữa nội dung và viền
+                                border: `1px solid ${theme.palette.background.paper}`,
+                                backgroundColor: theme.palette.background.default,
+                                borderRadius: '8px',
+                                padding: 2,
                                 width: '100%',
-                                padding: "8px!important"            // Chiều rộng
+                                padding: "8px!important"
                             }}
                         >
-                            <ProjectDescription initialContent={cmt} />
+                            <ProjectDescription initialContent={cmt} isLabled={false} context={"comment"} taskId={taskId} />
                         </Box>
                     </Box>
 

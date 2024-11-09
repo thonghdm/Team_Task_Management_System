@@ -20,14 +20,6 @@ const dataProjectDescription = {
 Enter your project description</p>`
 };
 
-const profile = [
-  { id: 1, name: 'Le Thi Be', email: 'hi@gmail.com', image: "https://w7.pngwing.com/pngs/895/199/png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png" },
-  { id: 3, name: 'Nguyen Van A', email: 'nguyena@gmail.com', image: "https://w7.pngwing.com/pngs/895/199/png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png" },
-  { id: 5, name: 'Nguyen Van C', email: 'nguyenc@gmail.com', image: "https://w7.pngwing.com/pngs/895/199/png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png" },
-  { id: 11, name: 'Le Thi Be', email: 'hi@gmail.com', image: "https://w7.pngwing.com/pngs/895/199/png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png" },
-  { id: 31, name: 'Nguyen Van A', email: 'nguyena@gmail.com', image: "https://w7.pngwing.com/pngs/895/199/png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png" },
-  { id: 51, name: 'Nguyen Van C', email: 'nguyenc@gmail.com', image: "https://w7.pngwing.com/pngs/895/199/png-transparent-spider-man-heroes-download-with-transparent-background-free-thumbnail.png" },
-];
 
 const Overview = () => {
   const theme = useTheme();
@@ -42,11 +34,7 @@ const Overview = () => {
   const [getTasksInfo, setTasksInfo] = useState([]);
   const dispatch = useDispatch();
   const refreshToken = useRefreshToken();
-  useEffect(() => {
-    
-    console.log('memberssssssssssssss', members);
-  }, [dispatch, projectId, accesstoken]);
-  console.log('members', members);
+
   useEffect(() => {
     const getProjectDetail = async (token) => {
       try {
@@ -67,12 +55,13 @@ const Overview = () => {
     };
   }, [dispatch, projectId, accesstoken]);
 
-  useEffect(() => {
-    if (projectData) {
-      const tasksInfo = extractTasksInfo(projectData?.project);
-      setTasksInfo(tasksInfo);
-    }
-  }, [projectData]);
+  // useEffect(() => {
+  //   if (projectData) {
+  //     const tasksInfo = extractTasksInfo(projectData?.project);
+  //     setTasksInfo(tasksInfo);
+  //   }
+  // }, [projectData]);
+
   const handleOpenShareDialog = () => setIsShareDialogOpen(true);
   const handleCloseShareDialog = () => setIsShareDialogOpen(false);
 
@@ -97,7 +86,7 @@ const Overview = () => {
         <Typography variant="h5" gutterBottom>
           Project description
         </Typography>
-        <ProjectDescription initialContent={projectData?.project?.description||dataProjectDescription.content} />
+        <ProjectDescription initialContent={projectData?.project?.description||dataProjectDescription.content} context={"description"}/>
       </Paper>
       <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
@@ -118,7 +107,7 @@ const Overview = () => {
                 {members?.members
                                 ?.filter(member => member.is_active === true)
                                 ?.map((member) => {
-                  const role = member.id === 1 ? "Owner" : "Member";
+                  const role = member.id === 1 ? "Owner" : member?.isRole;
                   return (
                     <Grid item xs={12} sm={6} md={3} key={member._id}>
                       <HomeProjectItem

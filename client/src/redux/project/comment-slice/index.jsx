@@ -1,40 +1,66 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { createNewComment } from '~/apis/Project/commentService';
+import { createNewComment, updateComment } from '~/apis/Project/commentService';
 
 export const createComment = createAsyncThunk(
     'comment/create',
     async ({ accesstoken, data }, thunkAPI) => {
         try {
-        const response = await createNewComment(accesstoken, data);
-        return response;
+            const response = await createNewComment(accesstoken, data);
+            return response;
         } catch (error) {
-        return thunkAPI.rejectWithValue(error.response?.data || error.message);
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
         }
     }
-    );
+);
+
+export const editComment = createAsyncThunk(
+    'comment/edit',
+    async ({ accesstoken, data }, thunkAPI) => {
+        try {
+            const response = await updateComment(accesstoken, data);
+            return response;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
 
 const commentSlice = createSlice({
     name: 'comment',
     initialState: {
-        comment: {},
+        comment: null,
         loading: false,
         error: null,
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
-        .addCase(createComment.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        })
-        .addCase(createComment.fulfilled, (state, action) => {
-            state.loading = false;
-            state.comment = action.payload;
-        })
-        .addCase(createComment.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload;
-        });
+            .addCase(createComment.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+                state.comment = null;
+            })
+            .addCase(createComment.fulfilled, (state, action) => {
+                state.loading = false;
+                state.comment = action.payload;
+            })
+            .addCase(createComment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            .addCase(editComment.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+                state.comment = null;
+            })
+            .addCase(editComment.fulfilled, (state, action) => {
+                state.loading = false;
+                state.comment = action.payload;
+            })
+            .addCase(editComment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            });
     },
 });
 

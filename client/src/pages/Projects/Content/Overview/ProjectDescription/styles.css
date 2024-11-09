@@ -1,0 +1,11 @@
+.project-description-content {
+    margin: 0;
+  }
+  
+  .project-description-content.is-editable {
+    cursor: pointer;
+  }
+
+  .no-margin p {
+    margin: 0;
+  }

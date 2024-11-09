@@ -96,7 +96,6 @@ const TaskBoard = () => {
   };
 
   const handleNameClick = (taskId, cellId) => {
-    console.log(`Name clicked: taskId=${taskId}, cellId=${cellId}`);
     handleOpenNameMenu(taskId);
   };
 
@@ -109,11 +108,13 @@ const TaskBoard = () => {
       switch (cellId) {
         case 'task_name':
           handleNameClick(taskId, cellId);
+          // navigate(`${taskId}`);
           break;
         default:
           console.log(`Unknown column type: ${cellId}`);
       }
     };
+
 
     return (
       <TableCell
@@ -153,6 +154,8 @@ const TaskBoard = () => {
       </TableCell>
     );
   };
+
+
 
   return (
     <>

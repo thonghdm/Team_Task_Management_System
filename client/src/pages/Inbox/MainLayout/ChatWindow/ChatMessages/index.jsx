@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Paper, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 const messages = [
     { text: 'Hi, how are you?', time: '11:00', sender: 'other' },
@@ -19,8 +20,10 @@ const messages = [
 ];
     
 const ChatMessages = () => {
+    const theme = useTheme();
+
     return (
-        <Box className="scrollable" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', backgroundColor: '#fafafa' }}>
+        <Box className="scrollable" sx={{ flexGrow: 1, p: 2, overflowY: 'auto', backgroundColor: theme.palette.background.default }}>
             {messages.map((message, index) => (
                 <Box 
                     key={index} 
@@ -36,7 +39,7 @@ const ChatMessages = () => {
                             maxWidth: '70%', 
                             mb: 1, 
                             borderRadius: 2, 
-                            backgroundColor: message.sender === 'self' ? '#c8e6c9' : '#e1f5fe',
+                            backgroundColor: message.sender === 'self' ? theme.palette.primary.main  : theme.palette.background.paper ,
                             wordBreak: 'break-word'
                         }}
                     >

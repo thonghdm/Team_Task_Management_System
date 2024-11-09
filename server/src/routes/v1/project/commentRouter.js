@@ -3,8 +3,10 @@ const verifyToken = require('~/middlewares/verifyToken')
 const Router = require('express').Router()
 
 Router.route('/comments')
-    .post(commentController.createComment)
+    .put(verifyToken, commentController.updateComment)
+    .post(verifyToken, commentController.createComment)
 
 Router.route('/comments/:id')
-    .get(commentController.getComment)
+    .get(verifyToken, commentController.getComment)
+
 module.exports = Router

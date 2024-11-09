@@ -7,9 +7,9 @@ Router.route('/by-owner')
     .post(verifyToken, taskController.createNew)
 
 Router.route('/tasks/:taskId')
-    .get(taskController.getTaskById)
+    .get(verifyToken, taskController.getTaskById)
 
 Router.route('/members')
-    .post(taskController.addMember)
+    .post(verifyToken, taskController.addMember)
 
 module.exports = Router

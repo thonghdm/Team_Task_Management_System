@@ -10,7 +10,7 @@ import inviteSlice from '~/redux/project/projectRole-slice/index';
 import memberProjectSlice from '~/redux/project/projectRole-slice/memberProjectSlice'
 
 import taskSlice from '~/redux/project/task-slice/index';
-import commentUserSlice from '~/redux/project/comment-slice/comentUser-slice/index';
+import commentUserSlice from '~/redux/project/comment-slice/commentUser-slice/index';
 import commentSlice from '~/redux/project/comment-slice/index';
 import labelSlice from '~/redux/project/label-slice/index';
 import inviteTaskUserSlice from '~/redux/project/task-slice/task-inviteUser-slice/index';
