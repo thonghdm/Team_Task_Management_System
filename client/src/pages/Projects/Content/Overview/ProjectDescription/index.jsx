@@ -39,7 +39,6 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
   const refreshToken = useRefreshToken();
 
   ///
-  const [currentTaskId, setCurrentTaskId] = useState(taskId);
   ///
   const handleSave = async () => {
     // setContent(tempContent);
@@ -67,7 +66,6 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 }
                 throw new Error('Comment creation failed');
               }
-              console.log("createComments", taskId);
               await dispatch(fetchTaskById({ accesstoken: token, taskId }));
               setIsEditing(false);
             } catch (error) {
@@ -76,7 +74,6 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
           };
           await createComments(accesstoken);
         } else {
-          console.log("editComments", taskId,currentTaskId);
           const commentData = {
             _id: commentID,
             content: tempContent,
@@ -93,7 +90,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 throw new Error('Comment edit failed');
               }
               await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-              // setContent(tempContent);
+              setContent(tempContent);
               setIsEditing(false);
 
             } catch (error) {

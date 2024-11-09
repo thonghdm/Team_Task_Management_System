@@ -26,7 +26,6 @@ const Overview = () => {
   const { projectId } = useParams();
   const { projectData } = useSelector((state) => state.projectDetail);
   const { members } = useSelector((state) => state.memberProject);
-  console.log('projectDataaaaaaaaaaaaa', projectData);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);

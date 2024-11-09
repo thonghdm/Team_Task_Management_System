@@ -7,7 +7,7 @@ import ProjectDescription from '~/pages/Projects/Content/Overview/ProjectDescrip
 import { useSelector } from 'react-redux'
 
 
-const Comment = ({ img, author, content, id, timestamp, commentID }) => {
+const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -58,13 +58,13 @@ const Comment = ({ img, author, content, id, timestamp, commentID }) => {
             <MenuItem onClick={handleClose}>Delete</MenuItem>
           </Menu>
         </Box>
-        <ProjectDescription initialContent={content} context={"comment"} commentID={commentID} />
+        <ProjectDescription initialContent={content} context={"comment"} commentID={commentID} taskId={taskId} />
       </Box>
     </Box>
   );
 };
 
-const CommentList = ({ comments }) => {
+const CommentList = ({ comments, taskId }) => {
   return (
     <Box sx={{ mt: 1 }}>
       {[...comments]?.reverse().map((comment,index) => (
@@ -76,6 +76,7 @@ const CommentList = ({ comments }) => {
           id={comment?.user_id?._id}
           commentID={comment?._id}
           timestamp={new Date(comment?.createdAt).toLocaleString()}
+          taskId={taskId}
         />
       ))}
     </Box>

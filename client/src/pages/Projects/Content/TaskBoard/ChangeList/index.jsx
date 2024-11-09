@@ -251,7 +251,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         </Box>
                     </Box>
 
-                    <CommentList comments={task?.comment_id} />
+                    <CommentList comments={task?.comment_id} taskId={taskId} />
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                         <Typography variant="caption">Collaborators</Typography>
