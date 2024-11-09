@@ -19,7 +19,7 @@ const TaskSchema = new mongoose.Schema(
             default: 'Medium'
         },
         assigned_to_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Consider using ObjectId if referencing a User model
-        created_by_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },// Consider using ObjectId
+        created_by_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' }, // Consider using ObjectId
         start_date: { type: Date },
         end_date: { type: Date },
         is_active: { type: Boolean, default: true },

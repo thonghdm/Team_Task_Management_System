@@ -5,12 +5,14 @@ import { useTheme } from '@mui/material/styles';
 import { FormatterTimeAgo } from '~/utils/FormatterTimeAgo';
 import ProjectDescription from '~/pages/Projects/Content/Overview/ProjectDescription';
 import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom';
 
 import { editComment } from '~/redux/project/comment-slice';
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 
 
 const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => {
@@ -18,6 +20,7 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const { userData, accesstoken } = useSelector(state => state.auth)
+  const { projectId } = useParams();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -45,9 +48,9 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
           throw new Error('Comment edit failed');
         }
         await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+        await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
         toast.success('Comment delete successfully!');
       } catch (error) {
-        toast.error('Error while delete comment.');
         throw error;
       }
     };

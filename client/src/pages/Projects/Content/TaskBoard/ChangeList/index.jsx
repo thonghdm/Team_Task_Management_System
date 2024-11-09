@@ -1,10 +1,10 @@
-    import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box, Typography, TextField, Button, Avatar, Chip,
     Dialog, DialogTitle, DialogContent, IconButton
 } from '@mui/material';
 import {
-    Close, CalendarToday, Add, MoreHoriz, InsertDriveFile
+    Close, CalendarToday, Add, MoreHoriz, InsertDriveFile, DensityMedium
 } from '@mui/icons-material';
 import ProjectDescription from '~/pages/Projects/Content/Overview/ProjectDescription';
 import CommentList from './CommentList';
@@ -17,8 +17,9 @@ import FileManagementDialogs from '~/Components/FileManagementDialogs';
 import AddMemberDialog from '~/Components/AddMemberDialog';
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom';
 import { useRefreshToken } from '~/utils/useRefreshToken'
+import PrioritySelector from './PrioritySelector';
+import StatusSelector from './StatusSelector';
 
 const dataProjectDescription = {
     content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to giveof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overvi people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
@@ -44,7 +45,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
     // Color picker
     const [openColorPicker, setOpenColorPicker] = useState(false);
-    const [label, setLabel] = useState({ title: '', color: '' });
+    // const [label, setLabel] = useState({ title: '', color: '' });
     const handleOpenColorPicker = () => setOpenColorPicker(true);
     const handleCloseColorPicker = (color, title) => {
         setOpenColorPicker(false);
@@ -110,7 +111,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Close />
                     </IconButton>
                 </Box>
-            </DialogTitle>  
+            </DialogTitle>
             <DialogContent dividers>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -137,7 +138,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ width: '100px' }}>Lables</Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 7 }}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 4 }}>
                             {task?.label_id?.map(lb => (
                                 <Chip
                                     key={lb?._id}
@@ -152,21 +153,39 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 Add
                             </Button>
                         </Box>
-                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} />
-                        {label.title && (
+                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId}/>
+                        {/* {label.title && (
                             <p>Created Label: {label.title} (Color: {label.color})</p>
-                        )}
+                        )} */}
                     </Box>
 
-                    {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography sx={{ width: '100px' }}>Due date</Typography>
-                        <Chip
-                            icon={<CalendarToday fontSize="small" />}
-                            label="Oct 25"
-                            onDelete={() => { }}
-                            sx={{ bgcolor: 'transparent', border: '1px solid #555' }}
-                        />
+                    {/* <Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography sx={{ width: '100px' }}>Priority</Typography>
+                            <Chip
+                                label={task?.project_id?.projectName}
+                                // onDelete={() => {}}
+                                sx={{ color: theme.palette.text.primary }}
+                            />
+                        </Box>
                     </Box> */}
+
+                    <PrioritySelector
+                        value={task?.priority}
+                        onChange={(newPriority) => {
+                            console.log('New priority:', newPriority);
+                            // Handle priority change
+                        }}
+                    />
+
+                    <StatusSelector
+                        value={task?.status}
+                        onChange={(newStatus) => {
+                            console.log('New status:', newStatus);
+                            // Handle status change
+                        }}
+                    />
+
                     <DueDatePicker
                         lableDate="Start Date"
                         onDateChange={() => console.log(task?.start_date)}

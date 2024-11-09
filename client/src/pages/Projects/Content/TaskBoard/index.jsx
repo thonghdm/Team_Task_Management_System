@@ -251,15 +251,18 @@ const TaskBoard = () => {
                   </TableCell>
                   {renderTableCell(
                     <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                      {task.task_name.length > 50 ? `${task.task_name.slice(0, 50)}...` : task.task_name}
+                      {task.task_name.length > 45 ? `${task.task_name.slice(0, 45)}...` : task.task_name}
                     </Box>,
                     task.id,
                     'task_name',
                     !task.task_name || task.task_name === '.',
-                  )
-                  }
+                  )}
 
-                  {renderTableCell(task.list_name, task.id, 'list_name', !task.list_name || task.list_name === '.')}
+                  {renderTableCell(
+                    <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    {task.list_name.length > 35 ? `${task.list_name.slice(0, 35)}...` : task.list_name}
+                  </Box>,
+                    task.list_name, task.id, 'list_name', !task.list_name || task.list_name === '.')}
 
                   {renderTableCell(
                     <Box sx={{ display: 'flex' }}>
@@ -298,7 +301,7 @@ const TaskBoard = () => {
                   )}
 
                   {renderTableCell(
-                    <Box sx={{ display: 'flex', flexWrap: 'nowrap', maxWidth: '90px', overflow: 'hidden' }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'nowrap', maxWidth: '130px', overflow: 'hidden' }}>
                       {task.labels.slice(0, 2).map((label, index) => (
                         <Chip
                           key={index}
