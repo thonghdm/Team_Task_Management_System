@@ -14,9 +14,16 @@ import {
   IconButton,
   Box,
 } from '@mui/material';
-import { Close, InsertDriveFile } from '@mui/icons-material';
+import { Close } from '@mui/icons-material';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const FileUploadDialog = ({ open, onClose }) => {
+
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { fetchFileByIdTask, updateFileByIdTaskThunk } from '~/redux/project/uploadFile-slice';
+import { useDispatch, useSelector } from 'react-redux'
+
+const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
   const [link, setLink] = useState('');
   const [displayText, setDisplayText] = useState('');
   const [file, setFile] = useState(null);
@@ -24,11 +31,45 @@ const FileUploadDialog = ({ open, onClose }) => {
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
+  ////////////////////////////////
+  const refreshToken = useRefreshToken();
+  const dispatch = useDispatch();
+  const { accesstoken, userData } = useSelector(state => state.auth)
 
   const handleInsert = () => {
-    // Handle the insert action here
-    onClose();
-  };
+    try {
+      if (!file) {
+        toast.error("File is required");
+        return;
+      }
+      const fileData = {
+        file: file,
+        entityId: taskId,
+        entityType: entityType,
+        uploadedBy: userData?._id
+      };
+      const uploadFileTask = async (token) => {
+        try {
+          const resultAction = await dispatch(updateFileByIdTaskThunk({ accesstoken: token, file: fileData }));
+          if (updateFileByIdTaskThunk.rejected.match(resultAction)) {
+            if (resultAction.payload?.err === 2) {
+              const newToken = await refreshToken();
+              return uploadFileTask(newToken);
+            }
+            throw new Error('File upload failed');
+          }
+          await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
+          toast.success("File upload successfully");
+          onClose();
+        } catch (error) {
+          throw error; // Rethrow error nếu không phải error code 2
+        }
+      };
+      uploadFileTask(accesstoken);
+    } catch (error) {
+      throw error;
+    }
+  };  
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -46,6 +87,7 @@ const FileUploadDialog = ({ open, onClose }) => {
         <Typography variant="body2" gutterBottom>
           Attach a file from your computer
         </Typography>
+
         <Typography variant="body2" color="textSecondary" gutterBottom>
           You can also drag and drop files to upload them.
         </Typography>
@@ -58,6 +100,9 @@ const FileUploadDialog = ({ open, onClose }) => {
           Choose a file
           <input type="file" hidden onChange={handleFileChange} />
         </Button>
+        {file && <Typography sx={{ mb: 2 }} variant="body2" gutterBottom>
+          {file?.name}
+        </Typography>}
         <TextField
           fullWidth
           placeholder="Find recent links or paste a new link"

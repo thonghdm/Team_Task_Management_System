@@ -21,6 +21,11 @@ import { useRefreshToken } from '~/utils/useRefreshToken'
 import PrioritySelector from './PrioritySelector';
 import StatusSelector from './StatusSelector';
 
+import { fetchFileByIdTask } from '~/redux/project/uploadFile-slice';
+import { formatFileSize } from '~/utils/formatFileSize';
+
+import FileManagementDialog from '~/Components/FileManagementDialog';
+
 const dataProjectDescription = {
     content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to giveof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overvi people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
 };
@@ -57,13 +62,6 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const [openFile, setOpenFile] = useState(false);
     const handleOpenFile = () => setOpenFile(true);
     const handleCloseFile = () => setOpenFile(false);
-    //
-
-    // manage file
-    const [openManagement, setOpenManagement] = useState(false);
-    const handleOpenManagement = () => setOpenManagement(true);
-    const handleCloseManagement = () => setOpenManagement(false);
-    //
 
     // add member
     const [openAvt, setOpenAvt] = useState(false);
@@ -92,6 +90,31 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
         getTaskDetail(accesstoken);
     }, [dispatch, taskId, accesstoken]);
+
+
+    /// get file
+    const { files } = useSelector(state => state.uploadFile);
+
+    useEffect(() => {
+        const getFileDetail = async (token) => {
+            try {
+                const resultAction = await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }))
+                if (fetchFileByIdTask.rejected.match(resultAction)) {
+                    if (resultAction.payload?.err === 2) {
+                        const newToken = await refreshToken();
+                        return getFileDetail(newToken);
+                    }
+                    throw new Error('get file failed');
+                }
+            } catch (error) {
+                throw error;
+            }
+        };
+
+        getFileDetail(accesstoken);
+    }, [dispatch, taskId, accesstoken]);
+
+    ///
     return (
         <Dialog
             open={open}
@@ -153,7 +176,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 Add
                             </Button>
                         </Box>
-                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId}/>
+                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId} />
                         {/* {label.title && (
                             <p>Created Label: {label.title} (Color: {label.color})</p>
                         )} */}
@@ -205,23 +228,27 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                     Add
                                 </Button>
                             </Box>
-                            <FileUploadDialog open={openFile} onClose={handleCloseFile} />
+                            <FileUploadDialog open={openFile} onClose={handleCloseFile} taskId={taskId} entityType={"Task"} />
                         </Box>
-                        <Box sx={{ ml: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <InsertDriveFile sx={{ color: theme.palette.text.primary }} />
-                                    <Box>
-                                        <Typography sx={{ color: theme.palette.text.primary }}>image.png</Typography>
-                                        <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.8rem' }}>Added May 28, 2018, 9:47 AM</Typography>
+                        <Box>
+                            {files?.length > 0 && (files?.map((file, index) => (
+                                <Box key={index} sx={{ ml: 3, mt: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <InsertDriveFile sx={{ color: theme.palette.text.primary }} />
+                                            <Box>
+                                                <Typography sx={{ color: theme.palette.text.primary }}>{file?.originalName}</Typography>
+                                                <Typography sx={{ color: theme.palette.text.secondary, fontSize: '0.8rem' }}>{formatFileSize(file?.size)}</Typography>
+                                            </Box>
+                                        </Box>
                                     </Box>
+                                    <FileManagementDialog fileManagement={file}/>
+                                    {/* <FileManagementDialogs open={openManagement} onClose={handleCloseManagement} /> */}
                                 </Box>
-                            </Box>
-                            <IconButton>
-                                <MoreHoriz onClick={handleOpenManagement} sx={{ color: theme.palette.text.primary }} />
-                            </IconButton>
-                            <FileManagementDialogs open={openManagement} onClose={handleCloseManagement} />
+                            )))}
                         </Box>
+
+
                     </Box>
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

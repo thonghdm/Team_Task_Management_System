@@ -73,7 +73,7 @@ const ColorPickerDialog = ({ open, onClose,taskId }) => {
               const newToken = await refreshToken();
               return createLabels(newToken);
             }
-            throw new Error('Comment creation failed');
+            throw new Error('Label creation failed');
           }
           await dispatch(fetchTaskById({ accesstoken: token, taskId }));
           await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
