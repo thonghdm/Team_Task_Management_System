@@ -94,7 +94,6 @@ const UserSearchInput = ({
             try {
                 // Simulate API call
                 await new Promise(resolve => setTimeout(resolve, 500));
-
                 const filtered = memberData?.data?.users.filter(user =>
                     (
                         user.displayName.toLowerCase().includes(inputValue.toLowerCase()) ||
@@ -102,7 +101,7 @@ const UserSearchInput = ({
                         user.username.toLowerCase().includes(inputValue.toLowerCase())) &&
                     !value.find(selected => selected._id === user._id)
                 );
-
+                console.log(filtered);
                 setOptions(filtered);
             } catch (error) {
                 console.error('Error fetching users:', error);
@@ -271,7 +270,6 @@ const UserSearch = () => {
 
         const inviteMember = async (token) => {
             try {
-                console.log('Invite member successfully!');
                 await dispatch(inviteMemberAsync({ accesstoken: token, inviteData: usersWithRole })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
                 await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
@@ -290,7 +288,6 @@ const UserSearch = () => {
                     }
                 }
                 else {
-                    console.log('errorasasdasdadaaaaaaaaaaaaaaaaa');
                     toast.error(error?.response?.data?.message || 'One or more users already exist');
                 }
 

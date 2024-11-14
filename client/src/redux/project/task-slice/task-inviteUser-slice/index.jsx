@@ -1,58 +1,68 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { inviteMemberTask } from '~/apis/Project/taskService';
+import { inviteMemberTask, updateMemberTask } from '~/apis/Project/MemberTaskService';
 
-export const inviteMember = createAsyncThunk(
-    'task/inviteTaskUser',
+export const inviteUserTask = createAsyncThunk(
+    'task/inviteUser',
     async ({ accesstoken, data }, thunkAPI) => {
         try {
-        const response = await inviteMemberTask(accesstoken, data);
-        return response;
+            const response = await inviteMemberTask(accesstoken, data);
+            return response;
         } catch (error) {
-        return thunkAPI.rejectWithValue(error.response?.data || error.message);
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
         }
     }
-    );
+);
 
-const inviteTaskUserSlice = createSlice({
-    name: 'inviteTaskUser',
+export const updateMemberTaskThunks = createAsyncThunk(
+    'task/updateMemberTask',
+    async ({ accesstoken, data }, thunkAPI) => {
+        try {
+            const response = await updateMemberTask(accesstoken, data);
+            return response;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+
+const taskInviteUserSlice = createSlice({
+    name: 'taskInviteUser',
     initialState: {
-        success: false,
+        success: {},
         loading: false,
         error: null,
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
-        .addCase(inviteMember.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        })
-        .addCase(inviteMember.fulfilled, (state) => {
-            state.loading = false;
-            state.success = true;
-        })
-        .addCase(inviteMember.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload;
-        });
+            .addCase(inviteUserTask.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(inviteUserTask.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = action.payload;
+            })
+            .addCase(inviteUserTask.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            .addCase(updateMemberTaskThunks.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateMemberTaskThunks.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = action.payload;
+            })
+            .addCase(updateMemberTaskThunks.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            });
+
     },
 });
 
-export default inviteTaskUserSlice.reducer;
-
-
-
-
-// {
-//     "message": "Member added to task successfully",
-//     "member": {
-//         "memberId": "6721dd4a0879c24f17f07766",
-//         "is_active": true,
-//         "task_id": "6723495a22bd64d3387f7011",
-//         "user_invite": "6721dc240879c24f17f0772a",
-//         "_id": "6723d0c2644877236f4ca387",
-//         "createdAt": "2024-10-31T18:47:30.081Z",
-//         "updatedAt": "2024-10-31T18:47:30.081Z",
-//         "__v": 0
-//     }
-// }
+export default taskInviteUserSlice.reducer;

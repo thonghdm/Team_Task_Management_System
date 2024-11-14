@@ -13,8 +13,6 @@ import taskSlice from '~/redux/project/task-slice/index';
 import commentUserSlice from '~/redux/project/comment-slice/commentUser-slice/index';
 import commentSlice from '~/redux/project/comment-slice/index';
 import labelSlice from '~/redux/project/label-slice/index';
-import inviteTaskUserSlice from '~/redux/project/task-slice/task-inviteUser-slice/index';
-
 import fileSlice from '~/redux/project/uploadFile-slice/index';
 
 // Cấu hình cho persist
@@ -83,11 +81,6 @@ const labelConfig = {
     whitelist: ['label'],
 };
 
-const inviteTaskUserConfig = {
-    ...commonConfig,
-    key: 'inviteTaskUser',
-    whitelist: ['inviteTaskUser'],
-};
 
 const fileConfig = {
     ...commonConfig,
@@ -108,9 +101,9 @@ const rootReducer = combineReducers({
     commentUser: persistReducer(commentUserConfig, commentUserSlice),
     comment: persistReducer(commentConfig, commentSlice),
     label: persistReducer(labelConfig, labelSlice),
-    inviteTaskUser: persistReducer(inviteTaskUserConfig, inviteTaskUserSlice),
 
     uploadFile: persistReducer(fileConfig, fileSlice),
+
 })
 
 

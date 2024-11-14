@@ -148,11 +148,9 @@ const DialogAvt = ({ open, onClose, projectName }) => {
         };
         const deleteMember = async (token) => {
             try {
-                console.log(dataDelete);
                 await dispatch(fetchDeleteMember({ accesstoken: token, data: dataDelete })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
                 await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
-                console.log('Member deleted successfully', members);
                 toast.success('Member deleted successfully');
                 handleCloseAlertDelete();
             } catch (error) {
@@ -203,7 +201,6 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 navigate('/board/tasks/mytask');
 
             } catch (error) {
-                console.error(error);
                 if (error?.err === 2) {
                     const newToken = await refreshToken();
                     return leaveProjectAdmin(newToken); // Retry with new token

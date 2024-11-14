@@ -24,11 +24,13 @@ import {
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material';
 import ProjectDetailsDialog from './ProjectDetailsDialog';
 
+import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
+
 // Styled components
 const StyledMenu = styled(Menu)(({ theme }) => ({
     '& .MuiPaper-root': {
-        backgroundColor: theme.palette.grey[900],
-        color: theme.palette.common.white,
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
         minWidth: 250,
         marginTop: theme.spacing(1)
     }
@@ -46,7 +48,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 
 const DeleteMenuItem = styled(MenuItem)(({ theme }) => ({
     '&:hover': {
-        backgroundColor: theme.palette.grey[800],
+        backgroundColor: theme.palette.background.default,
     },
     '& .MuiListItemIcon-root': {
         color: theme.palette.error.main,
@@ -74,6 +76,17 @@ const ProjectMenu = () => {
 
     const handleOpenDialog = () => {
         setOpenDialog(true);
+        handleClose();
+    };
+
+
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const handleCloseAlert = () => {
+        setIsAlertOpen(false);
+    };
+    const confirmLeaveProject = () => {
+        console.log('confirmLeaveProject');
+        handleCloseAlert();
         handleClose();
     };
 
@@ -166,7 +179,7 @@ const ProjectMenu = () => {
 
                 <StyledDivider />
 
-                <DeleteMenuItem>
+                <DeleteMenuItem  onClick={() => setIsAlertOpen(true)}>
                     <ListItemIcon>
                         <Delete fontSize="small" />
                     </ListItemIcon>
@@ -177,6 +190,16 @@ const ProjectMenu = () => {
             <ProjectDetailsDialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
+            />
+
+
+
+            <AlertLeave
+                open={isAlertOpen}
+                onClose={handleCloseAlert}
+                projectName="Confirm Delete Project"
+                lable="Are you sure you want to delete project?"
+                onConfirm={confirmLeaveProject}
             />
         </div>
     );

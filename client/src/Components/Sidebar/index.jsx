@@ -136,7 +136,6 @@ const Sidebar = ({ open }) => {
       dispatch(fetchProjectsByMemberId({ accesstoken, memberId: userData._id }));
     }
   }, [dispatch, accesstoken, userData, isLoggedIn]);
-
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Toolbar />

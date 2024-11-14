@@ -27,6 +27,7 @@ import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectD
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 
+import ExpandTask from './ChangeList/ExpandTask';
 
 
 const TaskBoard = () => {
@@ -58,7 +59,6 @@ const TaskBoard = () => {
   }, [projectData]);
 
 
-
   const updatedTasks = getTasksInfo.map(task => ({
     ...task,
     name: task.name || '.',
@@ -82,6 +82,11 @@ const TaskBoard = () => {
 
   const handleAddClick = (taskId) => {
     console.log(`Add clicked for task ${taskId}`);
+    // Thêm logic xử lý khi click vào icon Add ở đây
+  };
+
+  const handleAddClickID = (taskId) => {
+    console.log(`Add clicked for handleAddClickID ${taskId}`);
     // Thêm logic xử lý khi click vào icon Add ở đây
   };
 
@@ -151,6 +156,7 @@ const TaskBoard = () => {
             </IconButton>
           </Tooltip>
         )}
+
       </TableCell>
     );
   };
@@ -221,12 +227,12 @@ const TaskBoard = () => {
                     onMouseLeave={() => handleCellHover(null)}
                   >
                     {hoveredCell === task.id && (
-                      <Tooltip title="Expand">
+                      <Tooltip>
                         <IconButton
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAddClick(task.id);
+                            handleAddClickID(task.id);
                           }}
                           sx={{
                             position: 'absolute',
@@ -237,13 +243,14 @@ const TaskBoard = () => {
                             '&:hover': { backgroundColor: theme.palette.action.hover },
                           }}
                         >
-                          <DensityMediumIcon
+                          {/* <DensityMediumIcon
                             sx={{
                               width: '13px',
                               height: '13px',
                               cursor: 'pointer',
                             }}
-                          />
+                          /> */}
+                          <ExpandTask/>
                         </IconButton>
                       </Tooltip>
                     )}
@@ -260,8 +267,8 @@ const TaskBoard = () => {
 
                   {renderTableCell(
                     <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                    {task.list_name.length > 35 ? `${task.list_name.slice(0, 35)}...` : task.list_name}
-                  </Box>,
+                      {task.list_name.length > 35 ? `${task.list_name.slice(0, 35)}...` : task.list_name}
+                    </Box>,
                     task.list_name, task.id, 'list_name', !task.list_name || task.list_name === '.')}
 
                   {renderTableCell(

@@ -18,7 +18,7 @@ const TaskSchema = new mongoose.Schema(
             enum: ['Low', 'Medium', 'High'],
             default: 'Medium'
         },
-        assigned_to_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Consider using ObjectId if referencing a User model
+        assigned_to_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'MemberTask' }], // Consider using ObjectId if referencing a User model
         created_by_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' }, // Consider using ObjectId
         start_date: { type: Date },
         end_date: { type: Date },

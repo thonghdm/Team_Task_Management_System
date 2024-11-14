@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Typography, TextField, Button, Avatar, Chip,
-    Dialog, DialogTitle, DialogContent, IconButton
+    Dialog, DialogTitle, DialogContent, IconButton, DialogActions, DialogContentText
 } from '@mui/material';
 import {
     Close, CalendarToday, Add, MoreHoriz, InsertDriveFile, DensityMedium
@@ -20,11 +20,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import PrioritySelector from './PrioritySelector';
 import StatusSelector from './StatusSelector';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
 
 import { fetchFileByIdTask } from '~/redux/project/uploadFile-slice';
 import { formatFileSize } from '~/utils/formatFileSize';
 
 import FileManagementDialog from '~/Components/FileManagementDialog';
+import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
+import { updateMemberTaskThunks } from '~/redux/project/task-slice/task-inviteUser-slice';
+import { updateLabelThunks } from '~/redux/project/label-slice';
 
 const dataProjectDescription = {
     content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to giveof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overvi people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
@@ -67,6 +72,23 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const [openAvt, setOpenAvt] = useState(false);
     const handleOpenAvt = () => setOpenAvt(true);
     const handleCloseAvt = () => setOpenAvt(false);
+
+    ///delete assignee
+    const [openMember, setOpenMember] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
+    const handleDeleteMemberClick = (memberId) => {
+        setSelectedMember(memberId);
+        setOpenMember(true);
+    };
+
+    /// delete label
+    const [openLabel, setOpenLabel] = useState(false);
+    const [selectedLabel, setSelectedLabel] = useState(null);
+    const handleDeleteLabelClick = (labelId) => {
+        setSelectedLabel(labelId);
+        setOpenLabel(true);
+    }
+
     //
     const { accesstoken, userData } = useSelector(state => state.auth)
     const { task } = useSelector(state => state.task);
@@ -90,8 +112,6 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
         getTaskDetail(accesstoken);
     }, [dispatch, taskId, accesstoken]);
-
-
     /// get file
     const { files } = useSelector(state => state.uploadFile);
 
@@ -114,7 +134,92 @@ const ChangeList = ({ open, onClose, taskId }) => {
         getFileDetail(accesstoken);
     }, [dispatch, taskId, accesstoken]);
 
-    ///
+    const handleConfirmDeleteMember = () => {
+        try {
+            const dataDelete = {
+                _id: selectedMember,
+                is_active: false
+            };
+            const handleSuccess = () => {
+                toast.success('Delete member successfully!');
+                setOpenMember(false);
+                setSelectedMember(null);
+            };
+            const deleteMembers = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateMemberTaskThunks({
+                        accesstoken: token,
+                        data: dataDelete
+                    }));
+                    if (updateMemberTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return deleteMembers(newToken);
+                        }
+                        throw new Error('Delete members failed');
+                    }
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            // Start the invite process
+            deleteMembers(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    };
+
+    const handleCancelDeleteMember = () => {
+        setOpenMember(false);
+        setSelectedMember(null);
+    };
+
+    // delete label
+
+    const handleConfirmDeleteLabel = () => {
+        try {
+            const dataDelete = {
+                _id: selectedLabel,
+                is_active: false
+            };
+            const handleSuccess = () => {
+                toast.success('Delete label successfully!');
+                setOpenLabel(false);
+                setSelectedLabel(null);
+            };
+            const deleteLabel = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateLabelThunks({
+                        accesstoken: token,
+                        data: dataDelete
+                    }));
+                    if (updateLabelThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return deleteLabel(newToken);
+                        }
+                        throw new Error('Delete label failed');
+                    }
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            deleteLabel(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    };
+
+    const handleCancelDeleteLabel = () => {
+        setOpenLabel(false);
+        setSelectedLabel(null);
+    };
     return (
         <Dialog
             open={open}
@@ -141,13 +246,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         <Typography sx={{ width: '100px' }}>Assignee</Typography>
                         {task?.assigned_to_id?.map(member => (
                             <Chip
-                                key={member?._id}
-                                avatar={<Avatar sx={{ bgcolor: '#c9b458' }} src={member?.image} />}
-                                label={member?.displayName}
-                                // onDelete={() => {}}
+                                key={member?.memberId?._id}
+                                avatar={<Avatar sx={{ bgcolor: '#c9b458' }} src={member?.memberId?.image} />}
+                                label={member?.memberId?.displayName}
+                                onDelete={() => handleDeleteMemberClick(member?._id)}
                                 sx={{ bgcolor: 'transparent', border: `1px solid ${theme.palette.text.secondary}` }}
                             />
                         ))}
+
+
+
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -166,7 +274,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 <Chip
                                     key={lb?._id}
                                     label={lb?.name}
-                                    onDelete={() => { }}
+                                    onDelete={() => handleDeleteLabelClick(lb?._id)}
                                     sx={{ bgcolor: `${lb?.color}`, p: 1, color: theme.palette.text.primary }}
                                 />
                             ))}
@@ -242,7 +350,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                             </Box>
                                         </Box>
                                     </Box>
-                                    <FileManagementDialog fileManagement={file}/>
+                                    <FileManagementDialog fileManagement={file} />
                                     {/* <FileManagementDialogs open={openManagement} onClose={handleCloseManagement} /> */}
                                 </Box>
                             )))}
@@ -299,15 +407,44 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <CommentList comments={task?.comment_id} taskId={taskId} />
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography variant="caption">Collaborators</Typography>
-                        <Avatar sx={{ bgcolor: '#c9b458', width: 25, height: 25, fontSize: '0.7rem' }}>LV</Avatar>
-                        <Avatar onClick={handleOpenAvt} sx={{ bgcolor: theme.palette.background.default, color: theme.palette.text.primary, width: 25, height: 25, fontSize: '0.7rem', cursor: 'pointer' }}>+</Avatar>
+                        {task?.assigned_to_id
+                            ?.map((user, index) => (
+                                <Avatar
+                                    sx={{ bgcolor: '#c9b458', width: 28, height: 28, fontSize: '0.7rem' }}
+                                    key={index}
+                                    alt={user?.memberId?.displayName}
+                                    src={user?.memberId?.image}
+                                    onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }}
+                                />
+                            ))}
+
+                        <Avatar onClick={handleOpenAvt} sx={{ bgcolor: theme.palette.background.default, color: theme.palette.text.primary, width: 28, height: 28, fontSize: '0.7rem', cursor: 'pointer' }}>+</Avatar>
                         <Button sx={{ color: theme.palette.text.primary, textTransform: 'none', ml: 'auto' }}>Leave task</Button>
                     </Box>
-                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} />
+
+                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} />
                 </Box>
             </DialogContent>
+
+            {/* delete member */}
+            <AlertLeave
+                open={openMember}
+                onClose={handleCancelDeleteMember}
+                projectName="Confirm delete member"
+                lable="Are you sure you want to delete member this project?"
+                onConfirm={handleConfirmDeleteMember}
+            />
+
+            {/* delete label */}
+            <AlertLeave
+                open={openLabel}
+                onClose={handleCancelDeleteLabel}
+                projectName="Confirm delete label"
+                lable="Are you sure you want to delete label this project?"
+                onConfirm={handleConfirmDeleteLabel}
+            />
         </Dialog>
     );
 };

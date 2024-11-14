@@ -5,7 +5,7 @@ import {
     DialogContent,
     Typography,
     IconButton,
-    Box ,
+    Box,
     Button,
     Divider
 } from '@mui/material';
@@ -14,14 +14,21 @@ import { useTheme } from '@mui/material/styles';
 
 const AlertLeave = ({ open, onClose, projectName, lable, onConfirm }) => {
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'background.default', color: 'text.primary' }}>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth maxWidth="sm"
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description">
+            <DialogTitle
+                id="alert-dialog-title"
+                sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'background.default', color: 'text.primary' }}>
                 <Typography variant="h6">{projectName}</Typography>
                 <IconButton onClick={onClose} size="small">
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
-            <DialogContent sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
+            <DialogContent id="alert-dialog-description" sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
                 <Typography variant="body1" sx={{ pt: 2 }}>
                     {lable}
                 </Typography>

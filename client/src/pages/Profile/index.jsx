@@ -32,7 +32,6 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     useEffect(() => {
-        console.log('userData:', userData);
         if (isLoggedIn) {
             setUserInfo({
                 email: userData.email || '',

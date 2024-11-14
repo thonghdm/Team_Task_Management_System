@@ -35,6 +35,33 @@ const taskController = {
         } catch (error) {
             next(error)
         }
+    },
+    updateMember: async (req, res, next) => {
+        const { _id } = req.body
+        if (!_id) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: `Member ${_id} is required` })
+        }
+        try {
+            const updatedMember = await taskService.updateMemberTask(_id, req.body)
+            res.status(StatusCodes.OK).json({
+                message: 'Member updated successfully!',
+                member: updatedMember
+            })
+        } catch (error) {
+            next(error)
+        }
+    },
+    updateTaskById: async (req, res, next) => {
+        const { taskId } = req.params
+        try {
+            const task = await taskService.updateTaskById(taskId, req.body)
+            if (!task) {
+                return res.status(StatusCodes.NOT_FOUND).json({ message: 'Task not found' })
+            }
+            res.status(StatusCodes.OK).json(task)
+        } catch (error) {
+            next(error)
+        }
     }
 }
 

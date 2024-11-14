@@ -1,17 +1,30 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import {createNewLabel} from '~/apis/Project/labelService';
+import { createNewLabel, updateLabel } from '~/apis/Project/labelService';
 
 export const createLabel = createAsyncThunk(
     'label/create',
     async ({ accesstoken, data }, thunkAPI) => {
         try {
-        const response = await createNewLabel(accesstoken, data);
-        return response;
+            const response = await createNewLabel(accesstoken, data);
+            return response;
         } catch (error) {
-        return thunkAPI.rejectWithValue(error.response?.data || error.message);
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
         }
     }
-    );
+);
+
+export const updateLabelThunks = createAsyncThunk(
+    'label/update',
+    async ({ accesstoken, data }, thunkAPI) => {
+        try {
+            const response = await updateLabel(accesstoken, data);
+            return response;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
 
 const labelSlice = createSlice({
     name: 'label',
@@ -23,18 +36,32 @@ const labelSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-        .addCase(createLabel.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        })
-        .addCase(createLabel.fulfilled, (state, action) => {
-            state.loading = false;
-            state.label = action.payload;
-        })
-        .addCase(createLabel.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload;
-        });
+            .addCase(createLabel.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(createLabel.fulfilled, (state, action) => {
+                state.loading = false;
+                state.label = action.payload;
+            })
+            .addCase(createLabel.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+           
+            .addCase(updateLabelThunks.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateLabelThunks.fulfilled, (state, action) => {
+                state.loading = false;
+                state.label = action.payload;
+            })
+            .addCase(updateLabelThunks.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
     },
 });
 
