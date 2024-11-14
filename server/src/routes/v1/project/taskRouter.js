@@ -8,8 +8,10 @@ Router.route('/by-owner')
 
 Router.route('/tasks/:taskId')
     .get(verifyToken, taskController.getTaskById)
+    .put(taskController.updateTaskById)
 
 Router.route('/members')
     .post(verifyToken, taskController.addMember)
+    .put(verifyToken, taskController.updateMember)
 
 module.exports = Router

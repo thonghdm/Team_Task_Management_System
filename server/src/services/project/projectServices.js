@@ -155,10 +155,11 @@ const getDetailsProject = async (projectId) => {
                                 as: 'comments'
                             }
                         },
-                        // Join với users collection
+                        // Join với membertasks collection
                         {
                             $lookup: {
-                                from: 'users',
+                                // from: 'users',
+                                from: 'membertasks',
                                 localField: 'assigned_to_id',
                                 foreignField: '_id',
                                 pipeline: [
@@ -168,9 +169,19 @@ const getDetailsProject = async (projectId) => {
                                         }
                                     },
                                     {
+                                        $lookup: {
+                                            from: 'users',  // Assuming the 'users' collection has the desired data
+                                            localField: 'memberId',
+                                            foreignField: '_id',
+                                            as: 'userInfo'
+                                        }
+                                    },
+                                    {
                                         $project: {
-                                            image: 1,
-                                            displayName: 1
+                                            'userInfo.email': 1,
+                                            'userInfo._id': 1,
+                                            'userInfo.image': 1,
+                                            'userInfo.displayName': 1
                                         }
                                     }
                                 ],
@@ -210,10 +221,25 @@ const getAllByOwnerId = async (ownerId) => {
 
 const getAllByMemberId = async (memberId) => {
     try {
-        const projects = await Project.find({ membersId: memberId })
+        const projects = await Project.find({ membersId: memberId , isActive: true})
         return projects
     } catch (error) {
         throw new Error(error.message)
     }
 }
-module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId }
+
+const updateProjectById = async (projectId, reqBody) => {
+    try {
+        const project = await Project.findById(projectId)
+        if (!project) {
+            throw new Error('Project not found')
+        }
+       
+        Object.assign(project, reqBody)
+        const updatedProject = await project.save()
+        return updatedProject
+    } catch (error) {
+        throw new Error(`Failed to update project: ${error.message}`)
+    }
+}
+module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId,updateProjectById }

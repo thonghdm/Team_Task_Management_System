@@ -57,6 +57,17 @@ const projectController = {
         } catch (error) {
             next(error)
         }
+    },
+    updateProjectById: async (req, res, next) => {
+        try {
+            const updatedProject = await projectService.updateProjectById(req.params.id, req.body)
+            res.status(StatusCodes.OK).json({
+                message: 'Project updated successfully!',
+                project: updatedProject
+            })
+        } catch (error) {
+            next(error)
+        }
     }
 
 }

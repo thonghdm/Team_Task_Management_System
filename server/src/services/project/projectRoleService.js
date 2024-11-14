@@ -125,7 +125,7 @@ const updateRole = async (roleId, updateData) => {
 const getAllMembersByProjectId = async (projectId) => {
     try {
         const members = await ProjectRole.find({ projectId: projectId })
-            .populate('memberId', 'displayName email image')
+            .populate('memberId', 'displayName email image username')
             .select('memberId projectId isRole createdAt is_active')
         return members
     } catch (error) {

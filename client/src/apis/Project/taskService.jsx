@@ -28,9 +28,11 @@ export const getTasksById = async (accesstoken, taskId) => {
     }
 }
 
-export const inviteMemberTask = async (accesstoken, data) => {
+
+
+export const updateMemberTask = async (accesstoken, data) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/task/members', data, {
+        const response = await axios.put('http://localhost:5000/api/task/members', data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -41,7 +43,6 @@ export const inviteMemberTask = async (accesstoken, data) => {
         throw error;
     }
 };
-
 
 
 

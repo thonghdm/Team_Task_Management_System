@@ -30,8 +30,12 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
   ///
   const refreshToken = useRefreshToken();
   const dispatch = useDispatch();
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   ///
-  const handleClose = async () => {
+  const handleDelete = async () => {
     const commentData = {
       _id: commentID,
       is_active: false,
@@ -92,7 +96,7 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
             open={open}
             onClose={handleClose}
           >
-            <MenuItem onClick={handleClose}>Delete</MenuItem>
+            <MenuItem onClick={handleDelete}>Delete</MenuItem>
           </Menu>
         </Box>
         <ProjectDescription initialContent={content} context={"comment"} commentID={commentID} taskId={taskId} />
