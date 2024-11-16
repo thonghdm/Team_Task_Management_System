@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-
+import { formatName } from '~/utils/formatName';
 const HomeProjectItem = ({ icon, title, subtitle, color, onClick }) => {
   const theme = useTheme();
 
@@ -40,7 +40,7 @@ const HomeProjectItem = ({ icon, title, subtitle, color, onClick }) => {
         </Box>
         <Box>
           <Typography variant="subtitle1" sx={{ color: theme.palette.text.primary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
-            {title.length > 18 ? `${title.substring(0, 18)}...` : title}
+            {formatName(title)}
           </Typography>
           {subtitle && (
             <Typography variant="body2" sx={{ color:"text.secondary", display: 'flex'}}>

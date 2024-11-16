@@ -5,11 +5,15 @@ const createNewRole = async (rolesArray) => {
         const createdOrUpdatedRoles = []
 
         for (const role of rolesArray) {
-            const { projectId, memberId, isRole } = role
+            const { projectId, memberId, isRole, user_invite } = role
             // Check if the project exists
             const project = await Project.findById(projectId)
             if (!project) {
                 throw new Error(`Project with ID ${projectId} not found`)
+            }
+
+            if(!user_invite) {
+                throw new Error('User invite is required')
             }
 
             let existingRole = await ProjectRole.findOne({ projectId, memberId })
@@ -125,8 +129,9 @@ const updateRole = async (roleId, updateData) => {
 const getAllMembersByProjectId = async (projectId) => {
     try {
         const members = await ProjectRole.find({ projectId: projectId })
-            .populate('memberId', 'displayName email image username')
-            .select('memberId projectId isRole createdAt is_active')
+            .populate('memberId', 'displayName email image username company location jobTitle department phoneNumber')
+            .populate('user_invite', 'displayName image jobTitle ')
+            .select('memberId user_invite projectId isRole createdAt is_active')
         return members
     } catch (error) {
         throw new Error(`Error fetching members for project ${projectId}: ${error.message}`)

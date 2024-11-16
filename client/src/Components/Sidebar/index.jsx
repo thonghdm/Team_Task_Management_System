@@ -22,7 +22,7 @@ import SidebarList from '../SidebarList';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchProjectsByMemberId } from '~/redux/project/project-slice';
+import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
 const drawerWidth = 240;
@@ -108,15 +108,6 @@ const mainLinkData = [
   { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon /> },
   { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon /> },
 ];
-
-
-const projectsLinkData = [
-  { label: 'Cross-functional project p...', _id: 'project1' },
-  { label: 'My first portfolio', _id: 'project2' },
-  { label: 'uijjj', _id: 'project3' },
-  // Add more projects here to test scrolling
-];
-
 
 const teamLinkData = [
   { projectName: 'Team', _id: 'team', icon: <ReportingIcon /> },

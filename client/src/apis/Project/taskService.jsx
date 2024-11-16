@@ -44,6 +44,19 @@ export const updateMemberTask = async (accesstoken, data) => {
     }
 };
 
+export const updateTask = async (accesstoken, taskId, taskData) => {
+    try {
+        const response = await axios.put(`http://localhost:5000/api/task/tasks/${taskId}`, taskData, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
 
 
 

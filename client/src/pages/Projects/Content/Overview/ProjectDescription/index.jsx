@@ -7,12 +7,17 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { useParams } from 'react-router-dom';
-
 import { createComment, editComment } from '~/redux/project/comment-slice';
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 
-const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true, context, taskId=null, commentID = "" }) => {
+import 'react-quill/dist/quill.snow.css';
+
+import { updateTaskThunks } from '~/redux/project/task-slice';
+import { updateProjectThunk } from '~/redux/project/project-slice';
+
+
+const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true, context, taskId = null, commentID = "" }) => {
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(initialContent);
@@ -27,6 +32,11 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
       setIsEditing(false);
     }
   };
+
+  useEffect(() => {
+    setContent(initialContent);
+    setTempContent(initialContent);
+  }, [initialContent]);
 
   useEffect(() => {
     if (isEditing) {
@@ -70,7 +80,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 throw new Error('Comment creation failed');
               }
               await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-              await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+              await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               setIsEditing(false);
             } catch (error) {
               throw error; // Rethrow error nếu không phải error code 2
@@ -105,11 +115,88 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
         }
 
       }
-      else if (context === "description") {
-        console.log("description");
+      else if (context === "descriptionTask") {
+        try {
+          if (!tempContent || (content === initialContent && tempContent === initialContent)) {
+            setIsEditing(false);
+            return;
+          }
+          const dataSave = {
+            description: tempContent
+          };
+          const handleSuccess = () => {
+            toast.success('Update description task successfully!');
+            setContent(tempContent);
+            setIsEditing(false);
+          };
+          const saveDescriptionTask = async (token) => {
+            try {
+              const resultAction = await dispatch(updateTaskThunks({
+                accesstoken: token,
+                taskId: taskId,
+                taskData: dataSave
+              }));
+              if (updateTaskThunks.rejected.match(resultAction)) {
+                if (resultAction.payload?.err === 2) {
+                  const newToken = await refreshToken();
+                  return saveDescriptionTask(newToken);
+                }
+                throw new Error('Update description task failed');
+              }
+              await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+              handleSuccess();
+            } catch (error) {
+              throw error;
+            }
+          };
+          saveDescriptionTask(accesstoken);
+        }
+        catch (error) {
+          throw error;
+        }
+      }
+      else if (context === "descriptionProject") {
+        try {
+          if (!tempContent || (content === initialContent && tempContent === initialContent)) {
+            setIsEditing(false);
+            return;
+          }
+          const dataSave = {
+            description: tempContent
+          };
+          const handleSuccess = () => {
+            toast.success('Update description project successfully!');
+            setContent(tempContent);
+            setIsEditing(false);
+          };
+          const saveDescriptionProject = async (token) => {
+            try {
+              const resultAction = await dispatch(updateProjectThunk({
+                accesstoken: token,
+                projectId: projectId,
+                projectData: dataSave
+              }));
+              if (updateProjectThunk.rejected.match(resultAction)) {
+                if (resultAction.payload?.err === 2) {
+                  const newToken = await refreshToken();
+                  return saveDescriptionProject(newToken);
+                }
+                throw new Error('Update description project failed');
+              }
+              await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+              handleSuccess();
+            } catch (error) {
+              throw error;
+            }
+          };
+          saveDescriptionProject(accesstoken);
+        }
+        catch (error) {
+          throw error;
+        }
       }
     } catch (error) {
-    console.error('Error in handleSave:', error);
+      console.error('Error in handleSave:', error);
     }
   };
 
@@ -133,12 +220,15 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
           </Box>
         </div>
       ) : (
-        <Typography
-          variant="body1"
-          className="no-margin"
-          dangerouslySetInnerHTML={{ __html: content }}
-          onClick={() => { if (isEditable) setIsEditing(true) }}
-        />
+        <div
+          style={{ border: 'none' }}
+        >
+          <div
+            className="ql-editor"
+            dangerouslySetInnerHTML={{ __html: content }}
+            onClick={() => { if (isEditable) setIsEditing(true) }}
+          />
+        </div>
       )}
     </div>
   );

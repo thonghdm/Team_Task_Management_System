@@ -25,6 +25,16 @@ import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material';
 import ProjectDetailsDialog from './ProjectDetailsDialog';
 
 import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
+
+import { useDispatch, useSelector } from 'react-redux'
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { useParams } from 'react-router-dom';
+import { updateProjectThunk } from '~/redux/project/project-slice/index';
+import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
+import { useNavigate } from 'react-router-dom';
+
 
 // Styled components
 const StyledMenu = styled(Menu)(({ theme }) => ({
@@ -84,10 +94,51 @@ const ProjectMenu = () => {
     const handleCloseAlert = () => {
         setIsAlertOpen(false);
     };
+
+    ////////////////////////////////
+    const { projectId } = useParams();
+    const refreshToken = useRefreshToken();
+    const dispatch = useDispatch();
+    const { accesstoken, userData } = useSelector(state => state.auth)
+    const navigate = useNavigate();
+
     const confirmLeaveProject = () => {
-        console.log('confirmLeaveProject');
-        handleCloseAlert();
-        handleClose();
+        try {
+            const dataDelete = {
+                isActive: false
+            };
+            const handleSuccess = () => {
+                toast.success('Delete project successfully!');
+                handleCloseAlert();
+                handleClose();
+            };
+            const deleteProject = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateProjectThunk({
+                        accesstoken: token,
+                        projectId: projectId,
+                        projectData: dataDelete
+                    }));
+                    if (updateProjectThunk.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return deleteProject(newToken);
+                        }
+                        throw new Error('Delete project failed');
+                    }
+                    await dispatch(fetchProjectsByMemberId({ accesstoken: token, memberId: userData._id }));
+                    navigate('/board/tasks/mytask');
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            // Start the invite process
+            deleteProject(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
     };
 
     return (
@@ -179,7 +230,7 @@ const ProjectMenu = () => {
 
                 <StyledDivider />
 
-                <DeleteMenuItem  onClick={() => setIsAlertOpen(true)}>
+                <DeleteMenuItem onClick={() => setIsAlertOpen(true)}>
                     <ListItemIcon>
                         <Delete fontSize="small" />
                     </ListItemIcon>

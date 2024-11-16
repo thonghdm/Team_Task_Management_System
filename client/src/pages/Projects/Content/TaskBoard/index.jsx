@@ -85,10 +85,10 @@ const TaskBoard = () => {
     // Thêm logic xử lý khi click vào icon Add ở đây
   };
 
-  const handleAddClickID = (taskId) => {
-    console.log(`Add clicked for handleAddClickID ${taskId}`);
-    // Thêm logic xử lý khi click vào icon Add ở đây
-  };
+  // const handleAddClickID = (taskId) => {
+  //   console.log(`Add clicked for handleAddClickID ${taskId}`);
+  //   // Thêm logic xử lý khi click vào icon Add ở đây
+  // };
 
   // Handle Name click
   const handleOpenNameMenu = (task) => {
@@ -232,7 +232,7 @@ const TaskBoard = () => {
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAddClickID(task.id);
+                            // handleAddClickID(task.id);
                           }}
                           sx={{
                             position: 'absolute',
@@ -250,7 +250,7 @@ const TaskBoard = () => {
                               cursor: 'pointer',
                             }}
                           /> */}
-                          <ExpandTask/>
+                          <ExpandTask taskId={task.id}/>
                         </IconButton>
                       </Tooltip>
                     )}

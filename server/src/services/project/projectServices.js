@@ -102,13 +102,14 @@ const getDetailsProject = async (projectId) => {
             {
                 $lookup: {
                     from: 'tasks',
-                    let: { projectId: '$_id' },
+                    let: { projectId: '$_id'}, 
                     pipeline: [
                         {
                             $match: {
                                 $expr: {
                                     $eq: ['$project_id', '$$projectId']
-                                }
+                                },
+                                is_active: true
                             }
                         },
                         // Join với labels collection

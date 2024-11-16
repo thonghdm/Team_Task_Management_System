@@ -50,7 +50,7 @@ const ChatMessages = () => {
         overflowY: 'auto',
         backgroundColor: theme.palette.background.default
       }}
-      ref={chatContainerRef}
+      // ref={chatContainerRef}
     >
       {messages.map((message, index) => (
         <Box

@@ -1,11 +1,13 @@
 const mongoose = require('mongoose')
 
+const descriptionDefault = '<p>		<strong><em><u>Add new description</u></em></strong></p>'
+
 const TaskSchema = new mongoose.Schema(
     {
         project_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Project' }, // Ideally, use ObjectId if it's referencing a Project model
         list_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'List' }, // Ideally, use ObjectId if it's referencing a List model
         task_name: { type: String, required: true },
-        description: { type: String },
+        description: { type: String, default: descriptionDefault },
         img: { type: String },
         checklist: { type: Boolean, default: false },
         status: {

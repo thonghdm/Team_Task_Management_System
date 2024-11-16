@@ -14,6 +14,15 @@ import {
 } from '@mui/icons-material';
 import { DensityMedium as DensityMediumIcon } from '@mui/icons-material';
 import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
+
+import { updateTaskThunks } from '~/redux/project/task-slice';
+import { useDispatch, useSelector } from 'react-redux'
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useParams } from 'react-router-dom';
+
 
 
 // Styled components
@@ -46,7 +55,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     }
 }));
 
-const ExpandTask = () => {
+const ExpandTask = ({ taskId }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
@@ -62,10 +71,49 @@ const ExpandTask = () => {
     const handleCloseAlert = () => {
         setIsAlertOpen(false);
     };
+
+    ////////////////////////////////////////////////////////////////
+    const { accesstoken } = useSelector(state => state.auth)
+    const refreshToken = useRefreshToken();
+    const dispatch = useDispatch();
+    const { projectId } = useParams();
+
     const confirmLeaveProject = () => {
-        console.log('confirmLeaveProject');
-        handleCloseAlert();
-        handleClose();
+        try {
+            const dataDelete = {
+                is_active: false
+            };
+            const handleSuccess = () => {
+                toast.success('Delete task successfully!');
+                handleCloseAlert();
+                handleClose();
+            };
+            const deleteTask = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateTaskThunks({
+                        accesstoken: token,
+                        taskId: taskId,
+                        taskData: dataDelete
+                    }));
+                    if (updateTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return deleteTask(newToken);
+                        }
+                        throw new Error('Delete task failed');
+                    }
+                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            // Start the invite process
+            deleteTask(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
     };
 
     return (
