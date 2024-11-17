@@ -2,35 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import HomeProjectItem from '~/Components/HomeProjectItem';
-import { getRandomColor } from '~/utils/radomColor';
 import HomeLable from '../HomeLable';
 import './styles.css'
 import { useTheme } from '@mui/material/styles';
 
-
-const projectsLinkData = [
-  { label: 'Cross-functional project p...', link: 'project1' },
-  { label: 'My first portfolio', link: 'project2' },
-  { label: 'uijjj', link: 'project3' },
-  { label: 'Cross-functional project p...', link: 'project1' },
-  { label: 'My first portfolio', link: 'project2' },
-  { label: 'uijjj', link: 'project3' },
-  { label: 'Cross-functional project p...', link: 'project1' },
-  { label: 'My first portfolio', link: 'project2' },
-  { label: 'uijjj', link: 'project3' }
-];
-
-const HomeProjectList = () => {
-  const [projectColors, setProjectColors] = useState([]);
+const HomeProjectList = ({project}) => {
   const theme = useTheme();
-
-  useEffect(() => {
-    const colors = projectsLinkData.map(() => getRandomColor());
-    setProjectColors(colors);
-  }, []);
-
   return (
-    <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
+    <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 2 }}>
       <HomeLable lable={"Projects"} />
       <Box className="scrollable">
         <Grid container spacing={2}>
@@ -42,12 +21,13 @@ const HomeProjectList = () => {
             />
           </Grid>
 
-          {projectsLinkData.map((project, index) => (
+          {project?.map((project, index) => (
             <Grid item xs={6} key={index}>
               <HomeProjectItem
-                icon={<Typography sx={{ color: theme.palette.text.primary }}>{project.label.charAt(0)}</Typography>} // Use the first letter of the label for the icon
-                title={project.label}
-                color={projectColors[index]} // Apply the stored random color
+                icon={<Typography sx={{ color: theme.palette.text.primary }}>{project.projectName.charAt(0)}</Typography>} // Use the first letter of the label for the icon
+                title={project.projectName}
+                color={project.color}
+                maxWidth="560px"
               />
             </Grid>
           ))}

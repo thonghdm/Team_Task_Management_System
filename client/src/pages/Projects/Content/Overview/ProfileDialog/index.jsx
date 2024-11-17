@@ -65,7 +65,6 @@ const ProfileDialog = ({ open, onClose, member }) => {
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
-
   return (
     <StyledDialog
       open={open}
@@ -281,18 +280,24 @@ const ProfileDialog = ({ open, onClose, member }) => {
             </Button> */}
 
             {/* Reports To Section */}
-            <Typography variant="h6" sx={{ mb: 2, color: theme.palette.text.primary }}>
-              Reports to
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-              <Avatar alt={member?.user_invite?.displayName} src={member?.user_invite?.image} />
-              <Box>
-                <Typography sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>{member?.user_invite?.displayName}</Typography>
-                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                {member?.user_invite?.jobTitle}
+            {(member?.user_invite?._id !== member?.memberId?._id) && (
+              <>
+                <Typography variant="h6" sx={{ mb: 2, color: theme.palette.text.primary }}>
+                  Reports to
                 </Typography>
-              </Box>
-            </Box>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+                  <Avatar alt={member?.user_invite?.displayName} src={member?.user_invite?.image} />
+                  <Box>
+                    <Typography sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
+                      {member?.user_invite?.displayName}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                      {member?.user_invite?.jobTitle}
+                    </Typography>
+                  </Box>
+                </Box>
+              </>
+            )}
 
             {/* <Button
               endIcon={<KeyboardArrowRight />}

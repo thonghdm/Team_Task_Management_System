@@ -25,6 +25,8 @@ import { createNew } from '~/apis/Project/projectService';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRefreshToken } from '~/utils/useRefreshToken'
+import { getRandomColor } from '~/utils/radomColor';
+
 
 const roles = [
     { value: 'Public', label: 'My workspace', description: 'Everyone in your workspace can find and access this project.' },
@@ -56,6 +58,7 @@ const ProjectBlank = () => {
             visibility: privacy,
             ownerId: userData._id,
             membersId: [userData._id],
+            color: getRandomColor(),
         };
     
         const resetFormState = () => {

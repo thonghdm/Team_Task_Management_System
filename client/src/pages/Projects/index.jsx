@@ -21,6 +21,7 @@ import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
 import { useRefreshToken } from '~/utils/useRefreshToken';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
+import { createStarred, getStarredThunks, updateStarredThunks } from '~/redux/project/starred-slice';
 
 const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
 const Projects = () => {
@@ -30,16 +31,27 @@ const Projects = () => {
   const { accesstoken, userData } = useSelector(state => state.auth)
   const dispatch = useDispatch();
   const { projectData } = useSelector((state) => state.projectDetail);
-
   const { members } = useSelector((state) => state.memberProject);
   useEffect(() => {
     dispatch(fetchMemberProject({ accesstoken, projectId }));
   }, [dispatch, projectId, accesstoken]);
-  const [isClicked, setIsClicked] = useState(false);
+
+  const { starred } = useSelector((state) => state.starred);
+
+  // const isStarreds = starred?.data?.some(
+  //   (item) => item?.projectId?._id === projectId && item?.userId === userData?._id && item?.isStarred
+  // );
+  const isStarreds = Array.isArray(starred?.data) && starred.data.some(
+    (item) => item?.projectId?._id === projectId && item?.userId === userData?._id && item?.isStarred
+  );
+    
+  const [isClicked, setIsClicked] = useState(isStarreds);
+
 
   const handleAvatarGroupClick = () => {
     setDialogOpen(true);
   };
+
 
   const handleIconClick = () => {
     setIsClicked(!isClicked);
@@ -93,6 +105,75 @@ const Projects = () => {
       throw error;
     }
   };
+
+  /// Starred
+  const handleStarred = () => {
+    try {
+      if (isClicked === false) {
+        const data = {
+          projectId: projectId,
+          userId: userData._id
+        }
+        const handleSuccess = () => {
+          // toast.success('Update title task successfully!');
+          setIsClicked(true);
+        };
+      const saveStarredProject = async (token) => {
+          try {
+            const resultAction = await dispatch(createStarred({
+              accesstoken: token,
+              data: data
+            }));
+            if (createStarred.rejected.match(resultAction)) {
+              if (resultAction.payload?.err === 2) {
+                const newToken = await refreshToken();
+                return saveStarredProject(newToken);
+              }
+              throw new Error('Starred failed');
+            }    
+            await dispatch(getStarredThunks({ accesstoken: token, memberId: userData._id }));
+            handleSuccess();
+          } catch (error) {
+            throw error;
+          }
+        };
+        saveStarredProject(accesstoken);  
+      }
+      else {
+        const data = {
+          projectId: projectId,
+          userId: userData._id,
+          isStarred: false
+        }
+        const handleSuccess = () => {
+          // toast.success('Update title task successfully!');
+          setIsClicked(false);
+        };
+        const updateStarredProject = async (token) => {
+          try {
+            const resultAction = await dispatch(updateStarredThunks({
+              accesstoken: token,
+              data: data
+            }));
+            if (updateStarredThunks.rejected.match(resultAction)) {
+              if (resultAction.payload?.err === 2) {
+                const newToken = await refreshToken();
+                return updateStarredProject(newToken);
+              }
+              throw new Error('Starred failed');
+            }    
+            await dispatch(getStarredThunks({ accesstoken: token, memberId: userData._id }));
+            handleSuccess();
+          } catch (error) {
+            throw error;
+          }
+        };
+        updateStarredProject(accesstoken);
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: 'calc(100vh - 64px)' }}>
       <Paper elevation={3} sx={{ p: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
@@ -104,9 +185,10 @@ const Projects = () => {
                 maxWidth="1000px" t
                 itleColor="primary.main" />
             </Typography>}
+
             <IconButton
-              sx={{ color: isClicked ? 'gold' : 'text.primary', ml: 1 }}
-              onClick={handleIconClick}
+              sx={{ color: isStarreds ? 'gold' : 'text.primary', ml: 1 }}
+              onClick={handleStarred}
             >
               <GradeIcon />
 

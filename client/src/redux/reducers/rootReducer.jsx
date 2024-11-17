@@ -16,6 +16,9 @@ import labelSlice from '~/redux/project/label-slice/index';
 import fileSlice from '~/redux/project/uploadFile-slice/index';
 
 import projectThunkSlice from '~/redux/project/project-slice/index';
+import starredSlice from '~/redux/project/starred-slice/index';
+
+
 // Cấu hình cho persist
 const commonConfig = {
     storage,
@@ -93,7 +96,13 @@ const projectThunkSliceConfig = {
     ...commonConfig,
     key: 'projectThunk',
     whitelist: ['projectThunk'],
-};  
+};
+
+const starredSliceConfig = {
+    ...commonConfig,
+    key: 'starred',
+    whitelist: ['starred'],
+};
 
 
 const rootReducer = combineReducers({
@@ -111,6 +120,7 @@ const rootReducer = combineReducers({
 
     uploadFile: persistReducer(fileConfig, fileSlice),
     projectThunk: persistReducer(projectThunkSliceConfig, projectThunkSlice),
+    starred: persistReducer(starredSliceConfig, starredSlice),
 })
 
 

@@ -1,47 +1,58 @@
-import React from 'react';
-import { Box, Typography, Card, CardContent, Grid, Paper } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, Card, CardContent, Grid, Paper, MenuItem, Select } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import CircularProgress from '@mui/material/CircularProgress';
 import HomeLable from '../HomeLable';
 import { useTheme } from '@mui/material/styles';
 
-const data = [
-    { date: '30/09', created: 0, completed: 0 },
-    { date: '01/10', created: 2, completed: 0 },
-    { date: '02/10', created: 0, completed: 0 },
-    { date: '03/10', created: 4, completed: 0 },
-    { date: '04/10', created: 0, completed: 0 },
-    { date: '05/10', created: 3, completed: 0 },
-    { date: '06/10', created: 0, completed: 2 },
-];
 
-const HomeChart = () => {
-    const completedIssues = 2;
-    const totalIssues = 9;
+const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
+    const completedIssues = completed.length;
+    const totalIssues = completed.length + upcoming.length + overdue.length;
     const theme = useTheme();
+    const [period, setPeriod] = useState('last7days');
+    const handlePeriodChange = (event) => {
+        setPeriod(event.target.value);
+    };
+
 
     const progressPercentage = Math.round((completedIssues / totalIssues) * 100);
 
     return (
         <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
-            <HomeLable lable="Statistics" />
+            {/* <HomeLable lable="Statistics" /> */}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">Statistics</Typography>
+                <Box sx={{ flexGrow: 1 }} />
+                <Select
+                    value={period}
+                    onChange={handlePeriodChange}
+                    size="small"
+                    sx={{ minWidth: 120 }}
+                >
+                    <MenuItem value="last7days">Last 7 days</MenuItem>
+                    <MenuItem value="last30days">Last 30 days</MenuItem>
+                    <MenuItem value="last3months">Last 3 months</MenuItem>
+                </Select>
+            </Box>
+
             <Grid container spacing={3}>
                 <Grid item xs={12} md={9}>
                     <Card sx={{ backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
                         <CardContent>
-                            <Typography variant="h6" sx={{ textAlign: 'center' }} gutterBottom>Last 7 Days</Typography>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={data}>
+                            {/* <Typography variant="h6" sx={{ textAlign: 'center' }} gutterBottom>Last 7 Days</Typography> */}
+                            <ResponsiveContainer width="100%" height={340}>
+                                <BarChart data={dataStatics}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="date" />
-                                    <YAxis 
+                                    <YAxis
                                         allowDecimals={false}
                                         domain={[0, 'auto']}
                                         tickCount={5}
                                     />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="created" name="Created issues" fill="#8884d8" />
+                                    <Bar dataKey="due" name="Created issues" fill="#8884d8" />
                                     <Bar dataKey="completed" name="Completed issues" fill="#82ca9d" />
                                 </BarChart>
                             </ResponsiveContainer>
@@ -65,14 +76,14 @@ const HomeChart = () => {
                                         value={100}
                                         size={200}
                                         thickness={4}
-                                        sx={{ color: theme.palette.text.primary }} 
+                                        sx={{ color: theme.palette.text.primary }}
                                     />
                                     <CircularProgress
                                         variant="determinate"
                                         value={progressPercentage}
                                         size={200}
                                         thickness={4}
-                                        sx={{ color: '#8884d8', position: 'absolute', left: 0 }} 
+                                        sx={{ color: '#008000', position: 'absolute', left: 0 }}
                                     />
                                 </Box>
                                 <Box

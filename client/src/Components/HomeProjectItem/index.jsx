@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { formatName } from '~/utils/formatName';
-const HomeProjectItem = ({ icon, title, subtitle, color, onClick }) => {
+const HomeProjectItem = ({ icon, title, subtitle, color, onClick, maxWidth = "200px" }) => {
   const theme = useTheme();
 
   return (
@@ -39,11 +39,11 @@ const HomeProjectItem = ({ icon, title, subtitle, color, onClick }) => {
           {icon}
         </Box>
         <Box>
-          <Typography variant="subtitle1" sx={{ color: theme.palette.text.primary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
-            {formatName(title)}
+          <Typography variant="subtitle1" sx={{ color: theme.palette.text.primary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: maxWidth }}>
+            {maxWidth!="200px" ? title : formatName(title)}
           </Typography>
           {subtitle && (
-            <Typography variant="body2" sx={{ color:"text.secondary", display: 'flex'}}>
+            <Typography variant="body2" sx={{ color: "text.secondary", display: 'flex' }}>
               {subtitle}
             </Typography>
           )}

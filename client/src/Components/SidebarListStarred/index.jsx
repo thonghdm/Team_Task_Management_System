@@ -3,21 +3,21 @@ import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box } from 
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-const SidebarList = ({ linkData, isProject = false }) => {
+const SidebarListStarred = ({ linkData, isProject = false }) => {
   const location = useLocation();
   const path = location.pathname.split('/')[1] || ''; // Handle cases where there might not be a third segment
   const theme = useTheme();
 
   return (
     <List disablePadding>
-      {linkData?.map((item) => (
-        <ListItem key={item?.projectName} disablePadding>
+      {(Array.isArray(linkData) ? linkData : []).map((item) => (
+        <ListItem key={item?.projectId?.projectName} disablePadding>
           <ListItemButton
             component={Link}
-            to={`/board/${item?._id}`}
-            selected={path === item?._id}
+            to={`/board/${item?.projectId?._id}`}
+            selected={path === item?.projectId?._id}
             sx={{
-              backgroundColor: path === item?._id ? 'rgba(255, 255, 255, 0.08)' : 'inherit',
+              backgroundColor: path === item?.projectId?._id ? 'rgba(255, 255, 255, 0.08)' : 'inherit',
               '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.08)',
               },
@@ -30,7 +30,7 @@ const SidebarList = ({ linkData, isProject = false }) => {
                     width: 12,
                     height: 12,
                     borderRadius: 1,
-                    backgroundColor: item?.color || theme.palette.primary.main,
+                    backgroundColor: "#cd9d00",
                   }}
                 />
               ) : (
@@ -38,7 +38,7 @@ const SidebarList = ({ linkData, isProject = false }) => {
               )}
             </ListItemIcon>
             <ListItemText 
-              primary={item?.projectName}
+              primary={item?.projectId?.projectName}
               primaryTypographyProps={{
                 sx: { 
                   fontSize: 'inherit',
@@ -55,4 +55,4 @@ const SidebarList = ({ linkData, isProject = false }) => {
   );
 };
 
-export default SidebarList;
+export default SidebarListStarred;

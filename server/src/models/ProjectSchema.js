@@ -37,9 +37,9 @@ const ProjectSchema = new mongoose.Schema({
         enum: ['Public', 'Member'],
         default: 'Public'
     },
-    favorite: {
-        type: Boolean,
-        default: false
+    color: {
+        type: String,
+        default: '#000000'
     },
     isActive: {
         type: Boolean,

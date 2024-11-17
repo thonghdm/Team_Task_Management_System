@@ -16,6 +16,7 @@ const createNew = async (reqBody) => {
         const newRoleData = {
             projectId: createdProject._id,
             memberId: createdProject.membersId[0],
+            user_invite:createdProject.membersId[0],
             isRole: 'Admin'
         }
         const newRole = new ProjectRole(newRoleData)
@@ -204,9 +205,9 @@ const getDetailsProject = async (projectId) => {
 
         return res[0] || {}
     } catch (error) {
-        throw new Error(`Error getDetailsProject: ${error.message}`);
+        throw new Error(`Error getDetailsProject: ${error.message}`)
     }
-};
+}
 ///
 const getAllByOwnerId = async (ownerId) => {
     try {
@@ -219,7 +220,7 @@ const getAllByOwnerId = async (ownerId) => {
         throw new Error(error)
     }
 }
-
+///
 const getAllByMemberId = async (memberId) => {
     try {
         const projects = await Project.find({ membersId: memberId , isActive: true})
