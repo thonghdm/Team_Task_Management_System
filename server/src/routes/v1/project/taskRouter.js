@@ -8,7 +8,7 @@ Router.route('/by-owner')
 
 Router.route('/tasks/:taskId')
     .get(verifyToken, taskController.getTaskById)
-    .put(taskController.updateTaskById)
+    .put(verifyToken, taskController.updateTaskById)
 
 Router.route('/members')
     .post(verifyToken, taskController.addMember)

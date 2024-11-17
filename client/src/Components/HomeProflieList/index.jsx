@@ -1,9 +1,8 @@
-import React, { useMemo } from 'react';
-import { Typography, Paper, Grid, Box } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { Typography, Paper, Grid, Box, MenuItem, Select } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import HomeProjectItem from '~/Components/HomeProjectItem';
 import { getRandomColor } from '~/utils/radomColor';
-import HomeLable from '../HomeLable';
 import '../HomeProjectList/styles.css';
 import { useTheme } from '@mui/material/styles';
 
@@ -22,37 +21,55 @@ const HomeProflieList = () => {
   const projectColors = useMemo(() => {
     return profilesLinkData.map(() => getRandomColor());
   }, []);
+  const [period, setPeriod] = useState('frequentCollaborators');
+
+  const handlePeriodChange = (event) => {
+    setPeriod(event.target.value);
+  };
 
   return (
     <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
-      <HomeLable lable="Members" />
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">Members</Typography>
+        <Box sx={{ flexGrow: 1 }} />
+        <Select
+          value={period}
+          onChange={handlePeriodChange}
+          size="small"
+          sx={{ minWidth: 120 }}
+        >
+          <MenuItem value="frequentCollaborators">Frequent collaborators</MenuItem>
+          <MenuItem value="recentCollaborators">Recent collaborators</MenuItem>
+          <MenuItem value="starredCollaborators">Starred collaborators</MenuItem>
+        </Select>
+      </Box>
       <Box className="scrollable">
         <Grid container spacing={2}>
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <HomeProjectItem
               icon={<AddIcon sx={{ color: theme.palette.text.primary }} />}
               title="Invite member"
               color="transparent"
             />
-          </Grid>
+          </Grid> */}
 
           {profilesLinkData.map((profile, index) => (
             <Grid item xs={6} key={`${profile.id}-${index}`}>
               <HomeProjectItem
                 icon={
                   profile.image ? (
-                    <img 
-                      src={profile.image} 
-                      alt={profile.name} 
+                    <img
+                      src={profile.image}
+                      alt={profile.name}
                       style={{ width: 40, height: 40, borderRadius: '50%' }}
                     />
                   ) : (
-                    <Typography sx={{ 
-                      width: 40, 
-                      height: 40, 
-                      borderRadius: '50%', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    <Typography sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       backgroundColor: theme.palette.primary.main,
                       color: theme.palette.primary.contrastText

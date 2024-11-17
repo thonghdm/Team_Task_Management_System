@@ -68,7 +68,7 @@ function ModeSelect() {
 function App() {
   return (
     <AuthProvider>
-      <ToastContainer />
+      <ToastContainer position="bottom-left"/>
       {/* <ModeSelect />
       <Box sx={{ color: 'primary.main' }}>aaaaaaaaaaaaaa</Box>
       <TextField id="outlined-search" label="Search..." type='search' size='small' /> */}

@@ -22,8 +22,12 @@ import SidebarList from '../SidebarList';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchProjectsByMemberId } from '~/redux/project/project-slice';
+import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+
+import { getStarredThunks } from '~/redux/project/starred-slice';
+import SidebarListStarred from '../SidebarListStarred';
+
 
 const drawerWidth = 240;
 
@@ -109,15 +113,6 @@ const mainLinkData = [
   { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon /> },
 ];
 
-
-const projectsLinkData = [
-  { label: 'Cross-functional project p...', _id: 'project1' },
-  { label: 'My first portfolio', _id: 'project2' },
-  { label: 'uijjj', _id: 'project3' },
-  // Add more projects here to test scrolling
-];
-
-
 const teamLinkData = [
   { projectName: 'Team', _id: 'team', icon: <ReportingIcon /> },
 ];
@@ -132,10 +127,20 @@ const Sidebar = ({ open }) => {
   const { projects } = useSelector((state) => state.projects);
 
   useEffect(() => {
-    if (accesstoken && userData) {
+    if (accesstoken && userData?._id) {
       dispatch(fetchProjectsByMemberId({ accesstoken, memberId: userData._id }));
     }
-  }, [dispatch, accesstoken, userData, isLoggedIn]);
+  }, [dispatch, accesstoken, userData?._id]);
+
+
+  const { starred } = useSelector((state) => state.starred);
+
+  useEffect(() => {
+    if (accesstoken && userData?._id) {
+      dispatch(getStarredThunks({ accesstoken, memberId: userData._id }));
+    }
+  }, [dispatch, accesstoken,userData?._id, isLoggedIn]);
+
   return (
     <StyledDrawer variant="permanent" open={open}>
       <Toolbar />
@@ -159,14 +164,20 @@ const Sidebar = ({ open }) => {
           </Box> */}
 
           <Box>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
+            {projects?.projects.length > 0 && <Box display="flex" alignItems="center" justifyContent="space-between">
               <SectionTitle>PROJECTS</SectionTitle>
               <IconButton onClick={() => { navigate('/projects-new'), { state: { from: location.pathname } } }}>
                 <AddIcon sx={{ width: 17, mt: "3px" }} />
               </IconButton>
+            </Box>}
+            {projects?.projects && <SidebarList linkData={projects?.projects} isProject={true} open={open} />}
+          </Box>
+
+          <Box>
+            <Box display="flex" alignItems="center" justifyContent="space-between">
+              {starred?.data.length > 0 && <SectionTitle>STARRED</SectionTitle>}
             </Box>
-            {projects?.projects&&<SidebarList linkData={projects?.projects} isProject={true} open={open} />
-            }
+            {starred?.data && <SidebarListStarred linkData={starred?.data} isProject={true} open={open} />}
           </Box>
 
           <Box>

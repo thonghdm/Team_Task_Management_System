@@ -13,7 +13,7 @@ const labelController = require('~/routes/v1/project/labelRouter')
 const commentController = require('~/routes/v1/project/commentRouter')
 const uploadController = require('~/routes/v1/project/uploadFileRouter')
 const memberTaskRouter = require('~/routes/v1/project/memberTaskRouter')
-
+const starredRouter = require('~/routes/v1/project/starredRouter')
 
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
@@ -42,6 +42,8 @@ app.use('/api/label', labelController)
 app.use('/api/comment', commentController)
 app.use('/api/file', uploadController)
 app.use('/api/member-task', memberTaskRouter)
+
+app.use('/api/starred', starredRouter)
 
 app.use(errorHandling)
 const port = process.env.PORT || 8888

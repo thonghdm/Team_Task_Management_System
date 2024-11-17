@@ -13,6 +13,6 @@ Router.route('/by-member')
 
 Router.route('/:id')
     .get(verifyToken, projectController.getDetails)
-    .put(projectController.updateProjectById)
+    .put(verifyToken, projectController.updateProjectById)
 
 module.exports = Router

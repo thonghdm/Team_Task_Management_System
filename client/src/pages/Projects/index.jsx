@@ -11,27 +11,47 @@ import DialogAvt from '~/pages/Projects/DialogAvt';
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 import ProjectMenu from './ProjectMenu';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
+
+
+import EditableText from '~/Components/EditableText';
+import { updateProjectThunk } from '~/redux/project/project-slice';
+import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
+import { useRefreshToken } from '~/utils/useRefreshToken';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+
+import { createStarred, getStarredThunks, updateStarredThunks } from '~/redux/project/starred-slice';
 
 const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
 const Projects = () => {
   const { projectId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { accesstoken } = useSelector(state => state.auth)
+  const { accesstoken, userData } = useSelector(state => state.auth)
   const dispatch = useDispatch();
   const { projectData } = useSelector((state) => state.projectDetail);
-
-
   const { members } = useSelector((state) => state.memberProject);
   useEffect(() => {
     dispatch(fetchMemberProject({ accesstoken, projectId }));
   }, [dispatch, projectId, accesstoken]);
 
-  const [isClicked, setIsClicked] = useState(false);
+  const { starred } = useSelector((state) => state.starred);
+
+  // const isStarreds = starred?.data?.some(
+  //   (item) => item?.projectId?._id === projectId && item?.userId === userData?._id && item?.isStarred
+  // );
+  const isStarreds = Array.isArray(starred?.data) && starred.data.some(
+    (item) => item?.projectId?._id === projectId && item?.userId === userData?._id && item?.isStarred
+  );
+    
+  const [isClicked, setIsClicked] = useState(isStarreds);
+
 
   const handleAvatarGroupClick = () => {
     setDialogOpen(true);
   };
+
 
   const handleIconClick = () => {
     setIsClicked(!isClicked);
@@ -48,15 +68,127 @@ const Projects = () => {
   const isListActive = location.pathname.endsWith('/task-board');
   const isBoardActive = location.pathname.endsWith('/project-board');
 
+  /// save task name
+  const refreshToken = useRefreshToken();
+  const handleSaveTitle = (newText) => {
+    try {
+      const dataSave = {
+        projectName: newText
+      };
+      const handleSuccess = () => {
+        // toast.success('Update title task successfully!');
+      };
+      const saveTitleProject = async (token) => {
+        try {
+          const resultAction = await dispatch(updateProjectThunk({
+            accesstoken: token,
+            projectId: projectId,
+            projectData: dataSave
+          }));
+          if (updateProjectThunk.rejected.match(resultAction)) {
+            if (resultAction.payload?.err === 2) {
+              const newToken = await refreshToken();
+              return saveTitleProject(newToken);
+            }
+            throw new Error('Update title Project failed');
+          }
+          await dispatch(fetchProjectsByMemberId({ accesstoken: token, memberId: userData._id }));
+          await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+          handleSuccess();
+        } catch (error) {
+          throw error;
+        }
+      };
+      saveTitleProject(accesstoken);
+    }
+    catch (error) {
+      throw error;
+    }
+  };
+
+  /// Starred
+  const handleStarred = () => {
+    try {
+      if (isClicked === false) {
+        const data = {
+          projectId: projectId,
+          userId: userData._id
+        }
+        const handleSuccess = () => {
+          // toast.success('Update title task successfully!');
+          setIsClicked(true);
+        };
+      const saveStarredProject = async (token) => {
+          try {
+            const resultAction = await dispatch(createStarred({
+              accesstoken: token,
+              data: data
+            }));
+            if (createStarred.rejected.match(resultAction)) {
+              if (resultAction.payload?.err === 2) {
+                const newToken = await refreshToken();
+                return saveStarredProject(newToken);
+              }
+              throw new Error('Starred failed');
+            }    
+            await dispatch(getStarredThunks({ accesstoken: token, memberId: userData._id }));
+            handleSuccess();
+          } catch (error) {
+            throw error;
+          }
+        };
+        saveStarredProject(accesstoken);  
+      }
+      else {
+        const data = {
+          projectId: projectId,
+          userId: userData._id,
+          isStarred: false
+        }
+        const handleSuccess = () => {
+          // toast.success('Update title task successfully!');
+          setIsClicked(false);
+        };
+        const updateStarredProject = async (token) => {
+          try {
+            const resultAction = await dispatch(updateStarredThunks({
+              accesstoken: token,
+              data: data
+            }));
+            if (updateStarredThunks.rejected.match(resultAction)) {
+              if (resultAction.payload?.err === 2) {
+                const newToken = await refreshToken();
+                return updateStarredProject(newToken);
+              }
+              throw new Error('Starred failed');
+            }    
+            await dispatch(getStarredThunks({ accesstoken: token, memberId: userData._id }));
+            handleSuccess();
+          } catch (error) {
+            throw error;
+          }
+        };
+        updateStarredProject(accesstoken);
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: 'calc(100vh - 64px)' }}>
       <Paper elevation={3} sx={{ p: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', }}>
-            {projectData && <Typography variant="h6">{projectData?.project?.projectName}</Typography>}
+            {projectData && <Typography>
+              <EditableText initialText={projectData?.project?.projectName}
+                onSave={handleSaveTitle}
+                maxWidth="1000px" t
+                itleColor="primary.main" />
+            </Typography>}
+
             <IconButton
-              sx={{ color: isClicked ? 'gold' : 'text.primary', ml: 1 }}
-              onClick={handleIconClick}
+              sx={{ color: isStarreds ? 'gold' : 'text.primary', ml: 1 }}
+              onClick={handleStarred}
             >
               <GradeIcon />
 

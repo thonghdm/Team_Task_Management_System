@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getTasksById } from '~/apis/Project/taskService';
+import { getTasksById, updateTask } from '~/apis/Project/taskService';
 
 // Create async thunk with the function already defined
 export const fetchTaskById = createAsyncThunk(
@@ -15,6 +15,17 @@ export const fetchTaskById = createAsyncThunk(
   }
 );
 
+export const updateTaskThunks = createAsyncThunk(
+  'task/updateTask',
+  async ({ accesstoken, taskId, taskData }, thunkAPI) => {
+    try {
+      const response = await updateTask(accesstoken, taskId, taskData);
+      return response;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
 // Create slice for Redux Toolkit
 const taskSlice = createSlice({
   name: 'task',
@@ -37,8 +48,20 @@ const taskSlice = createSlice({
       .addCase(fetchTaskById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(updateTaskThunks.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateTaskThunks.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = action.payload;
+      })
+      .addCase(updateTaskThunks.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
-    },
+  },
 });
 
 export default taskSlice.reducer;

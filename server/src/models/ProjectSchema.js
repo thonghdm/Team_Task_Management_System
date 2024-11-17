@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+const descriptionDefault = '<p><strong><em><u>Add new description</u></em></strong></p>'
+
 const ProjectSchema = new mongoose.Schema({
     projectName: {
         type: String,
@@ -11,7 +13,8 @@ const ProjectSchema = new mongoose.Schema({
         type: String
     },
     description: {
-        type: String
+        type: String,
+        default: descriptionDefault
     },
     username: { type: String, unique: true }, // Ensure username field exists
     membersId: [
@@ -34,9 +37,9 @@ const ProjectSchema = new mongoose.Schema({
         enum: ['Public', 'Member'],
         default: 'Public'
     },
-    favorite: {
-        type: Boolean,
-        default: false
+    color: {
+        type: String,
+        default: '#000000'
     },
     isActive: {
         type: Boolean,

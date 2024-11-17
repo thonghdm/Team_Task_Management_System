@@ -59,6 +59,20 @@ export const createNew = async (accesstoken,projectData) => {
     }
 };
 
+export const updateProject = async (accesstoken, projectId, projectData) => {
+    try {
+        const response = await axios.put(`http://localhost:5000/api/project/${projectId}`, projectData, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 
 
 

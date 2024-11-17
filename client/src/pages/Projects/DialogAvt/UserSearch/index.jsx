@@ -101,7 +101,6 @@ const UserSearchInput = ({
                         user.username.toLowerCase().includes(inputValue.toLowerCase())) &&
                     !value.find(selected => selected._id === user._id)
                 );
-                console.log(filtered);
                 setOptions(filtered);
             } catch (error) {
                 console.error('Error fetching users:', error);
@@ -216,7 +215,7 @@ const roles = [
 const UserSearch = () => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [inviteRole, setInviteRole] = useState('Member');
-    const { accesstoken } = useSelector(state => state.auth);
+    const { accesstoken,userData } = useSelector(state => state.auth);
     const [error, setError] = useState(null);
     const { projectId } = useParams();
     const dispatch = useDispatch();
@@ -245,7 +244,8 @@ const UserSearch = () => {
         const usersWithRole = selectedUsers.map(user => ({
             isRole: inviteRole,
             memberId: user._id,
-            projectId: projectId
+            projectId: projectId,
+            user_invite: userData._id
         }));
 
         if (usersWithRole.some(user => projectData?.project?.membersId.includes(user.memberId))) {

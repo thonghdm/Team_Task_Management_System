@@ -31,9 +31,12 @@ import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
 import { updateMemberTaskThunks } from '~/redux/project/task-slice/task-inviteUser-slice';
 import { updateLabelThunks } from '~/redux/project/label-slice';
 
-const dataProjectDescription = {
-    content: `<p>hiiiiii<span style="color: rgb(241, 250, 140);">The goal of this board is to giveof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overviof this board is to give people a high level overvi people a high level overview of what's happening throughout the company, with the ability to find details when they want to.&nbsp;Here's how it works</span>...</p>`
-};
+import EditableText from '~/Components/EditableText';
+import { updateTaskThunks } from '~/redux/project/task-slice';
+import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useParams } from 'react-router-dom';
+
+// import AnimationDone from '~/Components/AnimationDone';
 
 const activities = [
     { avatar: "LV", name: "Luyên Lê Văn", action: "created this task", timestamp: "Yesterday at 12:34am" },
@@ -42,7 +45,6 @@ const activities = [
 ];
 const ChangeList = ({ open, onClose, taskId }) => {
     const theme = useTheme();
-    const [description, setDescription] = useState(dataProjectDescription.content);
     const [cmt, setCMT] = useState("Write a comment");
     const dispatch = useDispatch();
 
@@ -93,6 +95,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const { accesstoken, userData } = useSelector(state => state.auth)
     const { task } = useSelector(state => state.task);
     const refreshToken = useRefreshToken();
+    const { projectId } = useParams();
 
     useEffect(() => {
         const getTaskDetail = async (token) => {
@@ -178,7 +181,6 @@ const ChangeList = ({ open, onClose, taskId }) => {
     };
 
     // delete label
-
     const handleConfirmDeleteLabel = () => {
         try {
             const dataDelete = {
@@ -220,6 +222,255 @@ const ChangeList = ({ open, onClose, taskId }) => {
         setOpenLabel(false);
         setSelectedLabel(null);
     };
+
+    /// save task name
+    const handleSaveTitle = (newText) => {
+        try {
+            const dataSave = {
+                task_name: newText
+            };
+            const handleSuccess = () => {
+                // toast.success('Update title task successfully!');
+            };
+            const saveTitleTask = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateTaskThunks({
+                        accesstoken: token,
+                        taskId: taskId,
+                        taskData: dataSave
+                    }));
+                    if (updateTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return saveTitleTask(newToken);
+                        }
+                        throw new Error('Update title task failed');
+                    }
+                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            saveTitleTask(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    };
+
+    /// save Priority
+    const handleSavePriority = (newPriority) => {
+        try {
+            const dataSave = {
+                priority: newPriority
+            };
+            const handleSuccess = () => {
+                // toast.success('Update priority task successfully!');
+            };
+            const savePriorityTask = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateTaskThunks({
+                        accesstoken: token,
+                        taskId: taskId,
+                        taskData: dataSave
+                    }));
+                    if (updateTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return savePriorityTask(newToken);
+                        }
+                        throw new Error('Delete priority task failed');
+                    }
+                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            savePriorityTask(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    };
+
+    /// save status
+    // const [showAnimation, setShowAnimation] = useState(false);
+    const handleSaveStatus = (newStatus) => {
+        try {
+            const dataSave = {
+                status: newStatus
+            };
+            const handleSuccess = () => {
+                // toast.success('Update status task successfully!');
+                // if (newStatus === 'Completed') {
+                //     setShowAnimation(true);
+                //     setTimeout(() => setShowAnimation(false), 2000); // Hide animation after 2 seconds
+                //   }
+            };
+            const saveStatusTask = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateTaskThunks({
+                        accesstoken: token,
+                        taskId: taskId,
+                        taskData: dataSave
+                    }));
+                    if (updateTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return saveStatusTask(newToken);
+                        }
+                        throw new Error('Delete status task failed');
+                    }
+                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            saveStatusTask(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    };
+
+    /// save Start Date 
+    const handleSaveStartDate = (newStartDate) => {
+        try {
+            const dataSave = {
+                start_date: newStartDate
+            };
+            const handleSuccess = () => {
+                // toast.success('Update start date task successfully!');
+            };
+            const saveStartDateTask = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateTaskThunks({
+                        accesstoken: token,
+                        taskId: taskId,
+                        taskData: dataSave
+                    }));
+                    if (updateTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return saveStartDateTask(newToken);
+                        }
+                        throw new Error('Delete start date task failed');
+                    }
+                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            saveStartDateTask(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    };
+
+    /// save Due Date
+    const handleSaveDueDate = (newDueDate) => {
+        try {
+            if (new Date(newDueDate) < new Date(task?.start_date)) {
+                toast.error('Due date must be greater than start date!');
+                return;
+            }
+            const dataSave = {
+                end_date: newDueDate
+            };
+            const handleSuccess = () => {
+                // toast.success('Update due date task successfully!');
+            };
+            const saveDueDateTask = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateTaskThunks({
+                        accesstoken: token,
+                        taskId: taskId,
+                        taskData: dataSave
+                    }));
+                    if (updateTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return saveDueDateTask(newToken);
+                        }
+                        throw new Error('Delete due date task failed');
+                    }
+                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            saveDueDateTask(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    };
+
+    /// check ID leave task
+    const isAssignedToMe = (assignedToIdArray, userId) => {
+        return assignedToIdArray.some(item => item.memberId?._id === userId);
+    };
+
+    /// leave task
+    const findAssignedMember = (assignedToId, userId) => {
+        const matchedItem = assignedToId.find(item => item.memberId?._id === userId);
+        return matchedItem?._id || null; // Trả về _id hoặc null nếu không tìm thấy
+    }
+
+    const [openLeaveMember, setOpenLeaveMember] = useState(false);
+    const [selectedLeaveMember, setSelectedLeaveMember] = useState(null);
+    const handleLeaveMemberClick = (memberId) => {
+        setSelectedLeaveMember(memberId);
+        setOpenLeaveMember(true);
+    };
+
+    const handleConfirmLeaveMember = () => {
+        try {
+            const dataDelete = {
+                _id: selectedLeaveMember,
+                is_active: false
+            };
+            const handleSuccess = () => {
+                toast.success('Leave task successfully!');
+                setOpenLeaveMember(false);
+                setSelectedLeaveMember(null);
+            };
+            const leaveMembers = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateMemberTaskThunks({
+                        accesstoken: token,
+                        data: dataDelete
+                    }));
+                    if (updateMemberTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return leaveMembers(newToken);
+                        }
+                        throw new Error('Leave task failed');
+                    }
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            leaveMembers(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    };
+    const handleCancelLeaveMember = () => {
+        setOpenLeaveMember(false);
+        setSelectedLeaveMember(null);
+    }
+
     return (
         <Dialog
             open={open}
@@ -234,7 +485,10 @@ const ChangeList = ({ open, onClose, taskId }) => {
         >
             <DialogTitle>
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6">{task?.task_name}</Typography>
+                    {/* <Typography variant="h6">{task?.task_name}</Typography> */}
+                    <Typography >
+                        <EditableText initialText={task?.task_name} onSave={handleSaveTitle} maxWidth="780px" titleColor="primary.main" />
+                    </Typography>
                     <IconButton onClick={onClose} sx={{ color: theme.palette.text.primary }}>
                         <Close />
                     </IconButton>
@@ -253,9 +507,6 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 sx={{ bgcolor: 'transparent', border: `1px solid ${theme.palette.text.secondary}` }}
                             />
                         ))}
-
-
-
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -269,7 +520,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ width: '100px' }}>Lables</Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 4 }}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1}}>
                             {task?.label_id?.map(lb => (
                                 <Chip
                                     key={lb?._id}
@@ -303,28 +554,23 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <PrioritySelector
                         value={task?.priority}
-                        onChange={(newPriority) => {
-                            console.log('New priority:', newPriority);
-                            // Handle priority change
-                        }}
+                        onChange={handleSavePriority}
                     />
 
                     <StatusSelector
                         value={task?.status}
-                        onChange={(newStatus) => {
-                            console.log('New status:', newStatus);
-                            // Handle status change
-                        }}
+                        onChange={handleSaveStatus}
                     />
+                    {/* {showAnimation && <AnimationDone />} */}
 
                     <DueDatePicker
                         lableDate="Start Date"
-                        onDateChange={() => console.log(task?.start_date)}
+                        onDateChange={handleSaveStartDate}
                         initialDate={task?.start_date}
                     />
                     <DueDatePicker
                         lableDate="Due Date"
-                        onDateChange={() => console.log(task?.end_date)}
+                        onDateChange={handleSaveDueDate}
                         initialDate={task?.end_date}
                     />
 
@@ -361,7 +607,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Typography>Description</Typography>
-                        <ProjectDescription initialContent={description} context={"description"} />
+                        <ProjectDescription initialContent={task?.description} context={"descriptionTask"} taskId={taskId} />
                     </Box>
 
 
@@ -421,7 +667,11 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             ))}
 
                         <Avatar onClick={handleOpenAvt} sx={{ bgcolor: theme.palette.background.default, color: theme.palette.text.primary, width: 28, height: 28, fontSize: '0.7rem', cursor: 'pointer' }}>+</Avatar>
-                        <Button sx={{ color: theme.palette.text.primary, textTransform: 'none', ml: 'auto' }}>Leave task</Button>
+                        {isAssignedToMe(task?.assigned_to_id, userData?._id) &&
+                            <Button
+                                onClick={() => handleLeaveMemberClick(findAssignedMember(task?.assigned_to_id, userData?._id))}
+                                sx={{ color: theme.palette.text.primary, background: '#F88379', ml: 'auto' }}>Leave task</Button>
+                        }
                     </Box>
 
                     <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} />
@@ -444,6 +694,15 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 projectName="Confirm delete label"
                 lable="Are you sure you want to delete label this project?"
                 onConfirm={handleConfirmDeleteLabel}
+            />
+
+            {/* leave project*/}
+            <AlertLeave
+                open={openLeaveMember}
+                onClose={handleCancelLeaveMember}
+                projectName="Confirm leave project"
+                lable="Are you sure you want to leave this project?"
+                onConfirm={handleConfirmLeaveMember}
             />
         </Dialog>
     );

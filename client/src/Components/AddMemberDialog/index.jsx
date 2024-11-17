@@ -30,6 +30,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { inviteUserTask } from '~/redux/project/task-slice/task-inviteUser-slice';
+import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 
 const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
     '& .MuiOutlinedInput-root': {
@@ -292,6 +293,7 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
                         throw new Error('Invite members failed');
                     }
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
                     onClose();
                 } catch (error) {

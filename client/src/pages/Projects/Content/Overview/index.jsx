@@ -9,16 +9,10 @@ import './styles.css';
 import ProjectStats from '~/pages/Projects/Content/Overview/ProjectStats';
 import DialogAvt from '~/pages/Projects/DialogAvt';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
-import { extractTasksInfo } from '~/utils/extractTasksInfo';
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { ToastContainer, toast } from 'react-toastify';
-
-const dataProjectDescription = {
-  content: `<p>
-Enter your project description</p>`
-};
+import ProfileDialog from '~/pages/Projects/Content/Overview/ProfileDialog';
 
 
 const Overview = () => {
@@ -29,11 +23,10 @@ const Overview = () => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
-  const { accesstoken } = useSelector(state => state.auth)
+  const { accesstoken, userData } = useSelector(state => state.auth)
   const [getTasksInfo, setTasksInfo] = useState([]);
   const dispatch = useDispatch();
   const refreshToken = useRefreshToken();
-
   useEffect(() => {
     const getProjectDetail = async (token) => {
       try {
@@ -44,11 +37,11 @@ const Overview = () => {
           return getProjectDetail(newToken);
         }
         toast.error(error.response?.data.message || 'Unable to load project information!');
-      } 
+      }
     };
-  
+
     getProjectDetail(accesstoken);
-  
+
     return () => {
       dispatch(resetProjectDetail());
     };
@@ -60,11 +53,12 @@ const Overview = () => {
   //     setTasksInfo(tasksInfo);
   //   }
   // }, [projectData]);
-
   const handleOpenShareDialog = () => setIsShareDialogOpen(true);
   const handleCloseShareDialog = () => setIsShareDialogOpen(false);
 
+  const [selectedMember, setSelectedMember] = useState(null);
   const handleClick = (event, user) => {
+    setSelectedMember(user);
     setAnchorEl(event.currentTarget);
     setSelectedUser(user);
   };
@@ -79,13 +73,18 @@ const Overview = () => {
     handleClose();
   };
 
+  /// check admin
+  // const isAdmin = (members, userId) => {
+  //   return members.some(member => member?.isRole === "Admin" && member?.memberId?._id === userId);
+  // };
+  // console.log("isAdmin", isAdmin(members?.members, userData?._id));
   return (
     <>
       <Paper className="scrollable" elevation={3} sx={{ maxHeight: 500, p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
         <Typography variant="h5" gutterBottom>
           Project description
         </Typography>
-        <ProjectDescription initialContent={projectData?.project?.description||dataProjectDescription.content} context={"description"}/>
+        <ProjectDescription initialContent={projectData?.project?.description} context={"descriptionProject"} />
       </Paper>
       <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
@@ -104,48 +103,49 @@ const Overview = () => {
                   />
                 </Grid>
                 {members?.members
-                                ?.filter(member => member.is_active === true)
-                                ?.map((member) => {
-                  const role = member.id === 1 ? "Owner" : member?.isRole;
-                  return (
-                    <Grid item xs={12} sm={6} md={3} key={member._id}>
-                      <HomeProjectItem
-                        icon={
-                          member?.memberId?.image ? (
-                            <img
-                              src={member?.memberId?.image}
-                              alt={member?.memberId?.displayName}
-                              style={{ width: 40, height: 40, borderRadius: '50%' }}
-                            />
-                          ) : (
-                            <Typography sx={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: '50%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              backgroundColor: theme.palette.primary.main,
-                              color: theme.palette.primary.contrastText
-                            }}>
-                              {member?.memberId?.displayName.charAt(0).toUpperCase()}
-                            </Typography>
-                          )
-                        }
-                        subtitle={role}
-                        title={member?.memberId?.displayName}
-                        onClick={(event) => role === "Member" ? handleClick(event, member) : null}
-                      />
-                    </Grid>
-                  );
-                })}
+                  ?.filter(member => member.is_active === true)
+                  ?.map((member) => {
+                    const role = member.id === 1 ? "Owner" : member?.isRole;
+                    return (
+                      <Grid item xs={12} sm={6} md={3} key={member._id}>
+                        <HomeProjectItem
+                          icon={
+                            member?.memberId?.image ? (
+                              <img
+                                src={member?.memberId?.image}
+                                alt={member?.memberId?.displayName}
+                                style={{ width: 40, height: 40, borderRadius: '50%' }}
+                              />
+                            ) : (
+                              <Typography sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: theme.palette.primary.main,
+                                color: theme.palette.primary.contrastText
+                              }}>
+                                {member?.memberId?.displayName.charAt(0).toUpperCase()}
+                              </Typography>
+                            )
+                          }
+                          subtitle={role}
+                          title={member?.memberId?.displayName}
+                          onClick={(event) => member?.memberId?._id !== userData?._id ? handleClick(event, member) : null}
+                        />
+                      </Grid>
+                    );
+                  })}
               </Grid>
             </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
           <Paper className="scrollable" elevation={3} sx={{ maxHeight: 500, p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
-            <ProjectStats />
+
+            {projectData && <ProjectStats project={projectData.project} />}
           </Paper>
         </Grid>
       </Grid>
@@ -156,8 +156,8 @@ const Overview = () => {
         projectName={projectId}
         projectData={projectData}
       />
-
-      <Menu
+      <ProfileDialog open={Boolean(anchorEl)} onClose={handleClose} member={selectedMember}/>
+      {/* <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
@@ -168,7 +168,7 @@ const Overview = () => {
         >
           Remove from project
         </MenuItem>
-      </Menu>
+      </Menu> */}
     </>
   );
 };

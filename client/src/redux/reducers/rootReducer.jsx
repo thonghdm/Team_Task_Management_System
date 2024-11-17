@@ -3,7 +3,7 @@ import { combineReducers } from 'redux'
 import storage from 'redux-persist/lib/storage'
 import { persistReducer } from 'redux-persist'
 import autoMergeLevel2 from "redux-persist/es/stateReconciler/autoMergeLevel2";
-import projectsSlice from '~/redux/project/project-slice';
+import projectsSlice from '~/redux/project/projectArray-slice';
 import projectDetailSlice from '~/redux/project/projectDetail-slide';
 import memberSlice from '~/redux/member/member-slice';
 import inviteSlice from '~/redux/project/projectRole-slice/index';
@@ -14,6 +14,10 @@ import commentUserSlice from '~/redux/project/comment-slice/commentUser-slice/in
 import commentSlice from '~/redux/project/comment-slice/index';
 import labelSlice from '~/redux/project/label-slice/index';
 import fileSlice from '~/redux/project/uploadFile-slice/index';
+
+import projectThunkSlice from '~/redux/project/project-slice/index';
+import starredSlice from '~/redux/project/starred-slice/index';
+
 
 // Cấu hình cho persist
 const commonConfig = {
@@ -88,6 +92,18 @@ const fileConfig = {
     whitelist: ['files'],
 };
 
+const projectThunkSliceConfig = {
+    ...commonConfig,
+    key: 'projectThunk',
+    whitelist: ['projectThunk'],
+};
+
+const starredSliceConfig = {
+    ...commonConfig,
+    key: 'starred',
+    whitelist: ['starred'],
+};
+
 
 const rootReducer = combineReducers({
     auth: persistReducer(authConfig, authReducer),
@@ -103,7 +119,8 @@ const rootReducer = combineReducers({
     label: persistReducer(labelConfig, labelSlice),
 
     uploadFile: persistReducer(fileConfig, fileSlice),
-
+    projectThunk: persistReducer(projectThunkSliceConfig, projectThunkSlice),
+    starred: persistReducer(starredSliceConfig, starredSlice),
 })
 
 
