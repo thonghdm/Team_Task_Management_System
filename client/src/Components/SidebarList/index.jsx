@@ -10,49 +10,46 @@ const SidebarList = ({ linkData, isProject = false, Id }) => {
 
   return (
     <List disablePadding>
-      {linkData?.map((item) => {
-        const isSelected = path === item?._id;
-        return (
-          <ListItem key={item?.projectName} disablePadding>
-            <ListItemButton
-              component={Link}
-              to={`/board/${item?._id}${Id === 2 || Id === 3 ? `/${Id}` : ''}`}
-              sx={{
-                backgroundColor: isSelected ? theme.palette.action.selected : 'inherit',
-                '&:hover': {
-                  backgroundColor: theme.palette.action.hoverOpacity, // Hover effect
-                },
+      {linkData?.map((item) => (
+        <ListItem key={item?.projectName} disablePadding>
+          <ListItemButton
+            component={Link}
+            to={`/board/${item?._id}/${Id}`}
+            sx={{
+              backgroundColor: path === item?._id ? theme.palette.action.selected : 'inherit',
+              '&:hover': {
+                backgroundColor: theme.palette.action.hoverOpacity, // Hover effect
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+              {isProject ? (
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 1,
+                    backgroundColor: item?.color || theme.palette.primary.main,
+                  }}
+                />
+              ) : (
+                item.icon
+              )}
+            </ListItemIcon>
+            <ListItemText
+              primary={item?.projectName}
+              primaryTypographyProps={{
+                sx: {
+                  fontSize: 'inherit',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }
               }}
-            >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
-                {isProject ? (
-                  <Box
-                    sx={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: 1,
-                      backgroundColor: !item?.isStarred ? item?.color : "#ffcc00",
-                    }}
-                  />
-                ) : (
-                  item.icon
-                )}
-              </ListItemIcon>
-              <ListItemText
-                primary={item?.projectName}
-                primaryTypographyProps={{
-                  sx: {
-                    fontSize: 'inherit',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        )
-      })}
+            />
+          </ListItemButton>
+        </ListItem>
+      ))}
     </List>
   );
 };

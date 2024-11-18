@@ -25,13 +25,14 @@ const Boards = () => {
       <Sidebar open={open} />
       <Box component="main" sx={{ flexGrow: 1}}>
         <Routes>
-          <Route index element={<Navigate to="home" replace />} />
-          <Route path="home" element={<Homes />} />
-          <Route path="tasks/*" element={<Task />} />
-          <Route path="team" element={<Team />} />
-          <Route path="inbox/*" element={<Inbox />} />
+          <Route index element={<Navigate to="home/1" replace />} />
+          <Route path="home/1" element={<Homes />} />
+          <Route path="tasks/1/*" element={<Task />} />
+          <Route path="team/4" element={<Team />} />
+          <Route path="inbox/1/*" element={<Inbox />} />
           {/* <Route path="/projects/new" element={<AddProjects />} /> */}
-          <Route path=":projectId/*" element={<Projects />} />
+          <Route path=":projectId/2/*" element={<Projects />} />
+          <Route path=":projectId/3/*" element={<Projects />} />
         </Routes>
       </Box>
     </Box>
