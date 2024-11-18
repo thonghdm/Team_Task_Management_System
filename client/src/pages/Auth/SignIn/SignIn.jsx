@@ -60,7 +60,7 @@ export default function SignIn() {
         if (validateInputs()) {
             const result = await dispatch(loginWithEmail(email, password));
             if (result) {
-                navigate('/board/home');
+                navigate('/board/home/1');
             }
         }
     };

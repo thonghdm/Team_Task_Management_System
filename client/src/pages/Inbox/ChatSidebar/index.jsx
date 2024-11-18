@@ -1,8 +1,9 @@
 import React from 'react';
 import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Box } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import SearchBar from '~/pages/Inbox/ChatSidebar/SearchBar';
 import './styles.css';
+import { useTheme } from '@mui/material/styles';
 
 const chatItems = [
     { id: 1, name: "Hoang Dinh Minh Thong", message: "Last message preview", initials: "HT" },
@@ -17,6 +18,11 @@ const chatItems = [
 ];
 
 const ChatSidebar = () => {
+    const location = useLocation();
+    const path = location.pathname.split('/')[3] || ''; // Handle cases where there might not be a third segment
+    const theme = useTheme();
+
+
     return (
         <Box sx={{ height: '85vh', display: 'flex', flexDirection: 'column' }} className="scrollable">
             <SearchBar />
@@ -28,6 +34,12 @@ const ChatSidebar = () => {
                             component={Link}
                             to={`${item.id}`}
                             key={item.id}
+                            sx={{
+                                backgroundColor: path === item?._id ? theme.palette.text.disabled : 'inherit',
+                                '&:hover': {
+                                  backgroundColor: theme.palette.text.disabled,
+                                },
+                              }}
                         >
                             <ListItemAvatar>
                                 <Avatar>{item.initials}</Avatar>

@@ -16,7 +16,7 @@ const LoginSuccess = () => {
 
     return (
         <div>
-            {isLoggedIn ? <Navigate to='/board/home' replace={true} /> : <h3>Yêu cầu bạn hãy đăng nhập</h3>}
+            {isLoggedIn ? <Navigate to='/board/home/1' replace={true} /> : <h3>Yêu cầu bạn hãy đăng nhập</h3>}
         </div>
     )
 }

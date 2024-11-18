@@ -26,7 +26,6 @@ import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
 import { getStarredThunks } from '~/redux/project/starred-slice';
-import SidebarListStarred from '../SidebarListStarred';
 
 
 const drawerWidth = 240;
@@ -108,13 +107,13 @@ const AddBillingButton = styled(Button)(({ theme }) => ({
   },
 }));
 const mainLinkData = [
-  { projectName: 'Home', _id: 'home', icon: <HomeIcon /> },
-  { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon /> },
-  { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon /> },
+  { projectName: 'Home', _id: 'home', icon: <HomeIcon />,  main: 'Home'},
+  { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon />,  main: 'My tasks'},
+  { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon />,  main: 'Inbox'},
 ];
 
 const teamLinkData = [
-  { projectName: 'Team', _id: 'team', icon: <ReportingIcon /> },
+  { projectName: 'Team', _id: 'team', icon: <ReportingIcon /> ,team: 'Team'},
 ];
 
 const Sidebar = ({ open }) => {
@@ -139,7 +138,33 @@ const Sidebar = ({ open }) => {
     if (accesstoken && userData?._id) {
       dispatch(getStarredThunks({ accesstoken, memberId: userData._id }));
     }
-  }, [dispatch, accesstoken,userData?._id, isLoggedIn]);
+  }, [dispatch, accesstoken, userData?._id, isLoggedIn]);
+
+
+
+  const convertBtoA = (B) => {
+    return B?.map(itemB => {
+      return {
+        ...itemB.projectId, // Lấy dữ liệu từ projectId trong B
+        _id: itemB.projectId._id, // Dữ liệu về _id của dự án
+        projectName: itemB.projectId.projectName, // Dùng projectName từ projectId
+        // // slug: itemB.projectId.slug, // Slug từ projectId
+        // // membersId: itemB.projectId.membersId, // Danh sách thành viên từ projectId
+        // listId: itemB.projectId.listId, // Danh sách listId từ projectId
+        // // visibility: itemB.projectId.visibility, // Visibility từ projectId
+        // // favorite: itemB.projectId.favorite, // Favorite từ projectId
+        // // isActive: itemB.projectId.isActive, // Trạng thái hoạt động từ projectId
+        // createdAt: itemB.projectId.createdAt, // Thời gian tạo từ projectId
+        // updatedAt: itemB.projectId.updatedAt, // Thời gian cập nhật từ projectId
+        // __v: itemB.projectId.__v, // Version từ projectId
+        // description: itemB.projectId.description, // Mô tả từ projectId
+        // color: itemB.projectId.color, // Màu sắc từ projectId
+        isStarred: itemB.isStarred, // Trạng thái yêu thích (đã đánh dấu) từ B
+        // userId: itemB.userId // Thêm userId từ B
+      };
+    });
+  }
+
 
   return (
     <StyledDrawer variant="permanent" open={open}>
@@ -153,7 +178,7 @@ const Sidebar = ({ open }) => {
         }}
       >
         <Box sx={{ fontSize: '14px' }}>
-          <SidebarList linkData={mainLinkData} />
+          <SidebarList linkData={mainLinkData} Id = {1}/>
         </Box>
 
 
@@ -170,19 +195,19 @@ const Sidebar = ({ open }) => {
                 <AddIcon sx={{ width: 17, mt: "3px" }} />
               </IconButton>
             </Box>}
-            {projects?.projects && <SidebarList linkData={projects?.projects} isProject={true} open={open} />}
+            {projects?.projects && <SidebarList linkData={projects?.projects} isProject={true} open={open} Id = {2}/>}
           </Box>
 
           <Box>
             <Box display="flex" alignItems="center" justifyContent="space-between">
               {starred?.data.length > 0 && <SectionTitle>STARRED</SectionTitle>}
             </Box>
-            {starred?.data && <SidebarListStarred linkData={starred?.data} isProject={true} open={open} />}
+            {starred?.data && <SidebarList linkData={convertBtoA(starred?.data)} isProject={true} open={open} Id = {3}/>  }
           </Box>
 
           <Box>
             <SectionTitle>TEAM</SectionTitle>
-            <SidebarList linkData={teamLinkData} open={open} />
+            <SidebarList linkData={teamLinkData} open={open} Id={4}/>
           </Box>
         </ScrollableSection>
 

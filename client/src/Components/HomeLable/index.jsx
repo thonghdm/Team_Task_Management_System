@@ -7,9 +7,9 @@ const HomeLable = ({lable}) => {
     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6">{lable}</Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <IconButton sx={{ color: 'white' }}>
+        {/* <IconButton sx={{ color: 'white' }}>
           <MoreHorizIcon />
-        </IconButton>
+        </IconButton> */}
       </Box>
   );
 };

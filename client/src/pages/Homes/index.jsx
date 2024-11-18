@@ -139,9 +139,6 @@ const Homes = () => {
       case 'last30days':
         periodStartDate.setDate(currentDate.getDate() - 30);
         break;
-      case 'last3months':
-        periodStartDate.setMonth(currentDate.getMonth() - 3);
-        break;
       default:
         periodStartDate = new Date(0); 
     }
@@ -174,8 +171,8 @@ const Homes = () => {
     setPeriod(event.target.value);
   };
 
-  const transformData = (tasks) => {
-    const { upcoming, overdue, completed } = categorizeTasks(tasks);
+  const transformData = (tasks,period) => {
+    const { upcoming, overdue, completed } = categorizeTasks(tasks, period);
     // Combine all tasks into one array with additional date format parsing
     const allTasks = [
       ...upcoming.map(task => ({ ...task, category: "due" })),
@@ -195,7 +192,7 @@ const Homes = () => {
     // Transform into an array
     return Object.values(taskByDate);
   };
-  const dataStatics = transformData(projectDetails);
+  const dataStatics = transformData(projectDetails, period);
 
   const displayName = data?.displayName ? data.displayName.match(/^\S+/)[0] : 'User';
   return (
@@ -244,7 +241,6 @@ const Homes = () => {
           >
             <MenuItem value="last7days">Last 7 days</MenuItem>
             <MenuItem value="last30days">Last 30 days</MenuItem>
-            <MenuItem value="last3months">Last 3 months</MenuItem>
           </Select>
 
 

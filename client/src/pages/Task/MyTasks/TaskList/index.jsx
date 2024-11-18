@@ -31,14 +31,14 @@ const TaskList = () => {
   const tasks = normalizeTasks([
     {
       id: 1,
-      name: 'Schedule kickoff meeting',
+      name: 'Schedule kickoff meetingSchedule kickoff meetingSchedule kickoff meeting',
       dueDate: '2024-10-15',
       collaborators: [
         { name: 'John Doe', avatar: 'https://www.pngitem.com/middle/TbRixR_img-hd-png/' },
         { name: 'Jane Smith', avatar: '/static/images/avatar/2.jpg' }
       ],
       project: 'Cross-functional project',
-      visibility: 'My workspace'
+      status: 'Completed'
     },
     {
       id: 2,
@@ -56,7 +56,7 @@ const TaskList = () => {
         { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
       ],
       project: 'Marketing strategy',
-      visibility: 'Team workspace'
+      status: 'To Do'
     },
     {
       id: 3,
@@ -64,7 +64,7 @@ const TaskList = () => {
       dueDate: '2024-10-22',
       collaborators: [],
       project: 'Product development',
-      visibility: 'Private'
+      status: 'To Do'
     },
     {
       id: 4,
@@ -72,7 +72,7 @@ const TaskList = () => {
       dueDate: '2024-10-30',
       collaborators: [{ name: 'Cindy Baker', avatar: '/static/images/avatar/4.jpg' }],
       project: 'UI/UX Revamp',
-      visibility: 'My workspace'
+      status: 'To Do'
     },
     {
       id: 5,
@@ -80,12 +80,15 @@ const TaskList = () => {
       dueDate: '2024-10-08',
       collaborators: [{ name: 'Michael Brown', avatar: '/static/images/avatar/5.jpg' }],
       project: 'App development',
-      visibility: 'Private'
+      status: 'Completed'
     }
   ]);
   
   
-  
+  const handleRowOverdueClick = (taskId) => {
+    console.log('Task clicked:', taskId);
+    // Xử lý logic khi click vào task ở đây
+  };
 
   // Task Filtering
   const todayTasks = tasks?.filter(task => new Date(task?.dueDate).toDateString() === today.toDateString());
@@ -162,7 +165,7 @@ const TaskList = () => {
         </AccordionSummary>
         <AccordionDetails>
           {overdueTasks?.length > 0 ? (
-            <TaskTable tasks={overdueTasks} />
+            <TaskTable tasks={overdueTasks} onRowClick={handleRowOverdueClick}/>
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
               No overdue tasks

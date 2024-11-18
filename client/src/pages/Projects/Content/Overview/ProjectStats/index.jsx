@@ -31,9 +31,8 @@ const ProjectStats = ({ project }) => {
 
     const now = new Date();
     const periodDates = {
-      last7days: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      last30days: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-      last3months: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+      last7days: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), // Trước 7 ngày
+      lastAlldays: new Date(0) // Thời điểm bắt đầu của epoch (01-01-1970), đại diện cho tất cả dữ liệu
     };
 
     const cutoffDate = periodDates[period];
@@ -45,7 +44,7 @@ const ProjectStats = ({ project }) => {
 
     // Filter tasks by period
     const tasksInPeriod = allTasks.filter(task => {
-      const createdAt = new Date(task.createdAt);
+      const createdAt = new Date(task?.start_date);
       return createdAt >= cutoffDate;
     });
     return {
@@ -73,25 +72,24 @@ const ProjectStats = ({ project }) => {
           sx={{ minWidth: 120 }}
         >
           <MenuItem value="last7days">Last 7 days</MenuItem>
-          <MenuItem value="last30days">Last 30 days</MenuItem>
-          <MenuItem value="last3months">Last 3 months</MenuItem>
+          <MenuItem value="lastAlldays">All days</MenuItem>
         </Select>
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={6}>
-          <StatItem icon={NoteAddIcon} value={stats.created} label="Work items created" />
+          <StatItem icon={NoteAddIcon} value={stats.created} label="Work task created" />
         </Grid>
         <Grid item xs={6}>
-          <StatItem icon={AssignmentTurnedInIcon} value={stats.completed} label="Work items completed" />
+          <StatItem icon={AssignmentTurnedInIcon} value={stats.completed} label="Work task completed" />
         </Grid>
       </Grid>
 
       <Grid container spacing={2}>
         <Grid item xs={6}>
-          <StatItem icon={GppBadIcon} value={stats.todo} label="Work items to do" />
+          <StatItem icon={GppBadIcon} value={stats.todo} label="Work task to do" />
         </Grid>
         <Grid item xs={6}>
-          <StatItem icon={PublishedWithChangesIcon} value={stats.inProgress} label="Work items in progress" />
+          <StatItem icon={PublishedWithChangesIcon} value={stats.inProgress} label="Work task in progress" />
         </Grid>
       </Grid>
     </>

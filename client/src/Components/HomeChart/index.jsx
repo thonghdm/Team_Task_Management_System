@@ -10,32 +10,12 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
     const completedIssues = completed.length;
     const totalIssues = completed.length + upcoming.length + overdue.length;
     const theme = useTheme();
-    const [period, setPeriod] = useState('last7days');
-    const handlePeriodChange = (event) => {
-        setPeriod(event.target.value);
-    };
-
-
+    
     const progressPercentage = Math.round((completedIssues / totalIssues) * 100);
-
     return (
         <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
-            {/* <HomeLable lable="Statistics" /> */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">Statistics</Typography>
-                <Box sx={{ flexGrow: 1 }} />
-                <Select
-                    value={period}
-                    onChange={handlePeriodChange}
-                    size="small"
-                    sx={{ minWidth: 120 }}
-                >
-                    <MenuItem value="last7days">Last 7 days</MenuItem>
-                    <MenuItem value="last30days">Last 30 days</MenuItem>
-                    <MenuItem value="last3months">Last 3 months</MenuItem>
-                </Select>
-            </Box>
-
+            <HomeLable lable="Statistics" />
+            {/* <Typography variant="h6">Statistics</Typography> */}
             <Grid container spacing={3}>
                 <Grid item xs={12} md={9}>
                     <Card sx={{ backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
@@ -52,8 +32,8 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
                                     />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="due" name="Created issues" fill="#8884d8" />
-                                    <Bar dataKey="completed" name="Completed issues" fill="#82ca9d" />
+                                    <Bar dataKey="due" name="InComplete " fill="#F88379" />
+                                    <Bar dataKey="completed" name="Completed" fill="#82ca9d" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </CardContent>
