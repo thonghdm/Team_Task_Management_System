@@ -202,7 +202,7 @@ const Sidebar = ({ open }) => {
             <Box display="flex" alignItems="center" justifyContent="space-between">
               {starred?.data.length > 0 && <SectionTitle>STARRED</SectionTitle>}
             </Box>
-            {starred?.data && <SidebarList linkData={convertBtoA(starred?.data)} isProject={true} open={open} Id = {3}/>}
+            {starred?.data && <SidebarList linkData={convertBtoA(starred?.data)} isProject={true} open={open} Id = {3}/>  }
           </Box>
 
           <Box>
