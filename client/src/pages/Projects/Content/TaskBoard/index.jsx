@@ -106,8 +106,8 @@ const TaskBoard = () => {
 
 
   const renderTableCell = (content, taskId, cellId, isEmpty) => {
-    const isTrulyEmpty = isEmpty || (typeof content === 'string' && content.trim() === '.');
-
+    const isTrulyEmpty = !!isEmpty || (typeof content === 'string' && content.trim() === '.');
+    console.log(isTrulyEmpty);
     const handleClick = () => {
       console.log(cellId);
       switch (cellId) {
@@ -149,6 +149,7 @@ const TaskBoard = () => {
                 transform: 'translateY(-50%)',
                 backgroundColor: theme.palette.background.paper,
                 '&:hover': { backgroundColor: theme.palette.action.hover },
+                border: `1px solid ${theme.palette.text.secondary}`,
               }}
             >
               {isTrulyEmpty ? <AddIcon sx={{ width: '13px', height: '13px', cursor: 'pointer' }} />
@@ -241,6 +242,7 @@ const TaskBoard = () => {
                             transform: 'translateY(-50%)',
                             backgroundColor: theme.palette.background.paper,
                             '&:hover': { backgroundColor: theme.palette.action.hover },
+                            border: `1px solid ${theme.palette.text.secondary}`,
                           }}
                         >
                           {/* <DensityMediumIcon
@@ -250,7 +252,7 @@ const TaskBoard = () => {
                               cursor: 'pointer',
                             }}
                           /> */}
-                          <ExpandTask taskId={task.id}/>
+                          <ExpandTask taskId={task.id} />
                         </IconButton>
                       </Tooltip>
                     )}
@@ -269,7 +271,8 @@ const TaskBoard = () => {
                     <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       {task.list_name.length > 35 ? `${task.list_name.slice(0, 35)}...` : task.list_name}
                     </Box>,
-                    task.list_name, task.id, 'list_name', !task.list_name || task.list_name === '.')}
+                    task.id, 'list_name', !task.list_name || task.list_name === '.')}
+
 
                   {renderTableCell(
                     <Box sx={{ display: 'flex' }}>

@@ -25,6 +25,7 @@ import { apiLogOut, apiRefreshToken } from '~/apis/Auth/authService'
 import actionTypes from '~/redux/actions/actionTypes'
 import Profile from '~/pages/Profile';
 import { jwtDecode } from 'jwt-decode';
+import { useTheme } from '@mui/material/styles';
 
 const UserAvatar = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ const UserAvatar = () => {
   const dispatch = useDispatch();
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
   const [hasFetchedUser, setHasFetchedUser] = useState(false); // Track if user data has been fetched
+  const theme = useTheme();
 
   const isTokenExpired = (token) => {
     if (!token) return true;
@@ -112,7 +114,8 @@ const UserAvatar = () => {
               height: 32,
               bgcolor: 'warning.main',
               color: 'warning.contrastText',
-              fontSize: 16
+              fontSize: 16,
+              border:  `2px solid ${theme.palette.text.secondary}`,
             }}
             src={data?.image ? data?.image : undefined}  // Set the image if available
           >
@@ -147,7 +150,8 @@ const UserAvatar = () => {
               bgcolor: 'warning.main',
               color: 'warning.contrastText',
               fontSize: 20,
-              mr: 2
+              mr: 2,
+              border:  `2px solid ${theme.palette.text.secondary}`,
             }}
             src={data?.image ? data?.image : undefined}  // Set the image if available
           >

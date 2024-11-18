@@ -20,6 +20,7 @@ import { updateProjectThunk } from '~/redux/project/project-slice';
 import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
 import { useRefreshToken } from '~/utils/useRefreshToken';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useTheme } from '@mui/material/styles';
 
 import { createStarred, getStarredThunks, updateStarredThunks } from '~/redux/project/starred-slice';
 
@@ -35,6 +36,7 @@ const Projects = () => {
   useEffect(() => {
     dispatch(fetchMemberProject({ accesstoken, projectId }));
   }, [dispatch, projectId, accesstoken]);
+  const theme = useTheme();
 
   const { starred } = useSelector((state) => state.starred);
 
@@ -214,6 +216,8 @@ const Projects = () => {
                     width: 30,
                     height: 30,
                     backgroundColor: 'text.secondary',
+                    border:  `2px solid ${theme.palette.text.secondary}`,
+
                   }
                 }}
               >
