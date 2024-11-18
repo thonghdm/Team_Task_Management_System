@@ -4,10 +4,6 @@ import { Add as AddIcon } from '@mui/icons-material';
 import HomeItem from '../HomeItem';
 import '../HomeProjectList/styles.css'; // Ensure styles are imported
 import { useTheme } from '@mui/material/styles';
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
-import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
-import { useRefreshToken } from '~/utils/useRefreshToken'
 
 const HomeList = ({upcoming, overdue, completed }) => {
   const [value, setValue] = React.useState(0);
@@ -110,7 +106,7 @@ const HomeList = ({upcoming, overdue, completed }) => {
     <Box sx={{ color: theme.palette.text.primary }}>
       <Tabs value={value} onChange={handleChange} sx={{ mb: 2 }}>
         <Tab label="Upcoming" sx={{ color: theme.palette.text.primary }} />
-        <Tab label="To Do" sx={{ color: theme.palette.text.primary }} />
+        <Tab label="OverDue" sx={{ color: theme.palette.text.primary }} />
         <Tab label="Completed" sx={{ color: theme.palette.text.primary }} />
       </Tabs>
 

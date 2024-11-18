@@ -5,9 +5,13 @@ import HomeProjectItem from '~/Components/HomeProjectItem';
 import HomeLable from '../HomeLable';
 import './styles.css'
 import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const HomeProjectList = ({project}) => {
+  const location = useLocation();
   const theme = useTheme();
+  const navigate = useNavigate();
   return (
     <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 2 }}>
       <HomeLable lable={"Projects"} />
@@ -18,6 +22,7 @@ const HomeProjectList = ({project}) => {
               icon={<AddIcon sx={{ color: theme.palette.text.primary }} />}
               title="Create project"
               color="transparent"
+              onClick={() => {navigate('/projects-new'), { state: { from: location.pathname } }}}
             />
           </Grid>
 

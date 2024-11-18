@@ -533,7 +533,7 @@ const ProfilePage = () => {
                                         }
                                     }}
                                 >
-                                    Return to home page
+                                    Back
                                 </Button>
                                 <Button
                                     variant="contained"

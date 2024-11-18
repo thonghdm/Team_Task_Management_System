@@ -24,7 +24,7 @@ const theme = extendTheme({
                     200: '#fff',
                 },
                 text: {
-                    primary: '#000',   // Primary text color
+                    primary: '#44484b',   // Primary text color
                     secondary: '#4d4d4d', // Secondary text color
                     disabled: '#e5e5e5',    // Disabled text color
                 },
@@ -50,7 +50,7 @@ const theme = extendTheme({
                 text: {
                     primary: '#fff',   // Primary text color
                     secondary: '#8c8c8c', // Secondary text color
-                    disabled: '#373737',    // Disabled text color
+                    disabled: '#444444',    // Disabled text color
                 },
             },
         },
