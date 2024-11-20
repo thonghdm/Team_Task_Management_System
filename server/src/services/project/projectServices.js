@@ -16,10 +16,11 @@ const createNew = async (reqBody) => {
 
         const newRoleData = {
             projectId: createdProject._id,
-            memberId: createdProject.membersId[0],
-            user_invite:createdProject.membersId[0],
+            memberId: createdProject.ownerId,
+            user_invite:createdProject.ownerId,
             isRole: 'Admin'
         }
+
         const newRole = new ProjectRole(newRoleData)
         const createdRole = await newRole.save()
         return { createdRole, createdProject }
