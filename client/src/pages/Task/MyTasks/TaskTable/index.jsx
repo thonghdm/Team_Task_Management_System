@@ -5,6 +5,7 @@ import AvatarGroup from '@mui/material/AvatarGroup';
 import { useTheme } from '@mui/material/styles';
 
 const defaultAvatar = 'https://i.pravatar.cc/300'
+import {formatDateRange} from '~/utils/formatDateRange'
 
 const TaskTable = ({ tasks, onRowClick }) => {
   const theme = useTheme();
@@ -21,10 +22,10 @@ const TaskTable = ({ tasks, onRowClick }) => {
         </TableRow>
       </TableHead>
       <TableBody>
-        {tasks.map((task) => (
+        {tasks?.filter(task => task.task_id !== null)?.map((task) => (
           <TableRow
-            key={task.id}
-            onClick={() => onRowClick(task.id)}
+            key={task?.task_id?._id}
+            onClick={() => onRowClick(task?.task_id?._id)}
             sx={{
               color: theme.palette.text.primary,
               '&:hover': { backgroundColor: theme.palette.action.hover },
@@ -33,22 +34,22 @@ const TaskTable = ({ tasks, onRowClick }) => {
             }}
           >
             <TableCell>
-              {/* <Typography variant="body2">{task.name}</Typography> */}
+              {/* <Typography variant="body2">{task.task_name}</Typography> */}
               <Box sx={{ maxWidth: "500px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                {task.name.length > 60 ? `${task.name.slice(0, 60)}...` : task.name}
+                {task?.task_id?.task_name?.length > 60 ? `${task?.task_id?.task_name?.slice(0, 60)}...` : task?.task_id?.task_name}
               </Box>
             </TableCell>
-            <TableCell >{task.dueDate}</TableCell>
+            <TableCell >{formatDateRange(task?.task_id?.start_date,task?.task_id?.end_date)}</TableCell>
             <TableCell align="right">
-              {task.collaborators.length > 0 ? (
+              {task?.task_id?.assigned_to_id?.length > 0 ? (
                 <AvatarGroup max={3} sx={{
                   '& .MuiAvatar-root': { width: 28, height: 28, fontSize: 15 },
                 }}>
-                  {task.collaborators.map((collaborator, index) => (
+                  {task?.task_id?.assigned_to_id?.map((assigned, index) => (
                     <Avatar
                       key={index}
-                      alt={collaborator.name}
-                      src={collaborator.avatar}
+                      alt={assigned?.memberId?.displayName}
+                      src={assigned?.memberId?.image}
                       onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar || ""; }} // Fallback to default image
                     />
                   ))}
@@ -60,8 +61,8 @@ const TaskTable = ({ tasks, onRowClick }) => {
               )}
             </TableCell>
             <TableCell >
-              {task.project && (
-                <Chip label={task.project.length > 30 ? `${task.project.slice(0, 30)}...` : task.project} size="small" />
+              {task?.task_id?.project_id?.projectName && (
+                <Chip label={task?.task_id?.project_id?.projectName?.length > 30 ? `${task?.task_id?.project_id?.projectName?.slice(0, 30)}...` : task?.task_id?.project_id?.projectName} size="small" />
               )}
             </TableCell>
             <TableCell sx={{ display: 'flex' }}>
@@ -72,14 +73,14 @@ const TaskTable = ({ tasks, onRowClick }) => {
                   borderRadius: '50%',
                   mt: '5px',
                   marginRight: 1,
-                  backgroundColor: task.status === 'Completed'
+                  backgroundColor: task?.task_id?.status === 'Completed'
                     ? 'green'
-                    : task.status === 'To Do'
+                    : task?.task_id?.status === 'To Do'
                       ? 'red'
                       : 'yellow'
                 }}
               />
-              <Typography variant="body2">{task.status}</Typography>
+              <Typography variant="body2">{task?.task_id?.status}</Typography>
 
             </TableCell>
           </TableRow>

@@ -69,6 +69,8 @@ const Projects = () => {
   const isOverViewActive = location.pathname.endsWith('/overview');
   const isListActive = location.pathname.endsWith('/task-board');
   const isBoardActive = location.pathname.endsWith('/project-board');
+  const isDashedBoardActive = location.pathname.endsWith('/dash-board');
+  const isCalendarActive = location.pathname.endsWith('/project-calendar');
 
   /// save task name
   const refreshToken = useRefreshToken();
@@ -275,8 +277,25 @@ const Projects = () => {
         <Button
           variant={isListActive ? "contained" : "text"}
           onClick={() => navigate('task-board')}
+          sx={{ ml: 1 }}
         >
           List
+        </Button>
+
+        <Button
+          variant={isDashedBoardActive ? "contained" : "text"}
+          onClick={() => navigate('dash-board')}
+          sx={{ ml: 1 }}
+        >
+          DashBoard
+        </Button>
+
+        <Button
+          variant={isCalendarActive ? "contained" : "text"}
+          onClick={() => navigate('project-calendar')}
+          sx={{ ml: 1 }}
+        >
+          Calendar
         </Button>
       </Paper>
       <ProjectContent />

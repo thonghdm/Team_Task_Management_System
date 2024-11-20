@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
+import React, { useEffect, useState } from 'react'
+import {
+  Box,
   Typography,
   Accordion,
   AccordionSummary,
@@ -10,8 +10,31 @@ import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import TaskTable from '~/pages/Task/MyTasks/TaskTable';
 
+
+import { apiRefreshToken } from '~/apis/Auth/authService';
+import { useDispatch, useSelector } from 'react-redux'
+
+import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useRefreshToken } from '~/utils/useRefreshToken'
+
+import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
 const TaskList = () => {
   const theme = useTheme();
+
+
+  const dispatch = useDispatch()
+  const { accesstoken, userData } = useSelector(state => state.auth)
+
+  const {success} = useSelector(state => state.taskInviteUser)
+  
+  useEffect(() => {
+    dispatch(getTaskByMemberIDThunk({ accesstoken, memberID: userData?._id }));
+  }, [dispatch, userData?._id, accesstoken]);
+
+  console.log('success', success)
+
+
   const today = new Date();
   const nextWeek = new Date();
   nextWeek.setDate(today.getDate() + 7);
@@ -27,7 +50,7 @@ const TaskList = () => {
         : task.collaborators ? [task.collaborators] : []
     }));
   };
-  
+
   const tasks = normalizeTasks([
     {
       id: 1,
@@ -83,15 +106,16 @@ const TaskList = () => {
       status: 'Completed'
     }
   ]);
-  
-  
+
+
+
   const handleRowOverdueClick = (taskId) => {
     console.log('Task clicked:', taskId);
     // Xử lý logic khi click vào task ở đây
   };
 
   // Task Filtering
-  const todayTasks = tasks?.filter(task => new Date(task?.dueDate).toDateString() === today.toDateString());
+  const todayTasks = tasks?.filter(task => new Date(task?.end_date).toDateString() === today.toDateString());
   const nextWeekTasks = tasks?.filter(task => new Date(task?.dueDate) > today && new Date(task?.dueDate) <= nextWeek);
   const recentlyAssignedTasks = tasks?.filter(task => new Date(task?.dueDate) > today && new Date(task?.dueDate) <= threeDaysLater);
   const overdueTasks = tasks?.filter(task => new Date(task?.dueDate) < today);
@@ -104,8 +128,8 @@ const TaskList = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>Do today</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {todayTasks?.length > 0 ? (
-            <TaskTable tasks={todayTasks} />
+          {success?.length > 0 ? (
+            <TaskTable tasks={success} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
               No tasks for today
@@ -165,7 +189,7 @@ const TaskList = () => {
         </AccordionSummary>
         <AccordionDetails>
           {overdueTasks?.length > 0 ? (
-            <TaskTable tasks={overdueTasks} onRowClick={handleRowOverdueClick}/>
+            <TaskTable tasks={overdueTasks} onRowClick={handleRowOverdueClick} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
               No overdue tasks
