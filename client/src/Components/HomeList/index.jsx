@@ -1,122 +1,131 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Tabs, Tab, Button, Divider } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
-import HomeItem from '../HomeItem';
-import '../HomeProjectList/styles.css'; // Ensure styles are imported
+import React, { useState } from 'react';
+import {
+  Box,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import {formatDateRange} from '~/utils/formatDateRange'
 
-const HomeList = ({upcoming, overdue, completed }) => {
-  const [value, setValue] = React.useState(0);
+const HomeList = ({ upcoming, overdue, completed, onRowClick}) => {
+  const [value, setValue] = useState(0);
   const theme = useTheme();
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  // /////
-  // const dispatch = useDispatch();
-  // const { accesstoken, userData } = useSelector(state => state.auth)
-  // const { projects } = useSelector((state) => state.projects);
-  // const [projectDetails, setProjectDetails] = useState([]);
-  // const refreshToken = useRefreshToken();
-
-  // useEffect(() => {
-  //   if (accesstoken && userData?._id) {
-  //     dispatch(fetchProjectsByMemberId({ accesstoken, memberId: userData._id }));
-  //   }
-  // }, [dispatch, accesstoken, userData?._id]);
-
-
-  // const getAllTasks = (projects) => {
-  //   return projects
-  //     ?.flatMap(({ project }) =>
-  //       // Map through each project's lists
-  //       project?.lists?.flatMap(list =>
-  //         // Map through each list's tasks
-  //         list?.tasks?.map(task => ({
-  //           ...task,
-  //           projectName: project.projectName,
-  //           listName: list.list_name
-  //         }))
-  //       )
-  //     )
-  // };
-  // useEffect(() => {
-  //   const projectIds = projects.projects.map(project => project._id).flat();
-  //   if (projectIds.length === 0) return;
-
-  //   const fetchAllProjectDetails = async (token) => {
-  //     try {
-  //       const details = await Promise.all(
-  //         projectIds?.map(projectId =>
-  //           dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
-  //             .then(response => response.payload)
-  //         )
-  //       );
-  //       if (details.length === 0) return;
-  //       setProjectDetails(getAllTasks(details.filter(detail => detail !== undefined)));
-  //     } catch (err) {
-  //       if (error?.err === 2) {
-  //         const newToken = await refreshToken();
-  //         return fetchAllProjectDetails(newToken);
-  //       }
-  //       setError(err.message);
-  //       console.error('Error fetching project details:', err);
-  //     }
-  //   };
-  //   fetchAllProjectDetails(accesstoken);
-  //   // Cleanup
-  //   return () => {
-  //     dispatch(resetProjectDetail());
-  //   };
-  // }, [dispatch, projects, accesstoken]);
-  //
-
-  // const categorizeTasks = (tasks) => {
-  //   const upcoming = [];
-  //   const overdue = [];
-  //   const completed = [];
-  //   const currentDate = new Date();
-
-  //   tasks?.forEach(task => {
-  //     const taskEndDate = new Date(task?.end_date);
-  //     if (task?.status === "Completed") {
-  //       completed.push(task);
-  //     } else if (taskEndDate < currentDate) {
-  //       overdue.push(task);
-  //     } else {
-  //       upcoming.push(task);
-  //     }
-  //   });
-
-  //   return { upcoming, overdue, completed };
-  // };
-  // const { upcoming, overdue, completed } = categorizeTasks(projectDetails);
-
-  const colorMapping = {
-    upcoming: theme.palette.text.primary,
-    overdue: 'red',
-    completed: '#339900',
-  };
 
   // Get the tasks for the selected tab
   const selectedTasks =
     value === 0 ? upcoming : value === 1 ? overdue : completed;
 
+  // Format date function
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
   return (
     <Box sx={{ color: theme.palette.text.primary }}>
-      <Tabs value={value} onChange={handleChange} sx={{ mb: 2 }}>
-        <Tab label="Upcoming" sx={{ color: theme.palette.text.primary }} />
-        <Tab label="OverDue" sx={{ color: theme.palette.text.primary }} />
-        <Tab label="Completed" sx={{ color: theme.palette.text.primary }} />
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        sx={{ mb: 2 }}
+      // variant="fullWidth"
+      >
+        <Tab label="Upcoming" />
+        <Tab label="Overdue" />
+        <Tab label="Completed" />
       </Tabs>
 
-      <Box className="scrollable" sx={{ maxHeight: 300 }}>
-        {selectedTasks?.map((task, index) => (
-          <HomeItem key={index} task={task?.task_name} endDate={task?.end_date} project={task?.projectName} startDate={task?.start_date}
-            color={colorMapping[value === 0 ? 'upcoming' : value === 1 ? 'overdue' : 'completed']}
-          />
-        ))}
-      </Box>
+      <TableContainer className="scrollable" component={Paper} sx={{ maxHeight: 340 }}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell>Task Name</TableCell>
+              <TableCell>Priority</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {selectedTasks?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  <Typography variant="body2" color="textSecondary">
+                    No tasks found
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              selectedTasks?.map((task, index) => (
+                <TableRow
+                  key={task?.task_id?._id || index}
+                  hover
+                  sx={{
+                    backgroundColor: theme.palette.background.paper,
+                    '&:hover': { backgroundColor: theme.palette.action.hover },
+                    border: `1px solid ${theme.palette.text.secondary}`,
+                  }}
+                  onClick={() => onRowClick(task?.task_id?._id)}
+                >
+                  <TableCell>
+                    <Box>
+                      {task?.task_id?.task_name?.length > 100 ? `${task?.task_id?.task_name?.slice(0, 100)}...` : task?.task_id?.task_name}
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{display: 'flex'}}>
+                  <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        mt: '4px',
+                        marginRight: 1,
+                        backgroundColor: task?.task_id?.priority === 'Low'
+                          ? '#4CD2C0'
+                          : task?.task_id?.status === 'High'
+                            ? '#E587FF'
+                            : '#FFB84D'
+                      }}
+                    />
+                    {task?.task_id?.priority || 'N/A'}
+
+                  </TableCell>
+                  <TableCell>
+                    {formatDateRange(task?.task_id?.start_date, task?.task_id?.end_date)}
+                  </TableCell>
+                  <TableCell sx={{ display: 'flex' }}>
+                    <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        mt: '4px',
+                        borderRadius: '50%',
+                        marginRight: 1,
+                        backgroundColor: task?.task_id?.status === 'Completed'
+                          ? 'green'
+                          : task?.task_id?.status === 'To Do'
+                            ? 'red'
+                            : 'yellow'
+                      }}
+                    />
+                    {task?.task_id?.status || 'N/A'}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 };

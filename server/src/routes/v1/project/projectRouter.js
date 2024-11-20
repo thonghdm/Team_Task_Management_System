@@ -6,7 +6,7 @@ const Router = require('express').Router()
 // Route to get all projects by ownerId
 Router.route('/by-owner')
     .get(verifyToken, projectController.getAllByOwnerId)
-    .post( projectController.createNew)
+    .post(verifyToken, projectController.createNew)
 
 Router.route('/by-member')
     .get(verifyToken, projectController.getAllByMemberId)

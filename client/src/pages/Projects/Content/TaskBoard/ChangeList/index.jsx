@@ -37,6 +37,8 @@ import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 
 // import AnimationDone from '~/Components/AnimationDone';
+import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
+
 
 const activities = [
     { avatar: "LV", name: "Luyên Lê Văn", action: "created this task", timestamp: "Yesterday at 12:34am" },
@@ -162,6 +164,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         throw new Error('Delete members failed');
                     }
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -206,6 +209,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         throw new Error('Delete label failed');
                     }
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -246,7 +250,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Update title task failed');
                     }
-                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -282,7 +287,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete priority task failed');
                     }
-                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -299,9 +305,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
     // const [showAnimation, setShowAnimation] = useState(false);
     const handleSaveStatus = (newStatus) => {
         try {
-            const dataSave = {
+            let dataSave = {
                 status: newStatus
             };
+            if (newStatus === 'Completed') {
+                dataSave = { ...dataSave, done_date: new Date().toISOString() };
+            } else {
+                dataSave = { ...dataSave, done_date: '1000-10-10T00:00:00.000+00:00' };
+            }
+
+
             const handleSuccess = () => {
                 // toast.success('Update status task successfully!');
                 // if (newStatus === 'Completed') {
@@ -323,7 +336,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete status task failed');
                     }
-                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -359,7 +373,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete start date task failed');
                     }
-                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -399,7 +414,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete due date task failed');
                     }
-                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -520,7 +536,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ width: '100px' }}>Lables</Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1}}>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                             {task?.label_id?.map(lb => (
                                 <Chip
                                     key={lb?._id}

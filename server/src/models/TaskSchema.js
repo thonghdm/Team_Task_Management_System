@@ -24,6 +24,7 @@ const TaskSchema = new mongoose.Schema(
         created_by_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' }, // Consider using ObjectId
         start_date: { type: Date },
         end_date: { type: Date },
+        done_date: { type: Date, default: '1000-10-10T00:00:00.000+00:00' },
         is_active: { type: Boolean, default: true },
         comment_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
         attachments_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Attachment' }],

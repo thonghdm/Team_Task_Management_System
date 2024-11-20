@@ -11,7 +11,7 @@ const ProjectContent = () => {
     return (
         // <Paper elevation={3} sx={{ mt: 2, p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
         <Routes>
-            <Route path="/" element={<Navigate to="overview" replace />} />
+            <Route path="/" element={<Navigate to="task-board" replace />} />
             <Route path="overview" element={<Overview />} />
             <Route path="task-board" element={<TaskBoard />} />
             {/* <Route path="task-board/:taskId" element={

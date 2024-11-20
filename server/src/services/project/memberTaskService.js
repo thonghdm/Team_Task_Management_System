@@ -7,11 +7,11 @@ const updateMemberTask = async (memberId, reqBody) => {
         if (!existingMemberTask) {
             throw new Error('Member not found')
         }
-        await Task.findByIdAndUpdate(   
+        await Task.findByIdAndUpdate(
             existingMemberTask.task_id,
-            {   
+            {
                 $pull: { assigned_to_id: memberId }
-            },  
+            },
             { new: true }
         )
         // Update fields
@@ -27,7 +27,7 @@ const getMemberTasksByMemberId = async (memberId) => {
     try {
         const memberTasks = await MemberTask.find({
             memberId: memberId,
-            is_active: true,
+            is_active: true
         })
             .populate({
                 path: 'task_id',
@@ -36,30 +36,30 @@ const getMemberTasksByMemberId = async (memberId) => {
                 // select: 'task_name', // Select relevant task fields
                 populate: [
                     {
-                      path: 'assigned_to_id',
-                      select: 'memberId',
-                      populate: {
-                        path: 'memberId',
-                        select: 'email _id image displayName'
-                      }
+                        path: 'assigned_to_id',
+                        select: 'memberId',
+                        populate: {
+                            path: 'memberId',
+                            select: 'email _id image displayName'
+                        }
                     },
                     {
-                      path: 'project_id',
-                      select: 'projectName'
+                        path: 'project_id',
+                        select: 'projectName'
                     }
-                  ]
-               
+                ]
+
             })
         // .populate({
         //     path: 'memberId',
         //     select: 'email _id image displayName is_active'
         // });
 
-        return memberTasks;
+        return memberTasks
     } catch (error) {
-        throw new Error(`Error fetching member tasks: ${error.message}`);
+        throw new Error(`Error fetching member tasks: ${error.message}`)
     }
-};
+}
 
 
 module.exports = { updateMemberTask, getMemberTasksByMemberId }

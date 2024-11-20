@@ -28,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 
 import ExpandTask from './ChangeList/ExpandTask';
+import {formatDateRange} from '~/utils/formatDateRange'
 
 
 const TaskBoard = () => {
@@ -66,8 +67,10 @@ const TaskBoard = () => {
     labels: task.labels.length === 0 ? ['.'] : task.labels,
     comments: task.comments.length === 0 ? 0 : task.comments.length,
     members: task.members.length === 0 ? [{ name: '.', avatar: '' }] : task.members,
-    dueDate: task.end_date || '.'
+    dueDate: task.end_date || '.',
   }));
+
+  console.log(updatedTasks);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -180,7 +183,7 @@ const TaskBoard = () => {
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Comment</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
                   Due date
-                  <IconButton
+                  {/* <IconButton
                     aria-label="more"
                     id="long-button"
                     aria-controls={Boolean(anchorEl) ? 'long-menu' : undefined}
@@ -202,7 +205,7 @@ const TaskBoard = () => {
                   >
                     <MenuItem onClick={handleClose}>Sort ascending</MenuItem>
                     <MenuItem onClick={handleClose}>Sort descending</MenuItem>
-                  </Menu>
+                  </Menu> */}
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -380,7 +383,7 @@ const TaskBoard = () => {
                     </Box>
                   </TableCell>
 
-                  {renderTableCell(formatDate(task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
+                  {renderTableCell(formatDateRange(task.start_date,task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
 
                 </TableRow>
               ))}
