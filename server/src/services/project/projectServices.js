@@ -12,6 +12,7 @@ const createNew = async (reqBody) => {
         }
         const newProject = new Project(newProjectData)
         const createdProject = await newProject.save()
+        // console.log(createdProject)
 
         const newRoleData = {
             projectId: createdProject._id,

@@ -23,5 +23,43 @@ const updateMemberTask = async (memberId, reqBody) => {
     }
 }
 
+const getMemberTasksByMemberId = async (memberId) => {
+    try {
+        const memberTasks = await MemberTask.find({
+            memberId: memberId,
+            is_active: true,
+        })
+            .populate({
+                path: 'task_id',
+                match: { is_active: true },
+                // select: 'task_name description status priority due_date start_date end_date project_id is_active', // Select relevant task fields
+                // select: 'task_name', // Select relevant task fields
+                populate: [
+                    {
+                      path: 'assigned_to_id',
+                      select: 'memberId',
+                      populate: {
+                        path: 'memberId',
+                        select: 'email _id image displayName'
+                      }
+                    },
+                    {
+                      path: 'project_id',
+                      select: 'projectName'
+                    }
+                  ]
+               
+            })
+        // .populate({
+        //     path: 'memberId',
+        //     select: 'email _id image displayName is_active'
+        // });
 
-module.exports = {updateMemberTask }
+        return memberTasks;
+    } catch (error) {
+        throw new Error(`Error fetching member tasks: ${error.message}`);
+    }
+};
+
+
+module.exports = { updateMemberTask, getMemberTasksByMemberId }

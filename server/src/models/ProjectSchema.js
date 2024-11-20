@@ -16,6 +16,11 @@ const ProjectSchema = new mongoose.Schema({
         type: String,
         default: descriptionDefault
     },
+    ownerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        // required: true,
+        ref: 'User'
+    },
     username: { type: String, unique: true }, // Ensure username field exists
     membersId: [
         {
