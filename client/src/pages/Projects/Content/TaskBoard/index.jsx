@@ -109,7 +109,6 @@ const TaskBoard = () => {
 
   const renderTableCell = (content, taskId, cellId, isEmpty) => {
     const isTrulyEmpty = !!isEmpty || (typeof content === 'string' && content.trim() === '.');
-    console.log(isTrulyEmpty);
     const handleClick = () => {
       console.log(cellId);
       switch (cellId) {

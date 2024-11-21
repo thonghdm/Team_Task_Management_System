@@ -1,5 +1,8 @@
 const mongoose = require('mongoose')
 
+const descriptionDefault = '<p><strong><em><u>Add new note</u></em></strong></p>'
+
+
 // Define the user schema
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true }, // ensure email is unique and required
@@ -20,7 +23,8 @@ const userSchema = new mongoose.Schema({
     username: { type: String },
     otp_code: { type: String },
     otp_expired: { type: Date },
-    is_verified: { type: Boolean, default: false }
+    is_verified: { type: Boolean, default: false },
+    note: { type: String, default: descriptionDefault }
 }, { timestamps: true })
 
 const User = mongoose.model('User', userSchema)

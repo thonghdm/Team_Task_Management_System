@@ -50,7 +50,6 @@ function Calendario() {
         );
         setEventos(updatedEvents);
     };
-    console.log(eventos);
 
     const handleEventClick = (evento) => {
         console.log(evento); // Placeholder for event click handler

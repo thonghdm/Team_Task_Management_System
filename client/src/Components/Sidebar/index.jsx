@@ -189,7 +189,7 @@ const Sidebar = ({ open }) => {
           </Box> */}
 
           <Box>
-            {projects?.projects.length > 0 && <Box display="flex" alignItems="center" justifyContent="space-between">
+            {projects?.projects?.length > 0 && <Box display="flex" alignItems="center" justifyContent="space-between">
               <SectionTitle>PROJECTS</SectionTitle>
               <IconButton onClick={() => { navigate('/projects-new'), { state: { from: location.pathname } } }}>
                 <AddIcon sx={{ width: 17, mt: "3px" }} />
