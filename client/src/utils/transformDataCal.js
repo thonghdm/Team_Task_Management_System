@@ -20,6 +20,37 @@ export const transformDataCal = (tasks) => {
       };
     }).filter(task => task !== null) : [];
   }
+
+
+
+  // export const transformDataCal = (tasks) => {
+  //   if (!tasks || !Array.isArray(tasks)) {
+  //     return [];
+  //   }
+  //   return tasks
+  //     .map(task => {
+  //       if (!task?.task_id) {
+  //         return null; // Skip tasks without task_id
+  //       }
+  
+  //       const { task_id } = task;
+  //       return {
+  //         id: task_id._id,
+  //         title: task_id.task_name || "No title available",
+  //         start: task_id.start_date ? new Date(task_id.start_date) : new Date(),
+  //         end: task_id.end_date ? new Date(task_id.end_date) : new Date(),
+  //         desc: task_id.description 
+  //           ? task_id.description.replace(/<\/?[^>]+(>|$)/g, "") 
+  //           : "No description available",
+  //         color: task_id.color || "#FFFFFF", // Default white if no color is provided
+  //         tipo: task_id.project_id?.projectName || "No project name",
+  //         resource: Array.isArray(task_id.assigned_to_id) 
+  //           ? task_id.assigned_to_id.map(user => user?.memberId?.displayName || "Unnamed")
+  //           : [],
+  //       };
+  //     })
+  //     .filter(task => task !== null); // Filter out invalid tasks
+  // };
   
 //   // Example usage
 //   const duLieuDuAn = transformData([

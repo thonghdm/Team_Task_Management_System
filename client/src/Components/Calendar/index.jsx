@@ -1,40 +1,42 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import moment from 'moment';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
-import duLieuDuAn from '~/pages/Task/Calendar/duLieuDuAn';
+import duLieuDuAn from '~/Components/Calendar/duLieuDuAn';
 
 import CustomCalendar from './CustomCalendar';
-import useStyles from '~/pages/Task/Calendar/useStyles';
+import useStyles from '~/Components/Calendar/useStyles';
 import { useTheme } from '@mui/material/styles';
 
-import '~/pages/Task/Calendar/styles.css';
+import '~/Components/Calendar/styles.css';
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 const localizer = momentLocalizer(moment);
 
 import { useDispatch, useSelector } from 'react-redux'
 import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
-import { transformDataCal} from '~/utils/transformDataCal'
+import { transformDataCal } from '~/utils/transformDataCal'
 
-function Calendario() {
+import ChangeList from '~/pages/Projects/Content/TaskBoard/ChangeList';
+
+
+function Calendario({duLieuDuAn}) {
     const theme = useTheme();
     const classes = useStyles(theme);
 
 
 
     ////
-    const dispatch = useDispatch()
-    const { accesstoken, userData } = useSelector(state => state.auth)
-    const { success } = useSelector(state => state.taskInviteUser)
-    useEffect(() => {
-        dispatch(getTaskByMemberIDThunk({ accesstoken, memberID: userData?._id }));
-    }, [dispatch, userData?._id, accesstoken]);
+    // const dispatch = useDispatch()
+    // const { accesstoken, userData } = useSelector(state => state.auth)
+    // const { success } = useSelector(state => state.taskInviteUser)
+    // useEffect(() => {
+    //     dispatch(getTaskByMemberIDThunk({ accesstoken, memberID: userData?._id }));
+    // }, [dispatch, userData?._id, accesstoken]);
 
-    const duLieuDuAn = success ? (transformDataCal(success)) : [];
-    
+    // const duLieuDuAn = success ? (transformDataCal(success)) : [];
 
     const [eventos, setEventos] = useState(duLieuDuAn);
     const [eventosFiltrados, setEventosFiltrados] = useState(duLieuDuAn);
@@ -53,7 +55,36 @@ function Calendario() {
 
     const handleEventClick = (evento) => {
         console.log(evento); // Placeholder for event click handler
+        handleNameClick(evento.id);
     };
+
+    // const onDoubleClickEvent = useCallback((calEvent) => {
+    //     console.log("onDoubleClick");
+    //     window.clearTimeout(clickRef?.current);
+    //     clickRef.current = window.setTimeout(() => {
+    //       console.log(calEvent);
+    //     }, 250);
+    //   }, []);
+
+    ////////////////////////////////openTaskDetail
+    const [showNameMenu, setShowNameMenu] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
+
+    const handleOpenNameMenu = (task) => {
+        setSelectedTask(task);
+        setShowNameMenu(true);
+    };
+    const handleCloseNameMenu = () => {
+        setShowNameMenu(false);
+        setSelectedTask(null);
+    };
+
+    const handleNameClick = (taskId) => {
+        handleOpenNameMenu(taskId);
+    };
+    ////////////////////////////////////////////////////////////////
+
+
 
     return (
         <div className={classes.tela}>
@@ -68,6 +99,7 @@ function Calendario() {
                     onEventDrop={moverEventos}
                     onEventResize={moverEventos}
                     onSelectEvent={handleEventClick}
+                    // onDoubleClickEvent={onDoubleClickEvent}
                     eventPropGetter={eventStyle}
                     components={{
                         toolbar: CustomCalendar,
@@ -75,6 +107,9 @@ function Calendario() {
                 />
 
             </div>
+            {showNameMenu && selectedTask && (
+                <ChangeList open={showNameMenu} onClose={handleCloseNameMenu} taskId={selectedTask} />
+            )}
         </div>
     );
 }
