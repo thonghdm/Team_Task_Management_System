@@ -13,6 +13,8 @@ import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectD
 import './styles.css'; // Ensure this import is correct
 import dayjs from 'dayjs';
 
+import { getRandomColor } from '~/utils/radomColor';
+
 
 const DialogButtonAdd = ({ open, onClose }) => {
     const [addTaskDialogOpen, setAddTaskDialogOpen] = useState(false);
@@ -87,6 +89,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
             project_id: projectId,
             start_date: startDate,
             end_date: dueDate,
+            color: getRandomColor()
         };
         const resetFormState = () => {
             setNewTaskName('');

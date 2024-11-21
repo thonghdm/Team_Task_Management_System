@@ -70,7 +70,6 @@ const TaskBoard = () => {
     dueDate: task.end_date || '.',
   }));
 
-  console.log(updatedTasks);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
