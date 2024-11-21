@@ -6,6 +6,8 @@ import TaskBoard from '~/pages/Projects/Content/TaskBoard';
 import Overview from '~/pages/Projects/Content/Overview';
 import Board from '~/pages/Projects/Content/Board';
 import mockData from '~/apis/mockData';
+
+import Calendar from '~/pages/Projects/Content/Calendar';
 const ProjectContent = () => {
     const theme = useTheme();
     return (
@@ -21,6 +23,7 @@ const ProjectContent = () => {
                 />
             } /> */}
             <Route path="project-board" element={<Board board={mockData} />} />
+            <Route path="project-calendar" element={<Calendar />} />
         </Routes>
         // </Paper>
     );

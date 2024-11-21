@@ -15,10 +15,6 @@ import '~/Components/Calendar/styles.css';
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 const localizer = momentLocalizer(moment);
 
-import { useDispatch, useSelector } from 'react-redux'
-import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
-import { transformDataCal } from '~/utils/transformDataCal'
-
 import ChangeList from '~/pages/Projects/Content/TaskBoard/ChangeList';
 
 
@@ -91,7 +87,7 @@ function Calendario({duLieuDuAn}) {
             <div className={classes.calendario}>
                 <DragAndDropCalendar
                     defaultDate={moment().toDate()}
-                    defaultView='month'
+                    defaultView='week'
                     events={eventosFiltrados}
                     views={['month', 'week', 'day', 'agenda']}
                     localizer={localizer}
