@@ -71,7 +71,7 @@ const Projects = () => {
   const isBoardActive = location.pathname.endsWith('/project-board');
   const isDashedBoardActive = location.pathname.endsWith('/dash-board');
   const isCalendarActive = location.pathname.endsWith('/project-calendar');
-
+  const isTimeLineActive = location.pathname.endsWith('/project-timeline');
   /// save task name
   const refreshToken = useRefreshToken();
   const handleSaveTitle = (newText) => {
@@ -297,6 +297,15 @@ const Projects = () => {
         >
           Calendar
         </Button>
+
+        <Button
+          variant={isTimeLineActive ? "contained" : "text"}
+          onClick={() => navigate('project-timeline')}
+          sx={{ ml: 1 }}
+        >
+          TimeLine
+        </Button>
+
       </Paper>
       <ProjectContent />
 
