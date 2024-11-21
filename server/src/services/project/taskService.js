@@ -73,31 +73,31 @@ const addMemberToTask = async (reqBodyArray) => {
     try {
         // Đảm bảo input là array
         if (!Array.isArray(reqBodyArray)) {
-            throw new Error('Input must be an array');
+            throw new Error('Input must be an array')
         }
 
-        const results = [];
+        const results = []
 
         // Xử lý từng member một
         for (const reqBody of reqBodyArray) {
             // 1. Kiểm tra task có tồn tại không và lấy thông tin task
-            const existingTask = await Task.findById(reqBody.task_id);
+            const existingTask = await Task.findById(reqBody.task_id)
             if (!existingTask) {
-                throw new Error(`Task not found with id: ${reqBody.task_id}`);
+                throw new Error(`Task not found with id: ${reqBody.task_id}`)
             }
 
             // 2. Kiểm tra memberId đã tồn tại trong assigned_to_id chưa
             if (existingTask.assigned_to_id.includes(reqBody.memberId)) {
-                throw new Error(`Member ${reqBody.memberId} already exists in this task`);
+                throw new Error(`Member ${reqBody.memberId} already exists in this task`)
             }
 
             // 4. Kiểm tra member đã tồn tại trong MemberTask chưa
             const existingMemberTask = await MemberTask.findOne({
                 task_id: reqBody.task_id,
                 memberId: reqBody.memberId
-            });
+            })
 
-            let memberTaskResult;
+            let memberTaskResult
 
             if (existingMemberTask) {
                 // Nếu đã tồn tại thì update is_active = true
@@ -108,7 +108,7 @@ const addMemberToTask = async (reqBodyArray) => {
                         updatedAt: new Date()
                     },
                     { new: true }
-                );
+                )
             } else {
                 // Nếu chưa tồn tại thì tạo mới
                 const newMemberData = {
@@ -116,9 +116,9 @@ const addMemberToTask = async (reqBodyArray) => {
                     task_id: reqBody.task_id,
                     user_invite: reqBody.user_invite,
                     is_active: true
-                };
-                const newMemberTask = new MemberTask(newMemberData);
-                memberTaskResult = await newMemberTask.save();
+                }
+                const newMemberTask = new MemberTask(newMemberData)
+                memberTaskResult = await newMemberTask.save()
             }
 
             // 5. Update assigned_to_id trong Task
@@ -127,46 +127,46 @@ const addMemberToTask = async (reqBodyArray) => {
                 // { $addToSet: { assigned_to_id: reqBody.memberId } },
                 { $addToSet: { assigned_to_id: memberTaskResult._id } },
                 { new: true }
-            );
+            )
 
-            results.push(memberTaskResult);
+            results.push(memberTaskResult)
         }
 
         // Trả về array kết quả
         return {
-            message: "Members added to task successfully",
+            message: 'Members added to task successfully',
             members: results
-        };
+        }
 
     } catch (error) {
         // Xử lý lỗi specific
-        if (error.message.includes('Task not found') || 
+        if (error.message.includes('Task not found') ||
             error.message.includes('User cannot invite themselves') ||
             error.message.includes('already exists')) {
-            throw new Error(error.message);
+            throw new Error(error.message)
         }
         // Xử lý lỗi chung
-        throw new Error(`Error adding members to task: ${error.message}`);
+        throw new Error(`Error adding members to task: ${error.message}`)
     }
-};
+}
 
 // // Sử dụng với MongoDB transaction để đảm bảo tính atomic
 // const addMembersToTaskWithTransaction = async (reqBodyArray) => {
-//     const session = await mongoose.startSession();
+//     const session = await mongoose.startSession()
 //     try {
-//         session.startTransaction();
+//         session.startTransaction()
 
-//         const result = await addMemberToTask(reqBodyArray);
+//         const result = await addMemberToTask(reqBodyArray)
 
-//         await session.commitTransaction();
-//         return result;
+//         await session.commitTransaction()
+//         return result
 //     } catch (error) {
-//         await session.abortTransaction();
-//         throw error;
+//         await session.abortTransaction()
+//         throw error
 //     } finally {
-//         session.endSession();
+//         session.endSession()
 //     }
-// };
+// }
 
 const updateMemberTask = async (memberId, reqBody) => {
     try {
@@ -182,17 +182,17 @@ const updateMemberTask = async (memberId, reqBody) => {
     }
 }
 
-const updateTaskById = async (taskId,reqBody) => {
+const updateTaskById = async (taskId, reqBody) => {
     try {
         const task = await Task.findById(taskId)
         if (!task) {
             throw new Error('Task not found')
         }
-        await List.findByIdAndUpdate(   
+        await List.findByIdAndUpdate(
             task.list_id,
-            {   
+            {
                 $pull: { task_id: taskId }
-            },      
+            },
             { new: true }
         )
         Object.assign(task, reqBody)
@@ -204,4 +204,4 @@ const updateTaskById = async (taskId,reqBody) => {
 }
 
 
-module.exports = { createNew, getTaskById, addMemberToTask, updateMemberTask,updateTaskById }
+module.exports = { createNew, getTaskById, addMemberToTask, updateMemberTask, updateTaskById }

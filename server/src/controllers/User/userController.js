@@ -85,10 +85,27 @@ const getAllMembers = async (req, res, next) => {
     }
 }
 
+const updateAll = async (req, res, next) => {
+    const { _id } = req.body
+    if (!_id) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ message: `User ${_id} is required` })
+    }
+    try {
+        const updateUser = await userService.updateUserByID(_id, req.body)
+        res.status(StatusCodes.OK).json({
+            message: 'Label updated successfully!',
+            user: updateUser
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 
 module.exports = {
     getOne,
     updateUser,
     searchUsers,
-    getAllMembers
+    getAllMembers,
+    updateAll
 }

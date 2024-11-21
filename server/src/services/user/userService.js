@@ -4,7 +4,7 @@ const getOneService = (id) => new Promise((resolve, reject) => {
     (async () => {
         try {
             const response = await User.findOne({ _id: id })
-                .select('_id email displayName image isAdmin is_active createdAt phoneNumber company location jobTitle department')
+                .select('_id email displayName image isAdmin is_active createdAt phoneNumber company location jobTitle department note')
                 .lean()
             resolve({
                 err: response ? 0 : 4,
@@ -61,9 +61,25 @@ const getAllMembers = async () => {
     }
 }
 
+const updateUserByID = async (userId, updateData) => {
+    try {
+        const existingUser = await User.findById(userId)
+        if (!existingUser) {
+            throw new Error('User not found')
+        }
+        // Update fields
+        Object.assign(existingUser, updateData)
+        const updatedUser = await existingUser.save()
+        return updatedUser
+    } catch (error) {
+        throw new Error(`Failed to update user: ${error.message}`)
+    }
+}
+
 module.exports = {
     updateService,
     getOneService,
     searchUsers,
-    getAllMembers
+    getAllMembers,
+    updateUserByID
 }

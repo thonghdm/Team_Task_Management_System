@@ -38,9 +38,9 @@ const updateLabel = async (labelId, updateData) => {
         if (!existingLabel) {
             throw new Error('Label not found')
         }
-        await Task.findByIdAndUpdate(   
+        await Task.findByIdAndUpdate(
             existingLabel.task_id,
-            {   
+            {
                 $pull: { label_id: labelId }
             },
             { new: true }
@@ -54,4 +54,4 @@ const updateLabel = async (labelId, updateData) => {
     }
 }
 
-module.exports = { createLabel,updateLabel }
+module.exports = { createLabel, updateLabel }

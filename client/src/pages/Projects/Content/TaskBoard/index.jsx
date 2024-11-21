@@ -28,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 
 import ExpandTask from './ChangeList/ExpandTask';
+import {formatDateRange} from '~/utils/formatDateRange'
 
 
 const TaskBoard = () => {
@@ -66,8 +67,9 @@ const TaskBoard = () => {
     labels: task.labels.length === 0 ? ['.'] : task.labels,
     comments: task.comments.length === 0 ? 0 : task.comments.length,
     members: task.members.length === 0 ? [{ name: '.', avatar: '' }] : task.members,
-    dueDate: task.end_date || '.'
+    dueDate: task.end_date || '.',
   }));
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -106,8 +108,7 @@ const TaskBoard = () => {
 
 
   const renderTableCell = (content, taskId, cellId, isEmpty) => {
-    const isTrulyEmpty = isEmpty || (typeof content === 'string' && content.trim() === '.');
-
+    const isTrulyEmpty = !!isEmpty || (typeof content === 'string' && content.trim() === '.');
     const handleClick = () => {
       console.log(cellId);
       switch (cellId) {
@@ -149,6 +150,7 @@ const TaskBoard = () => {
                 transform: 'translateY(-50%)',
                 backgroundColor: theme.palette.background.paper,
                 '&:hover': { backgroundColor: theme.palette.action.hover },
+                border: `1px solid ${theme.palette.text.secondary}`,
               }}
             >
               {isTrulyEmpty ? <AddIcon sx={{ width: '13px', height: '13px', cursor: 'pointer' }} />
@@ -179,7 +181,7 @@ const TaskBoard = () => {
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Comment</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
                   Due date
-                  <IconButton
+                  {/* <IconButton
                     aria-label="more"
                     id="long-button"
                     aria-controls={Boolean(anchorEl) ? 'long-menu' : undefined}
@@ -201,7 +203,7 @@ const TaskBoard = () => {
                   >
                     <MenuItem onClick={handleClose}>Sort ascending</MenuItem>
                     <MenuItem onClick={handleClose}>Sort descending</MenuItem>
-                  </Menu>
+                  </Menu> */}
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -241,6 +243,7 @@ const TaskBoard = () => {
                             transform: 'translateY(-50%)',
                             backgroundColor: theme.palette.background.paper,
                             '&:hover': { backgroundColor: theme.palette.action.hover },
+                            border: `1px solid ${theme.palette.text.secondary}`,
                           }}
                         >
                           {/* <DensityMediumIcon
@@ -250,7 +253,7 @@ const TaskBoard = () => {
                               cursor: 'pointer',
                             }}
                           /> */}
-                          <ExpandTask taskId={task.id}/>
+                          <ExpandTask taskId={task.id} />
                         </IconButton>
                       </Tooltip>
                     )}
@@ -269,7 +272,8 @@ const TaskBoard = () => {
                     <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       {task.list_name.length > 35 ? `${task.list_name.slice(0, 35)}...` : task.list_name}
                     </Box>,
-                    task.list_name, task.id, 'list_name', !task.list_name || task.list_name === '.')}
+                    task.id, 'list_name', !task.list_name || task.list_name === '.')}
+
 
                   {renderTableCell(
                     <Box sx={{ display: 'flex' }}>
@@ -377,7 +381,7 @@ const TaskBoard = () => {
                     </Box>
                   </TableCell>
 
-                  {renderTableCell(formatDate(task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
+                  {renderTableCell(formatDateRange(task.start_date,task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
 
                 </TableRow>
               ))}

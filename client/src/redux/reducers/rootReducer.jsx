@@ -18,6 +18,7 @@ import fileSlice from '~/redux/project/uploadFile-slice/index';
 import projectThunkSlice from '~/redux/project/project-slice/index';
 import starredSlice from '~/redux/project/starred-slice/index';
 
+import taskInviteUserSlice from '~/redux/project/task-slice/task-inviteUser-slice/index';
 
 // Cấu hình cho persist
 const commonConfig = {
@@ -104,6 +105,11 @@ const starredSliceConfig = {
     whitelist: ['starred'],
 };
 
+const taskInviteUserSliceConfig = {
+    ...commonConfig,
+    key: 'taskInviteUser',
+    whitelist: ['success', 'loading', 'error'],
+};
 
 const rootReducer = combineReducers({
     auth: persistReducer(authConfig, authReducer),
@@ -121,6 +127,8 @@ const rootReducer = combineReducers({
     uploadFile: persistReducer(fileConfig, fileSlice),
     projectThunk: persistReducer(projectThunkSliceConfig, projectThunkSlice),
     starred: persistReducer(starredSliceConfig, starredSlice),
+
+    taskInviteUser: persistReducer(taskInviteUserSliceConfig, taskInviteUserSlice),
 })
 
 

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { inviteMemberTask, updateMemberTask } from '~/apis/Project/MemberTaskService';
+import { inviteMemberTask, updateMemberTask, getTaskByMemberID } from '~/apis/Project/MemberTaskService';
 
 export const inviteUserTask = createAsyncThunk(
     'task/inviteUser',
@@ -18,6 +18,18 @@ export const updateMemberTaskThunks = createAsyncThunk(
     async ({ accesstoken, data }, thunkAPI) => {
         try {
             const response = await updateMemberTask(accesstoken, data);
+            return response;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const getTaskByMemberIDThunk = createAsyncThunk(
+    'task/getTaskByMemberID',
+    async ({ accesstoken, memberID }, thunkAPI) => {
+        try {
+            const response = await getTaskByMemberID(accesstoken, memberID);
             return response;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response?.data || error.message);
@@ -60,7 +72,20 @@ const taskInviteUserSlice = createSlice({
             .addCase(updateMemberTaskThunks.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
-            });
+            })
+
+            .addCase(getTaskByMemberIDThunk.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getTaskByMemberIDThunk.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = action.payload;
+            })
+            .addCase(getTaskByMemberIDThunk.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
 
     },
 });

@@ -12,13 +12,15 @@ const createNew = async (reqBody) => {
         }
         const newProject = new Project(newProjectData)
         const createdProject = await newProject.save()
+        // console.log(createdProject)
 
         const newRoleData = {
             projectId: createdProject._id,
-            memberId: createdProject.membersId[0],
-            user_invite:createdProject.membersId[0],
+            memberId: createdProject.ownerId,
+            user_invite: createdProject.ownerId,
             isRole: 'Admin'
         }
+
         const newRole = new ProjectRole(newRoleData)
         const createdRole = await newRole.save()
         return { createdRole, createdProject }
@@ -103,7 +105,7 @@ const getDetailsProject = async (projectId) => {
             {
                 $lookup: {
                     from: 'tasks',
-                    let: { projectId: '$_id'}, 
+                    let: { projectId: '$_id' },
                     pipeline: [
                         {
                             $match: {
@@ -172,7 +174,7 @@ const getDetailsProject = async (projectId) => {
                                     },
                                     {
                                         $lookup: {
-                                            from: 'users',  // Assuming the 'users' collection has the desired data
+                                            from: 'users', // Assuming the 'users' collection has the desired data
                                             localField: 'memberId',
                                             foreignField: '_id',
                                             as: 'userInfo'
@@ -223,7 +225,7 @@ const getAllByOwnerId = async (ownerId) => {
 ///
 const getAllByMemberId = async (memberId) => {
     try {
-        const projects = await Project.find({ membersId: memberId , isActive: true})
+        const projects = await Project.find({ membersId: memberId, isActive: true })
         return projects
     } catch (error) {
         throw new Error(error.message)
@@ -236,7 +238,7 @@ const updateProjectById = async (projectId, reqBody) => {
         if (!project) {
             throw new Error('Project not found')
         }
-       
+
         Object.assign(project, reqBody)
         const updatedProject = await project.save()
         return updatedProject
@@ -244,4 +246,4 @@ const updateProjectById = async (projectId, reqBody) => {
         throw new Error(`Failed to update project: ${error.message}`)
     }
 }
-module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId,updateProjectById }
+module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId, updateProjectById }

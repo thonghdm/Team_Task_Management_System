@@ -20,6 +20,7 @@ import { updateProjectThunk } from '~/redux/project/project-slice';
 import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
 import { useRefreshToken } from '~/utils/useRefreshToken';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useTheme } from '@mui/material/styles';
 
 import { createStarred, getStarredThunks, updateStarredThunks } from '~/redux/project/starred-slice';
 
@@ -35,6 +36,7 @@ const Projects = () => {
   useEffect(() => {
     dispatch(fetchMemberProject({ accesstoken, projectId }));
   }, [dispatch, projectId, accesstoken]);
+  const theme = useTheme();
 
   const { starred } = useSelector((state) => state.starred);
 
@@ -67,7 +69,9 @@ const Projects = () => {
   const isOverViewActive = location.pathname.endsWith('/overview');
   const isListActive = location.pathname.endsWith('/task-board');
   const isBoardActive = location.pathname.endsWith('/project-board');
-
+  const isDashedBoardActive = location.pathname.endsWith('/dash-board');
+  const isCalendarActive = location.pathname.endsWith('/project-calendar');
+  const isTimeLineActive = location.pathname.endsWith('/project-timeline');
   /// save task name
   const refreshToken = useRefreshToken();
   const handleSaveTitle = (newText) => {
@@ -214,6 +218,8 @@ const Projects = () => {
                     width: 30,
                     height: 30,
                     backgroundColor: 'text.secondary',
+                    border:  `2px solid ${theme.palette.text.secondary}`,
+
                   }
                 }}
               >
@@ -271,9 +277,35 @@ const Projects = () => {
         <Button
           variant={isListActive ? "contained" : "text"}
           onClick={() => navigate('task-board')}
+          sx={{ ml: 1 }}
         >
           List
         </Button>
+
+        <Button
+          variant={isDashedBoardActive ? "contained" : "text"}
+          onClick={() => navigate('dash-board')}
+          sx={{ ml: 1 }}
+        >
+          DashBoard
+        </Button>
+
+        <Button
+          variant={isCalendarActive ? "contained" : "text"}
+          onClick={() => navigate('project-calendar')}
+          sx={{ ml: 1 }}
+        >
+          Calendar
+        </Button>
+
+        <Button
+          variant={isTimeLineActive ? "contained" : "text"}
+          onClick={() => navigate('project-timeline')}
+          sx={{ ml: 1 }}
+        >
+          TimeLine
+        </Button>
+
       </Paper>
       <ProjectContent />
 

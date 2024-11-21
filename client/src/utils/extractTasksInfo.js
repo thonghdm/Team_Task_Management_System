@@ -24,7 +24,8 @@ export function extractTasksInfo(project) {
                     )
                     : [],
                 comments: task?.comments?.length ? task?.comments.map(cmt => cmt._id) : [],
-                end_date: task?.end_date || ""
+                end_date: task?.end_date || "",
+                start_date: task?.start_date || "",
             });
         });
     });

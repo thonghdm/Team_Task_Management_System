@@ -11,7 +11,7 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
     const totalIssues = completed.length + upcoming.length + overdue.length;
     const theme = useTheme();
     
-    const progressPercentage = Math.round((completedIssues / totalIssues) * 100);
+    const progressPercentage = Math.round((completedIssues / totalIssues) * 100) || 0;
     return (
         <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
             <HomeLable lable="Statistics" />
@@ -32,7 +32,8 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
                                     />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="due" name="InComplete " fill="#F88379" />
+                                    <Bar dataKey="coming" name="Upcoming " fill="#FFC300" />
+                                    <Bar dataKey="due" name="Overdue " fill="#F88379" />
                                     <Bar dataKey="completed" name="Completed" fill="#82ca9d" />
                                 </BarChart>
                             </ResponsiveContainer>
