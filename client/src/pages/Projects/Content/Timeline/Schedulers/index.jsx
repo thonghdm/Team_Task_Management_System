@@ -1,9 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { Scheduler } from "@bitnoi.se/react-scheduler";
-import dayjs from "dayjs";
-
-import mockedSchedulerData from "./mockedSchedulerData";
-const Schedulers = () => {
+import "@bitnoi.se/react-scheduler/dist/style.css";
+const Schedulers = ({dataScheduler}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [filterButtonState, setFilterButtonState] = useState(0);
 
@@ -15,28 +13,30 @@ const Schedulers = () => {
     // const handleRangeChange = useCallback((range) => {
     //     setRange(range);
     // }, []);
+    // const filteredMockedSchedulerData = dataScheduler?.map((person) => ({
+    //     ...person,
+    //     data: Array.isArray(person?.data) // Kiểm tra nếu là mảng
+    //         ? person.data.filter(
+    //             (project) =>
+    //                 dayjs(project.startDate).isBetween(range.startDate, range.endDate) ||
+    //                 dayjs(project.endDate).isBetween(range.startDate, range.endDate) ||
+    //                 (dayjs(project.startDate).isBefore(range.startDate, "day") &&
+    //                     dayjs(project.endDate).isAfter(range.endDate, "day"))
+    //         )
+    //         : [] // Nếu không phải mảng, gán giá trị mặc định là []
+    // }));
+    // console.log(dataScheduler);
 
-    const filteredMockedSchedulerData = mockedSchedulerData.map((person) => ({
-        ...person,
-        data: person.data.filter(
-            (project) =>
-                // we use "dayjs" for date calculations, but feel free to use library of your choice
-                dayjs(project.startDate).isBetween(range.startDate, range.endDate) ||
-                dayjs(project.endDate).isBetween(range.startDate, range.endDate) ||
-                (dayjs(project.startDate).isBefore(range.startDate, "day") &&
-                    dayjs(project.endDate).isAfter(range.endDate, "day"))
-        )
-    }))
     return (
         <Scheduler
             // decide when to show loading indicators
             isLoading={isLoading}
             // your data
-            data={filteredMockedSchedulerData}
+            data={dataScheduler}
             // callback when user click's on one of the grid's tile
-            onItemClick={(clickedItem) => console.log(clickedItem)}
+            onItemClick={(clickedItem) => console.log(clickedItem?.label?._id)}
             // filter function that let's you handling filtering on your end
-            onTileClick={(clickedResource) => console.log(clickedResource)}
+            onTileClick={(clickedResource) => console.log(clickedResource?.id)}
             // callback when user changes range
             onFilterData={() => {
                 // Some filtering logic...
@@ -60,6 +60,7 @@ const Schedulers = () => {
                 lang: "en",
                 // decide how many resources show per one page
                 maxRecordsPerPage: 20,
+                showThemeToggle: true,
             }}
         />
     );

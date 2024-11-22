@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
 import { Typography, Paper } from '@mui/material';
 import Scheduler from '~/pages/Projects/Content/Timeline/Schedulers';
 import '~/pages/Projects/Content/Timeline/styles.css';
 
+
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useDispatch, useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom';
+
+import { convertedDataTimeline } from '~/utils/convertedDataTimeline';
+
 const StyledSchedulerFrame = styled('div')(({ theme }) => ({
     position: 'relative',
-    minHeight: '70vh',
-    width: '79vw',
+    minHeight: '86vh',
+    width: '81vw',
     [theme.breakpoints.down('md')]: {
         width: '70vw',
-        height: '50vh',
+        height: '86vh',
     },
     '&.scrollable': {
         overflowY: 'auto',
@@ -28,13 +35,13 @@ const StyledSchedulerFrame = styled('div')(({ theme }) => ({
     },
     '& .kKdpkB': {
         backgroundColor: `${theme.palette.background.paper}!important`, // Màu nền của thẻ select khi hover
-        zIndex: 10, 
+        zIndex: 10,
     },
     '& .fLoswr ': {
         backgroundColor: `${theme.palette.background.paper}`, // Corrected spelling and added string for the color
         borderRadius: '15px',
     },
-    '& .btlFdD': {
+    '& .btlFdD, .cBSAIz, .eFJouK': {
         backgroundColor: `${theme.palette.background.paper}`, // Corrected spelling and added string for the color
         borderRadius: '15px',
     },
@@ -43,15 +50,29 @@ const StyledSchedulerFrame = styled('div')(({ theme }) => ({
         // backgroundColor: `${theme.palette.secondary.main}`, // Màu nền của thẻ select
     },
 
-    '& .bFYVFX': {
+    '& .bFYVFX,.fMRhlw': {
         color: `${theme.palette.secondary.main}`, // Màu nền của thẻ select
     },
-   
+    
+
 
 }));
 
 
 function Timeline() {
+    const { accesstoken } = useSelector(state => state.auth)
+    const dispatch = useDispatch();
+    const { projectData } = useSelector((state) => state.projectDetail);
+    const { projectId } = useParams();
+    useEffect(() => {
+        dispatch(fetchProjectDetail({ accesstoken, projectId }));
+        return () => {
+            dispatch(resetProjectDetail());
+        };
+    }, [dispatch, projectId, accesstoken]);
+
+    const dataScheduler = convertedDataTimeline(projectData?.project?.lists);
+    // console.log(projectData?.project?.lists)
     return (
         <Paper
             elevation={3}
@@ -61,7 +82,7 @@ function Timeline() {
             }}
         >
             <StyledSchedulerFrame className="scrollable aETZL">
-                <Scheduler />
+                {projectData && <Scheduler dataScheduler={dataScheduler} />}
             </StyledSchedulerFrame>
         </Paper>
     );
