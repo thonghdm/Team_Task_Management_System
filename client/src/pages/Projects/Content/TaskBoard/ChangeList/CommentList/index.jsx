@@ -81,8 +81,8 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
             {author}
           </Typography>
           <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-            {/* {relativeTime} */}
-            {FormatterTimeAgo(timestamp)}
+{/* {relativeTime} */}
+            {timestamp}
           </Typography>
           {userData._id === id && (<IconButton
             size="small"

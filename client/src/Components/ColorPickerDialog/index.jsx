@@ -20,7 +20,7 @@ import { fetchTaskById } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { useParams } from 'react-router-dom';
-
+import { createAuditLog } from '~/redux/project/auditLog-slice';
 
 const colors = [
   '#1a5fb4', '#26a269', '#e66100', '#a51d2d', '#613583',
@@ -32,7 +32,7 @@ const colors = [
   '#7d6608', '#784212'
 ];
 
-const ColorPickerDialog = ({ open, onClose,taskId }) => {
+const ColorPickerDialog = ({ open, onClose,taskId, userData }) => {
   const [selectedColor, setSelectedColor] = useState('#1a5fb4');
   const [title, setTitle] = useState('');
   const theme = useTheme();
@@ -75,6 +75,13 @@ const ColorPickerDialog = ({ open, onClose,taskId }) => {
             }
             throw new Error('Label creation failed');
           }
+          await dispatch(createAuditLog({ 
+            accesstoken: token, 
+            data: { task_id: taskId, 
+                    action:'Create', 
+                    entity:'Label', 
+                    old_value: labelData?.name,
+                    user_id:userData?._id} }));
           await dispatch(fetchTaskById({ accesstoken: token, taskId }));
           await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
           toast.success("Label created successfully");
