@@ -26,9 +26,11 @@ import { formatDate } from '~/utils/formattedDate';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
+import { useRefreshToken } from '~/utils/useRefreshToken'
 
 import ExpandTask from './ChangeList/ExpandTask';
-import {formatDateRange} from '~/utils/formatDateRange'
+import { formatDateRange } from '~/utils/formatDateRange'
+import { ToastContainer, toast } from 'react-toastify';
 
 
 const TaskBoard = () => {
@@ -45,8 +47,23 @@ const TaskBoard = () => {
   const { projectData } = useSelector((state) => state.projectDetail);
   const { projectId } = useParams();
   const [getTasksInfo, setTasksInfo] = useState([]);
+
+  const refreshToken = useRefreshToken();
   useEffect(() => {
-    dispatch(fetchProjectDetail({ accesstoken, projectId }));
+    const getProjectDetail = async (token) => {
+      try {
+        await dispatch(fetchProjectDetail({ accesstoken: token, projectId })).unwrap();
+      } catch (error) {
+        if (error?.err === 2) {
+          const newToken = await refreshToken();
+          return getProjectDetail(newToken);
+        }
+        toast.error(error.response?.data.message || 'Unable to load project information!');
+      }
+    };
+
+    getProjectDetail(accesstoken);
+
     return () => {
       dispatch(resetProjectDetail());
     };
@@ -381,7 +398,7 @@ const TaskBoard = () => {
                     </Box>
                   </TableCell>
 
-                  {renderTableCell(formatDateRange(task.start_date,task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
+                  {renderTableCell(formatDateRange(task.start_date, task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
 
                 </TableRow>
               ))}

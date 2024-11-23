@@ -61,7 +61,7 @@ export default function SignIn() {
             const result = await dispatch(loginWithEmail(email, password));
             if (result) {
                 if(result?.data?.userWithToken?.isAdmin===true) {
-                    navigate('/admin/1');
+                    navigate('/admin');
                 }else{
                     navigate('/board/home/1');
                 }
