@@ -52,7 +52,7 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
           throw new Error('Comment edit failed');
         }
         await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-        await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+        await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
         toast.success('Comment delete successfully!');
       } catch (error) {
         throw error;
@@ -81,8 +81,8 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
             {author}
           </Typography>
           <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-{/* {relativeTime} */}
-            {timestamp}
+            {/* {relativeTime} */}
+            {FormatterTimeAgo(timestamp)}
           </Typography>
           {userData._id === id && (<IconButton
             size="small"
