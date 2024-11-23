@@ -23,10 +23,10 @@ export default function SignIn() {
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    const [password, setPassword] = useState("22222");
+    const [password, setPassword] = useState("Admin#123");
     
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setGmail] = useState("thon2long@gmail.com");
+    const [email, setGmail] = useState("thongdzprooo100@gmail.com");
 
     const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth)
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
@@ -60,7 +60,12 @@ export default function SignIn() {
         if (validateInputs()) {
             const result = await dispatch(loginWithEmail(email, password));
             if (result) {
-                navigate('/board/home/1');
+                if(result?.data?.userWithToken?.isAdmin===true) {
+                    navigate('/admin/1');
+                }else{
+                    navigate('/board/home/1');
+                }
+                
             }
         }
     };

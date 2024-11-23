@@ -28,6 +28,8 @@ import { ToastContainer, toast } from 'react-toastify';
 
 import Introduce from '~/pages/Introduce'
 
+
+import Admin from '~/pages/Admin'
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
 
@@ -89,6 +91,9 @@ function App() {
         <Route path='/board/*' element={<Boards />} />
         <Route path="/projects-new" element={<AddProjects />} />
         <Route path="/projects-new/blank" element={<ProjectsBlank />} />
+
+        <Route path='/admin/1' element={<Admin />} />
+        
       </Routes>
 
     </AuthProvider>

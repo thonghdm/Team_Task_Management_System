@@ -6,7 +6,7 @@ Router.route('/comments')
     .put(verifyToken, commentController.updateComment)
     .post(verifyToken, commentController.createComment)
 
-Router.route('/comments/:id')
+Router.route('/comments/:id') //id = task_id
     .get(verifyToken, commentController.getComment)
 
 module.exports = Router

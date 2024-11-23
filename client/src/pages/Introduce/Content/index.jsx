@@ -11,7 +11,7 @@ const StyledImg = styled('img')({});
 
 const Content = () => {
   return (
-    <Container maxWidth="lg" sx={{ mt: "120px" }}>
+    <Container maxWidth="lg" sx={{ mt: "140px" }}>
 
       <Box>
         <Typography
