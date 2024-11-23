@@ -92,7 +92,7 @@ function App() {
         <Route path="/projects-new" element={<AddProjects />} />
         <Route path="/projects-new/blank" element={<ProjectsBlank />} />
 
-        <Route path='/admin/*' element={<Admin />} />
+        <Route path='/admin/1' element={<Admin />} />
         
       </Routes>
 

@@ -254,9 +254,7 @@ const ProfilePage = () => {
             <Box sx={{
                 bgcolor: theme.palette.background.default,
                 minHeight: '100vh',
-                p: 3,
-                flexDirection: 'column',
-                alignItems: 'center',
+                p: 3
             }}>
                 <Box
                     sx={{
@@ -275,8 +273,7 @@ const ProfilePage = () => {
                                 width: 120,
                                 height: 120,
                                 bgcolor: theme.palette.primary.main,
-                                objectFit: 'cover',
-                                mt:3
+                                objectFit: 'cover'
                             }}
                         />
                     </Box>

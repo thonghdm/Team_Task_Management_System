@@ -10,8 +10,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom';
 
 import { convertedDataTimeline } from '~/utils/convertedDataTimeline';
-import { useRefreshToken } from '~/utils/useRefreshToken'
-import { ToastContainer, toast } from 'react-toastify';
 
 const StyledSchedulerFrame = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -66,27 +64,12 @@ function Timeline() {
     const dispatch = useDispatch();
     const { projectData } = useSelector((state) => state.projectDetail);
     const { projectId } = useParams();
-
-    const refreshToken = useRefreshToken();
     useEffect(() => {
-        const getProjectDetail = async (token) => {
-          try {
-            await dispatch(fetchProjectDetail({ accesstoken: token, projectId })).unwrap();
-          } catch (error) {
-            if (error?.err === 2) {
-              const newToken = await refreshToken();
-              return getProjectDetail(newToken);
-            }
-            toast.error(error.response?.data.message || 'Unable to load project information!');
-          }
-        };
-    
-        getProjectDetail(accesstoken);
-    
+        dispatch(fetchProjectDetail({ accesstoken, projectId }));
         return () => {
-          dispatch(resetProjectDetail());
+            dispatch(resetProjectDetail());
         };
-      }, [dispatch, projectId, accesstoken]);
+    }, [dispatch, projectId, accesstoken]);
 
     const dataScheduler = convertedDataTimeline(projectData?.project?.lists);
     // console.log(projectData?.project?.lists)
