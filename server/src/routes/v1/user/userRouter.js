@@ -12,6 +12,6 @@ router.route('/search-member')
 router.route('/all-member')
     .get(userController.getAllMembers)
 
-
-
+router.route('/update-all')
+    .put(verifyToken, userController.updateAll)
 module.exports = router

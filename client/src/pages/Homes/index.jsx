@@ -15,16 +15,15 @@ import { getTimeOfDay } from '~/utils/getTimeOfDay';
 import { apiRefreshToken } from '~/apis/Auth/authService';
 import actionTypes from '~/redux/actions/actionTypes';
 
-import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
-import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
-import { useRefreshToken } from '~/utils/useRefreshToken'
+import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
 
+import ChangeList from '~/pages/Projects/Content/TaskBoard/ChangeList';
 
 const Homes = () => {
   const theme = useTheme();
   const dispatch = useDispatch()
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
-
+  const navigate = useNavigate()
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -64,64 +63,18 @@ const Homes = () => {
   //   setDate(formattedDate);
   //   setTimeOfDay(getTimeOfDay());
   // }, []);
+  const { projects } = useSelector((state) => state.projects);
 
 
   ////////////////////////////////
   /////// HomeList Component ///////
-  const { projects } = useSelector((state) => state.projects);
-  const [projectDetails, setProjectDetails] = useState([]);
-  const refreshToken = useRefreshToken();
 
+  ////
+  const { success } = useSelector(state => state.taskInviteUser)
   useEffect(() => {
-    if (accesstoken && userData?._id) {
-      dispatch(fetchProjectsByMemberId({ accesstoken, memberId: userData._id }));
-    }
-  }, [dispatch, accesstoken, userData?._id]);
-
-
-  const getAllTasks = (projects) => {
-    return projects
-      ?.flatMap(({ project }) =>
-        // Map through each project's lists
-        project?.lists?.flatMap(list =>
-          // Map through each list's tasks
-          list?.tasks?.map(task => ({
-            ...task,
-            projectName: project.projectName,
-            listName: list.list_name
-          }))
-        )
-      )
-  };
-  useEffect(() => {
-    const projectIds = projects.projects.map(project => project._id).flat();
-    if (projectIds.length === 0) return;
-
-    const fetchAllProjectDetails = async (token) => {
-      try {
-        const details = await Promise.all(
-          projectIds?.map(projectId =>
-            dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
-              .then(response => response.payload)
-          )
-        );
-        if (details.length === 0) return;
-        setProjectDetails(getAllTasks(details.filter(detail => detail !== undefined)));
-      } catch (err) {
-        if (error?.err === 2) {
-          const newToken = await refreshToken();
-          return fetchAllProjectDetails(newToken);
-        }
-        setError(err.message);
-        console.error('Error fetching project details:', err);
-      }
-    };
-    fetchAllProjectDetails(accesstoken);
-    // Cleanup
-    return () => {
-      dispatch(resetProjectDetail());
-    };
-  }, [dispatch, projects, accesstoken]);
+    dispatch(getTaskByMemberIDThunk({ accesstoken, memberID: userData?._id }));
+  }, [dispatch, userData?._id, accesstoken]);
+  ////
 
   const [period, setPeriod] = useState('last7days');
 
@@ -140,14 +93,20 @@ const Homes = () => {
         periodStartDate.setDate(currentDate.getDate() - 30);
         break;
       default:
-        periodStartDate = new Date(0); 
+        periodStartDate = new Date(0);
     }
 
-    tasks?.forEach(task => {
-      const taskEndDate = new Date(task?.end_date);
-      if (task?.status === "Completed") {
-        if (taskEndDate >= periodStartDate && taskEndDate <= currentDate) {
-          completed.push(task);
+    Array.isArray(tasks) ? tasks?.forEach(task => {
+      const taskEndDate = new Date(task?.task_id?.end_date);
+      const taskDone = new Date(task?.task_id?.done_date);
+
+      if (task?.task_id?.status === "Completed") {
+        if (taskEndDate >= periodStartDate) {
+          if (taskEndDate >= taskDone) {
+            completed.push(task);
+          } else {
+            overdue.push(task);
+          }
         }
       } else if (taskEndDate < currentDate) {
         if (taskEndDate >= periodStartDate) {
@@ -158,32 +117,31 @@ const Homes = () => {
           upcoming.push(task);
         }
       }
-    });
+    }) : [];
 
     return { upcoming, overdue, completed };
   };
 
-  // Usage
-  const { upcoming, overdue, completed } = categorizeTasks(projectDetails, period);
 
+  const { upcoming, overdue, completed } = categorizeTasks(success, period);
   // Period change handler
   const handlePeriodChange = (event) => {
     setPeriod(event.target.value);
   };
 
-  const transformData = (tasks,period) => {
+  const transformData = (tasks, period) => {
     const { upcoming, overdue, completed } = categorizeTasks(tasks, period);
     // Combine all tasks into one array with additional date format parsing
     const allTasks = [
-      ...upcoming.map(task => ({ ...task, category: "due" })),
+      ...upcoming.map(task => ({ ...task, category: "coming" })),
       ...overdue.map(task => ({ ...task, category: "due" })),
       ...completed.map(task => ({ ...task, category: "completed" })),
     ];
     // Group by dates
     const taskByDate = allTasks.reduce((acc, task) => {
-      const formattedDate = new Date(task.end_date).toLocaleDateString("en-GB");
+      const formattedDate = new Date(task?.task_id?.end_date).toLocaleDateString("en-GB");
       if (!acc[formattedDate]) {
-        acc[formattedDate] = { date: formattedDate, due: 0, completed: 0 };
+        acc[formattedDate] = { date: formattedDate, due: 0, completed: 0, coming: 0 };
       }
       acc[formattedDate][task.category] += 1;
       return acc;
@@ -192,7 +150,37 @@ const Homes = () => {
     // Transform into an array
     return Object.values(taskByDate);
   };
-  const dataStatics = transformData(projectDetails, period);
+
+  ////////////////////////////////openTaskDetail
+  const [showNameMenu, setShowNameMenu] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  const handleOpenNameMenu = (task) => {
+    setSelectedTask(task);
+    setShowNameMenu(true);
+  };
+  const handleCloseNameMenu = () => {
+    setShowNameMenu(false);
+    setSelectedTask(null);
+  };
+
+  const handleNameClick = (taskId) => {
+    handleOpenNameMenu(taskId);
+  };
+
+  const handleRowClick = (taskId) => {
+    handleNameClick(taskId)
+  };
+
+    ////////////////////////////////////////////////////////////////
+
+
+    //////////////////////////// openProjectDetail
+    const handleProjectClick = (projectId) => {
+      navigate(`/board/${projectId}/2/task-board`);
+    }
+    
+  const dataStatics = transformData(success, period);
 
   const displayName = data?.displayName ? data.displayName.match(/^\S+/)[0] : 'User';
   return (
@@ -224,7 +212,7 @@ const Homes = () => {
         </Box>
       </Box>
 
-      <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
+      <Paper elevation={3} sx={{ p: 1, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar sx={{ mr: 1 }}
             src={data?.image ? data?.image : undefined}
@@ -245,19 +233,23 @@ const Homes = () => {
 
 
         </Box>
-        <HomeList upcoming={upcoming} overdue={overdue} completed={completed} />
+        <HomeList upcoming={upcoming} overdue={overdue} completed={completed} onRowClick={handleRowClick} />
       </Paper>
 
       <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, mt: 2 }}>
         <Box sx={{ flexBasis: '100%' }}>
-          {projects?.projects && <HomeProjectList project={projects?.projects} />}
+          {projects?.projects && <HomeProjectList project={projects?.projects} onClickProject={handleProjectClick} />}
         </Box>
         {/* <Box sx={{ flexBasis: '50%' }}>
           <HomeProflieList />
         </Box> */}
       </Box>
-
       {upcoming && <HomeChart upcoming={upcoming} overdue={overdue} completed={completed} dataStatics={dataStatics} />}
+
+      {showNameMenu && selectedTask && (
+        <ChangeList open={showNameMenu} onClose={handleCloseNameMenu} taskId={selectedTask} />
+      )}
+
     </Box>
   );
 };

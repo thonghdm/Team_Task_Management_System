@@ -11,14 +11,14 @@ const starredService = {
                 const updatedStarred = await Starred.findOneAndUpdate(
                     { userId, projectId },
                     { isStarred: true },
-                    { new: true }  // Trả về document sau khi update
+                    { new: true }// Trả về document sau khi update
                 )
                 return updatedStarred
             }
             // Nếu chưa tồn tại, tạo mới
             const newStarred = new Starred({
                 userId,
-                projectId,
+                projectId
             })
             const savedStarred = await newStarred.save()
             return savedStarred
@@ -69,7 +69,7 @@ const starredService = {
         } catch (error) {
             throw new Error('Error updating starred status: ' + error.message)
         }
-    },
+    }
 
 }
 

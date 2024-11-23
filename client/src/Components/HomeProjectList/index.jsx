@@ -8,7 +8,7 @@ import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 
-const HomeProjectList = ({project}) => {
+const HomeProjectList = ({project, onClickProject}) => {
   const location = useLocation();
   const theme = useTheme();
   const navigate = useNavigate();
@@ -33,6 +33,7 @@ const HomeProjectList = ({project}) => {
                 title={project.projectName}
                 color={project.color}
                 maxWidth="560px"
+                onClick={() => onClickProject(project._id)}
               />
             </Grid>
           ))}

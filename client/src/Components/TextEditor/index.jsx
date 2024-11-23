@@ -33,7 +33,7 @@ const StyledToolbar = styled('div')(({ theme }) => ({
     stroke: 'none',
   },
   '& .ql-active .ql-fill': {
-    fill:`${theme.palette.primary.main}!important`,
+    fill: `${theme.palette.primary.main}!important`,
     stroke: 'none',
   },
   '& .ql-snow.ql-toolbar .ql-picker-label.ql-active': {
@@ -62,21 +62,20 @@ const StyledToolbar = styled('div')(({ theme }) => ({
   },
   '& .ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke, & .ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke, & .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke': {
     stroke: `${theme.palette.secondary.main}!important`,
-  },
+  }
 }));
 
 
-function TextEditor({value, onChange }) {
+function TextEditor({ value, onChange }) {
   const [content, setContent] = useState(value);
 
   const handleContentChange = (value) => {
     setContent(value);
     onChange(value);
-    console.log(value);
   };
 
   return (
-    <Box className="text-editor" sx={{ mt: 2 }}>
+    <Box className="text-editor" sx={{ mt: 1}}>
       <StyledToolbar>
         <EditorToolbar toolbarId="t1" />
       </StyledToolbar>

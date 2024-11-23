@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
+import React, { useEffect, useState } from 'react'
+import {
+  Box,
   Typography,
   Accordion,
   AccordionSummary,
@@ -9,93 +9,84 @@ import {
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import TaskTable from '~/pages/Task/MyTasks/TaskTable';
+import { useDispatch, useSelector } from 'react-redux'
+
+import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
+
+import ChangeList from '~/pages/Projects/Content/TaskBoard/ChangeList';
 
 const TaskList = () => {
   const theme = useTheme();
+
+  ////
+  const dispatch = useDispatch()
+  const { accesstoken, userData } = useSelector(state => state.auth)
+  const { success } = useSelector(state => state.taskInviteUser)
+  useEffect(() => {
+    dispatch(getTaskByMemberIDThunk({ accesstoken, memberID: userData?._id }));
+  }, [dispatch, userData?._id, accesstoken]);
+  ////
+
+
+  
   const today = new Date();
   const nextWeek = new Date();
   nextWeek.setDate(today.getDate() + 7);
   const threeDaysLater = new Date();
   threeDaysLater.setDate(today.getDate() + 3);
 
-  // Sample task data
-  const normalizeTasks = (tasks) => {
-    return tasks.map(task => ({
-      ...task,
-      collaborators: Array.isArray(task.collaborators)
-        ? task.collaborators
-        : task.collaborators ? [task.collaborators] : []
-    }));
-  };
-  
-  const tasks = normalizeTasks([
-    {
-      id: 1,
-      name: 'Schedule kickoff meetingSchedule kickoff meetingSchedule kickoff meeting',
-      dueDate: '2024-10-15',
-      collaborators: [
-        { name: 'John Doe', avatar: 'https://www.pngitem.com/middle/TbRixR_img-hd-png/' },
-        { name: 'Jane Smith', avatar: '/static/images/avatar/2.jpg' }
-      ],
-      project: 'Cross-functional project',
-      status: 'Completed'
-    },
-    {
-      id: 2,
-      name: 'Prepare project timeline',
-      dueDate: '2024-10-20',
-      collaborators: [
-        { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
-        { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' }, // Example of valid URL
-        // Repeat this as necessary, or modify to use distinct users.
-        { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
-        { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
-        { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
-        { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
-        { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
-        { name: 'Alice Johnson', avatar: 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg' },
-      ],
-      project: 'Marketing strategy',
-      status: 'To Do'
-    },
-    {
-      id: 3,
-      name: 'Client meeting',
-      dueDate: '2024-10-22',
-      collaborators: [],
-      project: 'Product development',
-      status: 'To Do'
-    },
-    {
-      id: 4,
-      name: 'Review design specs',
-      dueDate: '2024-10-30',
-      collaborators: [{ name: 'Cindy Baker', avatar: '/static/images/avatar/4.jpg' }],
-      project: 'UI/UX Revamp',
-      status: 'To Do'
-    },
-    {
-      id: 5,
-      name: 'Fix bugs in application',
-      dueDate: '2024-10-08',
-      collaborators: [{ name: 'Michael Brown', avatar: '/static/images/avatar/5.jpg' }],
-      project: 'App development',
-      status: 'Completed'
-    }
-  ]);
-  
-  
-  const handleRowOverdueClick = (taskId) => {
-    console.log('Task clicked:', taskId);
-    // Xử lý logic khi click vào task ở đây
-  };
+
 
   // Task Filtering
-  const todayTasks = tasks?.filter(task => new Date(task?.dueDate).toDateString() === today.toDateString());
-  const nextWeekTasks = tasks?.filter(task => new Date(task?.dueDate) > today && new Date(task?.dueDate) <= nextWeek);
-  const recentlyAssignedTasks = tasks?.filter(task => new Date(task?.dueDate) > today && new Date(task?.dueDate) <= threeDaysLater);
-  const overdueTasks = tasks?.filter(task => new Date(task?.dueDate) < today);
-  const laterTasks = tasks?.filter(task => new Date(task?.dueDate) > nextWeek);
+  const todayTasks = Array.isArray(success) ? success.filter(task => {
+    const taskEndDate = new Date(task?.task_id?.end_date);
+    return taskEndDate.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0);
+  }) : [];
+
+  const nextWeekTasks = Array.isArray(success) ? success.filter(task => {
+    const dueDate = new Date(task?.task_id?.end_date)
+    return dueDate.setHours(0, 0, 0, 0) > today.setHours(0, 0, 0, 0) && dueDate.setHours(0, 0, 0, 0) <= nextWeek.setHours(0, 0, 0, 0);
+  }) : [];
+
+  const recentlyAssignedTasks = Array.isArray(success) ? success.filter(task => {
+    const dueDate = new Date(task?.task_id?.end_date)
+    return dueDate.setHours(0, 0, 0, 0) > today.setHours(0, 0, 0, 0) && dueDate.setHours(0, 0, 0, 0) <= threeDaysLater.setHours(0, 0, 0, 0);
+  }) : [];
+
+  const overdueTasks = Array.isArray(success) ? success.filter(task => {
+    const dueDate = new Date(task?.task_id?.end_date)
+    return dueDate.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0)
+  }) : [];
+
+  const laterTasks = Array.isArray(success) ? success.filter(task => {
+    const dueDate = new Date(task?.task_id?.end_date)
+    return dueDate.setHours(0, 0, 0, 0) > nextWeek.setHours(0, 0, 0, 0)
+  }) : [];
+
+////////////////////////////////openTaskDetail
+const [showNameMenu, setShowNameMenu] = useState(false);
+const [selectedTask, setSelectedTask] = useState(null);
+
+const handleOpenNameMenu = (task) => {
+  setSelectedTask(task);
+  setShowNameMenu(true);
+};
+const handleCloseNameMenu = () => {
+  setShowNameMenu(false);
+  setSelectedTask(null);
+};
+
+const handleNameClick = (taskId) => {
+  handleOpenNameMenu(taskId);
+};
+
+const handleRowClick = (taskId) => {
+  handleNameClick(taskId)
+};
+
+  ////////////////////////////////////////////////////////////////
+
+
 
   return (
     <Box sx={{ color: theme.palette.text.primary, bgcolor: theme.palette.background.default }}>
@@ -105,7 +96,7 @@ const TaskList = () => {
         </AccordionSummary>
         <AccordionDetails>
           {todayTasks?.length > 0 ? (
-            <TaskTable tasks={todayTasks} />
+            <TaskTable tasks={todayTasks} onRowClick={handleRowClick} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
               No tasks for today
@@ -120,7 +111,7 @@ const TaskList = () => {
         </AccordionSummary>
         <AccordionDetails>
           {nextWeekTasks?.length > 0 ? (
-            <TaskTable tasks={nextWeekTasks} />
+            <TaskTable tasks={nextWeekTasks} onRowClick={handleRowClick}/>
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
               No tasks for next week
@@ -135,7 +126,7 @@ const TaskList = () => {
         </AccordionSummary>
         <AccordionDetails>
           {recentlyAssignedTasks?.length > 0 ? (
-            <TaskTable tasks={recentlyAssignedTasks} />
+            <TaskTable tasks={recentlyAssignedTasks} onRowClick={handleRowClick} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
               No recently assigned tasks
@@ -150,7 +141,7 @@ const TaskList = () => {
         </AccordionSummary>
         <AccordionDetails>
           {laterTasks?.length > 0 ? (
-            <TaskTable tasks={laterTasks} />
+            <TaskTable tasks={laterTasks} onRowClick={handleRowClick} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
               No tasks to do later
@@ -165,7 +156,7 @@ const TaskList = () => {
         </AccordionSummary>
         <AccordionDetails>
           {overdueTasks?.length > 0 ? (
-            <TaskTable tasks={overdueTasks} onRowClick={handleRowOverdueClick}/>
+            <TaskTable tasks={overdueTasks} onRowClick={handleRowClick} />
           ) : (
             <Typography variant="body2" sx={{ color: theme.palette.text.primary, fontStyle: 'italic' }}>
               No overdue tasks
@@ -173,6 +164,11 @@ const TaskList = () => {
           )}
         </AccordionDetails>
       </Accordion>
+
+      {showNameMenu && selectedTask && (
+        <ChangeList open={showNameMenu} onClose={handleCloseNameMenu} taskId={selectedTask} />
+      )}
+      
     </Box>
   );
 };

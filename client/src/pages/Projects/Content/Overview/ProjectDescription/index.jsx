@@ -17,6 +17,7 @@ import { updateTaskThunks } from '~/redux/project/task-slice';
 import { updateProjectThunk } from '~/redux/project/project-slice';
 import { createAuditLog } from '~/redux/project/auditLog-slice';
 
+import { updateAll } from '~/apis/User/userService'
 
 const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true, context, taskId = null, commentID = "" }) => {
   const dispatch = useDispatch();
@@ -221,6 +222,45 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
         catch (error) {
           throw error;
         }
+      }
+      else if (context === "descriptionMyTask") {
+        try {
+          if (!tempContent || (content === initialContent && tempContent === initialContent)) {
+            setIsEditing(false);
+            return;
+          }
+          const data = {
+            note: tempContent,
+            _id: userData._id
+          };
+          const handleSuccess = () => {
+            toast.success('Update note successfully!');
+            setContent(tempContent);
+            setIsEditing(false);
+          };
+
+          const saveNote = async (token) => {
+            try {
+              const response = await updateAll(token, data);
+              handleSuccess();
+              dispatch({
+                type: actionTypes.USER_UPDATE_SUCCESS,
+                data: { userData: response.data.response },
+              });
+              
+            } catch (error) {
+              if (error.response?.status === 401) {
+                const newToken = await refreshToken();
+                return saveNote(newToken);
+              } throw new Error('Update note failed');
+            }
+          };
+          saveNote(accesstoken);
+        }
+        catch (error) {
+          throw error;
+        }
+
       }
     } catch (error) {
       console.error('Error in handleSave:', error);

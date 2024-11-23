@@ -16,6 +16,18 @@ const memberTaskController = {
         } catch (error) {
             next(error)
         }
+    },
+    getMemberTasks: async (req, res, next) => {
+        const { memberId } = req.params
+        try {
+            const tasks = await memberTaskService.getMemberTasksByMemberId(memberId)
+            if (!tasks || tasks.length === 0) {
+                return res.status(StatusCodes.BAD_REQUEST).json({ message: 'No tasks found for this member' })
+            }
+            res.status(StatusCodes.OK).json(tasks)
+        } catch (error) {
+            next(error)
+        }
     }
 
 }

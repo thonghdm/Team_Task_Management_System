@@ -53,3 +53,22 @@ export const getAllMembers = (accesstoken) => new Promise(async (resolve, reject
 })  
 
 
+export const updateAll = (accesstoken, data) => new Promise(async (resolve, reject) => {
+    try {
+        let response = await axios({
+            method: 'put',
+            url: 'http://localhost:5000/api/user/update-all',
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            data: data,
+            withCredentials: true  // Set withCredentials here
+        })
+        resolve(response)
+
+    } catch (error) {
+        reject(error)
+    }
+})
+
+

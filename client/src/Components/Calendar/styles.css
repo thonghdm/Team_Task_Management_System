@@ -1,0 +1,56 @@
+.rbc-now .rbc-button-link{
+    background-color: #f15550;
+    color: #ffffff;
+    border-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin: 5px;
+    font-size: 16px;
+}
+/* .rbc-month-row .rbc-today {
+    background-color: transparent;
+} */
+
+.rbc-today .rbc-button-link{
+    color: #f15550;
+}
+
+.rbc-header {
+    font-size: 16px;
+    font-weight: bold;
+    background: #17405d;
+    color: #ffffff;
+}
+
+/* .rbc-allday-cell {
+    display: none;
+} */
+.css-gzfqkg-MuiButtonBase-root-MuiButton-root{
+    color: #ffffff !important;
+    background-color: #17405d !important;
+}
+
+
+.css-134pb0l-MuiButtonBase-root-MuiIconButton-root{
+    color: none !important;
+}
+
+.rbc-today {
+    background-color: #eaf6ff;
+}
+
+
+.rbc-event, .rbc-day-slot .rbc-background-event{
+    color:#17405d;
+}
+
+.rbc-show-more{
+    background-color:transparent !important;
+}
+
+.rbc-agenda-table tbody tr { 
+    color: #000000; /* Màu chữ */
+}
+
+
+  

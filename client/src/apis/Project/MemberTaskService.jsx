@@ -30,3 +30,16 @@ export const updateMemberTask = async (accesstoken, data) => {
     }
 };
 
+export const getTaskByMemberID = async(accesstoken, memberID) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/member-task/tasks/${memberID}`, {
+            headers: {
+                Authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}

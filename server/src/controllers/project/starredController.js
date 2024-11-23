@@ -8,7 +8,7 @@ const starredController = {
             const createdStarred = await starredService.createNew({ userId, projectId })
             res.status(StatusCodes.CREATED).json({
                 message: 'Project starred successfully!',
-                data: createdStarred,
+                data: createdStarred
             })
         } catch (error) {
             next(error)
@@ -22,7 +22,7 @@ const starredController = {
             const starredList = await starredService.getAllByUser(userId)
             res.status(StatusCodes.OK).json({
                 message: 'Starred projects retrieved successfully!',
-                data: starredList,
+                data: starredList
             })
         } catch (error) {
             next(error)
@@ -36,12 +36,12 @@ const starredController = {
             const updatedStarred = await starredService.updateStarred(userId, projectId, isStarred)
             res.status(StatusCodes.OK).json({
                 message: 'Starred status updated successfully!',
-                data: updatedStarred,
+                data: updatedStarred
             })
         } catch (error) {
             next(error)
         }
-    },
+    }
 }
 
 module.exports = starredController
