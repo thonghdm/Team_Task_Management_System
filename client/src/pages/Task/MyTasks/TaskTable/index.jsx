@@ -65,7 +65,7 @@ const TaskTable = ({ tasks, onRowClick }) => {
                 <Chip label={task?.task_id?.project_id?.projectName?.length > 30 ? `${task?.task_id?.project_id?.projectName?.slice(0, 30)}...` : task?.task_id?.project_id?.projectName} size="small" />
               )}
             </TableCell>
-            <TableCell sx={{ display: 'flex' }}>
+            <TableCell sx={{ display: 'flex',mt:"12px"}}>
               <Box
                 sx={{
                   width: 10,

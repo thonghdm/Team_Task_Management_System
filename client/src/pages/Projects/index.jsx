@@ -69,7 +69,7 @@ const Projects = () => {
   const isOverViewActive = location.pathname.endsWith('/overview');
   const isListActive = location.pathname.endsWith('/task-board');
   const isBoardActive = location.pathname.endsWith('/project-board');
-  const isDashedBoardActive = location.pathname.endsWith('/dash-board');
+  const isDashedBoardActive = location.pathname.endsWith('/project-dashboard');
   const isCalendarActive = location.pathname.endsWith('/project-calendar');
   const isTimeLineActive = location.pathname.endsWith('/project-timeline');
   /// save task name
@@ -284,7 +284,7 @@ const Projects = () => {
 
         <Button
           variant={isDashedBoardActive ? "contained" : "text"}
-          onClick={() => navigate('dash-board')}
+          onClick={() => navigate('project-dashboard')}
           sx={{ ml: 1 }}
         >
           DashBoard
