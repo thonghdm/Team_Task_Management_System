@@ -1,36 +1,86 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Avatar, 
-  Menu, 
-  MenuItem, 
-  ListItemIcon, 
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  Avatar,
+  Menu,
+  MenuItem,
+  ListItemIcon,
   ListItemText,
   IconButton,
   Typography,
   Divider,
   Box,
 } from '@mui/material';
-import { 
+import {
   Person as PersonIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   QuestionMark as QuestionMarkIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
+import ModeSelect from '../ModeSelect';
+import { apiGetOne } from '~/apis/User/userService'
+import { apiLogOut, apiRefreshToken } from '~/apis/Auth/authService'
+import actionTypes from '~/redux/actions/actionTypes'
+import Profile from '~/pages/Profile';
+import { jwtDecode } from 'jwt-decode';
+import { useTheme } from '@mui/material/styles';
 
 const UserAvatar = () => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const { user } = useSelector((state) => state.auth);
-
-  const imageUrl = 'https://example.com/path-to-your-image.png';
-  const nameUser = 'LV';
-  const email = 'thongdzpro100@gmail.com';
-
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const dispatch = useDispatch();
+  const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
+  const [hasFetchedUser, setHasFetchedUser] = useState(false); // Track if user data has been fetched
+  const theme = useTheme();
 
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+    try {
+      const decodedToken = jwtDecode(token);
+      return decodedToken.exp < Date.now() / 1000;
+    } catch {
+      return true;
+    }
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      setHasFetchedUser(true); 
+      try {
+        const response = await apiGetOne(accesstoken);
+        dispatch({
+          type: actionTypes.UPDATE_USER_DATA,
+          data: { typeLogin: true, userData: response.data.response },
+        });
+      } catch (error) {
+        if (error.response?.status === 401) {
+          try {
+            const response = await apiRefreshToken();
+            dispatch({
+              type: actionTypes.LOGIN_SUCCESS,
+              data: { accesstoken: response.data.token, typeLogin: true, userData: response.data.userData },
+            });
+            setHasFetchedUser(false);
+          } catch (refreshError) {
+            if (refreshError.response?.status === 403) {
+              alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+              dispatch({ type: actionTypes.LOGOUT });
+              navigate('/');
+            }
+          }
+        }
+      }
+    };
+
+    if (isLoggedIn && (!userData || (isTokenExpired(accesstoken) && !hasFetchedUser))) {
+      fetchUser();
+    }
+  }, [isLoggedIn, accesstoken, userData, hasFetchedUser, dispatch, navigate]);
+  
+
+  let data = isLoggedIn ? userData : {};
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -38,27 +88,40 @@ const UserAvatar = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const logoutHandler = () => {
-    console.log("logout");
-    handleClose();
+  const ProfileHandle = () => {
+    navigate(`/profile/${userData._id}`);
   };
 
+  const logoutHandler = async () => {
+    console.log("logout");
+    try {
+      const response = await apiLogOut();
+      dispatch({
+        type: actionTypes.LOGOUT,
+      });
+      navigate('/');
+    } catch (error) {
+      handleClose();
+    };
+  };
   return (
     <div>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton onClick={handleClick}>
-          <Avatar 
-            sx={{ 
-              width: 32, 
-              height: 32, 
+          <Avatar
+            sx={{
+              width: 32,
+              height: 32,
               bgcolor: 'warning.main',
               color: 'warning.contrastText',
-              fontSize: 16
+              fontSize: 16,
+              border:  `2px solid ${theme.palette.text.secondary}`,
             }}
+            src={data?.image ? data?.image : undefined}  // Set the image if available
           >
-            {nameUser}
+            {!data?.image && data?.displayName}  {/* Display initials if no image */}
           </Avatar>
+
         </IconButton>
       </Box>
       <Menu
@@ -80,21 +143,23 @@ const UserAvatar = () => {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <MenuItem sx={{ py: 2, px: 2 }}>
-          <Avatar 
-            sx={{ 
-              width: 48, 
-              height: 48, 
+          <Avatar
+            sx={{
+              width: 48,
+              height: 48,
               bgcolor: 'warning.main',
               color: 'warning.contrastText',
               fontSize: 20,
-              mr: 2
+              mr: 2,
+              border:  `2px solid ${theme.palette.text.secondary}`,
             }}
+            src={data?.image ? data?.image : undefined}  // Set the image if available
           >
-            {nameUser}
+            {!data?.image && data?.displayName}  {/* Display initials if no image */}
           </Avatar>
           <Box>
-            <Typography variant="subtitle1">My workspace</Typography>
-            <Typography variant="body2" color="text.secondary">{email}</Typography>
+            <Typography variant="subtitle1">{data?.displayName}</Typography>
+            <Typography variant="body2" color="text.primary">{data?.email}</Typography>
           </Box>
         </MenuItem>
         <Divider />
@@ -117,7 +182,10 @@ const UserAvatar = () => {
           <ListItemText>Invite to Asana</ListItemText>
         </MenuItem>
         <Divider />
-        <MenuItem>
+        <ModeSelect />
+        <Divider />
+
+        <MenuItem onClick={ProfileHandle}>
           <ListItemText>Profile</ListItemText>
         </MenuItem>
         <MenuItem>
@@ -126,6 +194,7 @@ const UserAvatar = () => {
         <MenuItem>
           <ListItemText>Add another account</ListItemText>
         </MenuItem>
+
         <MenuItem onClick={logoutHandler}>
           <ListItemText>Log out</ListItemText>
         </MenuItem>

@@ -1,5 +1,6 @@
 const User = require('~/models/user') // Import the Mongoose user model
 const jwt = require('jsonwebtoken')
+const token = require('~/utils/generateToken')
 const { v4: uuidv4 } = require('uuid')
 require('dotenv').config()
 
@@ -10,16 +11,8 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
         let user = await User.findOne({ _id: id, tokenLogin }).lean()
         if (user) {
 
-            const token = jwt.sign(
-                { id: user._id, email: user.email },
-                process.env.JWT_ACCESS_SECRET,
-                { expiresIn: '1d' }
-            )
-            const refreshToken = jwt.sign(
-                { id: user._id },
-                process.env.JWT_REFRESH_SECRET,
-                { expiresIn: '7d' }
-            )
+            const accesstoken = token.generateAccessToken(user._id, user.email)
+            const refreshToken = token.generateRefreshToken(user._id, user.email)
 
             await User.updateOne(
                 { _id: id },
@@ -28,14 +21,14 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
             resolve({
                 err: 0,
                 msg: 'OK',
-                token,
+                accesstoken,
                 refreshToken
             })
         } else {
             resolve({
                 err: 3,
                 msg: 'User not found or failed to login!',
-                token: null,
+                accesstoken: null,
                 refreshToken: null
             })
         }
@@ -68,23 +61,13 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
                     })
                 }
 
-                const newAccessToken = jwt.sign(
-                    { id: user._id, email: user.email },
-                    process.env.JWT_ACCESS_SECRET,
-                    { expiresIn: '1d' }
-                )
-                const newRefreshToken = jwt.sign(
-                    { id: user._id },
-                    process.env.JWT_REFRESH_SECRET,
-                    { expiresIn: '7d' }
-                )
-                await User.updateOne({ _id: user._id }, { refreshToken: newRefreshToken })
-
+                const newAccessToken = token.generateAccessToken(user._id, user.email)
                 resolve({
                     err: 0,
                     msg: 'New tokens generated successfully',
                     token: newAccessToken,
-                    refreshToken: newRefreshToken
+                    refreshToken,
+                    userData: user
                 })
             })
         } catch (error) {
@@ -95,9 +78,38 @@ const refreshTokenService = (refreshToken) => new Promise((resolve, reject) => {
         }
     })()
 })
-
+const getUserService = (id) => new Promise((resolve, reject) => {
+    try {
+        const user = User
+            .findOne({ _id: id })
+            .select('-password')
+            .lean()
+        resolve(user)
+    } catch (error) {
+        reject(error)
+    }
+})
+const logoutService = (refreshToken) => new Promise((resolve, reject) => {
+    (async () => {
+        try {//Xóa refreshToken khỏi db
+            await User.findOneAndUpdate({ refreshToken }, { refreshToken: '' }, { new: true })
+            resolve({
+                err: 0,
+                msg: 'Logout successful'
+            })
+        } catch (error) {
+            reject({
+                err: -1,
+                msg: 'Fail at refresh token service: ' + error.message
+            })
+        }
+    })()
+})
 
 module.exports = {
     loginSuccessService,
-    refreshTokenService
+    refreshTokenService,
+    getUserService,
+    logoutService
 }
+

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Drawer,
   Toolbar,
   Typography,
   Button,
+  IconButton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
@@ -18,17 +19,23 @@ import {
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import SidebarList from '../SidebarList';
+import { useTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+
+import { getStarredThunks } from '~/redux/project/starred-slice';
+
 
 const drawerWidth = 240;
 
-const StyledDrawer = styled(Drawer)(({ theme, open  }) => ({
+const StyledDrawer = styled(Drawer)(({ theme, open }) => ({
   width: drawerWidth,
   flexShrink: 0,
   '& .MuiDrawer-paper': {
     width: drawerWidth,
     boxSizing: 'border-box',
-    backgroundColor: '#2d2d2d',
-    color: '#FFFFFF',
   },
   whiteSpace: 'nowrap',
   boxSizing: 'border-box',
@@ -48,8 +55,8 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: '#f1ada6',
-  color: '#FFFFFF',
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.text.primary,
 });
 
 const closedMixin = (theme) => ({
@@ -59,8 +66,8 @@ const closedMixin = (theme) => ({
   }),
   overflowX: 'hidden',
   width: theme.spacing(1),
-  backgroundColor: '#f1ada6',
-  color: '#FFFFFF',
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.text.primary,
 });
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
@@ -73,59 +80,91 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
   paddingLeft: theme.spacing(2),
 }));
 const TrialInfo = styled(Box)(({ theme }) => ({
-  backgroundColor: '#3d3d3d',
+  backgroundColor: theme.palette.background.paper,
   borderRadius: 5,
   padding: theme.spacing(2),
   margin: theme.spacing(2),
 }));
 
 const ScrollableSection = styled(Box)(({ theme }) => ({
-  maxHeight: '43vh',
+  maxHeight: '52vh',
   overflowY: 'auto',
   '&::-webkit-scrollbar': {
     width: '6px',
   },
   '&::-webkit-scrollbar-thumb': {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: theme.palette.background.paper,
     borderRadius: '3px',
   },
   fontSize: '14px',
 }));
 const AddBillingButton = styled(Button)(({ theme }) => ({
-  backgroundColor: '#ffc107',
+  backgroundColor: theme.palette.primary.main,
   color: '#000',
   fontWeight: 'bold',
   '&:hover': {
-    backgroundColor: '#ffca28',
+    backgroundColor: theme.palette.secondary.main,
   },
 }));
 const mainLinkData = [
-  { label: 'Home', link: 'home', icon: <HomeIcon /> },
-  { label: 'My tasks', link: 'tasks', icon: <TaskIcon /> },
-  { label: 'Inbox', link: 'inbox', icon: <InboxIcon /> },
+  { projectName: 'Home', _id: 'home', icon: <HomeIcon />,  main: 'Home'},
+  { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon />,  main: 'My tasks'},
+  { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon />,  main: 'Inbox'},
 ];
-
-const insightsLinkData = [
-  { label: 'Reporting', link: 'reporting', icon: <ReportingIcon /> },
-  { label: 'Portfolios', link: 'portfolios', icon: <PortfoliosIcon /> },
-  { label: 'Goals', link: 'goals', icon: <GoalsIcon /> },
-];
-
-const projectsLinkData = [
-  { label: 'Cross-functional project p...', link: 'project1', color: '#00BCD4' },
-  { label: 'My first portfolio', link: 'project2', color: '#9E9E9E' },
-  { label: 'uijjj', link: 'project3', color: '#2196F3' },
-  // Add more projects here to test scrolling
-];
-
 
 const teamLinkData = [
-  { label: 'Team', link: 'team', icon: <ReportingIcon /> },
-
+  { projectName: 'Team', _id: 'team', icon: <ReportingIcon /> ,team: 'Team'},
 ];
 
-const Sidebar = ({open}) => {
+const Sidebar = ({ open }) => {
   const location = useLocation();
+  const theme = useTheme();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { accesstoken, userData, isLoggedIn } = useSelector(state => state.auth)
+  const { projects } = useSelector((state) => state.projects);
+
+  useEffect(() => {
+    if (accesstoken && userData?._id) {
+      dispatch(fetchProjectsByMemberId({ accesstoken, memberId: userData._id }));
+    }
+  }, [dispatch, accesstoken, userData?._id]);
+
+
+  const { starred } = useSelector((state) => state.starred);
+
+  useEffect(() => {
+    if (accesstoken && userData?._id) {
+      dispatch(getStarredThunks({ accesstoken, memberId: userData._id }));
+    }
+  }, [dispatch, accesstoken, userData?._id, isLoggedIn]);
+
+
+
+  const convertBtoA = (B) => {
+    return B?.map(itemB => {
+      return {
+        ...itemB.projectId, // Lấy dữ liệu từ projectId trong B
+        _id: itemB.projectId._id, // Dữ liệu về _id của dự án
+        projectName: itemB.projectId.projectName, // Dùng projectName từ projectId
+        // // slug: itemB.projectId.slug, // Slug từ projectId
+        // // membersId: itemB.projectId.membersId, // Danh sách thành viên từ projectId
+        // listId: itemB.projectId.listId, // Danh sách listId từ projectId
+        // // visibility: itemB.projectId.visibility, // Visibility từ projectId
+        // // favorite: itemB.projectId.favorite, // Favorite từ projectId
+        // // isActive: itemB.projectId.isActive, // Trạng thái hoạt động từ projectId
+        // createdAt: itemB.projectId.createdAt, // Thời gian tạo từ projectId
+        // updatedAt: itemB.projectId.updatedAt, // Thời gian cập nhật từ projectId
+        // __v: itemB.projectId.__v, // Version từ projectId
+        // description: itemB.projectId.description, // Mô tả từ projectId
+        // color: itemB.projectId.color, // Màu sắc từ projectId
+        isStarred: itemB.isStarred, // Trạng thái yêu thích (đã đánh dấu) từ B
+        // userId: itemB.userId // Thêm userId từ B
+      };
+    });
+  }
+
 
   return (
     <StyledDrawer variant="permanent" open={open}>
@@ -139,24 +178,36 @@ const Sidebar = ({open}) => {
         }}
       >
         <Box sx={{ fontSize: '14px' }}>
-          <SidebarList linkData={mainLinkData} />
+          <SidebarList linkData={mainLinkData} Id = {1}/>
         </Box>
 
 
         <ScrollableSection>
+          {/* <Box>
+            <SectionTitle>INSIGHTS</SectionTitle>
+            <SidebarList linkData={insightsLinkData} open={open} />
+          </Box> */}
+
           <Box>
-          <SectionTitle>INSIGHTS</SectionTitle>
-          <SidebarList linkData={insightsLinkData} open={open}/>
+            {projects?.projects?.length > 0 && <Box display="flex" alignItems="center" justifyContent="space-between">
+              <SectionTitle>PROJECTS</SectionTitle>
+              <IconButton onClick={() => { navigate('/projects-new'), { state: { from: location.pathname } } }}>
+                <AddIcon sx={{ width: 17, mt: "3px" }} />
+              </IconButton>
+            </Box>}
+            {projects?.projects && <SidebarList linkData={projects?.projects} isProject={true} open={open} Id = {2}/>}
           </Box>
 
           <Box>
-          <SectionTitle>PROJECTS</SectionTitle>
-          <SidebarList linkData={projectsLinkData} isProject={true}open={open}/>
+            <Box display="flex" alignItems="center" justifyContent="space-between">
+              {starred?.data.length > 0 && <SectionTitle>STARRED</SectionTitle>}
+            </Box>
+            {starred?.data && <SidebarList linkData={convertBtoA(starred?.data)} isProject={true} open={open} Id = {3}/>  }
           </Box>
 
           <Box>
-          <SectionTitle>TEAM</SectionTitle>
-          <SidebarList linkData={teamLinkData}open={open} />
+            <SectionTitle>TEAM</SectionTitle>
+            <SidebarList linkData={teamLinkData} open={open} Id={4}/>
           </Box>
         </ScrollableSection>
 
@@ -169,7 +220,7 @@ const Sidebar = ({open}) => {
                   width: 20,
                   height: 20,
                   borderRadius: '50%',
-                  backgroundColor: '#4CAF50',
+                  backgroundColor: theme.palette.success.main,
                   marginRight: 1,
                 }}
               />
@@ -181,9 +232,12 @@ const Sidebar = ({open}) => {
             </AddBillingButton>
           </TrialInfo>
           <Box textAlign="center" mb={2}>
-            <Typography color="#4CAF50" sx={{ cursor: 'pointer' }}>
-              <AddIcon fontSize="small" sx={{ verticalAlign: 'middle', mr: 0.5 }} />
-              Invite teammates
+            <Typography
+              sx={{
+                color: (theme) => theme.palette.success.main,
+                cursor: 'pointer',
+              }}
+            >
             </Typography>
           </Box>
         </Box>

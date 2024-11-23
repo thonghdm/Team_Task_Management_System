@@ -1,0 +1,28 @@
+.text-editor {
+    margin-top: 20px;
+  }
+  
+  .ql-toolbar {
+    border-radius: 4px 4px 0 0;
+  }
+  
+  .ql-container {
+    border-radius: 0 0 4px 4px;
+    min-height: 6em;
+    font-size: 1rem
+  }
+
+.ql-editor.ql-blank::before{
+    color: #398bc6;
+    margin-left: -12px;
+}
+
+.ql-editor p{
+  margin-left: 3px;
+}
+
+
+
+
+
+

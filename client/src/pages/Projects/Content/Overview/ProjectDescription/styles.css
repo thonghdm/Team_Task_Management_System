@@ -1,0 +1,22 @@
+.project-description-content {
+    margin: 0;
+  }
+  
+  .project-description-content.is-editable {
+    cursor: pointer;
+  }
+
+  .no-margin p {
+    margin: 0;
+  }
+
+  /* Thêm vào file CSS của bạn */
+.ql-editor {
+  padding: 0;
+  min-height: auto;
+}
+
+/* Nếu bạn muốn nội dung có thể click để edit */
+.ql-editor:hover {
+  cursor: pointer;
+}

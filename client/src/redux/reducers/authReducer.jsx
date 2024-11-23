@@ -3,7 +3,7 @@ import actionTypes from "../actions/actionTypes";
 const initState = {
     isLoggedIn: false,
     typeLogin: false,
-    token: null,
+    accesstoken: null,
     userData: {},  // Add userData state
     error: null,
 };
@@ -15,8 +15,15 @@ const authReducer = (state = initState, action) => {
                 ...state,
                 isLoggedIn: action.data ? true : false,
                 typeLogin: false,
-                token: action.data
+                accesstoken: action.data.accesstoken,
+                userData: action.data.userData,  // Store user data (Google or email)
+                error: null,
             }
+        case actionTypes.LOGIN_FAILURE:
+            return {
+                ...initState,
+                error: action.error
+            };
         case actionTypes.LOGOUT:
             return {
                 ...initState
@@ -25,7 +32,7 @@ const authReducer = (state = initState, action) => {
             return {
                 ...state,
                 isLoggedIn: true,
-                token: action.data,
+                accesstoken: action.data.accesstoken,
                 userData: action.userData || {},  // Update userData
                 typeLogin: true,
                 error: null,
@@ -34,7 +41,7 @@ const authReducer = (state = initState, action) => {
             return {
                 ...state,
                 isLoggedIn: false,
-                token: null,
+                accesstoken: null,
                 userData: {},  // Reset userData
                 typeLogin: true,
                 error: action.error,
@@ -49,6 +56,23 @@ const authReducer = (state = initState, action) => {
                 ...state,
                 userData: {},  // Reset userData
                 error: action.error,
+            };
+        case actionTypes.USER_UPDATE_SUCCESS:
+            return {
+                ...state,
+                userData: action.data.userData || {},  // Update userData
+                
+            };
+        case actionTypes.USER_UPDATE_FAILURE:
+            return {
+                ...state,
+                userData: {},  // Reset userData
+                error: action.error,
+            };
+        case actionTypes.UPDATE_USER_DATA:
+            return {
+                ...state,
+                userData: action.data.userData || {},  // Update userData
             };
         default:
             return state;

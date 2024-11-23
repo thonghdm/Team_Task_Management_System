@@ -1,0 +1,8 @@
+
+/* Standard browsers */
+.scrollable {
+    max-height: 700px; 
+    overflow-y: auto;
+    scrollbar-width: thin; /* Use thin scrollbar */
+    scrollbar-color: rgb(212, 232, 223) transparent; /* Set scrollbar colors */
+}

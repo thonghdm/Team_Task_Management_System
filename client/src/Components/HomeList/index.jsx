@@ -1,62 +1,131 @@
-import React from 'react';
-import { Box, Tabs, Tab, Button } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
-import HomeItem from '../HomeItem';
+import React, { useState } from 'react';
+import {
+  Box,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import {formatDateRange} from '~/utils/formatDateRange'
 
-const HomeList = () => {
-  const [value, setValue] = React.useState(0);
+const HomeList = ({ upcoming, overdue, completed, onRowClick}) => {
+  const [value, setValue] = useState(0);
+  const theme = useTheme();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  // Sample task data
-  const tasks = {
-    upcoming: [
-      { title: 'Draft project brief', date: 'Today - Oct 8' },
-      { title: 'Schedule kickoff meeting', date: 'Oct 7 - 9' },
-    ],
-    overdue: [
-      { title: 'Old task 1', date: 'Oct 1' },
-      { title: 'Old task 2', date: 'Oct 2' },
-    ],
-    completed: [
-      { title: 'Completed task 1', date: 'Sep 30' },
-      { title: 'Completed task 2', date: 'Sep 29' },
-    ],
-  };
-  const colorMapping = {
-    upcoming: 'white',
-    overdue: 'red',
-    completed: 'green',
-  };
 
   // Get the tasks for the selected tab
   const selectedTasks =
-    value === 0 ? tasks.upcoming : value === 1 ? tasks.overdue : tasks.completed;
+    value === 0 ? upcoming : value === 1 ? overdue : completed;
+
+  // Format date function
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
 
   return (
-    <Box sx={{ color: 'white' }}>
-      <Tabs value={value} onChange={handleChange} sx={{ mb: 2 }}>
-        <Tab label="Upcoming" sx={{ color: 'white' }} />
-        <Tab label="Overdue" sx={{ color: 'white' }} />
-        <Tab label="Completed" sx={{ color: 'white' }} />
+    <Box sx={{ color: theme.palette.text.primary }}>
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        sx={{ mb: 2 }}
+      // variant="fullWidth"
+      >
+        <Tab label="Upcoming" />
+        <Tab label="Overdue" />
+        <Tab label="Completed" />
       </Tabs>
 
-      {value === 0 && (
-        <Box sx={{ display: 'flex', alignItems: 'center', color: '#aaa', mb: 2 }}>
-          <Button variant="text" sx={{ color: '#aaa' }}>
-            <AddIcon sx={{ mr: 1 }} /> {/* 'mr' là margin-right để tạo khoảng cách giữa icon và text */}
-            Create task
-          </Button>
-        </Box>
-      )}
+      <TableContainer className="scrollable" component={Paper} sx={{ maxHeight: 340 }}>
+        <Table stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell>Task Name</TableCell>
+              <TableCell>Priority</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {selectedTasks?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  <Typography variant="body2" color="textSecondary">
+                    No tasks found
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              selectedTasks?.map((task, index) => (
+                <TableRow
+                  key={task?.task_id?._id || index}
+                  hover
+                  sx={{
+                    backgroundColor: theme.palette.background.paper,
+                    '&:hover': { backgroundColor: theme.palette.action.hover },
+                    border: `1px solid ${theme.palette.text.secondary}`,
+                  }}
+                  onClick={() => onRowClick(task?.task_id?._id)}
+                >
+                  <TableCell>
+                    <Box>
+                      {task?.task_id?.task_name?.length > 100 ? `${task?.task_id?.task_name?.slice(0, 100)}...` : task?.task_id?.task_name}
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{display: 'flex'}}>
+                  <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        mt: '4px',
+                        marginRight: 1,
+                        backgroundColor: task?.task_id?.priority === 'Low'
+                          ? '#4CD2C0'
+                          : task?.task_id?.status === 'High'
+                            ? '#E587FF'
+                            : '#FFB84D'
+                      }}
+                    />
+                    {task?.task_id?.priority || 'N/A'}
 
-      {selectedTasks.map((task, index) => (
-        <HomeItem key={index} task={task.title} date={task.date}
-          color={colorMapping[value === 0 ? 'upcoming' : value === 1 ? 'overdue' : 'completed']}
-        />
-      ))}
+                  </TableCell>
+                  <TableCell>
+                    {formatDateRange(task?.task_id?.start_date, task?.task_id?.end_date)}
+                  </TableCell>
+                  <TableCell sx={{ display: 'flex' }}>
+                    <Box
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        mt: '4px',
+                        borderRadius: '50%',
+                        marginRight: 1,
+                        backgroundColor: task?.task_id?.status === 'Completed'
+                          ? 'green'
+                          : task?.task_id?.status === 'To Do'
+                            ? 'red'
+                            : 'yellow'
+                      }}
+                    />
+                    {task?.task_id?.status || 'N/A'}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
 };

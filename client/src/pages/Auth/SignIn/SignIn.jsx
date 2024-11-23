@@ -23,20 +23,13 @@ export default function SignIn() {
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    const [password, setPassword] = useState("000000");
+    const [password, setPassword] = useState("Admin#123");
     
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setGmail] = useState("thongdzpro100@gmail.co3m");
+    const [email, setGmail] = useState("thongdzprooo100@gmail.com");
 
-    const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth);
-    useEffect(() => {
-        console.log(isLoggedIn, typeLogin)
-        if (isLoggedIn && typeLogin) {
-            navigate('/user'); // Redirect to Home page after login
-        }
-    }, [isLoggedIn, typeLogin, navigate]);
+    const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth)
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
-
     const validateInputs = () => {
         const email = document.getElementById('email').value;
         let isValid = true;
@@ -62,10 +55,18 @@ export default function SignIn() {
         return isValid;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateInputs()) {
-            dispatch(loginWithEmail(email, password));
+            const result = await dispatch(loginWithEmail(email, password));
+            if (result) {
+                if(result?.data?.userWithToken?.isAdmin===true) {
+                    navigate('/admin/1');
+                }else{
+                    navigate('/board/home/1');
+                }
+                
+            }
         }
     };
 
@@ -126,8 +127,7 @@ export default function SignIn() {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <FormLabel htmlFor="password">Password</FormLabel>
                             <Link
-                                component="button"
-                                onClick={() => alert('Forgot password modal placeholder')}
+                                href="/reset-password"
                                 variant="body2"
                                 sx={{ alignSelf: 'baseline' }}
                             >

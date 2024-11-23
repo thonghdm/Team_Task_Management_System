@@ -1,0 +1,14 @@
+.scrollable {
+    overflow-y: auto; 
+}
+  
+.scrollable::-webkit-scrollbar {
+    width: 0; 
+    background: transparent; 
+}
+  
+.scrollable {
+    scrollbar-width: thin; /* Use thin scrollbar */
+    scrollbar-color: transparent transparent; /* Set scrollbar colors */
+}
+  

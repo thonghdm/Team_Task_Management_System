@@ -15,8 +15,7 @@ import SearchWithFilters from '../Search';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: '#FFFF00', // Yellow background
-  color: '#000000', // Black text
+  backgroundColor: theme.palette.background.default, // Changed from .paper to .default
 }));
 
 const Header = ({ toggleDrawer }) => {
@@ -24,7 +23,7 @@ const Header = ({ toggleDrawer }) => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const getSearchWidth = () => {
-    return 'calc(100% - 500px)'; 
+    return 'calc(100% - 500px)';
   };
 
   return (
@@ -34,7 +33,7 @@ const Header = ({ toggleDrawer }) => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          flexWrap: 'nowrap', 
+          flexWrap: 'nowrap',
         }}
       >
         <div style={{ 

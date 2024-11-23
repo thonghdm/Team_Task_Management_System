@@ -1,4 +1,4 @@
-import { apiLoginSuccess, apiLoginWithEmail, apiRegisterWithEmail} from '~/apis/Auth/authService';
+import { apiLoginSuccess, apiLoginWithEmail, apiRegisterWithEmail, apiLogOut} from '~/apis/Auth/authService';
 import actionTypes from './actionTypes'
 
 export const loginSuccess = (id, tokenLogin) => async (dispatch) => {
@@ -7,7 +7,7 @@ export const loginSuccess = (id, tokenLogin) => async (dispatch) => {
         if (response?.data.err === 0) {
             dispatch({
                 type: actionTypes.LOGIN_SUCCESS,
-                data: response.data.token
+                data: response.data
             })
         } else {
             dispatch({
@@ -29,19 +29,19 @@ export const loginWithEmail = (email, password) => async (dispatch) => {
         dispatch({ type: actionTypes.LOGIN_REQUEST });
 
         let response = await apiLoginWithEmail(email, password);
-
-        if (response!==null) {
+        if (response) {
             dispatch({
                 type: actionTypes.EMAIL_LOGIN_SUCCESS,
-                data: response.data.userWithToken.accessToken,
+                data: {accesstoken: response.data.userWithToken.accessToken},
                 userData: response.data.userWithToken // Save user data if needed
-
             });
+            return response
         } else {
             dispatch({
                 type: actionTypes.EMAIL_LOGIN_FAILURE,
                 error: response?.data?.message || 'Login failed'
             });
+            return null
         }
 
     } catch (error) {
@@ -57,29 +57,38 @@ export const registerWithEmail = (name, email, password) => async (dispatch) => 
         dispatch({ type: actionTypes.LOGIN_REQUEST });
 
         const response = await apiRegisterWithEmail(name, email, password);
-        
-        if (response && response.data && response.data.userWithToken) {
+        console.log('registerWithEmail response:', response);
+        if (response && response.data) {
             dispatch({
                 type: actionTypes.USER_REGISTER_SUCCESS,
                 payload: {
-                    token: response.data.userWithToken.accessToken,
-                    user: response.data.userWithToken
+                    user: response.data
                 }
             });
+            return {success: true}
         } else {
             throw new Error('Invalid response format');
         }
     } catch (error) {
         dispatch({
             type: actionTypes.USER_REGISTER_FAILURE,
-            payload: error.response?.data?.message || error.message || 'Registration failed'
+            payload: error.response?.data?.error || error.message || 'Registration failed'
         });
+        console.error('Registration error:', error.response?.data?.error || error.message);
+        return {success: false, message: error.response?.data?.error || error.message || 'Registration failed'}
     }
 };
 
 
 // http://localhost:5000/api/auth/login
 
-export const logout = () => ({
-    type: actionTypes.LOGOUT
-})
+export const logout = () => async (dispatch) =>{
+    try{
+        dispatch({ type: actionTypes.LOGOUT });
+        const response = await apiLogOut();
+    }
+    catch(error){
+        console.error('Logout error:', error.response?.data || error.message);
+        throw error;
+    }
+}

@@ -1,6 +1,4 @@
 const authService = require('~/services/auth/authService')
-
-
 const authController = {
     loginSuccess: async (req, res) => {
         const { id, tokenLogin } = req.body
@@ -13,7 +11,7 @@ const authController = {
             }
 
             let response = await authService.loginSuccessService(id, tokenLogin)
-            if (response.token && response.refreshToken) {
+            if (response.accesstoken && response.refreshToken) {
                 res.cookie('refreshToken', response.refreshToken, {
                     httpOnly: true,
                     path: '/',
@@ -25,7 +23,7 @@ const authController = {
             res.status(200).json({
                 err: response.err,
                 msg: response.msg,
-                token: response.token || null
+                accesstoken: response.accesstoken || null
             })
 
         } catch (error) {
@@ -35,8 +33,7 @@ const authController = {
             })
         }
     },
-
-    requestRefreshToken: async (req, res) => {
+    requestAccessToken: async (req, res) => {
         const refreshToken = req.cookies.refreshToken
         if (!refreshToken) {
             return res.status(401).json({
@@ -57,7 +54,9 @@ const authController = {
                 res.status(200).json({
                     err: 0,
                     msg: 'New tokens generated successfully',
-                    token: response.token || null
+                    token: response.token || null,
+                    userData: response.userData || null
+
                 })
             } else {
                 res.status(403).json({
@@ -69,6 +68,61 @@ const authController = {
             res.status(500).json({
                 err: -1,
                 msg: 'Fail at refresh token: ' + error.message
+            })
+        }
+    },
+    logout: async (req, res) => {
+        const refreshToken = req.cookies.refreshToken
+        if (!refreshToken) {
+            return res.status(401).json({
+                err: 1,
+                msg: 'You re not authenticated'
+            })
+        }
+        try {
+            let response = await authService.logoutService(refreshToken)
+            if (response.err === 0) {
+                res.clearCookie('refreshToken', {
+                    httpOnly: true,
+                    secure:true
+                })
+                res.status(200).json({
+                    err: 0,
+                    msg: 'Logout successful'
+                })
+            } else {
+                res.status(403).json({
+                    err: 3,
+                    msg: response.msg
+                })
+            }
+        } catch (error) {
+            res.status(500).json({
+                err: -1,
+                msg: 'Fail at logout: ' + error.message
+            })
+        }
+    },
+    getUser: async (req, res) => {
+        try {
+            const userId = req.body._id
+            const user = await authService.getUserService(userId)
+            if (!user) {
+                return res.status(404).json({
+                    err: 1,
+                    msg: 'User not found'
+                })
+            }
+
+            res.status(200).json({
+                err: 0,
+                msg: 'Success',
+                data: user
+            })
+        } catch (error) {
+            res.status(500).json({
+                err: -1,
+                msg: 'Fail at get user: ' + error.message
             })
         }
     }
