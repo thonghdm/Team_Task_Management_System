@@ -9,6 +9,8 @@ import mockData from '~/apis/mockData';
 
 import Calendar from '~/pages/Projects/Content/Calendar';
 import Timeline from '~/pages/Projects/Content/Timeline';
+
+import DashBoard from '~/pages/Projects/Content/DashBoard';
 const ProjectContent = () => {
     const theme = useTheme();
     return (
@@ -27,6 +29,8 @@ const ProjectContent = () => {
             <Route path="project-calendar" element={<Calendar />} />
 
             <Route path="project-timeline" element={<Timeline />} />
+            
+            <Route path="project-dashboard" element={<DashBoard />} />
         </Routes>
         // </Paper>
     );

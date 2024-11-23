@@ -26,6 +26,8 @@ import ProjectTemplate from '~/pages/Projects/AddProjects/ProjectTemplate';
 import ProjectsBlank from './pages/Projects/AddProjects/ProjectsBlank'
 import { ToastContainer, toast } from 'react-toastify';
 
+import Introduce from '~/pages/Introduce'
+
 function ModeSelect() {
   const { mode, setMode } = useColorScheme()
 
@@ -73,7 +75,8 @@ function App() {
       <Box sx={{ color: 'primary.main' }}>aaaaaaaaaaaaaa</Box>
       <TextField id="outlined-search" label="Search..." type='search' size='small' /> */}
       <Routes>
-        <Route path='/' element={<SignIn />} />
+        {/* <Route path='/' element={<SignIn />} /> */}
+        <Route path='/' element={<Introduce />} />
         <Route path='/sign-in' element={<SignIn />} />
         <Route path='/sign-up' element={<SingUp />} />
         <Route path="/otp" element={<ProtectedRoute><OTP /></ProtectedRoute>} />
