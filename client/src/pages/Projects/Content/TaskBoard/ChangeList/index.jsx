@@ -22,7 +22,7 @@ import PrioritySelector from './PrioritySelector';
 import StatusSelector from './StatusSelector';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
-
+import dayjs from 'dayjs';
 import { fetchFileByIdTask } from '~/redux/project/uploadFile-slice';
 import { formatFileSize } from '~/utils/formatFileSize';
 
@@ -36,6 +36,7 @@ import { updateTaskThunks } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 
+import { createAuditLog} from '~/redux/project/auditLog-slice';
 // import AnimationDone from '~/Components/AnimationDone';
 import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
 
@@ -88,8 +89,10 @@ const ChangeList = ({ open, onClose, taskId }) => {
     /// delete label
     const [openLabel, setOpenLabel] = useState(false);
     const [selectedLabel, setSelectedLabel] = useState(null);
-    const handleDeleteLabelClick = (labelId) => {
+    const [selectedLabelName, setSelectedLabelName] = useState(null);
+    const handleDeleteLabelClick = (labelId, labelName) => {
         setSelectedLabel(labelId);
+        setSelectedLabelName(labelName);
         setOpenLabel(true);
     }
 
@@ -114,8 +117,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 throw error; // Rethrow error nếu không phải error code 2
             }
         };
-
         getTaskDetail(accesstoken);
+        
     }, [dispatch, taskId, accesstoken]);
     /// get file
     const { files } = useSelector(state => state.uploadFile);
@@ -188,12 +191,14 @@ const ChangeList = ({ open, onClose, taskId }) => {
         try {
             const dataDelete = {
                 _id: selectedLabel,
-                is_active: false
+                is_active: false,
+                old_value: selectedLabelName
             };
             const handleSuccess = () => {
                 toast.success('Delete label successfully!');
                 setOpenLabel(false);
                 setSelectedLabel(null);
+                setSelectedLabelName(null);
             };
             const deleteLabel = async (token) => {
                 try {
@@ -208,6 +213,13 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete label failed');
                     }
+                    await dispatch(createAuditLog({ 
+                        accesstoken: token, 
+                        data: { task_id: taskId, 
+                                action:'Delete', 
+                                entity:'Label',
+                                old_value: dataDelete?.old_value, 
+                                user_id:userData?._id} }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -225,6 +237,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const handleCancelDeleteLabel = () => {
         setOpenLabel(false);
         setSelectedLabel(null);
+        setSelectedLabelName(null);
     };
 
     /// save task name
@@ -287,6 +300,15 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete priority task failed');
                     }
+                    await dispatch(createAuditLog({ 
+                        accesstoken: token, 
+                        data: { task_id: taskId, 
+                                action:'Update', 
+                                entity:'Priority',
+                                old_value: task?.priority,
+                                new_value: newPriority, 
+                                user_id:userData?._id} }));
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -303,7 +325,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
     /// save status
     // const [showAnimation, setShowAnimation] = useState(false);
-    const handleSaveStatus = (newStatus) => {
+    const handleSaveStatus = async (newStatus) => {
         try {
             let dataSave = {
                 status: newStatus
@@ -336,6 +358,15 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete status task failed');
                     }
+                     await dispatch(createAuditLog({ 
+                        accesstoken: token, 
+                        data: { task_id: taskId, 
+                                action:'Update', 
+                                entity:'Status', 
+                                old_value: task?.status,
+                                new_value: newStatus,
+                                user_id:userData?._id} }));
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -343,7 +374,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     throw error;
                 }
             };
-            saveStatusTask(accesstoken);
+            await saveStatusTask(accesstoken);
         }
         catch (error) {
             throw error;
@@ -373,6 +404,15 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete start date task failed');
                     }
+                    await dispatch(createAuditLog({ 
+                        accesstoken: token, 
+                        data: { task_id: taskId, 
+                                action:'Update', 
+                                entity:'Start Date',
+                                old_value: dayjs(task?.start_date).format('MMM DD, hh:mm A'),
+                                new_value: dayjs(newStartDate).format('MMM DD, hh:mm A'),
+                                user_id:userData?._id} }));
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -414,6 +454,15 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete due date task failed');
                     }
+                    await dispatch(createAuditLog({ 
+                        accesstoken: token, 
+                        data: { task_id: taskId, 
+                                action:'Update', 
+                                entity:'Due Date', 
+                                old_value: dayjs(task?.end_date).format('MMM DD, hh:mm A'),
+                                new_value: dayjs(newDueDate).format('MMM DD, hh:mm A'),
+                                user_id:userData?._id} }));
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -470,6 +519,15 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Leave task failed');
                     }
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Leave',
+                            entity: 'Task',
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     handleSuccess();
                 } catch (error) {
@@ -541,7 +599,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 <Chip
                                     key={lb?._id}
                                     label={lb?.name}
-                                    onDelete={() => handleDeleteLabelClick(lb?._id)}
+                                    onDelete={() => handleDeleteLabelClick(lb?._id, lb?.name)}
                                     sx={{ bgcolor: `${lb?.color}`, p: 1, color: theme.palette.text.primary }}
                                 />
                             ))}
@@ -551,7 +609,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 Add
                             </Button>
                         </Box>
-                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId} />
+                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId} userData={userData} />
                         {/* {label.title && (
                             <p>Created Label: {label.title} (Color: {label.color})</p>
                         )} */}
@@ -612,7 +670,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                             </Box>
                                         </Box>
                                     </Box>
-                                    <FileManagementDialog fileManagement={file} />
+                                    <FileManagementDialog fileManagement={file} userData={userData} taskId={taskId} />
                                     {/* <FileManagementDialogs open={openManagement} onClose={handleCloseManagement} /> */}
                                 </Box>
                             )))}
@@ -642,7 +700,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         {showDetails && (
                             <Box sx={{ mt: 2 }}>
                                 <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
-                                    <ActivityLog activitys={activities} />
+                                    <ActivityLog activitys={task?.audit_log_id} />
                                 </Typography>
                             </Box>
                         )}

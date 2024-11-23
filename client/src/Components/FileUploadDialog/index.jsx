@@ -22,7 +22,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { fetchFileByIdTask, updateFileByIdTaskThunk } from '~/redux/project/uploadFile-slice';
 import { useDispatch, useSelector } from 'react-redux'
-
+import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { fetchTaskById } from '~/redux/project/task-slice';
 const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
   const [link, setLink] = useState('');
   const [displayText, setDisplayText] = useState('');
@@ -30,6 +31,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
+    console.log(event.target.files[0]);
   };
   ////////////////////////////////
   const refreshToken = useRefreshToken();
@@ -58,6 +60,16 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
             }
             throw new Error('File upload failed');
           }
+          await dispatch(createAuditLog({ 
+            accesstoken: token, 
+            data: { task_id: taskId, 
+                    action:'Create', 
+                    entity:'Attachment', 
+                    user_id:userData?._id,
+                    old_value: fileData?.file?.name
+                  }
+                  }));
+          await dispatch(fetchTaskById({ accesstoken: token, taskId }));
           await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
           toast.success("File upload successfully");
           onClose();
