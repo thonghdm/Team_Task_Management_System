@@ -63,6 +63,15 @@ const getTaskById = async (taskId) => {
                     select: 'email _id image displayName'
                 }
             })
+            .populate({
+                path: 'audit_log_id',
+                match: { is_active: true },
+                select: 'action user_id entity createdAt old_value new_value',
+                populate: {
+                    path: 'user_id',
+                    select: 'email _id image displayName'
+                }
+            })
         return task
     } catch (error) {
         throw new Error(`Error fetching task: ${error.message}`)
@@ -134,7 +143,7 @@ const addMemberToTask = async (reqBodyArray) => {
 
         // Trả về array kết quả
         return {
-            message: "Members added to task successfully",
+            message: 'Members added to task successfully',
             members: results
         };
 

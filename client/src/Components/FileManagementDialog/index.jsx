@@ -18,6 +18,8 @@ import { fetchFileByIdTask, updateAttachmentByIdFileThunk } from '~/redux/projec
 import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 
+import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { fetchTaskById } from '~/redux/project/task-slice';
 // Styled components
 const StyledMenu = styled(Menu)(({ theme }) => ({
     '& .MuiPaper-root': {
@@ -49,7 +51,7 @@ const DeleteMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 
-const FileManagementDialog = ({ fileManagement }) => {
+const FileManagementDialog = ({ fileManagement, userData, taskId }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -105,6 +107,15 @@ const FileManagementDialog = ({ fileManagement }) => {
                         }
                         throw new Error('File delete failed');
                     }
+                    await dispatch(createAuditLog({ 
+                        accesstoken: token, 
+                        data: { task_id: taskId, 
+                                action:'Delete', 
+                                entity:'Attachment', 
+                                user_id:userData?._id,
+                                old_value: fileManagement?.originalName
+                            } }));
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
                     handleClose();
                     toast.success("File delete successfully");

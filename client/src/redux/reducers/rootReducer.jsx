@@ -18,6 +18,7 @@ import fileSlice from '~/redux/project/uploadFile-slice/index';
 import projectThunkSlice from '~/redux/project/project-slice/index';
 import starredSlice from '~/redux/project/starred-slice/index';
 
+import auditLogSlice from '~/redux/project/auditLog-slice/index';
 
 // Cấu hình cho persist
 const commonConfig = {
@@ -103,7 +104,14 @@ const starredSliceConfig = {
     key: 'starred',
     whitelist: ['starred'],
 };
+const auditLogSliceConfig = {
+    ...commonConfig,
+    key: 'auditLog',
+    whitelist: ['auditLog'],
+};
 
+
+// Cấu hình cho persist
 
 const rootReducer = combineReducers({
     auth: persistReducer(authConfig, authReducer),
@@ -121,6 +129,7 @@ const rootReducer = combineReducers({
     uploadFile: persistReducer(fileConfig, fileSlice),
     projectThunk: persistReducer(projectThunkSliceConfig, projectThunkSlice),
     starred: persistReducer(starredSliceConfig, starredSlice),
+    auditLog: persistReducer(auditLogSliceConfig, auditLogSlice)
 })
 
 

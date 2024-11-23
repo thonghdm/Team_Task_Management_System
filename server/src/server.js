@@ -14,7 +14,7 @@ const commentController = require('~/routes/v1/project/commentRouter')
 const uploadController = require('~/routes/v1/project/uploadFileRouter')
 const memberTaskRouter = require('~/routes/v1/project/memberTaskRouter')
 const starredRouter = require('~/routes/v1/project/starredRouter')
-
+const auditLogRouter = require('~/routes/v1/project/auditLogRouter')
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
 
@@ -40,6 +40,7 @@ app.use('/api/task', taskRoutes)
 app.use('/api/project-role', projectRoleRoutes)
 app.use('/api/label', labelController)
 app.use('/api/comment', commentController)
+app.use('/api/auditLog', auditLogRouter)
 app.use('/api/file', uploadController)
 app.use('/api/member-task', memberTaskRouter)
 

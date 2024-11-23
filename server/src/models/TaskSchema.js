@@ -27,7 +27,8 @@ const TaskSchema = new mongoose.Schema(
         is_active: { type: Boolean, default: true },
         comment_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
         attachments_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Attachment' }],
-        label_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Label' }]
+        label_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Label' }],
+        audit_log_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AuditLog' }]
     },
     { timestamps: true } // This will add createdAt and updatedAt fields automatically
 )

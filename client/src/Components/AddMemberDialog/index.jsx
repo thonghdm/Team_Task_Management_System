@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material/styles';
-
+import {createAuditLog} from '~/redux/project/auditLog-slice';
 
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 import { useDispatch, useSelector } from 'react-redux'
@@ -258,7 +258,8 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
             const userInvite = selectedUsers.map(user => ({
                 memberId: user._id,
                 task_id: taskId,
-                user_invite: userData._id
+                user_invite: userData._id,
+                user_name: userData.username
             }));
 
             // Check existing members
@@ -292,7 +293,17 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Invite members failed');
                     }
-                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    if(userInvite.length > 0)
+                    {
+                            await dispatch(createAuditLog({ 
+                                accesstoken: token, 
+                                data: { task_id: taskId, 
+                                        action:'Add', 
+                                        entity:'Member', 
+                                        old_value: userInvite.map(user => user.user_name).join(','),
+                                        user_id:userData?._id} }));
+                            await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    }
                     await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
                     onClose();

@@ -15,7 +15,6 @@ export const FormatterTimeAgo = (inputTime) => {
   const minutesDiff = now.diff(time, 'minute');
   const hoursDiff = now.diff(time, 'hour');
   const daysDiff = now.diff(time, 'day');
-
   // Quy tắc format
   if (minutesDiff < 60) {
     return `${minutesDiff} minute `;
@@ -27,4 +26,5 @@ export const FormatterTimeAgo = (inputTime) => {
     // Nếu quá 7 ngày, format lại theo ngày cụ thể
     return time.format('DD/MM/YYYY');
   }
+  
 };
