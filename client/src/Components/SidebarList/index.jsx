@@ -3,7 +3,7 @@ import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box } from 
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-const SidebarList = ({ linkData, isProject = false, Id }) => {
+const SidebarList = ({ linkData, isProject = false, Id , URL = "board"}) => {
   const location = useLocation();
   const path = location.pathname.split('/')[2] || ''; // Handle cases where there might not be a third segment
   const theme = useTheme();
@@ -15,7 +15,7 @@ const SidebarList = ({ linkData, isProject = false, Id }) => {
           <ListItem key={index} disablePadding>
             <ListItemButton
               component={Link}
-              to={`/board/${item?._id}/${Id}`}
+              to={`/${URL}/${item?._id}/${Id}`}
               sx={{
                 backgroundColor: isSelected ? theme.palette.action.selected : 'inherit',
                 '&:hover': {

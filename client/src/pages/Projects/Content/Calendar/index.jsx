@@ -10,18 +10,37 @@ import { useParams } from 'react-router-dom';
 
 import { transformDataCalProject } from '~/utils/transformDataCalProject';
 
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { ToastContainer, toast } from 'react-toastify';
+
+
 function Calendar() {
     ////
     const { accesstoken } = useSelector(state => state.auth)
     const dispatch = useDispatch();
     const { projectData } = useSelector((state) => state.projectDetail);
     const { projectId } = useParams();
+    
+    const refreshToken = useRefreshToken();
     useEffect(() => {
-        dispatch(fetchProjectDetail({ accesstoken, projectId }));
-        return () => {
-            dispatch(resetProjectDetail());
+        const getProjectDetail = async (token) => {
+          try {
+            await dispatch(fetchProjectDetail({ accesstoken: token, projectId })).unwrap();
+          } catch (error) {
+            if (error?.err === 2) {
+              const newToken = await refreshToken();
+              return getProjectDetail(newToken);
+            }
+            toast.error(error.response?.data.message || 'Unable to load project information!');
+          }
         };
-    }, [dispatch, projectId, accesstoken]);
+    
+        getProjectDetail(accesstoken);
+    
+        return () => {
+          dispatch(resetProjectDetail());
+        };
+      }, [dispatch, projectId, accesstoken]);
 
     const data = transformDataCalProject(projectData?.project?.lists);  
     ////
