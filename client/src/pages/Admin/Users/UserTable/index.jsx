@@ -12,6 +12,8 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  TablePagination,
+  Box,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -27,6 +29,8 @@ import { useNavigate } from 'react-router-dom';
 const UserTable = ({ users, activeTab }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [page, setPage] = useState(0); // Current page
+  const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
   const navigate = useNavigate();
 
   const handleMenuOpen = (event, user) => {
@@ -38,13 +42,26 @@ const UserTable = ({ users, activeTab }) => {
     setAnchorEl(null);
     setSelectedUser(null);
   };
+
   const handleEditUser = (userId) => {
     navigate(`/admin/users/101/edit-user/${userId}`);
     handleMenuClose();
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to the first page
+  };
+
+  // Calculate the users to display based on the current page and rows per page
+  const paginatedUsers = users.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
-    <>
+    <Box>
       <TableContainer>
         <Table>
           <TableHead>
@@ -56,7 +73,7 @@ const UserTable = ({ users, activeTab }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((user, index) => (
+            {paginatedUsers.map((user, index) => (
               <TableRow key={index}>
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
@@ -75,6 +92,18 @@ const UserTable = ({ users, activeTab }) => {
         </Table>
       </TableContainer>
 
+      {/* Pagination */}
+      <TablePagination
+        component="div"
+        count={users.length} // Total number of users
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]} // Options for rows per page
+      />
+
+      {/* Actions Menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -90,7 +119,7 @@ const UserTable = ({ users, activeTab }) => {
       >
         {activeTab === 0 ? (
           // Menu for Active Users
-          <>
+          <Box>
             <MenuItem onClick={() => handleEditUser(selectedUser._id)}>
               <ListItemIcon>
                 <EditIcon fontSize="small" />
@@ -110,10 +139,10 @@ const UserTable = ({ users, activeTab }) => {
               </ListItemIcon>
               <ListItemText>Delete</ListItemText>
             </MenuItem>
-          </>
+          </Box>
         ) : (
           // Menu for Deleted Users
-          <>
+          <Box>
             <MenuItem onClick={handleMenuClose} sx={{ color: 'primary.main' }}>
               <ListItemIcon>
                 <RestoreIcon fontSize="small" sx={{ color: 'primary.main' }} />
@@ -127,10 +156,10 @@ const UserTable = ({ users, activeTab }) => {
               </ListItemIcon>
               <ListItemText>Delete Permanently</ListItemText>
             </MenuItem>
-          </>
+          </Box>
         )}
       </Menu>
-    </>
+    </Box>
   );
 };
 

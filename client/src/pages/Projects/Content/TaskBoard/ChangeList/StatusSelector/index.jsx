@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Select, MenuItem } from '@mui/material';
 import { useTheme } from '@mui/material';
 
-const StatusSelector = ({ value, onChange }) => {
+const StatusSelector = ({ value, onChange, title="Status" }) => {
   const [status, setStatus] = useState(value || 'To Do');
   const theme = useTheme();
 
@@ -70,7 +70,7 @@ const StatusSelector = ({ value, onChange }) => {
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <Typography sx={{ width: '100px', color: 'text.primary' }}>Status</Typography>
+      <Typography sx={{ width: '100px', color: 'text.primary' }}>{title}</Typography>
       <Select
         value={status}
         onChange={handleChange}

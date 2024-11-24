@@ -93,7 +93,7 @@ const ChangePassword = ({ initialUser }) => {
             style={{ display: 'none' }}
             id="avatar-upload"
             type="file"
-            // onChange={handleAvatarChange}
+          // onChange={handleAvatarChange}
           />
           <label htmlFor="avatar-upload">
             <Button
@@ -129,7 +129,6 @@ const ChangePassword = ({ initialUser }) => {
                 variant="outlined"
                 margin="normal"
                 disabled
-                helperText="Email cannot be changed after user creation"
               />
               <TextField
                 fullWidth
@@ -161,8 +160,7 @@ const ChangePassword = ({ initialUser }) => {
       <CardActions
         sx={{
           justifyContent: 'flex-end',
-          padding: 2,
-          backgroundColor: theme.palette.grey[100],
+          padding: 2
         }}
       >
         <Button
@@ -172,7 +170,7 @@ const ChangePassword = ({ initialUser }) => {
             textTransform: 'none',
             borderRadius: '8px',
           }}
-          // onClick={onCancel}
+        // onClick={onCancel}
         >
           Cancel
         </Button>
