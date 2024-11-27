@@ -26,8 +26,8 @@ const Users = () => {
 
   // Active users data
   const activeUsers = [
-    { _id: 1, name: 'Diệp Thảo Nguyễn Văn', email: 'diepthaonguyenvanbmt@gmail.com', username: 'Moderator' },
-    { _id: 2, name: 'Thai Hoang Anh', email: 'zinmx205@gmail.com', username: 'Moderator' },
+    { _id: 1, name: 'Diệp Thảo Nguyễn Văn', email: 'diepthaonguyenvanbmt@gmail.com', username: 'Moderator', avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwbl_8kkN0-vMdzEdp1RRpWWp4zSKD8zsEag&s' },
+    { _id: 2, name: 'Thai Hoang Anh', email: 'zinmx205@gmail.com', username: 'Moderator',avatar:'https://image.made-in-china.com/2f0j00TdmaOvFqLzrh/Avt-230cc-4X4-Motorcycles-Vehicle-Beach-Mini-Jeep-for-Sale-with-Ce.webp' },
     { _id: 3, name: 'Thong Hoang', email: 'thongdzpro100@gmail.com', username: 'User' },
     { _id: 4, name: 'Trần Anh', email: 'tran.anh@gmail.com', username: 'User' },
     { _id: 5, name: 'Jane Doe', email: 'jane.doe@example.com', username: 'User' },

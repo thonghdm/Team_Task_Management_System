@@ -6,6 +6,8 @@ import StatsGrid from '~/pages/Admin/DashBoards/Overview/StatsGrid';
 import ProjectTimeline from '~/pages/Admin/DashBoards/Overview/ProjectTimeline';
 import RecentProjects from '~/pages/Admin/DashBoards/Overview/RecentProjects';
 import MemberStatistics from '~/pages/Admin/DashBoards/Overview/MemberStatistics';
+
+import ProjectDashboard from './ProjectDashboard';
 const DashBoards = () => {
   const [currentTab, setCurrentTab] = useState('overview');
 
@@ -38,7 +40,7 @@ const DashBoards = () => {
       )}
 
       {currentTab === 'projects' && (
-        <Typography variant="h6">Projects</Typography>
+        <ProjectDashboard/>
       )}
 
       {currentTab === 'team' && (
