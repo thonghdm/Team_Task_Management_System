@@ -1,9 +1,11 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box } from '@mui/material';
+import { useTheme } from '@mui/material';
 
-const StatsCard = ({ title, value, subtext, icon, color = 'primary.main' }) => {
+const StatsCard = ({ title, value, subtext, icon, color = 'primary.main', background}) => {
+  const theme = useTheme();
   return (
-    <Card>
+    <Card sx={{ background: background }}>
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
           <Box>

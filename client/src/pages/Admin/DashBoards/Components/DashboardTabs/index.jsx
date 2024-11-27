@@ -16,9 +16,9 @@ const DashboardTabs = ({ value, onChange }) => {
       </Tabs> */}
       <Tabs value={value} onChange={onChange}>
         <Tab label="Overview" value="overview" />
-        <Tab label="Projects" value="projects" />
+        {/* <Tab label="Projects" value="projects" />
         <Tab label="Team" value="team" />
-        <Tab label="Reports" value="reports" />
+        <Tab label="Reports" value="reports" /> */}
       </Tabs>
     </Box>
   );

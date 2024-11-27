@@ -93,14 +93,15 @@ const ProjectsTable = ({ projects, isArchived }) => {
       { id: 'name', label: 'Project Name' },
       { id: 'client', label: 'Client' },
       { id: 'visibility', label: 'Visibility' },
-      { id: 'deadline', label: 'Deadline' },
+      // { id: 'deadline', label: 'Deadline' },
       { id: 'team', label: 'Team Size' },
+      // { id: 'status', label: 'Status' },
     ];
 
     if (isArchived) {
       return [
         ...baseColumns,
-        { id: 'completedDate', label: 'Completed Date' },
+        // { id: 'completedDate', label: 'Completed Date' },
         // { id: 'archiveReason', label: 'Archive Reason' },
         { id: 'actions', label: 'Actions', align: 'right' },
       ];
@@ -108,7 +109,7 @@ const ProjectsTable = ({ projects, isArchived }) => {
 
     return [
       ...baseColumns,
-      { id: 'startDate', label: 'Start Date' },
+      // { id: 'startDate', label: 'Start Date' },
       { id: 'actions', label: 'Actions', align: 'right' },
     ];
   };
@@ -143,23 +144,23 @@ const ProjectsTable = ({ projects, isArchived }) => {
                     size="small"
                   />
                 </TableCell>
-                <TableCell>{project.deadline}</TableCell>
+                {/* <TableCell>{project.deadline}</TableCell> */}
                 <TableCell>{project.team} members</TableCell>
-                {isArchived ? (
+                {/* {isArchived ? (
                   <TableCell>{project.completedDate}</TableCell>
 
-                  // <Box>
-                  //   {/* <TableCell>
-                  //     <Tooltip title={project.archiveReason}>
-                  //       <IconButton size="small">
-                  //         <InfoIcon fontSize="small" />
-                  //       </IconButton>
-                  //     </Tooltip>
-                  //   </TableCell> */}
-                  // </Box>
+                  <Box>
+                    <TableCell>
+                      <Tooltip title={project.archiveReason}>
+                        <IconButton size="small">
+                          <InfoIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                   </Box>
                 ) : (
                   <TableCell>{project.startDate}</TableCell>
-                )}
+                )} */}
                 <TableCell align="right">
                   <IconButton
                     size="small"

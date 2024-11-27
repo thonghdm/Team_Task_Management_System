@@ -14,6 +14,8 @@ import {
   Divider,
   TablePagination,
   Box,
+  Avatar,
+  Typography,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -75,7 +77,13 @@ const UserTable = ({ users, activeTab }) => {
           <TableBody>
             {paginatedUsers.map((user, index) => (
               <TableRow key={index}>
-                <TableCell>{user.name}</TableCell>
+                <TableCell sx={{display: 'flex'}}>
+                  <Avatar sx={{ mr: 1 }}
+                    src={user?.avatar}
+                  />
+                  <Typography sx={{mt:1}}>{user.name}</Typography>
+                   
+                </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell align="right">

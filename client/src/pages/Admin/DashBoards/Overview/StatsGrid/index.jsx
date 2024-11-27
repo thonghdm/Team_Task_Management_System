@@ -6,6 +6,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import TimelineIcon from '@mui/icons-material/Timeline';
 
+import { useTheme } from '@mui/material';
 const StatsGrid = () => {
   const stats = [
     {
@@ -37,12 +38,12 @@ const StatsGrid = () => {
       color: '#f44336'
     }
   ];
-
+  const theme = useTheme();
   return (
     <Grid container spacing={3}>
       {stats.map((stat, index) => (
         <Grid item xs={12} sm={6} md={3} key={index}>
-          <StatsCard {...stat} />
+          <StatsCard {...stat} background={theme.palette.background.default } />
         </Grid>
       ))}
     </Grid>
