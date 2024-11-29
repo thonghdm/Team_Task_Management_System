@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import {
   Box,
   Button,
@@ -18,6 +18,12 @@ import {
 import UserTable from '~/pages/Admin/Users/UserTable';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
+import { fetchAllMembers } from '~/redux/member/member-slice/index';
+
+import { useDispatch, useSelector } from 'react-redux'
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { ToastContainer, toast } from 'react-toastify';
+
 
 const Users = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -27,7 +33,7 @@ const Users = () => {
   // Active users data
   const activeUsers = [
     { _id: 1, name: 'Diệp Thảo Nguyễn Văn', email: 'diepthaonguyenvanbmt@gmail.com', username: 'Moderator', avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwbl_8kkN0-vMdzEdp1RRpWWp4zSKD8zsEag&s' },
-    { _id: 2, name: 'Thai Hoang Anh', email: 'zinmx205@gmail.com', username: 'Moderator',avatar:'https://image.made-in-china.com/2f0j00TdmaOvFqLzrh/Avt-230cc-4X4-Motorcycles-Vehicle-Beach-Mini-Jeep-for-Sale-with-Ce.webp' },
+    { _id: 2, name: 'Thai Hoang Anh', email: 'zinmx205@gmail.com', username: 'Moderator', avatar: 'https://image.made-in-china.com/2f0j00TdmaOvFqLzrh/Avt-230cc-4X4-Motorcycles-Vehicle-Beach-Mini-Jeep-for-Sale-with-Ce.webp' },
     { _id: 3, name: 'Thong Hoang', email: 'thongdzpro100@gmail.com', username: 'User' },
     { _id: 4, name: 'Trần Anh', email: 'tran.anh@gmail.com', username: 'User' },
     { _id: 5, name: 'Jane Doe', email: 'jane.doe@example.com', username: 'User' },
@@ -48,6 +54,32 @@ const Users = () => {
     { _id: 6, name: 'John Smith', email: 'john.smith@example.com', username: 'User' },
     { _id: 7, name: 'Mary Johnson', email: 'mary.j@example.com', username: 'Moderator' },
   ];
+
+  const { memberData } = useSelector((state) => state.allMember);
+
+
+  // const dispatch = useDispatch();
+  // const { accesstoken } = useSelector(state => state.auth)
+
+  // const refreshToken = useRefreshToken();
+  // useEffect(() => {
+  //   const getAllMembers = async (token) => {
+  //     try {
+  //       await dispatch(fetchAllMembers({ accesstoken: token })).unwrap();
+  //     } catch (error) {
+  //       if (error?.err === 2) {
+  //         const newToken = await refreshToken();
+  //         return getAllMembers(newToken);
+  //       }
+  //       toast.error(error.response?.data.message || 'Unable to load project information!');
+  //     }
+  //   };
+
+  //   getAllMembers(accesstoken);
+
+  // }, [dispatch, accesstoken]);
+
+  console.log(memberData);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);

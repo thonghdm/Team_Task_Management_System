@@ -28,8 +28,8 @@ export const formatDateRange = (startDate, endDate) => {
   return `${formattedStartFullDate} – ${formattedEndFullDate}`;
 };
 
-// Sử dụng
-const startDate = "2024-11-08T07:33:03.585Z";
-const endDate = "2024-11-30T07:33:03.585Z";
+// // Sử dụng
+// const startDate = "2024-11-08T07:33:03.585Z";
+// const endDate = "2024-11-30T07:33:03.585Z";
 
-console.log(formatDateRange(startDate, endDate)); // Output: "8 – Nov 30"
+// console.log(formatDateRange(startDate, endDate)); // Output: "8 – Nov 30"

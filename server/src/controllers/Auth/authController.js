@@ -23,7 +23,9 @@ const authController = {
             res.status(200).json({
                 err: response.err,
                 msg: response.msg,
-                accesstoken: response.accesstoken || null
+                accesstoken: response.accesstoken || null,
+                is_active: response.is_active || null,
+                isAdmin: response.isAdmin ?? null
             })
 
         } catch (error) {
