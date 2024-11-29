@@ -8,7 +8,7 @@ export const fetchAllMembers = createAsyncThunk(
   async ({ accesstoken }, thunkAPI) => {
     try {
       const data = await getAllMembers(accesstoken);
-      return data;
+      return data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }

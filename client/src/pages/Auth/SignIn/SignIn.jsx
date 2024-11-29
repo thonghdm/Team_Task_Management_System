@@ -24,7 +24,7 @@ export default function SignIn() {
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
     const [password, setPassword] = useState("Admin#123");
-    
+
     const [showPassword, setShowPassword] = useState(false);
     const [email, setGmail] = useState("thongdzprooo100@gmail.com");
 
@@ -60,12 +60,16 @@ export default function SignIn() {
         if (validateInputs()) {
             const result = await dispatch(loginWithEmail(email, password));
             if (result) {
-                if(result?.data?.userWithToken?.isAdmin===true) {
-                    navigate('/admin');
-                }else{
-                    navigate('/board/home/1');
+                if (result?.data?.userWithToken?.is_active === false)
+                    navigate('/error')
+                else {
+                    if (result?.data?.userWithToken?.isAdmin === true) {
+                        navigate('/admin/users/101');
+                    } else {
+                        navigate('/board/home/1');
+                    }
                 }
-                
+
             }
         }
     };
@@ -168,7 +172,7 @@ export default function SignIn() {
                             }}
                             color={passwordError ? 'error' : 'primary'}
                         />
-                        {error && <FormLabel sx={{paddingLeft:2, fontSize: 12, color: '#d32f2f' }}>The email address or password you entered isn't connected to an account</FormLabel>}
+                        {error && <FormLabel sx={{ paddingLeft: 2, fontSize: 12, color: '#d32f2f' }}>The email address or password you entered isn't connected to an account</FormLabel>}
 
                     </FormControl>
                     <Button type="submit" fullWidth variant="contained">

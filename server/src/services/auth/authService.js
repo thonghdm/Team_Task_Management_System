@@ -22,7 +22,9 @@ const loginSuccessService = (id, tokenLogin) => new Promise(async (resolve, reje
                 err: 0,
                 msg: 'OK',
                 accesstoken,
-                refreshToken
+                refreshToken,
+                is_active: user?.is_active,
+                isAdmin: user?.isAdmin
             })
         } else {
             resolve({
