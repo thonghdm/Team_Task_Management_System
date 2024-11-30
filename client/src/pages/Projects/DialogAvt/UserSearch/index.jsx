@@ -24,7 +24,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useParams } from 'react-router-dom';
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
-
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 // Custom styles for Autocomplete
 const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
     '& .MuiOutlinedInput-root': {
@@ -245,7 +245,8 @@ const UserSearch = () => {
             isRole: inviteRole,
             memberId: user._id,
             projectId: projectId,
-            user_invite: userData._id
+            user_invite: userData._id,
+            username: user.username,
         }));
 
         if (usersWithRole.some(user => projectData?.project?.membersId.includes(user.memberId))) {
@@ -270,7 +271,18 @@ const UserSearch = () => {
 
         const inviteMember = async (token) => {
             try {
+
                 await dispatch(inviteMemberAsync({ accesstoken: token, inviteData: usersWithRole })).unwrap();
+                await dispatch(createAuditLog_project({
+                    accesstoken: token,
+                    data: {
+                        project_id: projectId,
+                        action: 'Add',
+                        entity: 'Member',
+                        user_id: userData?._id,
+                        old_value: usersWithRole.map(user => user.username).join(', ')
+                    }
+                }));
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
                 await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                 handleSuccess();

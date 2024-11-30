@@ -77,7 +77,6 @@ const Overview = () => {
   // const isAdmin = (members, userId) => {
   //   return members.some(member => member?.isRole === "Admin" && member?.memberId?._id === userId);
   // };
-  // console.log("isAdmin", isAdmin(members?.members, userData?._id));
   return (
     <>
       <Paper className="scrollable" elevation={3} sx={{ maxHeight: 500, p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>

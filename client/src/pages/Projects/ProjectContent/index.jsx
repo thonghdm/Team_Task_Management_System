@@ -11,6 +11,7 @@ import Calendar from '~/pages/Projects/Content/Calendar';
 import Timeline from '~/pages/Projects/Content/Timeline';
 
 import DashBoard from '~/pages/Projects/Content/DashBoard';
+import AuditLog from '~/pages/Projects/Content/AuditLog';
 const ProjectContent = () => {
     const theme = useTheme();
     return (
@@ -31,6 +32,7 @@ const ProjectContent = () => {
             <Route path="project-timeline" element={<Timeline />} />
             
             <Route path="project-dashboard" element={<DashBoard />} />
+            <Route path="audit-log" element={<AuditLog auditLogs={mockData.auditLogs} />} />
         </Routes>
         // </Paper>
     );

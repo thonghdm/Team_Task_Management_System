@@ -23,6 +23,7 @@ import { useRefreshToken } from '~/utils/useRefreshToken'
 import { fetchFileByIdTask, updateFileByIdTaskThunk } from '~/redux/project/uploadFile-slice';
 import { useDispatch, useSelector } from 'react-redux'
 import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { fetchTaskById } from '~/redux/project/task-slice';
 const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
   const [link, setLink] = useState('');
@@ -69,9 +70,21 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
                     old_value: fileData?.file?.name
                   }
                   }));
-          await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+          const tastData = await dispatch(fetchTaskById({ accesstoken: token, taskId }));
           await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
+          await dispatch(createAuditLog_project({
+            accesstoken: token,
+            data: {
+              project_id: tastData?.payload?.project_id?._id,
+              action: 'Update',
+              entity: 'Task',
+              user_id: userData?._id,
+              task_id: taskId,
+            }}))
           toast.success("File upload successfully");
+          setLink('');
+          setDisplayText('');
+          setFile(null);
           onClose();
         } catch (error) {
           throw error; // Rethrow error nếu không phải error code 2

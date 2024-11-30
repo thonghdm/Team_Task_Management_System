@@ -12,7 +12,7 @@ import { getListIDProjectDetails } from '~/utils/getListIDProjectDetails';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import './styles.css'; // Ensure this import is correct
 import dayjs from 'dayjs';
-
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { getRandomColor } from '~/utils/radomColor';
 
 
@@ -104,8 +104,20 @@ const DialogButtonAdd = ({ open, onClose }) => {
         const createTask = async (token) => {
             try {
                 const response = await createNewTask(token, taskData);
+                await dispatch(createAuditLog_project({
+                    accesstoken: token,
+                    data: {
+                        project_id: projectId,
+                        action: 'Create',
+                        entity: 'Task',
+                        user_id: userData?._id,
+                        task_id: response?.task?._id,
+                    }
+                })
+                )
                 setCheckState(!checkState);
                 handleSuccess(response.message);
+
             } catch (error) {
                 if (error.response?.status === 401) {
                     const newToken = await refreshToken();
@@ -147,6 +159,17 @@ const DialogButtonAdd = ({ open, onClose }) => {
         const createList = async (token) => {
             try {
                 const response = await createNew(token, listData);
+                const res = await dispatch(createAuditLog_project({
+                    accesstoken: token,
+                    data: {
+                        project_id: projectId,
+                        action: 'Create',
+                        entity: 'List',
+                        user_id: userData?._id,
+                        list_id: response?.list?._id,
+                    }
+                })
+                )
                 dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
                 handleSuccess(response.message);
             } catch (error) {

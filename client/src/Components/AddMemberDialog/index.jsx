@@ -20,7 +20,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material/styles';
 import {createAuditLog} from '~/redux/project/auditLog-slice';
-
+import {createAuditLog_project} from '~/redux/project/auditlog-slice/auditlog_project';
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom';
@@ -303,6 +303,16 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
                                         old_value: userInvite.map(user => user.user_name).join(','),
                                         user_id:userData?._id} }));
                             await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                            await dispatch(createAuditLog_project({
+                                accesstoken: token,
+                                data: {
+                                  project_id: projectId,
+                                  action: 'Update',
+                                  entity: 'Task',
+                                  user_id: userData?._id,
+                                  task_id: taskId,
+                                }}))
+                              await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     }
                     await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();

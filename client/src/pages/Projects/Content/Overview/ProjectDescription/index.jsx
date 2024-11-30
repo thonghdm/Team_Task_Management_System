@@ -18,7 +18,7 @@ import { updateProjectThunk } from '~/redux/project/project-slice';
 import { createAuditLog } from '~/redux/project/auditLog-slice';
 
 import { updateAll } from '~/apis/User/userService'
-
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true, context, taskId = null, commentID = "" }) => {
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
@@ -81,19 +81,10 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 }
                 throw new Error('Comment creation failed');
               }
-              await dispatch(createAuditLog({ 
-                accesstoken: token, 
-                data: { task_id: taskId, 
-                        action:'Create', 
-                        entity:'Comment', 
-                        old_value: content,
-                        user_id:userData?._id} }));
-            await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-              await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               setIsEditing(false);
             } catch (error) {
-              console.log("error bị lỗi ở đây nè", error);
               throw error; // Rethrow error nếu không phải error code 2
             }
           };
@@ -123,7 +114,16 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                         new_value: tempContent,
                         user_id:userData?._id} }));
               await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-              await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+              await dispatch(createAuditLog_project({
+                accesstoken: token,
+                data: {
+                  project_id: projectId,
+                  action: 'Update',
+                  entity: 'Task',
+                  user_id: userData?._id,
+                  task_id: taskId,
+                }}))
+              await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               setContent(tempContent);
               setIsEditing(false);
 
@@ -171,7 +171,16 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                         old_value: content,
                         user_id:userData?._id} }));
               await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-              await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+              await dispatch(createAuditLog_project({
+                accesstoken: token,
+                data: {
+                  project_id: projectId,
+                  action: 'Update',
+                  entity: 'Task',
+                  user_id: userData?._id,
+                  task_id: taskId,
+                }}))
+              await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               handleSuccess();
             } catch (error) {
               throw error;
@@ -211,6 +220,14 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 }
                 throw new Error('Update description project failed');
               }
+              await dispatch(createAuditLog_project({
+                accesstoken: token,
+                data: {
+                  project_id: projectId,
+                  action: 'Update',
+                  entity: 'Description',
+                  user_id: userData?._id,
+                }}))
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               handleSuccess();
             } catch (error) {
