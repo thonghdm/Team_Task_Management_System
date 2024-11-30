@@ -52,6 +52,7 @@ const authControllerRegister = {
     verifyEmail: async (req, res) => {
         try {
             const result = await authServiceRegister.verifyEmail(req.body)
+            console.log('resulttt', result)
             if (result.error) {
                 return res.status(400).json({ error: result.error })
             }

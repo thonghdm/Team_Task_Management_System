@@ -1,5 +1,28 @@
 const authService = require('~/services/auth/authService')
 const authController = {
+    resetPasswordOTP: async (req, res) => {
+        try {
+            const { email } = req.body
+            console.log(email)
+            if (!email) {
+                return res.status(400).json({
+                    err: 1,
+                    msg: 'Missing inputs'
+                })
+            }
+            let response = await authService.resetPasswordOTPService(email)
+            console.log(response)
+            res.status(200).json({
+                err: response.err,
+                msg: response.msg
+            })
+        } catch (error) {
+            res.status(500).json({
+                err: -1,
+                msg: 'Fail at reset password: ' + error.message
+            })
+        }
+    },
     loginSuccess: async (req, res) => {
         const { id, tokenLogin } = req.body
         try {

@@ -94,6 +94,7 @@ export default function SignUp() {
         if (validateInputs()) {
             try {
                 const res=await dispatch(registerWithEmail(name, email, password));
+                console.log('registerWithEmail response:', res);
                 if(res.success===true){
                     setIsSignedUp(true);
                     navigate('/otp', { state: { email, typeOtp } }); // Pass email to OTP page

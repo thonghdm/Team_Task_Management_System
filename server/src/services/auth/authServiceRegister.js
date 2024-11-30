@@ -36,6 +36,35 @@ const isStrongPassword = (password) => {
     return hasMinimumLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar
 }
 const authServiceRegister = {
+    forgotPassword: async (userData) => {
+        try {
+            const user = await User.findOne({ email: userData.email })
+            if (!user) {
+                return { error: 'User not found' }
+            }
+            const otp = generateOTP()
+            user.otp_code = otp
+            user.otp_expired = new Date(Date.now() + 600000) // 60s
+            await user.save()
+            const emailOptions = {
+                email: user.email,
+                subject: 'OTP Verification',
+                message: `Your OTP code is ${otp}`
+            }
+            try {
+                await sendEmail(emailOptions)
+                console.log('Email sent successfully!')
+            } catch (error) {
+                console.error('Error sending email:', error)
+            }
+            // eslint-disable-next-line no-unused-vars
+            const { password, otp_code, ...userWithoutPasswordOTP } = user._doc
+            return { user: userWithoutPasswordOTP }
+        } catch (error) {
+            console.error('Forgot password error:', error)
+            return { error: 'An error occurred during forgot password' }
+        }
+    },
     loginUser: async (userData) => {
         try {
             const user = await User.findOne({ email: userData.email })
@@ -98,12 +127,14 @@ const authServiceRegister = {
                 password: hashed,
                 username: username,
                 otp_code: otp,
-                otp_expired: new Date(Date.now() + 60000) // 60s
+                otp_expired: new Date(Date.now() + 600000), // 60s
+                otp_type: 'register'
             })
 
             const savedUser = await newUser.save()
             // eslint-disable-next-line no-unused-vars
             const { password, otp_code, ...userWithoutPasswordOTP } = savedUser._doc
+            console.log(userWithoutPasswordOTP)
             const emailOptions = {
                 email: savedUser.email, // Địa chỉ email người nhận
                 subject: 'OTP Verification', // Tiêu đề email
@@ -125,7 +156,7 @@ const authServiceRegister = {
         try {
             const user = await User.findOneAndUpdate(
                 { email: userData.email },
-                { otp_code: generateOTP(), otp_expired: new Date(Date.now() + 60000) },
+                { otp_code: generateOTP(), otp_expired: new Date(Date.now() + 600000) },
                 { new: true }
             )
             if (!user) {
@@ -159,9 +190,6 @@ const authServiceRegister = {
             const OTPExpired = new Date() > new Date(user.otp_expired)
             if (user.otp_code !== userData.otp_code || OTPExpired) {
                 return { error: 'Invalid OTP code' }
-            }
-            if (user.is_verified) {
-                return { error: 'Email already verified' }
             }
             user.otp_code = ''
             user.otp_expired = ''

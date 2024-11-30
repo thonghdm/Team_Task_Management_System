@@ -2,6 +2,9 @@ const User = require('~/models/user') // Import the Mongoose user model
 const jwt = require('jsonwebtoken')
 const token = require('~/utils/generateToken')
 const { v4: uuidv4 } = require('uuid')
+import sendEmail from '~/utils/sendEmail'
+import generateOTP from '~/utils/generateOTP'
+
 require('dotenv').config()
 
 // eslint-disable-next-line no-async-promise-executor
@@ -91,6 +94,40 @@ const getUserService = (id) => new Promise((resolve, reject) => {
         reject(error)
     }
 })
+const resetPasswordOTPService = (email) => new Promise((resolve, reject) => {
+    (async () => {
+        try {
+            const user = await User.findOne({ email })
+            console.log(user)
+            if (!user) {
+                return resolve({
+                    err: 1,
+                    msg: 'Email not found'
+                })
+            }
+            const otp = generateOTP()
+            user.otp_code = otp
+            user.otp_expired = new Date(Date.now() + 600000) // 60s
+            user.otp_type = 'reset_password'
+            await user.save()
+            await sendEmail({
+                email: user.email,
+                subject: 'OTP Verification',
+                message: `Your OTP code is ${otp}`
+            })
+            resolve({
+                err: 0,
+                msg: 'OK',
+                otp
+            })
+        } catch (error) {
+            reject({
+                err: -1,
+                msg: 'Fail at reset password service: ' + error.message
+            })
+        }
+    })()
+})
 const logoutService = (refreshToken) => new Promise((resolve, reject) => {
     (async () => {
         try {//Xóa refreshToken khỏi db
@@ -112,6 +149,7 @@ module.exports = {
     loginSuccessService,
     refreshTokenService,
     getUserService,
-    logoutService
+    logoutService,
+    resetPasswordOTPService
 }
 

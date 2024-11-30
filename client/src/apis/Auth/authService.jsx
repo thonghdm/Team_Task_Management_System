@@ -45,7 +45,17 @@ export const apiRegisterWithEmail = async (name, email, password) => {
         throw error;
     }
 };
-
+export const apiResetPassword = async (email) => {
+    try {
+        console.log('apiResetPassword response');
+        const response = await axios.post('http://localhost:5000/api/auth/otp-reset-password', { email });
+        console.log('apiResetPassword response', response);
+        return response;
+    } catch (error) {
+        console.error('Reset password error:', error.response?.data || error.message);
+        throw error;
+    }
+}
 export const apiLogOut = async () => {
     try {
         const response = await axios.get('http://localhost:5000/api/auth/logout', { withCredentials: true });
