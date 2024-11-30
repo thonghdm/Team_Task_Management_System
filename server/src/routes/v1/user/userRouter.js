@@ -14,4 +14,7 @@ router.route('/all-member')
 
 router.route('/update-all')
     .put(verifyToken, userController.updateAll)
+
+// router.route('/reset-password')
+//     .delete(verifyToken, userController.deleteAll)
 module.exports = router

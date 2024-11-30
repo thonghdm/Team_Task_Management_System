@@ -13,40 +13,7 @@ import {
 } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 
-const RecentProjects = () => {
-    const projects = [
-        {
-            name: 'E-commerce Platform',
-            members: '100',
-            owner: 'In LO',
-            color: '#2196f3'
-        },
-        {
-            name: 'Dashboard UI',
-            members: '100',
-            owner: 'âdđ minh',
-            color: '#4caf50'
-        },
-        {
-            name: 'Dashboard UI',
-            members: '100',
-            owner: 'Loas',
-            color: '#4caf50'
-        },
-        {
-            name: 'Dashboard UI',
-            members: '100',
-            owner: 'Thông HJO',
-            color: '#4caf50'
-        },
-        {
-            name: 'Dashboard UI',
-            members: '100',
-            owner: 'Thông HJO',
-            color: '#4caf50'
-        },
-    ];
-
+const RecentProjects = ({dataBigProjects}) => {
     return (
         <Card>
             <CardContent>
@@ -54,7 +21,7 @@ const RecentProjects = () => {
                     Recent Big Projects
                 </Typography>
                 <List>
-                    {projects.map((project, index) => (
+                    {dataBigProjects?.map((project, index) => (
                         <ListItem key={index} sx={{ px: 0 }}>
                             <ListItemIcon>
                                 <FolderIcon sx={{ color: project.color }} />

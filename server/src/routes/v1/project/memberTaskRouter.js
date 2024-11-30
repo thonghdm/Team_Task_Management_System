@@ -7,6 +7,6 @@ Router.route('/delete-member')
     .put(verifyToken, memberTaskController.updateMember)
 
 Router.route('/tasks/:memberId')
-    .get( memberTaskController.getMemberTasks )
+    .get(verifyToken, memberTaskController.getMemberTasks )
 
 module.exports = Router
