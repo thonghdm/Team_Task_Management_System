@@ -11,8 +11,13 @@ Router.route('/by-owner')
 Router.route('/by-member')
     .get(verifyToken, projectController.getAllByMemberId)
 
+Router.route('/all-projects')
+    .get( projectController.getAllProjects)
+
 Router.route('/:id')
     .get(verifyToken, projectController.getDetails)
     .put(verifyToken, projectController.updateProjectById)
+
+
 
 module.exports = Router

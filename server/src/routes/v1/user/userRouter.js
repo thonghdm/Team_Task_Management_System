@@ -14,8 +14,10 @@ router.route('/all-member')
 
 router.route('/update-all')
     .put(verifyToken, userController.updateAll)
+
 router.route('/change-password')
     .put(userController.changePassword)
 router.route('/change-password-profile')
     .put(userController.changePasswordProfile)
+
 module.exports = router

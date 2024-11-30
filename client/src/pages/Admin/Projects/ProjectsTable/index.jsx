@@ -16,6 +16,8 @@ import {
   Tooltip,
   Box,
   TablePagination,
+  Typography,
+  Avatar,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -29,6 +31,13 @@ import {
 
 import ProjectDetailsDialog from '~/pages/Projects/ProjectMenu/ProjectDetailsDialog';
 import DialogAvt from '~/pages/Projects/DialogAvt';
+
+import { updateProjectThunk, fetchProjectsThunk } from '~/redux/project/project-slice/index';
+import { useDispatch, useSelector } from 'react-redux'
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 
 
 const ProjectsTable = ({ projects, isArchived }) => {
@@ -48,11 +57,7 @@ const ProjectsTable = ({ projects, isArchived }) => {
         return 'default';
     }
   };
-  const team = [
-    { id: 1, name: 'Gia Huy Hồ', role: 'Owner' },
-    { id: 2, name: 'Thanh Phạm', role: 'Editor' },
-    { id: 3, name: 'Linh Nguyễn', role: 'Viewer' }
-  ];
+
 
   const handleMenuOpen = (event, project) => {
     setAnchorEl(event.currentTarget);
@@ -61,6 +66,7 @@ const ProjectsTable = ({ projects, isArchived }) => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    setSelectedProject(null);
   };
 
 
@@ -114,10 +120,59 @@ const ProjectsTable = ({ projects, isArchived }) => {
     ];
   };
 
-  const paginatedProjects = projects.slice(
+  const paginatedProjects = projects?.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
+
+
+  ////////////////////////////////
+  const refreshToken = useRefreshToken();
+  const dispatch = useDispatch();
+  const { accesstoken } = useSelector(state => state.auth)
+  const navigate = useNavigate();
+
+  const handleDeleteActive = (projectId, check) => {
+    try {
+      let data = {
+        isActive: true
+      }
+      const handleSuccess = () => {
+        toast.success(`${check} project successfully!`);
+        handleMenuClose();
+      };
+      const deleteActiveUser = async (token) => {
+        try {
+
+          if (check === "Delete") {
+            data = {
+              isActive: false,
+            }
+          }
+          const resultAction = await dispatch(updateProjectThunk({
+            accesstoken: token,
+            projectId: projectId,
+            projectData: data
+          }));
+          if (updateProjectThunk.rejected.match(resultAction)) {
+            if (resultAction.payload?.err === 2) {
+              const newToken = await refreshToken();
+              return deleteActiveUser(newToken);
+            }
+            throw new Error(`${check} project failed`);
+          }
+          await dispatch(fetchProjectsThunk({ accesstoken: token }));
+          handleSuccess();
+        } catch (error) {
+
+        }
+      };
+      deleteActiveUser(accesstoken);
+    } catch (error) {
+      toast.error(`Failed to ${check} project`);
+    }
+  };
+
 
   return (
     <Box>
@@ -133,10 +188,41 @@ const ProjectsTable = ({ projects, isArchived }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedProjects.map((project, index) => (
+            {paginatedProjects?.map((project, index) => (
               <TableRow key={index}>
-                <TableCell>{project.name}</TableCell>
-                <TableCell>{project.client}</TableCell>
+                {/* <TableCell>{project.projectName}</TableCell> */}
+
+                <TableCell>
+                  <Box sx={{ display: 'flex' }}>
+                    <Box
+                      sx={{
+                        width: 20,
+                        height: 20,
+                        marginRight: 1,
+                        backgroundColor: project?.color,
+                        borderRadius: '50%', // Makes it a circle
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)', // Adds a shadow effect
+                        border: '2px solid white' // Adds a border
+                      }}
+                    />
+                    <Typography variant="body2">{project.projectName}</Typography>
+                  </Box>
+
+                </TableCell>
+
+                <TableCell sx={{ display: 'flex' }}>
+                  <Avatar sx={{
+                    mr: 1, width: 30,
+                    height: 30,
+                    mt: "3px",
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)', // Adds a shadow effect
+                    border: '2px solid white' // Adds a border
+                  }}
+                    src={project?.ownerId?.image}
+                  />
+                  <Typography sx={{ mt: 1 }}>{project.ownerId.displayName}</Typography>
+
+                </TableCell>
                 <TableCell>
                   <Chip
                     label={project.visibility}
@@ -145,7 +231,7 @@ const ProjectsTable = ({ projects, isArchived }) => {
                   />
                 </TableCell>
                 {/* <TableCell>{project.deadline}</TableCell> */}
-                <TableCell>{project.team} members</TableCell>
+                <TableCell>{project.membersId.length} members</TableCell>
                 {/* {isArchived ? (
                   <TableCell>{project.completedDate}</TableCell>
 
@@ -202,7 +288,7 @@ const ProjectsTable = ({ projects, isArchived }) => {
       >
         {!isArchived ? (
           <Box>
-            <MenuItem onClick={handleEditProject}>
+            {/* <MenuItem onClick={handleEditProject}>
               <ListItemIcon>
                 <EditIcon fontSize="small" />
               </ListItemIcon>
@@ -213,28 +299,28 @@ const ProjectsTable = ({ projects, isArchived }) => {
                 <GroupsIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Manage Team</ListItemText>
-            </MenuItem>
+            </MenuItem> */}
             {/* <MenuItem onClick={handleMenuClose}>
               <ListItemIcon>
                 <SettingsIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Project Settings</ListItemText>
             </MenuItem> */}
-            <Divider />
-            <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+            {/* <Divider /> */}
+            <MenuItem onClick={() => handleDeleteActive(selectedProject._id, "Delete")} sx={{ color: 'error.main' }}>
               <ListItemIcon>
                 <DeleteIcon fontSize="small" sx={{ color: 'error.main' }} />
               </ListItemIcon>
-              <ListItemText>Archive Project</ListItemText>
+              <ListItemText>Delete</ListItemText>
             </MenuItem>
           </Box>
         ) : (
           <Box>
-            <MenuItem onClick={handleMenuClose}>
+            <MenuItem onClick={() => handleDeleteActive(selectedProject._id, "Active")}>
               <ListItemIcon>
-                <RestoreIcon fontSize="small" sx={{ color: '#008000	' }} />
+                <RestoreIcon fontSize="small" sx={{ color: '#27a6ab' }} />
               </ListItemIcon>
-              <ListItemText sx={{ color: '#008000	' }} >Restore Project</ListItemText>
+              <ListItemText sx={{ color: '#27a6ab' }} >Restore</ListItemText>
             </MenuItem>
             {/* <MenuItem onClick={handleMenuClose}>
               <ListItemIcon>
@@ -242,13 +328,13 @@ const ProjectsTable = ({ projects, isArchived }) => {
               </ListItemIcon>
               <ListItemText>View Details</ListItemText>
             </MenuItem> */}
-            <Divider />
-            <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+            {/* <Divider /> */}
+            {/* <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
               <ListItemIcon>
                 <DeleteIcon fontSize="small" sx={{ color: 'error.main' }} />
               </ListItemIcon>
               <ListItemText>Delete Permanently</ListItemText>
-            </MenuItem>
+            </MenuItem> */}
           </Box>
         )}
       </Menu>

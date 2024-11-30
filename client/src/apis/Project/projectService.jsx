@@ -74,6 +74,22 @@ export const updateProject = async (accesstoken, projectId, projectData) => {
 }
 
 
+export const getAllProjects = async (accesstoken) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/project/all-projects`, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        }
+        );
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
 
 
 
