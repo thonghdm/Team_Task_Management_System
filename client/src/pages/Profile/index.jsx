@@ -34,7 +34,6 @@ const ProfilePage = () => {
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [tempAvatarFile, setTempAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
-    const [tempAvatarUrl, setTempAvatarUrl] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
     useEffect(() => {
@@ -114,11 +113,11 @@ const ProfilePage = () => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            setTempAvatarFile(null);
             dispatch({
                 type: actionTypes.USER_UPDATE_SUCCESS,
                 data: { userData: response.data.response },
             });
-            setTempAvatarFile(null);
             if (previewUrl) {
                 URL.revokeObjectURL(previewUrl);
                 setPreviewUrl('');
@@ -785,7 +784,7 @@ const ProfilePage = () => {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <IconButton onClick={togglePasswordVisibility}>
-                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                            {showPassword ? <Visibility /> : <VisibilityOff />}
                                                         </IconButton>
                                                     </InputAdornment>
                                                 ),
@@ -829,7 +828,7 @@ const ProfilePage = () => {
                                             endAdornment: (
                                                 <InputAdornment position="end">
                                                     <IconButton onClick={toggleNewPasswordVisibility}>
-                                                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                                                        {showNewPassword ? <Visibility /> : <VisibilityOff />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             ),
@@ -872,7 +871,7 @@ const ProfilePage = () => {
                                             endAdornment: (
                                                 <InputAdornment position="end">
                                                     <IconButton onClick={toggleConfirmPasswordVisibility}>
-                                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                                        {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             ),
