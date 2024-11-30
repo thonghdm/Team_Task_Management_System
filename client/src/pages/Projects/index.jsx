@@ -72,6 +72,7 @@ const Projects = () => {
   const isDashedBoardActive = location.pathname.endsWith('/project-dashboard');
   const isCalendarActive = location.pathname.endsWith('/project-calendar');
   const isTimeLineActive = location.pathname.endsWith('/project-timeline');
+  const isAuditLogActive = location.pathname.endsWith('/audit-log');
   /// save task name
   const refreshToken = useRefreshToken();
   const handleSaveTitle = (newText) => {
@@ -305,7 +306,13 @@ const Projects = () => {
         >
           TimeLine
         </Button>
-
+        <Button
+          variant={isAuditLogActive ? "contained" : "text"}
+          onClick={() => navigate('audit-log')}
+          sx={{ ml: 1 }}
+        >
+          AuditLog
+        </Button>
       </Paper>
       <ProjectContent />
 

@@ -25,7 +25,6 @@ const Schedulers = ({dataScheduler}) => {
     //         )
     //         : [] // Nếu không phải mảng, gán giá trị mặc định là []
     // }));
-    // console.log(dataScheduler);
 
     return (
         <Scheduler

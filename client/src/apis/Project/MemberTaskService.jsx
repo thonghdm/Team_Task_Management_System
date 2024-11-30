@@ -9,7 +9,6 @@ export const inviteMemberTask = async (accesstoken, data) => {
             withCredentials: true
         });
         
-        console.log('Response:', response.data); // Debug log
         return response.data;
     } catch (error) {
         console.error('Error in inviteMemberTask:', error.response?.data || error);

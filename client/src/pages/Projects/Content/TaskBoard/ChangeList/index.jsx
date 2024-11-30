@@ -37,6 +37,7 @@ import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 
 import { createAuditLog} from '~/redux/project/auditLog-slice';
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 // import AnimationDone from '~/Components/AnimationDone';
 import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
 
@@ -81,8 +82,10 @@ const ChangeList = ({ open, onClose, taskId }) => {
     ///delete assignee
     const [openMember, setOpenMember] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
-    const handleDeleteMemberClick = (memberId) => {
+    const [selectedMemberName, setSelectedMemberName] = useState(null);
+    const handleDeleteMemberClick = (memberId,memberName) => {
         setSelectedMember(memberId);
+        setSelectedMemberName(memberName);
         setOpenMember(true);
     };
 
@@ -146,12 +149,14 @@ const ChangeList = ({ open, onClose, taskId }) => {
         try {
             const dataDelete = {
                 _id: selectedMember,
+                name: selectedMemberName,
                 is_active: false
             };
             const handleSuccess = () => {
                 toast.success('Delete member successfully!');
                 setOpenMember(false);
                 setSelectedMember(null);
+                setSelectedLabelName(null);
             };
             const deleteMembers = async (token) => {
                 try {
@@ -166,6 +171,23 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete members failed');
                     }
+                    await dispatch(createAuditLog({ 
+                        accesstoken: token, 
+                        data: { task_id: taskId, 
+                                action:'Delete', 
+                                entity:'Member',
+                                old_value: dataDelete?.name, 
+                                user_id:userData?._id} }));
+                    await dispatch(createAuditLog_project({
+                        accesstoken: token,
+                        data: {
+                            project_id: projectId,
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Task',
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -184,6 +206,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const handleCancelDeleteMember = () => {
         setOpenMember(false);
         setSelectedMember(null);
+        setSelectedMemberName(null);
     };
 
     // delete label
@@ -221,6 +244,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 old_value: dataDelete?.old_value, 
                                 user_id:userData?._id} }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    await dispatch(createAuditLog_project({
+                        accesstoken: token,
+                        data: {
+                            project_id: projectId,
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Task',
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
@@ -309,6 +342,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 new_value: newPriority, 
                                 user_id:userData?._id} }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    await dispatch(createAuditLog_project({
+                        accesstoken: token,
+                        data: {
+                            project_id: projectId,
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Task',
+                            user_id: userData?._id
+                        }
+                    }));
                     if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -367,6 +410,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 new_value: newStatus,
                                 user_id:userData?._id} }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    await dispatch(createAuditLog_project({
+                        accesstoken: token,
+                        data: {
+                            project_id: projectId,
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Task',
+                            user_id: userData?._id
+                        }
+                    }));
                     if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -463,6 +516,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 new_value: dayjs(newDueDate).format('MMM DD, hh:mm A'),
                                 user_id:userData?._id} }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    await dispatch(createAuditLog_project({
+                        accesstoken: token,
+                        data: {
+                            project_id: projectId,
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Task',
+                            user_id: userData?._id
+                        }
+                    }));
                     if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
                     handleSuccess();
@@ -528,6 +591,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             user_id: userData?._id
                         }
                     }));
+                    await dispatch(createAuditLog_project({
+                        accesstoken: token,
+                        data: {
+                            project_id: projectId,
+                            action: 'Leave',
+                            entity: 'Task',
+                            user_id: userData?._id,
+                            task_id: taskId
+                        }
+                    }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     handleSuccess();
                 } catch (error) {
@@ -577,7 +650,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 key={member?.memberId?._id}
                                 avatar={<Avatar sx={{ bgcolor: '#c9b458' }} src={member?.memberId?.image} />}
                                 label={member?.memberId?.displayName}
-                                onDelete={() => handleDeleteMemberClick(member?._id)}
+                                onDelete={() => handleDeleteMemberClick(member?._id, member?.memberId?.displayName)}
                                 sx={{ bgcolor: 'transparent', border: `1px solid ${theme.palette.text.secondary}` }}
                             />
                         ))}

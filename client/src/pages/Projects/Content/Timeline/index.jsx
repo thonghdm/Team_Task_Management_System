@@ -89,7 +89,6 @@ function Timeline() {
       }, [dispatch, projectId, accesstoken]);
 
     const dataScheduler = convertedDataTimeline(projectData?.project?.lists);
-    // console.log(projectData?.project?.lists)
     return (
         <Paper
             elevation={3}

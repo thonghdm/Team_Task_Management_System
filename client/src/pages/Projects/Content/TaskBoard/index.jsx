@@ -105,7 +105,6 @@ const TaskBoard = () => {
   };
 
   // const handleAddClickID = (taskId) => {
-  //   console.log(`Add clicked for handleAddClickID ${taskId}`);
   //   // Thêm logic xử lý khi click vào icon Add ở đây
   // };
 

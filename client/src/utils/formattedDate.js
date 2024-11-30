@@ -11,5 +11,4 @@ export const formatDate = (isoDate) => {
 };
 
 // const formattedEndDate = formatDate("2024-10-22T20:38:20.067+00:00");
-// console.log(formattedEndDate); // Output: "22/10/2024"
 
