@@ -34,7 +34,6 @@ const ProfilePage = () => {
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [tempAvatarFile, setTempAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
-    const [tempAvatarUrl, setTempAvatarUrl] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
     useEffect(() => {
@@ -114,11 +113,11 @@ const ProfilePage = () => {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            setTempAvatarFile(null);
             dispatch({
                 type: actionTypes.USER_UPDATE_SUCCESS,
                 data: { userData: response.data.response },
             });
-            setTempAvatarFile(null);
             if (previewUrl) {
                 URL.revokeObjectURL(previewUrl);
                 setPreviewUrl('');
@@ -749,7 +748,7 @@ const ProfilePage = () => {
                                     />
 
 
-                                    {userData.password && (
+                                    {(
                                         <TextField
                                             fullWidth
                                             variant="outlined"
@@ -785,7 +784,7 @@ const ProfilePage = () => {
                                                 endAdornment: (
                                                     <InputAdornment position="end">
                                                         <IconButton onClick={togglePasswordVisibility}>
-                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                            {showPassword ? <Visibility /> : <VisibilityOff />}
                                                         </IconButton>
                                                     </InputAdornment>
                                                 ),
@@ -804,6 +803,7 @@ const ProfilePage = () => {
                                         error={!!error.newPassword}
                                         helperText={error.newPassword}
                                         onChange={handleInputChangePass}
+                                        autoComplete="new-password"
                                         sx={{
                                             mb: 2,
                                             '& .MuiOutlinedInput-root': {
@@ -828,7 +828,7 @@ const ProfilePage = () => {
                                             endAdornment: (
                                                 <InputAdornment position="end">
                                                     <IconButton onClick={toggleNewPasswordVisibility}>
-                                                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                                                        {showNewPassword ? <Visibility /> : <VisibilityOff />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             ),
@@ -846,6 +846,7 @@ const ProfilePage = () => {
                                         onChange={handleInputChangePass}
                                         error={!!error.confirmPassword}
                                         helperText={error.confirmPassword}
+                                        autoComplete="new-password"
                                         sx={{
                                             mb: 2,
                                             '& .MuiOutlinedInput-root': {
@@ -870,7 +871,7 @@ const ProfilePage = () => {
                                             endAdornment: (
                                                 <InputAdornment position="end">
                                                     <IconButton onClick={toggleConfirmPasswordVisibility}>
-                                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                                        {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                                                     </IconButton>
                                                 </InputAdornment>
                                             ),
