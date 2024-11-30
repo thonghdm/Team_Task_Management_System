@@ -19,4 +19,6 @@ router.route('/change-password')
     .put(userController.changePassword)
 router.route('/change-password-profile')
     .put(userController.changePasswordProfile)
+router.route('/reset-password-admin')
+    .put(userController.resetPasswordfromAdmin)
 module.exports = router
