@@ -298,7 +298,6 @@ const ProfilePage = () => {
             console.log('Password change submitted', changeUserInfo, userData);
         }
     };
-    console.log('changeUserInfo', userData);
 
 
     return (

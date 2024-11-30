@@ -28,12 +28,21 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
+import { updateAll } from '~/apis/User/userService'
+import { ToastContainer, toast } from 'react-toastify';
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchAllMembers } from '~/redux/member/member-slice/index';
+
+
 const UserTable = ({ users, activeTab }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [page, setPage] = useState(0); // Current page
   const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { userData, accesstoken } = useSelector(state => state.auth)
 
   const handleMenuOpen = (event, user) => {
     setAnchorEl(event.currentTarget);
@@ -45,9 +54,55 @@ const UserTable = ({ users, activeTab }) => {
     setSelectedUser(null);
   };
 
-  const handleEditUser = (userId) => {
-    navigate(`/admin/users/101/edit-user/${userId}`);
-    handleMenuClose();
+  // const handleEditUser = (userId) => {
+  //   navigate(`/admin/users/101/edit-user/${userId}`);
+  //   handleMenuClose();
+  // };
+  const refreshToken = useRefreshToken();
+
+  const handleDeleteActive = (userId, check) => {
+    try {
+      let data = {
+        _id: userId
+      };
+
+      if (check === "Delete") {
+        data = {
+          ...data,
+          is_active: false,
+        }
+      } else {
+        data = {
+          ...data,
+          is_active: true,
+        }
+      }
+
+      const handleSuccess = () => {
+        toast.success(`${check} user successfully!`);
+        handleMenuClose();
+      };
+      const deleteUser = async (token) => {
+        try {
+          const response = await updateAll(token, data);
+          await dispatch(fetchAllMembers({ accesstoken: token })).unwrap();
+          handleSuccess();
+          dispatch({
+            type: actionTypes.USER_UPDATE_SUCCESS,
+            data: { userData: response.data.response },
+          });
+
+        } catch (error) {
+          if (error.response?.status === 401) {
+            const newToken = await refreshToken();
+            return deleteUser(newToken);
+          } throw new Error(`${check} user failed!`);
+        }
+      };
+      deleteUser(accesstoken);
+    } catch (error) {
+      toast.error(`Failed to ${check} user`);
+    }
   };
 
   const handleChangePage = (event, newPage) => {
@@ -77,12 +132,12 @@ const UserTable = ({ users, activeTab }) => {
           <TableBody>
             {paginatedUsers.map((user, index) => (
               <TableRow key={index}>
-                <TableCell sx={{display: 'flex'}}>
+                <TableCell sx={{ display: 'flex' }}>
                   <Avatar sx={{ mr: 1 }}
-                    src={user?.avatar}
+                    src={user?.image}
                   />
-                  <Typography sx={{mt:1}}>{user.name}</Typography>
-                   
+                  <Typography sx={{ mt: 1 }}>{user.displayName}</Typography>
+
                 </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.username}</TableCell>
@@ -128,12 +183,12 @@ const UserTable = ({ users, activeTab }) => {
         {activeTab === 0 ? (
           // Menu for Active Users
           <Box>
-            <MenuItem onClick={() => handleEditUser(selectedUser._id)}>
+            {/* <MenuItem onClick={() => handleEditUser(selectedUser._id)}>
               <ListItemIcon>
                 <EditIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Edit</ListItemText>
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem onClick={handleMenuClose}>
               <ListItemIcon>
                 <LockIcon fontSize="small" />
@@ -141,7 +196,7 @@ const UserTable = ({ users, activeTab }) => {
               <ListItemText>Reset Password</ListItemText>
             </MenuItem>
             <Divider />
-            <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+            <MenuItem onClick={() => handleDeleteActive(selectedUser._id, "Delete")} sx={{ color: 'error.main' }}>
               <ListItemIcon>
                 <DeleteIcon fontSize="small" sx={{ color: 'error.main' }} />
               </ListItemIcon>
@@ -151,19 +206,19 @@ const UserTable = ({ users, activeTab }) => {
         ) : (
           // Menu for Deleted Users
           <Box>
-            <MenuItem onClick={handleMenuClose} sx={{ color: 'primary.main' }}>
+            <MenuItem onClick={() => handleDeleteActive(selectedUser._id, "Active")} sx={{ color: 'primary.main' }}>
               <ListItemIcon>
                 <RestoreIcon fontSize="small" sx={{ color: 'primary.main' }} />
               </ListItemIcon>
               <ListItemText>Restore</ListItemText>
             </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+            {/* <Divider /> */}
+            {/* <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
               <ListItemIcon>
                 <DeleteForeverIcon fontSize="small" sx={{ color: 'error.main' }} />
               </ListItemIcon>
               <ListItemText>Delete Permanently</ListItemText>
-            </MenuItem>
+            </MenuItem> */}
           </Box>
         )}
       </Menu>
