@@ -19,5 +19,4 @@ router.route('/change-password')
     .put(userController.changePassword)
 router.route('/change-password-profile')
     .put(userController.changePasswordProfile)
-
 module.exports = router
