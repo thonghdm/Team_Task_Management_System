@@ -44,7 +44,7 @@ const Homes = () => {
               dispatch({
                 type: actionTypes.LOGOUT,
               });
-              navigate('/');
+              navigate('/sign-in');
             }
           }
         } else {

@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, Typography, Box, Button, Divider, Grid, TextField, Tooltip, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { Avatar, Typography, Box, Button, Divider, Grid, TextField, Tooltip, Snackbar, Alert, CircularProgress, InputAdornment, IconButton } from '@mui/material';
 import { useTheme } from '@mui/system';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiupdateUser } from '~/apis/User/userService';
 import { apiRefreshToken } from '~/apis/Auth/authService';
 import actionTypes from '~/redux/actions/actionTypes';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+
+
 
 const ProfilePage = () => {
     const theme = useTheme();
@@ -28,7 +34,7 @@ const ProfilePage = () => {
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [tempAvatarFile, setTempAvatarFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
-    const [tempAvatarUrl, setTempAvatarUrl] = useState(''); 
+    const [tempAvatarUrl, setTempAvatarUrl] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
     useEffect(() => {
@@ -123,7 +129,7 @@ const ProfilePage = () => {
             }
             showNotification('Updated information successfully!', 'success');
         } catch (error) {
-            
+
             if (error.response?.status === 401) {
                 await refreshTokenAndUpdate();
             } else {
@@ -137,9 +143,9 @@ const ProfilePage = () => {
 
     const refreshTokenAndUpdate = async () => {
         const data = new FormData();
-       if (tempAvatarFile) {
-                data.append('image', tempAvatarFile);
-            }
+        if (tempAvatarFile) {
+            data.append('image', tempAvatarFile);
+        }
         data.append('displayName', userInfo.displayName);
         data.append('jobTitle', userInfo.jobTitle);
         data.append('department', userInfo.department);
@@ -219,6 +225,81 @@ const ProfilePage = () => {
             tempAvatarFile !== null
         );
     };
+
+    ////////////////////////////////////////////////////////////////
+    const [value, setValue] = useState(0);
+
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
+
+
+    const toggleNewPasswordVisibility = () => {
+        setShowNewPassword(!showNewPassword);
+    };
+
+    const [changeUserInfo, setChangeUserInfo] = useState({
+        password: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+    const [error, setError] = useState({});
+
+    const handleInputChangePass = (e) => {
+        const { name, value } = e.target;
+        setChangeUserInfo(prev => ({ ...prev, [name]: value }));
+    };
+
+    const isStrongPassword = (password) => {
+        // Kiểm tra độ dài tối thiểu
+        const hasMinimumLength = password.length >= 8;
+        // Kiểm tra chữ hoa
+        const hasUpperCase = /[A-Z]/.test(password);
+        // Kiểm tra chữ thường
+        const hasLowerCase = /[a-z]/.test(password);
+        // Kiểm tra ký tự số
+        const hasNumber = /\d/.test(password);
+        // Kiểm tra ký tự đặc biệt
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+        return hasMinimumLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+    }
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!changeUserInfo.newPassword) newErrors.newPassword = 'New password is required';
+        if (changeUserInfo.newPassword !== changeUserInfo.confirmPassword) {
+            newErrors.confirmPassword = 'Passwords do not match';
+        }
+        if (!isStrongPassword(changeUserInfo.newPassword)) {
+            newErrors.newPassword = 'Password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special character';
+        }
+        if (!isStrongPassword(changeUserInfo.confirmPassword)) {
+            newErrors.confirmPassword = 'Password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special character';
+        }
+        setError(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmitChange = () => {
+        if (validateForm()) {
+            console.log('Password change submitted', changeUserInfo, userData);
+        }
+    };
+
+
     return (
         <>
             {/* Full page loading overlay */}
@@ -276,7 +357,7 @@ const ProfilePage = () => {
                                 height: 120,
                                 bgcolor: theme.palette.primary.main,
                                 objectFit: 'cover',
-                                mt:3
+                                mt: 3
                             }}
                         />
                     </Box>
@@ -329,258 +410,518 @@ const ProfilePage = () => {
                     )}
                 </Box>
 
-                <Grid container spacing={0} sx={{ mt: 3 }}>
-                    <Grid item xs={12} md={2} />
-                    <Grid item xs={12} md={8}>
-                        <Box sx={{
-                            p: 3,
-                            bgcolor: theme.palette.background.paper,
-                            borderRadius: 2,
-                            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
-                        }}>
-                            <Typography
-                                variant="subtitle1"
-                                sx={{
-                                    mb: 2,
-                                    color: theme.palette.text.primary
-                                }}
-                            >
-                                Giới thiệu
-                            </Typography>
-                            <Divider sx={{ mb: 2 }} />
-
-                            {/* Các TextField được custom theo theme */}
-                            <TextField
-                                fullWidth
-                                variant="outlined"
-                                label="Job Title"
-                                name="jobTitle"
-                                value={userInfo.jobTitle || ''}
-                                onChange={handleInputChange}
-                                sx={{
-                                    mb: 2,
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: theme.palette.text.primary,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: theme.palette.secondary.contrastText,
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: theme.palette.primary.main,
-                                        },
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: theme.palette.text.primary,
-                                    },
-                                    '& .MuiOutlinedInput-input': {
-                                        color: theme.palette.text.primary,
-                                    }
-                                }}
-                            />
-                            <TextField
-                                fullWidth
-                                variant="outlined"
-                                label="Department"
-                                name="department"
-                                value={userInfo.department || ''}
-                                onChange={handleInputChange}
-                                sx={{
-                                    mb: 2,
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: theme.palette.text.primary,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: theme.palette.secondary.contrastText,
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: theme.palette.primary.main,
-                                        },
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: theme.palette.text.primary,
-                                    },
-                                    '& .MuiOutlinedInput-input': {
-                                        color: theme.palette.text.primary,
-                                    }
-                                }}
-                            /><TextField
-                                fullWidth
-                                variant="outlined"
-                                label="Company"
-                                name="company"
-                                value={userInfo.company || ''}
-                                onChange={handleInputChange}
-                                sx={{
-                                    mb: 2,
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: theme.palette.text.primary,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: theme.palette.secondary.contrastText,
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: theme.palette.primary.main,
-                                        },
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: theme.palette.text.primary,
-                                    },
-                                    '& .MuiOutlinedInput-input': {
-                                        color: theme.palette.text.primary,
-                                    }
-                                }}
-                            />
-                            <TextField
-                                fullWidth
-                                variant="outlined"
-                                label="Location"
-                                name="location"
-                                value={userInfo.location || ''}
-                                onChange={handleInputChange}
-                                sx={{
-                                    mb: 2,
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: theme.palette.text.primary,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: theme.palette.secondary.contrastText,
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: theme.palette.primary.main,
-                                        },
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: theme.palette.text.primary,
-                                    },
-                                    '& .MuiOutlinedInput-input': {
-                                        color: theme.palette.text.primary,
-                                    }
-                                }}
-                            />
-                            <TextField
-                                fullWidth
-                                variant="outlined"
-                                label="Phone Number"
-                                name="phoneNumber"
-                                value={userInfo.phoneNumber || ''}
-                                onChange={handleInputChange}
-                                error={!!phoneError}
-                                helperText={phoneError}
-                                sx={{
-                                    mb: 2,
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: phoneError
-                                                ? theme.palette.error.main
-                                                : theme.palette.text.primary,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: phoneError
-                                                ? theme.palette.error.main
-                                                : theme.palette.secondary.contrastText,
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: phoneError
-                                                ? theme.palette.error.main
-                                                : theme.palette.primary.main,
-                                        },
-                                    },
-                                    '& .MuiInputLabel-root': {
-                                        color: phoneError
-                                            ? theme.palette.error.main
-                                            : theme.palette.text.primary,
-                                    },
-                                    '& .MuiOutlinedInput-input': {
-                                        color: theme.palette.text.primary,
-                                    },
-                                    '& .MuiFormHelperText-root': {
-                                        color: theme.palette.error.main,
-                                        marginLeft: 0,
-                                        marginTop: '6px',
-                                    }
-                                }}
-                            />
-
-
-                            <Divider sx={{ my: 2 }} />
-                            <Tooltip title="This is your email address">
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        color: theme.palette.text.secondary
-                                    }}
-                                >
-                                    {userInfo.email}
-                                </Typography>
-                            </Tooltip>
-
-                            {/* Buttons với style mới */}
-                            <Box sx={{
-                                mt: 3,
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                gap: 5
-                            }}>
-                                <Button
-                                    variant="outlined"
-                                    onClick={handleBacktoHomePage}
-                                    sx={{
-                                        color: theme.palette.primary.main,
-                                        borderColor: theme.palette.primary.main,
-                                        '&:hover': {
-                                            borderColor: theme.palette.primary.dark,
-                                        }
-                                    }}
-                                >
-                                    Back
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    onClick={handleSaveProfile}
-                                    sx={{
-                                        bgcolor: theme.palette.primary.main,
-                                        color: '#fff',
-                                        '&:hover': {
-                                            bgcolor: theme.palette.primary.dark,
-                                        }
-                                    }}
-                                >
-                                    Update information
-                                </Button>
-
-                            </Box>
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} md={2} />
-                </Grid>
-                <Snackbar
-                    open={openSnackbar}
-                    autoHideDuration={3000}
-                    onClose={handleCloseSnackbar}
-                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'stretch',
+                        gap: 2, // Khoảng cách giữa Tabs và nội dung
+                        height: '100vh', // Chiều cao toàn màn hình
+                        p: 2, // Padding ngoài
+                    }}
                 >
-                    <Alert
-                        onClose={handleCloseSnackbar}
-                        severity={snackbarSeverity}
-                        variant="filled"
+                    <Tabs
+                        orientation="vertical"
+                        variant="scrollable"
+                        value={value}
+                        onChange={handleChange}
                         sx={{
-                            width: '100%',
-                            bgcolor: snackbarSeverity === 'success'
-                                ? theme.palette.success.main
-                                : theme.palette.error.main,
-                            color: '#fff',
-                            '& .MuiAlert-icon': {
-                                color: '#fff'
-                            }
+                            borderRight: 1,
+                            borderColor: 'divider',
+                            minWidth: 200, // Đặt độ rộng tối thiểu
+                            '& .MuiTab-root': {
+                                alignItems: 'flex-start', // Căn lề trái
+                                color: 'text.secondary',
+                                fontWeight: 500,
+                                textTransform: 'none', // Không viết hoa
+                                fontSize: 16,
+                                '&.Mui-selected': {
+                                    color: 'primary.main', // Màu khi chọn
+                                    fontWeight: 600,
+                                    bgcolor: 'rgba(0, 0, 0, 0.04)', // Màu nền khi chọn
+                                },
+                            },
                         }}
                     >
-                        {snackbarMessage}
-                    </Alert>
-                </Snackbar>
+                        <Tab label="Introduce" />
+                        <Tab label="Change Password" />
+                    </Tabs>
+
+                    {value === 0 && (<>
+                        <Grid container spacing={0} sx={{ mt: 3 }}>
+                            <Grid item xs={12} md={2} />
+                            <Grid item xs={12} md={8}>
+                                <Box sx={{
+                                    p: 3,
+                                    bgcolor: theme.palette.background.paper,
+                                    borderRadius: 2,
+                                    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
+                                }}>
+                                    {/* <Typography
+                                        variant="subtitle1"
+                                        sx={{
+                                            mb: 2,
+                                            color: theme.palette.primary.main,
+                                            fontWeight: 500,
+                                            fontSize: 20
+                                        }}
+                                    >
+                                        Introduce
+                                    </Typography> */}
+                                    <Divider sx={{ mb: 2 }} />
+
+                                    {/* Các TextField được custom theo theme */}
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label="Job Title"
+                                        name="jobTitle"
+                                        value={userInfo.jobTitle || ''}
+                                        onChange={handleInputChange}
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: theme.palette.text.primary,
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: theme.palette.secondary.contrastText,
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                                color: theme.palette.text.primary,
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label="Department"
+                                        name="department"
+                                        value={userInfo.department || ''}
+                                        onChange={handleInputChange}
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: theme.palette.text.primary,
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: theme.palette.secondary.contrastText,
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                                color: theme.palette.text.primary,
+                                            }
+                                        }}
+                                    /><TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label="Company"
+                                        name="company"
+                                        value={userInfo.company || ''}
+                                        onChange={handleInputChange}
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: theme.palette.text.primary,
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: theme.palette.secondary.contrastText,
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                                color: theme.palette.text.primary,
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label="Location"
+                                        name="location"
+                                        value={userInfo.location || ''}
+                                        onChange={handleInputChange}
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: theme.palette.text.primary,
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: theme.palette.secondary.contrastText,
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                                color: theme.palette.text.primary,
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label="Phone Number"
+                                        name="phoneNumber"
+                                        value={userInfo.phoneNumber || ''}
+                                        onChange={handleInputChange}
+                                        error={!!phoneError}
+                                        helperText={phoneError}
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: phoneError
+                                                        ? theme.palette.error.main
+                                                        : theme.palette.text.primary,
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: phoneError
+                                                        ? theme.palette.error.main
+                                                        : theme.palette.secondary.contrastText,
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: phoneError
+                                                        ? theme.palette.error.main
+                                                        : theme.palette.primary.main,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: phoneError
+                                                    ? theme.palette.error.main
+                                                    : theme.palette.text.primary,
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                            '& .MuiFormHelperText-root': {
+                                                color: theme.palette.error.main,
+                                                marginLeft: 0,
+                                                marginTop: '6px',
+                                            }
+                                        }}
+                                    />
+
+
+                                    <Divider sx={{ my: 2 }} />
+                                    <Tooltip title="This is your email address">
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: theme.palette.text.secondary
+                                            }}
+                                        >
+                                            {userInfo.email}
+                                        </Typography>
+                                    </Tooltip>
+
+                                    {/* Buttons với style mới */}
+                                    <Box sx={{
+                                        mt: 3,
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        gap: 5
+                                    }}>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={handleBacktoHomePage}
+                                            sx={{
+                                                color: theme.palette.primary.main,
+                                                borderColor: theme.palette.primary.main,
+                                                '&:hover': {
+                                                    borderColor: theme.palette.primary.dark,
+                                                }
+                                            }}
+                                        >
+                                            Back
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            onClick={handleSaveProfile}
+                                            sx={{
+                                                bgcolor: theme.palette.primary.main,
+                                                color: '#fff',
+                                                '&:hover': {
+                                                    bgcolor: theme.palette.primary.dark,
+                                                }
+                                            }}
+                                        >
+                                            Update information
+                                        </Button>
+
+                                    </Box>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={2} />
+                        </Grid>
+                        <Snackbar
+                            open={openSnackbar}
+                            autoHideDuration={3000}
+                            onClose={handleCloseSnackbar}
+                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                        >
+                            <Alert
+                                onClose={handleCloseSnackbar}
+                                severity={snackbarSeverity}
+                                variant="filled"
+                                sx={{
+                                    width: '100%',
+                                    bgcolor: snackbarSeverity === 'success'
+                                        ? theme.palette.success.main
+                                        : theme.palette.error.main,
+                                    color: '#fff',
+                                    '& .MuiAlert-icon': {
+                                        color: '#fff'
+                                    }
+                                }}
+                            >
+                                {snackbarMessage}
+                            </Alert>
+                        </Snackbar>
+                    </>)}
+
+                    {value === 1 && (
+                        <Grid container spacing={0} sx={{ mt: 3 }}>
+                            <Grid item xs={12} md={2} />
+                            <Grid item xs={12} md={8}>
+                                <Box
+                                    sx={{
+                                        p: 3,
+                                        bgcolor: theme.palette.background.paper,
+                                        borderRadius: 2,
+                                        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
+                                    }}
+                                >
+                                    <Divider sx={{ mb: 2 }} />
+
+                                    {/* Email Field */}
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        label="Email"
+                                        name="email"
+                                        value={userInfo.email || ''}
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: theme.palette.text.primary,
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: theme.palette.secondary.contrastText,
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                        }}
+                                    />
+
+
+                                    {userData?.password && (
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            type={showPassword ? 'text' : 'password'}
+                                            label="Password"
+                                            name="password"
+                                            value={changeUserInfo.password}
+                                            error={!!error.password}
+                                            helperText={error.password}
+                                            onChange={handleInputChangePass}
+                                            sx={{
+                                                mb: 2,
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        borderColor: theme.palette.text.primary,
+                                                    },
+                                                    '&:hover fieldset': {
+                                                        borderColor: theme.palette.secondary.contrastText,
+                                                    },
+                                                    '&.Mui-focused fieldset': {
+                                                        borderColor: theme.palette.primary.main,
+                                                    },
+                                                },
+                                                '& .MuiInputLabel-root': {
+                                                    color: theme.palette.text.primary,
+                                                },
+                                                '& .MuiOutlinedInput-input': {
+                                                    color: theme.palette.text.primary,
+                                                },
+                                            }}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton onClick={togglePasswordVisibility}>
+                                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+
+                                    {/* Password Field */}
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        type={showNewPassword ? 'text' : 'password'}
+                                        label="New Password"
+                                        name="newPassword"
+                                        value={changeUserInfo.newPassword}
+                                        error={!!error.newPassword}
+                                        helperText={error.newPassword}
+                                        onChange={handleInputChangePass}
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: theme.palette.text.primary,
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: theme.palette.secondary.contrastText,
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                        }}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton onClick={toggleNewPasswordVisibility}>
+                                                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+
+                                    {/* Confirm Password Field */}
+                                    <TextField
+                                        fullWidth
+                                        variant="outlined"
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        label="Confirm Password"
+                                        name="confirmPassword"
+                                        value={changeUserInfo.confirmPassword || ''}
+                                        onChange={handleInputChangePass}
+                                        error={!!error.confirmPassword}
+                                        helperText={error.confirmPassword}
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                '& fieldset': {
+                                                    borderColor: theme.palette.text.primary,
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: theme.palette.secondary.contrastText,
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                },
+                                            },
+                                            '& .MuiInputLabel-root': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                                color: theme.palette.text.primary,
+                                            },
+                                        }}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton onClick={toggleConfirmPasswordVisibility}>
+                                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+
+                                    <Divider sx={{ mb: 2 }} />
+
+                                    {/* Submit Button */}
+                                    <Box sx={{
+                                        mt: 3,
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        gap: 5
+                                    }}>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={handleBacktoHomePage}
+                                            sx={{
+                                                color: theme.palette.primary.main,
+                                                borderColor: theme.palette.primary.main,
+                                                '&:hover': {
+                                                    borderColor: theme.palette.primary.dark,
+                                                }
+                                            }}
+                                        >
+                                            Back
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            onClick={handleSubmitChange}
+                                            sx={{
+                                                bgcolor: theme.palette.primary.main,
+                                                color: '#fff',
+                                                '&:hover': {
+                                                    bgcolor: theme.palette.primary.dark,
+                                                }
+                                            }}
+                                        >
+                                            Change Password
+                                        </Button>
+
+                                    </Box>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12} md={2} />
+                        </Grid>
+                    )}
+
+                </Box>
+
+
+
             </Box>
         </>
     );

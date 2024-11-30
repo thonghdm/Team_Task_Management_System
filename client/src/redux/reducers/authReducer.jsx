@@ -6,6 +6,8 @@ const initState = {
     accesstoken: null,
     userData: {},  // Add userData state
     error: null,
+    isAdmin: false,
+    is_active: true,
 };
 
 const authReducer = (state = initState, action) => {
@@ -18,6 +20,8 @@ const authReducer = (state = initState, action) => {
                 accesstoken: action.data.accesstoken,
                 userData: action.data.userData,  // Store user data (Google or email)
                 error: null,
+                isAdmin: action.data.isAdmin,
+                is_active: action.data.is_active,
             }
         case actionTypes.LOGIN_FAILURE:
             return {
@@ -36,6 +40,8 @@ const authReducer = (state = initState, action) => {
                 userData: action.userData || {},  // Update userData
                 typeLogin: true,
                 error: null,
+                isAdmin: action.data.isAdmin,
+                is_active: action.data.is_active,
             };
         case actionTypes.EMAIL_LOGIN_FAILURE:
             return {
@@ -61,7 +67,7 @@ const authReducer = (state = initState, action) => {
             return {
                 ...state,
                 userData: action.data.userData || {},  // Update userData
-                
+
             };
         case actionTypes.USER_UPDATE_FAILURE:
             return {
