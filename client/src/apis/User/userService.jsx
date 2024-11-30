@@ -100,6 +100,9 @@ export const apiResetPasswordfromAdmin = (accesstoken, email , password) => new 
         let response = await axios({
             method: 'put',
             url: 'http://localhost:5000/api/user/reset-password-admin',
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
             data: { email, password },
             withCredentials: true  // Set withCredentials here
         });
