@@ -43,7 +43,7 @@ const StatsGrid = () => {
     <Grid container spacing={3}>
       {stats.map((stat, index) => (
         <Grid item xs={12} sm={6} md={3} key={index}>
-          <StatsCard {...stat} background={theme.palette.background.default } />
+          <StatsCard {...stat} background={theme.palette.background.paper } />
         </Grid>
       ))}
     </Grid>

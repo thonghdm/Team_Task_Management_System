@@ -7,33 +7,36 @@ import {
   CardActions,
   TextField,
   Button,
+  InputAdornment, IconButton,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
+
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { useTheme } from '@mui/system';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+
+
+
 const AddUserButton = ({ initialUser }) => {
+  const theme = useTheme();
+  const navigate = useNavigate();
   const [user, setUser] = useState(initialUser || {
     name: '',
     email: '',
-    password: '',
+    newPassword: '',
     confirmPassword: '',
   });
+  const [error, setError] = useState({});
 
 
   const [open, setOpen] = useState(true);
-  const [userData, setUserData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  });
+
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => {
-    setOpen(false);
-    setUserData({ name: '', email: '', password: '' });
-  };
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,9 +46,69 @@ const AddUserButton = ({ initialUser }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
+
+  const toggleNewPasswordVisibility = () => {
+    setShowNewPassword(!showNewPassword);
+  };
+
+  const isStrongPassword = (password) => {
+    // Kiểm tra độ dài tối thiểu
+    const hasMinimumLength = password.length >= 8;
+    // Kiểm tra chữ hoa
+    const hasUpperCase = /[A-Z]/.test(password);
+    // Kiểm tra chữ thường
+    const hasLowerCase = /[a-z]/.test(password);
+    // Kiểm tra ký tự số
+    const hasNumber = /\d/.test(password);
+    // Kiểm tra ký tự đặc biệt
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    return hasMinimumLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+  }
+  const isValidName = (name) => /^[^\d_!@#$%^&*()=+[\]{};':"|,.<>?~`]{3,255}$/.test(name);
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!user.name) newErrors.name = 'Name is required';  // Kiểm tra tên
+    else if (!isValidName(user.name)) newErrors.name = 'Name is invalid';
+
+    if (!user.email) newErrors.email = 'Email is required';  // Kiểm tra email
+    else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(user.email)) newErrors.email = 'Email is invalid';  
+    
+    if (!user.newPassword) newErrors.newPassword = 'New password is required';
+    
+    if (user.newPassword !== user.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    if (!isStrongPassword(user.newPassword)) {
+      newErrors.newPassword = 'Password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special character';
+    }
+    
+    if (!isStrongPassword(user.confirmPassword)) {
+      newErrors.confirmPassword = 'Password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special character';
+    }
+    
+    setError(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+    console.log(user);
+  };
+
+  const handleCancel = () => {
+    navigate('/admin/users/101');
+  };
+
 
   return (
     <Card sx={{
@@ -70,7 +133,7 @@ const AddUserButton = ({ initialUser }) => {
           sx={{
             textTransform: 'none',
             borderRadius: '8px',
-            mr:2
+            mr: 2
           }}
         >
           Add User File
@@ -84,6 +147,8 @@ const AddUserButton = ({ initialUser }) => {
             label="Name"
             name="name"
             value={user.name}
+            error={!!error.name}
+            helperText={error.name}
             onChange={handleChange}
             placeholder="Điệp Thảo"
             variant="outlined"
@@ -95,35 +160,97 @@ const AddUserButton = ({ initialUser }) => {
             label="Email"
             name="email"
             value={user.email}
+            error={!!error.email}
+            helperText={error.email}
             onChange={handleChange}
-            placeholder="Nguyễn Văn"
+            placeholder="diepthao@gmail.com"
             variant="outlined"
             margin="normal"
-          />
-
-          <TextField
-            fullWidth
-            label="Password"
-            name="password"
-            type="password"
-            value={user.password}
-            onChange={handleChange}
-            placeholder="diepthaonguyenvanbmt@gmail.com"
-            variant="outlined"
-            margin="normal"
+            sx={{
+              mb: 2}}
           />
 
 
           <TextField
             fullWidth
-            label="ConfirmPassword"
+            variant="outlined"
+            type={showNewPassword ? 'text' : 'password'}
+            label="New Password"
+            name="newPassword"
+            value={user.newPassword}
+            error={!!error.newPassword}
+            helperText={error.newPassword}
+            onChange={handleChange}
+            sx={{
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: theme.palette.text.primary,
+                },
+                '&:hover fieldset': {
+                  borderColor: theme.palette.secondary.contrastText,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: theme.palette.text.primary,
+              },
+              '& .MuiOutlinedInput-input': {
+                color: theme.palette.text.primary,
+              },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={toggleNewPasswordVisibility}>
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          {/* Confirm Password Field */}
+          <TextField
+            fullWidth
+            variant="outlined"
+            type={showConfirmPassword ? 'text' : 'password'}
+            label="Confirm Password"
             name="confirmPassword"
-            type="confirmPassword"
-            value={user.confirmPassword}
+            value={user.confirmPassword || ''}
             onChange={handleChange}
-            placeholder="diepthaonguyenvanbmt@gmail.com"
-            variant="outlined"
-            margin="normal"
+            error={!!error.confirmPassword}
+            helperText={error.confirmPassword}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: theme.palette.text.primary,
+                },
+                '&:hover fieldset': {
+                  borderColor: theme.palette.secondary.contrastText,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: theme.palette.primary.main,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: theme.palette.text.primary,
+              },
+              '& .MuiOutlinedInput-input': {
+                color: theme.palette.text.primary,
+              },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={toggleConfirmPasswordVisibility}>
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
         </Box>
       </CardContent>
@@ -131,7 +258,7 @@ const AddUserButton = ({ initialUser }) => {
       <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
         <Button
           variant="outlined"
-        //   onClick={onCancel}
+          onClick={handleCancel}
           sx={{ mr: 1 }}
         >
           Cancel
