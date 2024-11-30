@@ -133,7 +133,13 @@ const UserTable = ({ users, activeTab }) => {
             {paginatedUsers.map((user, index) => (
               <TableRow key={index}>
                 <TableCell sx={{ display: 'flex' }}>
-                  <Avatar sx={{ mr: 1 }}
+                  <Avatar sx={{
+                    mr: 1, width: 30,
+                    height: 30,
+                    mt: "3px",
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)', // Adds a shadow effect
+                    border: '2px solid white' // Adds a border
+                  }}
                     src={user?.image}
                   />
                   <Typography sx={{ mt: 1 }}>{user.displayName}</Typography>

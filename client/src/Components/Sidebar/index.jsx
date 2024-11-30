@@ -143,27 +143,28 @@ const Sidebar = ({ open }) => {
 
 
   const convertBtoA = (B) => {
-    return B?.map(itemB => {
+    // Kiểm tra nếu B không phải là một mảng, trả về mảng rỗng
+    if (!Array.isArray(B)) {
+      console.error("Input B is not a valid array:", B);
+      return [];
+    }
+    
+    // Duyệt qua từng phần tử của B và chuyển đổi dữ liệu
+    return B.map(itemB => {
+      if (!itemB || !itemB.projectId) {
+        return null; // Bỏ qua phần tử không hợp lệ
+      }
+  
       return {
         ...itemB.projectId, // Lấy dữ liệu từ projectId trong B
-        _id: itemB.projectId._id, // Dữ liệu về _id của dự án
-        projectName: itemB.projectId.projectName, // Dùng projectName từ projectId
-        // // slug: itemB.projectId.slug, // Slug từ projectId
-        // // membersId: itemB.projectId.membersId, // Danh sách thành viên từ projectId
-        // listId: itemB.projectId.listId, // Danh sách listId từ projectId
-        // // visibility: itemB.projectId.visibility, // Visibility từ projectId
-        // // favorite: itemB.projectId.favorite, // Favorite từ projectId
-        // // isActive: itemB.projectId.isActive, // Trạng thái hoạt động từ projectId
-        // createdAt: itemB.projectId.createdAt, // Thời gian tạo từ projectId
-        // updatedAt: itemB.projectId.updatedAt, // Thời gian cập nhật từ projectId
-        // __v: itemB.projectId.__v, // Version từ projectId
-        // description: itemB.projectId.description, // Mô tả từ projectId
-        // color: itemB.projectId.color, // Màu sắc từ projectId
-        isStarred: itemB.isStarred, // Trạng thái yêu thích (đã đánh dấu) từ B
-        // userId: itemB.userId // Thêm userId từ B
+        _id: itemB.projectId?._id || null, // Kiểm tra nếu _id tồn tại
+        projectName: itemB.projectId?.projectName || "Unknown", // Kiểm tra nếu projectName tồn tại
+        isStarred: itemB.isStarred || false // Trạng thái yêu thích (đã đánh dấu) từ B
+        // Có thể thêm các trường khác nếu cần thiết
       };
-    });
-  }
+    }).filter(item => item !== null); // Loại bỏ các phần tử null do dữ liệu không hợp lệ
+  };
+  
 
 
   return (

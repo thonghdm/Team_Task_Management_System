@@ -31,85 +31,85 @@ const commonConfig = {
 const authConfig = {
     ...commonConfig,
     key: 'auth',
-    whitelist: ['isLoggedIn', 'typeLogin' , 'accesstoken' , 'userData']
+    whitelist: ['isLoggedIn', 'typeLogin', 'accesstoken', 'userData']
 }
 const projectsConfig = {
-    ...commonConfig, 
-    key: 'projects', 
-    whitelist: ['projects'], 
+    ...commonConfig,
+    key: 'projects',
+    whitelist: ['projects', 'loading', 'error'],
 };
 
 const projectsDetailConfig = {
-    ...commonConfig, 
-    key: 'projectDetail', 
-    whitelist: ['projectDetail'],
+    ...commonConfig,
+    key: 'projectDetail',
+    whitelist: ['projectDetail', 'loading', 'error'],
 };
 
 const memberAllDetailConfig = {
-    ...commonConfig, 
-    key: 'allMember', 
-    whitelist: ['memberData', 'loading', 'error'], 
+    ...commonConfig,
+    key: 'allMember',
+    whitelist: ['memberData', 'loading', 'error'],
 };
 
 
 const inviteMemberConfig = {
-    ...commonConfig, 
-    key: 'invite', 
-    whitelist: ['success', 'loading', 'error'], 
+    ...commonConfig,
+    key: 'invite',
+    whitelist: ['success', 'loading', 'error'],
 };
 
 const memberProjectConfig = {
-    ...commonConfig, 
-    key: 'memberProject', 
-    whitelist: ['members', 'loading', 'error'], 
+    ...commonConfig,
+    key: 'memberProject',
+    whitelist: ['members', 'loading', 'error'],
 };
 
 const taskConfig = {
     ...commonConfig,
     key: 'task',
-    whitelist: ['task'],
+    whitelist: ['task', 'loading', 'error'],
 };
 
 const commentUserConfig = {
     ...commonConfig,
     key: 'commentUser',
-    whitelist: ['commentUser'],
+    whitelist: ['commentUser', 'loading', 'error'],
 };
 
 const commentConfig = {
     ...commonConfig,
     key: 'comment',
-    whitelist: ['comment'],
+    whitelist: ['comment', 'loading', 'error'],
 };
 
 const labelConfig = {
     ...commonConfig,
     key: 'label',
-    whitelist: ['label'],
+    whitelist: ['label','loading', 'error'],
 };
 
 
 const fileConfig = {
     ...commonConfig,
     key: 'file',
-    whitelist: ['files'],
+    whitelist: ['files', 'loading', 'error'],
 };
 
 const projectThunkSliceConfig = {
     ...commonConfig,
     key: 'projectThunk',
-    whitelist: ['projectThunk'],
+    whitelist: ['project', 'loading', 'error'],
 };
 
 const starredSliceConfig = {
     ...commonConfig,
     key: 'starred',
-    whitelist: ['starred'],
+    whitelist: ['starred', 'loading', 'error'],
 };
 const auditLogSliceConfig = {
     ...commonConfig,
     key: 'auditLog',
-    whitelist: ['auditLog'],
+    whitelist: ['auditLog', 'loading', 'error'],
 };
 
 const taskInviteUserSliceConfig = {
