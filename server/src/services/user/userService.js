@@ -1,5 +1,68 @@
 const User = require('~/models/user') // Import the Mongoose user model
-
+const bcrypt = require('bcrypt')
+const changePasswordService = (email, password) => new Promise((resolve, reject) => {
+    (async () => {
+        try {
+            const salt = await bcrypt.genSalt(10)
+            const hashed = await bcrypt.hash(password, salt)
+            const user = await User.findOne({ email })
+            if (!user) {
+                return resolve({
+                    err: 4,
+                    msg: 'User not found!'
+                })
+            }
+            user.password = hashed
+            const response = await user.save()
+            resolve({
+                err: response ? 0 : 4,
+                msg: response ? 'OK' : 'User not found!',
+                response
+            })
+        } catch (error) {
+            reject({
+                err: 2,
+                msg: 'Fail at user server: ' + error.message
+            })
+        }
+    }
+    )()
+})
+const changePasswordProfileService = (email, password, newPassword) => new Promise((resolve, reject) => {
+    (async () => {
+        try {
+            const user = await User.findOne({ email})
+            if (!user) {
+                return resolve({
+                    err: 4,
+                    msg: 'User not found!'
+                })
+            }
+            const validPassword = await bcrypt.compare(password, user.password)
+            if (!validPassword) {
+                return resolve({
+                    err: 5,
+                    msg: 'Incorrect password!'
+                })
+            }
+            const salt = await bcrypt.genSalt(10)
+            const hashed = await bcrypt.hash(newPassword, salt)
+            user.password = hashed
+            const response = await user.save()
+            resolve({
+                err: response ? 0 : 4,
+                msg: response ? 'OK' : 'User not found!',
+                response
+            })
+        } catch (error) {
+            reject({
+                err: 2,
+                msg: 'Fail at user server: ' + error.message
+            })
+        }
+    }
+    )()
+})
 const getOneService = (id) => new Promise((resolve, reject) => {
     (async () => {
         try {
@@ -81,5 +144,7 @@ module.exports = {
     getOneService,
     searchUsers,
     getAllMembers,
-    updateUserByID
+    updateUserByID,
+    changePasswordService,
+    changePasswordProfileService
 }

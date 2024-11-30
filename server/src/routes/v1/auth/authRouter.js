@@ -35,4 +35,5 @@ router.post('/resend-otp', authControllerRegister.resendOTP)
 router.post('/verify-email', authControllerRegister.verifyEmail)
 router.get('/get-user', verifyToken, authController.getUser)
 router.get('/logout', authController.logout)
+router.post('/otp-reset-password', authController.resetPasswordOTP)
 module.exports = router

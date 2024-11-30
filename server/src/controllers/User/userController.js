@@ -57,8 +57,40 @@ const updateUser = async (req, res) => {
         })
     }
 }
+const changePassword = async (req, res) => {
+    console.log('req.body', req.body)
+    try {
+        if (!req.body?.email) res.status(400).json({
+            err: 1,
+            msg: 'Missing inputs'
+        })
+        let response = await userService.changePasswordService(req.body?.email, req.body?.password)
+        res.status(200).json(response)
 
+    } catch (error) {
+        res.status(500).json({
+            err: -1,
+            msg: 'Fail at user controller ' + error
+        })
+    }
+}
+const changePasswordProfile = async (req, res) => {
+    console.log('req.body', req.body)
+    try {
+        if (!req.body?.email) res.status(400).json({
+            err: 1,
+            msg: 'Missing inputs'
+        })
+        let response = await userService.changePasswordProfileService(req.body?.email, req.body?.password, req.body?.newPassword)
+        res.status(200).json(response)
 
+    } catch (error) {
+        res.status(500).json({
+            err: -1,
+            msg: 'Fail at user controller ' + error
+        })
+    }
+}
 const searchUsers = async (req, res, next) => {
     const { query } = req.query
 
@@ -107,5 +139,7 @@ module.exports = {
     updateUser,
     searchUsers,
     getAllMembers,
-    updateAll
+    updateAll,
+    changePassword,
+    changePasswordProfile
 }
