@@ -749,7 +749,7 @@ const ProfilePage = () => {
                                     />
 
 
-                                    {userData.password && (
+                                    {(
                                         <TextField
                                             fullWidth
                                             variant="outlined"
@@ -804,6 +804,7 @@ const ProfilePage = () => {
                                         error={!!error.newPassword}
                                         helperText={error.newPassword}
                                         onChange={handleInputChangePass}
+                                        autoComplete="new-password"
                                         sx={{
                                             mb: 2,
                                             '& .MuiOutlinedInput-root': {
@@ -846,6 +847,7 @@ const ProfilePage = () => {
                                         onChange={handleInputChangePass}
                                         error={!!error.confirmPassword}
                                         helperText={error.confirmPassword}
+                                        autoComplete="new-password"
                                         sx={{
                                             mb: 2,
                                             '& .MuiOutlinedInput-root': {
