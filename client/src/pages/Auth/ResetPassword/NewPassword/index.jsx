@@ -12,6 +12,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 // import { resetPassword } from '~/redux/actions/authAction';
 import { useTheme } from '@mui/material/styles';
+import { resetPassword, changePassword } from '~/redux/actions/authAction';
 
 
 export default function NewPassword() {
@@ -63,7 +64,7 @@ export default function NewPassword() {
 
         if (validatePasswords()) {
             try {
-                // await dispatch(resetPassword(password));
+                await dispatch(changePassword(email, password));
                 navigate('/sign-up-success', { state: { email } });
             } catch (error) {
                 setGeneralError(error.message || 'Failed to reset password. Please try again.');

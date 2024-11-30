@@ -80,6 +80,28 @@ const authReducer = (state = initState, action) => {
                 ...state,
                 userData: action.data.userData || {},  // Update userData
             };
+        case actionTypes.RESET_PASSWORD_SUCCESS:
+            return {
+                ...state,
+                userData: action.data.userData || {},  // Update userData
+            };
+        case actionTypes.RESET_PASSWORD_SUCCESS:
+            return {
+                ...state,
+                userData: {},  // Reset userData
+                error: action.error,
+            };
+        case actionTypes.CHANGE_PASSWORD_SUCCESS:
+            console.log('CHANGE_PASSWORD_SUCCESS action:', action.payload.userData.response);
+            return {
+                ...state,
+            };
+        case actionTypes.CHANGE_PASSWORD_FAILURE:
+            return {
+                ...state,
+                userData: {},  // Reset userData
+                error: action.error,
+            };
         default:
             return state;
     }

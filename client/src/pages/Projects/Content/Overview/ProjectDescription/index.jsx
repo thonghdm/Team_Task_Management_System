@@ -81,7 +81,28 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 }
                 throw new Error('Comment creation failed');
               }
-
+              await dispatch(createAuditLog({
+                accesstoken: token,
+                data: {
+                  task_id: taskId,
+                  action: 'Create',
+                  entity: 'Comment',
+                  old_value: null,
+                  new_value: tempContent,
+                  user_id: userData?._id
+                }
+              }));
+              await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+              await dispatch(createAuditLog_project({
+                accesstoken: token,
+                data: {
+                  project_id: projectId,
+                  action: 'Update',
+                  entity: 'Task',
+                  user_id: userData?._id,
+                  task_id: taskId,
+                }
+              }))
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               setIsEditing(false);
             } catch (error) {

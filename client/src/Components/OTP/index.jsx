@@ -74,6 +74,7 @@ const OTP = () => {
     };
     const verifyOtp = async (enteredOtp) => {
         try {
+            console.log('Email:', email, 'OTP:', enteredOtp);
             const response = await axios.post('http://localhost:5000/api/auth/verify-email', {
                 email,
                 otp_code: enteredOtp,

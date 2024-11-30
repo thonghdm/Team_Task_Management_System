@@ -6,7 +6,7 @@ import { apiupdateUser } from '~/apis/User/userService';
 import { apiRefreshToken } from '~/apis/Auth/authService';
 import actionTypes from '~/redux/actions/actionTypes';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import { changePasswordProfile } from '~/redux/actions/authAction';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
@@ -60,10 +60,6 @@ const ProfilePage = () => {
     }, [previewUrl]);
     const validatePhoneNumber = (phone) => {
         const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
-        if (!phone) {
-            setPhoneError('Phone number cannot be left blank');
-            return false;
-        }
         if (!phoneRegex.test(phone)) {
             setPhoneError('Invalid phone number');
             return false;
@@ -289,13 +285,39 @@ const ProfilePage = () => {
         if (!isStrongPassword(changeUserInfo.confirmPassword)) {
             newErrors.confirmPassword = 'Password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special character';
         }
+        if (!changeUserInfo.password) newErrors.password = 'Current password is required';
+        if (!changeUserInfo.confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
+        if (changeUserInfo.newPassword === changeUserInfo.password) {
+            newErrors.newPassword = 'New password must be different from the current password';
+        }
         setError(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmitChange = () => {
+    const handleSubmitChange = async (e) => {
         if (validateForm()) {
-            console.log('Password change submitted', changeUserInfo, userData);
+            const res = await dispatch(changePasswordProfile(userInfo.email, changeUserInfo.password, changeUserInfo.newPassword));
+            
+            // Reset form
+            setChangeUserInfo({
+                password: '',
+                newPassword: '',
+                confirmPassword: ''
+            });
+    
+            // Reset any previous error states
+            setError({});
+    
+            // Show notification
+            if (res.message ==='OK') {
+                setOpenSnackbar(true);
+                setSnackbarMessage('Password change successfully!');
+                setSnackbarSeverity('success');
+            } else {
+                setOpenSnackbar(true);
+                setSnackbarMessage(res.message || 'Wrong password!');
+                setSnackbarSeverity('error');
+            }
         }
     };
 
@@ -328,7 +350,7 @@ const ProfilePage = () => {
                             fontWeight: 500
                         }}
                     >
-                        Đang cập nhật thông tin...
+                        Updating information...
                     </Typography>
                 </Box>
             )}
@@ -678,30 +700,6 @@ const ProfilePage = () => {
                             </Grid>
                             <Grid item xs={12} md={2} />
                         </Grid>
-                        <Snackbar
-                            open={openSnackbar}
-                            autoHideDuration={3000}
-                            onClose={handleCloseSnackbar}
-                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                        >
-                            <Alert
-                                onClose={handleCloseSnackbar}
-                                severity={snackbarSeverity}
-                                variant="filled"
-                                sx={{
-                                    width: '100%',
-                                    bgcolor: snackbarSeverity === 'success'
-                                        ? theme.palette.success.main
-                                        : theme.palette.error.main,
-                                    color: '#fff',
-                                    '& .MuiAlert-icon': {
-                                        color: '#fff'
-                                    }
-                                }}
-                            >
-                                {snackbarMessage}
-                            </Alert>
-                        </Snackbar>
                     </>)}
 
                     {value === 1 && (
@@ -725,6 +723,9 @@ const ProfilePage = () => {
                                         label="Email"
                                         name="email"
                                         value={userInfo.email || ''}
+                                        inputProps={{
+                                            readOnly: true, 
+                                        }}
                                         sx={{
                                             mb: 2,
                                             '& .MuiOutlinedInput-root': {
@@ -748,7 +749,7 @@ const ProfilePage = () => {
                                     />
 
 
-                                    {userData?.password && (
+                                    {userData.password && (
                                         <TextField
                                             fullWidth
                                             variant="outlined"
@@ -759,6 +760,7 @@ const ProfilePage = () => {
                                             error={!!error.password}
                                             helperText={error.password}
                                             onChange={handleInputChangePass}
+                                            autoComplete="new-password"
                                             sx={{
                                                 mb: 2,
                                                 '& .MuiOutlinedInput-root': {
@@ -923,6 +925,30 @@ const ProfilePage = () => {
 
 
             </Box>
+            <Snackbar
+                            open={openSnackbar}
+                            autoHideDuration={3000}
+                            onClose={handleCloseSnackbar}
+                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                        >
+                            <Alert
+                                onClose={handleCloseSnackbar}
+                                severity={snackbarSeverity}
+                                variant="filled"
+                                sx={{
+                                    width: '100%',
+                                    bgcolor: snackbarSeverity === 'success'
+                                        ? theme.palette.success.main
+                                        : theme.palette.error.main,
+                                    color: '#fff',
+                                    '& .MuiAlert-icon': {
+                                        color: '#fff'
+                                    }
+                                }}
+                            >
+                                {snackbarMessage}
+                            </Alert>
+                        </Snackbar>
         </>
     );
 
