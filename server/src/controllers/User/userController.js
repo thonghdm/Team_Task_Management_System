@@ -1,4 +1,5 @@
 const userService = require('~/services/user/userService')
+import sendEmail from '~/utils/sendEmail'
 const cloudinary = require('cloudinary').v2
 const { StatusCodes } = require('http-status-codes')
 
@@ -74,6 +75,33 @@ const changePassword = async (req, res) => {
         })
     }
 }
+const resetPasswordfromAdmin = async (req, res) => {
+    console.log('req.body', req.body)
+    try {
+        if (!req.body?.email) res.status(400).json({
+            err: 1,
+            msg: 'Missing inputs'
+        })
+        let response = await userService.changePasswordService(req.body?.email, req.body?.password)
+        if (response.err) {
+            return res.status(400).json(response);
+        }
+        await sendEmail({
+            email: req.body.email, 
+            subject: 'Your Password Has Been Reset',
+            message: `Your new password is: ${req.body.password}`
+        })
+        res.status(200).json({
+            err: 0,
+            msg: 'Password reset successfully. A confirmation email has been sent.'
+        })
+    } catch (error) {
+        res.status(500).json({
+            err: -1,
+            msg: 'Fail at user controller ' + error
+        })
+    }
+}
 const changePasswordProfile = async (req, res) => {
     console.log('req.body', req.body)
     try {
@@ -141,5 +169,6 @@ module.exports = {
     getAllMembers,
     updateAll,
     changePassword,
-    changePasswordProfile
+    changePasswordProfile,
+    resetPasswordfromAdmin
 }
