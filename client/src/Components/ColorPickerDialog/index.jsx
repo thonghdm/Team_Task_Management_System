@@ -21,7 +21,7 @@ import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { useParams } from 'react-router-dom';
 import { createAuditLog } from '~/redux/project/auditLog-slice';
-
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 const colors = [
   '#1a5fb4', '#26a269', '#e66100', '#a51d2d', '#613583',
   '#2ec27e', '#e5a50a', '#ff7800', '#f66151', '#9141ac',
@@ -32,7 +32,7 @@ const colors = [
   '#7d6608', '#784212'
 ];
 
-const ColorPickerDialog = ({ open, onClose,taskId, userData }) => {
+const ColorPickerDialog = ({ open, onClose,taskId }) => {
   const [selectedColor, setSelectedColor] = useState('#1a5fb4');
   const [title, setTitle] = useState('');
   const theme = useTheme();
@@ -51,7 +51,7 @@ const ColorPickerDialog = ({ open, onClose,taskId, userData }) => {
   ///
   const refreshToken = useRefreshToken();
   const dispatch = useDispatch();
-  const {accesstoken } = useSelector(state => state.auth)
+  const {accesstoken, userData } = useSelector(state => state.auth)
 
   const handleSubmit = () => {
     try{
@@ -83,6 +83,16 @@ const ColorPickerDialog = ({ open, onClose,taskId, userData }) => {
                     old_value: labelData?.name,
                     user_id:userData?._id} }));
           await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+          await dispatch(createAuditLog_project({
+            accesstoken: token,
+            data: {
+              project_id: projectId,
+              action: 'Update',
+              entity: 'Task',
+              user_id: userData?._id,
+              task_id: taskId,
+            }}))
+          await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
           await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
           toast.success("Label created successfully");
           handleClose();

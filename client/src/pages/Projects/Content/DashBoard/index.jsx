@@ -81,7 +81,6 @@ function DashBoard() {
     };
   }, [dispatch, projectId, accesstoken]);
 
-  // console.log(projectData?.project?.lists);
   const icons = [<AssignmentIcon />, <GroupIcon />, <CheckCircleIcon />, <TimelineIcon />];
 
   const dataTaskDetails = transformDataTaskDetails(projectData?.project?.lists);

@@ -18,11 +18,9 @@ const Note = () => {
     //                 data: { typeLogin: true, userData: response.data.response },
     //             });
     //         } catch (error) {
-    //             console.log(error);
     //         }
     //     };
     //     fetchUser();
-    //     console.log(userData);
     // }, [hasFetchedUser]);
 
     return (

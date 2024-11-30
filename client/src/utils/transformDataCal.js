@@ -185,5 +185,4 @@ export const transformDataCal = (tasks) => {
 //     }
 //   ]);
   
-//   console.log(duLieuDuAn);
   

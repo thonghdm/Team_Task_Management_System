@@ -19,7 +19,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 
 import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { fetchTaskById } from '~/redux/project/task-slice';
+import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 // Styled components
 const StyledMenu = styled(Menu)(({ theme }) => ({
     '& .MuiPaper-root': {
@@ -51,7 +53,7 @@ const DeleteMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 
-const FileManagementDialog = ({ fileManagement, userData, taskId }) => {
+const FileManagementDialog = ({ fileManagement, taskId }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -86,7 +88,7 @@ const FileManagementDialog = ({ fileManagement, userData, taskId }) => {
     /// Delete file
     const refreshToken = useRefreshToken();
     const dispatch = useDispatch();
-    const { accesstoken } = useSelector(state => state.auth)
+    const { accesstoken, userData } = useSelector(state => state.auth)
 
     const handleDelete = (fileId) => {
         try {
@@ -107,6 +109,7 @@ const FileManagementDialog = ({ fileManagement, userData, taskId }) => {
                         }
                         throw new Error('File delete failed');
                     }
+                    
                     await dispatch(createAuditLog({ 
                         accesstoken: token, 
                         data: { task_id: taskId, 
@@ -115,7 +118,17 @@ const FileManagementDialog = ({ fileManagement, userData, taskId }) => {
                                 user_id:userData?._id,
                                 old_value: fileManagement?.originalName
                             } }));
-                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    const taskdata = await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+
+                    await dispatch(createAuditLog_project({
+                        accesstoken: token,
+                        data: {
+                          project_id: taskdata?.payload?.project_id?._id,
+                          action: 'Update',
+                          entity: 'Task',
+                          user_id: userData?._id,
+                          task_id: taskId,
+                        }}))
                     await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
                     handleClose();
                     toast.success("File delete successfully");
