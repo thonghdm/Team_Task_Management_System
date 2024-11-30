@@ -53,7 +53,6 @@ const Projects = () => {
 
   }, [dispatch, accesstoken]);
 
-  console.log(project?.projects);
 
   const separateActiveInactiveProjects = (projects) => {
     const activeProjects = projects?.filter(project => project?.isActive);

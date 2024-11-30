@@ -18,35 +18,9 @@ import {
   Legend 
 } from 'recharts';
 
-const MemberStatistics = () => {
+const MemberStatistics = ({statisticsMember}) => {
   const [timeRange, setTimeRange] = useState('7days');
-
-  // Data for last 7 days
-  const weeklyData = [
-    { date: '19 Nov', newMembers: 3, },
-    { date: '20 Nov', newMembers: 5},
-    { date: '21 Nov', newMembers: 2},
-    { date: '22 Nov', newMembers: 4},
-    { date: '23 Nov', newMembers: 6},
-    { date: '24 Nov', newMembers: 3},
-    { date: '25 Nov', newMembers: 4}
-  ];
-
-  // Data for last month
-  const monthlyData = [
-    { date: 'Week 1', newMembers: 12},
-    { date: 'Week 2', newMembers: 15},
-    { date: 'Week 3', newMembers: 18},
-    { date: 'Week 4', newMembers: 14}
-  ];
-
-  // Data for last 3 months
-  const quarterlyData = [
-    { date: 'Sep', newMembers: 45, activeMembers: 38 },
-    { date: 'Oct', newMembers: 52, activeMembers: 45 },
-    { date: 'Nov', newMembers: 59, activeMembers: 50 }
-  ];
-
+  
   const handleTimeRangeChange = (event, newRange) => {
     if (newRange !== null) {
       setTimeRange(newRange);
@@ -56,13 +30,13 @@ const MemberStatistics = () => {
   const getDataForRange = () => {
     switch (timeRange) {
       case '7days':
-        return weeklyData;
+        return statisticsMember.weeklyData;
       case '1month':
-        return monthlyData;
+        return statisticsMember.monthlyData;
       case '3months':
-        return quarterlyData;
+        return statisticsMember.quarterlyData;
       default:
-        return weeklyData;
+        return statisticsMember.weeklyData;
     }
   };
 

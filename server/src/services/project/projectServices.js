@@ -313,7 +313,15 @@ const updateProjectById = async (projectId, reqBody) => {
 const getAllProjects = async () => {
     try {
         const projects = await Project.find() // Fetch all projects
-            .populate('ownerId', 'displayName image') // Populate ownerId field')
+            .populate('ownerId', 'displayName image createdAt') // Populate ownerId field
+            .populate({
+                path: 'listId',
+                select: 'task_id createdAt is_active',
+                populate: {
+                    path: 'task_id',
+                    select: 'name createdAt', // Adjust the fields you want to populate from task_id
+                }
+            })
         return projects
     } catch (error) {
         throw new Error('Error fetching projects: ' + error.message)

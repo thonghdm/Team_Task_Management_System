@@ -54,7 +54,7 @@ const searchUsers = async (query) => {
 const getAllMembers = async () => {
     try {
         const user = await User.find()
-            .select('_id email username displayName image isAdmin is_active')
+            .select('_id email username displayName image isAdmin is_active createdAt')
         return user
     } catch (error) {
         throw new Error(`Error fetching user: ${error.message}`)
