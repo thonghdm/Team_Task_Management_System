@@ -68,8 +68,21 @@ const projectController = {
         } catch (error) {
             next(error)
         }
-    }
+    },
+    getAllProjects: async (req, res, next) => {
+        try {
+            // Fetch all projects from the service layer
+            const projects = await projectService.getAllProjects()
 
+            // Respond with the list of projects
+            res.status(StatusCodes.OK).json({
+                projects,
+                message: 'GET all projects successfully'
+            })
+        } catch (error) {
+            next(error) // Pass error to global error handler
+        }
+    }
 }
 
 module.exports = projectController

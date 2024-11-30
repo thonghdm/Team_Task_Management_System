@@ -247,4 +247,15 @@ const updateProjectById = async (projectId, reqBody) => {
         throw new Error(`Failed to update project: ${error.message}`)
     }
 }
-module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId, updateProjectById }
+
+const getAllProjects = async () => {
+    try {
+        const projects = await Project.find() // Fetch all projects
+            .populate('ownerId', 'displayName image') // Populate ownerId field')
+        return projects
+    } catch (error) {
+        throw new Error('Error fetching projects: ' + error.message)
+    }
+}
+
+module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId, updateProjectById, getAllProjects }
