@@ -33,7 +33,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchAllMembers } from '~/redux/member/member-slice/index';
-
+import {apiResetPasswordfromAdmin} from '~/apis/User/userService'
 
 const UserTable = ({ users, activeTab }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -43,6 +43,31 @@ const UserTable = ({ users, activeTab }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { userData, accesstoken } = useSelector(state => state.auth)
+  const generateStrongPassword= () => {
+    const length = 8; // Độ dài mật khẩu
+    const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+    const upperCaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const specialCharacters = '!@#$%^&*()-_=+[]{}|;:,.<>?/';
+    
+    const allCharacters = lowerCaseLetters + upperCaseLetters + numbers + specialCharacters;
+    
+    // Đảm bảo rằng mật khẩu chứa ít nhất một ký tự từ mỗi nhóm
+    const passwordArray = [
+        lowerCaseLetters[Math.floor(Math.random() * lowerCaseLetters.length)],
+        upperCaseLetters[Math.floor(Math.random() * upperCaseLetters.length)],
+        numbers[Math.floor(Math.random() * numbers.length)],
+        specialCharacters[Math.floor(Math.random() * specialCharacters.length)],
+    ];
+
+    // Tạo phần còn lại của mật khẩu (tổng độ dài là 8 ký tự)
+    for (let i = passwordArray.length; i < length; i++) {
+        passwordArray.push(allCharacters[Math.floor(Math.random() * allCharacters.length)]);
+    }
+
+    // Trộn các ký tự trong mảng mật khẩu để tạo độ ngẫu nhiên
+    return passwordArray.sort(() => Math.random() - 0.5).join('');
+}
 
   const handleMenuOpen = (event, user) => {
     setAnchorEl(event.currentTarget);
@@ -104,7 +129,31 @@ const UserTable = ({ users, activeTab }) => {
       toast.error(`Failed to ${check} user`);
     }
   };
+  const handleResetPassword = async(email) => {
+    const newPassword = generateStrongPassword();
+    try {
 
+      const handleSuccess = () => {
+        toast.success(`Reset password email sent successfully!`);
+        handleMenuClose();
+      };
+      const resetPassword = async (token) => {
+        try {
+          const response = await apiResetPasswordfromAdmin(token, email, newPassword);
+          handleSuccess();
+        } catch (error) {
+          if (error.response?.status === 401) {
+            const newToken = await refreshToken();
+            return resetPassword(newToken);
+          } throw new Error(`Failed to send reset password email!`);
+        }
+      };
+      resetPassword(accesstoken);
+    } catch (error) {
+      toast.error(`Failed to send reset password email`);
+    }
+    handleMenuClose();
+  };  
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -195,7 +244,7 @@ const UserTable = ({ users, activeTab }) => {
               </ListItemIcon>
               <ListItemText>Edit</ListItemText>
             </MenuItem> */}
-            <MenuItem onClick={handleMenuClose}>
+            <MenuItem onClick={() => handleResetPassword(selectedUser.email)} >
               <ListItemIcon>
                 <LockIcon fontSize="small" />
               </ListItemIcon>
