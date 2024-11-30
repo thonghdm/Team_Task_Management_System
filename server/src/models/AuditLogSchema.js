@@ -1,8 +1,15 @@
 const mongoose = require('mongoose')
 
 const AuditLogSchema = new mongoose.Schema({
+    project_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project'
+    },
+    list_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'List'
+    },
     task_id: {
-        required: true,
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Task'
     },
@@ -14,7 +21,7 @@ const AuditLogSchema = new mongoose.Schema({
     entity: {
         type: String,
         enum: ['Task', 'Comment', 'Assignee', 'Label', 'Priority', 'Status', 'Start Date',
-            'Due Date', 'Attachment', 'Description', 'Member'],
+            'Due Date', 'Attachment', 'Description', 'Member', 'List'],
         required: true
     },
     old_value: {

@@ -7,7 +7,8 @@ const ListSchema = new mongoose.Schema(
         project_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Project' },
         task_id: [{ type: mongoose.Schema.Types.ObjectId, default: [], ref: 'Task' }],
         created_by_id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
-        is_active: { type: Boolean, default: true }
+        is_active: { type: Boolean, default: true },
+        audit_log_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AuditLog' }]
     },
     { timestamps: true }
 )

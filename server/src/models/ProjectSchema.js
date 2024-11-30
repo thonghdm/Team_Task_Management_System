@@ -18,7 +18,6 @@ const ProjectSchema = new mongoose.Schema({
     },
     ownerId: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'User'
     },
     // username: { type: String, unique: true }, // Ensure username field exists
@@ -49,7 +48,13 @@ const ProjectSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
-    }
+    },
+    audit_log_id: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'AuditLog'
+        }
+    ]
 },
 {
     timestamps: true

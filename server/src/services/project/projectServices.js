@@ -197,6 +197,68 @@ const getDetailsProject = async (projectId) => {
                     as: 'tasks'
                 }
             },
+            {
+                $lookup: {
+                    from: 'auditlogs',
+                    localField: 'audit_log_id',
+                    foreignField: '_id',
+                    as: 'audit_logs',
+                    pipeline: [
+                        // Join với bảng users
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'user_id',
+                                foreignField: '_id',
+                                as: 'user_details'
+                            }
+                        },
+                        {
+                            $unwind: { path: '$user_details', preserveNullAndEmptyArrays: true }
+                        },
+                        // Join với bảng tasks
+                        {
+                            $lookup: {
+                                from: 'tasks',
+                                localField: 'task_id', // Trường task_id trong auditlogs
+                                foreignField: '_id', // Khóa ngoại _id trong tasks
+                                as: 'task_details'
+                            }
+                        },
+                        {
+                            $unwind: { path: '$task_details', preserveNullAndEmptyArrays: true }
+                        },
+                        // Join với bảng lists
+                        {
+                            $lookup: {
+                                from: 'lists',
+                                localField: 'list_id', // Trường list_id trong auditlogs
+                                foreignField: '_id', // Khóa ngoại _id trong lists
+                                as: 'list_details'
+                            }
+                        },
+                        {
+                            $unwind: { path: '$list_details', preserveNullAndEmptyArrays: true }
+                        },
+                        {
+                            $project: {
+                                task_id: 1,
+                                list_id: 1,
+                                action: 1,
+                                entity: 1,
+                                createdAt: 1,
+                                old_value: 1,
+                                'user_details._id': 1,
+                                'user_details.displayName': 1,
+                                'user_details.email': 1,
+                                'user_details.image': 1,
+                                'task_details.task_name': 1, // Thêm task_name từ bảng tasks
+                                'list_details.list_name': 1  // Thêm list_name từ bảng lists
+                            }
+                        }
+                    ]
+                }
+            },
             // Thêm các thông tin thống kê (optional)
             {
                 $addFields: {
