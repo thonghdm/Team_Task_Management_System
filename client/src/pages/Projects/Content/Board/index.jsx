@@ -22,6 +22,9 @@ import Columns from './Columns/Columns';
 import Column from './Columns/Column/Column';
 import Card from './Columns/Column/Cards/Card/Card';
 import { generatePlaceholderCard } from '~/utils/formatters';
+
+import { useTheme } from '@mui/material';
+
 // import { moveColumns } from '~/redux/thunk/board';
 // import {
 //   moveCardsInTheSameColumn,
@@ -43,6 +46,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 };
 
 const Board = ({ board }) => {
+  const theme = useTheme();
   // const dispatch = useDispatch();
   // MapOrdered
   const [orderedColumnsState, setOrderedColumnsState] = useState([]);
@@ -424,11 +428,13 @@ const Board = ({ board }) => {
           width: '100%',
           // height: (theme) => theme.customTrello.boardContentHeight,
           // marginTop: (theme) => theme.customTrello.appBarHeight,
-          bgcolor: 'primary.main',
+          bgcolor: theme.palette.background.paper,
           paddingTop: '.7rem',
           paddingBottom: '.7rem',
           maxWidth: '100vw',
-          overflowX: 'auto'
+          overflowX: 'auto',
+          mt: 2,
+          borderRadius: '10px',
         }}
       >
         <Columns columns={orderedColumnsState} />

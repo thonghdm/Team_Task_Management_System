@@ -7,6 +7,7 @@ import {
   horizontalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { toast } from 'react-toastify';
+import { useTheme } from '@mui/material';
 // import { useDispatch, useSelector } from 'react-redux';
 
 //
@@ -15,6 +16,7 @@ import Column from './Column/Column';
 // import { createNewColumn } from '~/redux/thunk/column';
 
 export default function Columns({ columns = [] }) {
+  const theme = useTheme();
   const [openFormCreateColumn, setOpenFormCreateColumn] = useState(false);
   const [valueInputNewColumn, setValueInputNewColumn] = useState('');
 //   const dispatch = useDispatch();
@@ -85,7 +87,7 @@ export default function Columns({ columns = [] }) {
           sx={{
             marginLeft: '.7rem',
             borderRadius: '8px',
-            bgcolor: '#ffffff3d',
+            bgcolor: theme.palette.primary.main,
             maxWidth: '272px',
             minWidth: '272px',
             height: 'fit-content'
@@ -98,7 +100,7 @@ export default function Columns({ columns = [] }) {
                 justifyContent: 'flex-start',
                 paddingLeft: '1rem',
                 paddingY: '.6rem',
-                color: '#fff'
+                color: theme.palette.primary.contrastText,  
               }}
               startIcon={<AddIcon />}
               onClick={toggleOpenFormCreateColumn}
@@ -107,7 +109,7 @@ export default function Columns({ columns = [] }) {
             </Button>
           ) : (
             <Box
-              sx={{ p: 1, bgcolor: '#fff', borderRadius: 2, transition: '2s' }}
+              sx={{ p: 1, bgcolor: theme.palette.background.default, borderRadius: 2, transition: '2s' }}
             >
               <form action="" onSubmit={(e) => e.preventDefault()}>
                 <TextField
@@ -121,7 +123,7 @@ export default function Columns({ columns = [] }) {
                     borderRadius: 1,
                     border: 'none',
                     outline: 'none',
-                    bgcolor: '#fff',
+                    bgcolor: theme.palette.background.paper,
                     width: '100%'
                   }}
                   value={valueInputNewColumn}
@@ -130,7 +132,7 @@ export default function Columns({ columns = [] }) {
                 />
                 <Box sx={{ marginTop: 0.5 }}>
                   <Button
-                    color="success"
+                    sx={{color:theme.palette.primary.contrastText, backgroundColor: theme.palette.primary.main}}
                     variant="contained"
                     size="small"
                     onClick={handleClickAddList}
