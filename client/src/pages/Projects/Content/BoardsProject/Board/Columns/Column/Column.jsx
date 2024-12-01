@@ -26,7 +26,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'react-toastify';
 // import { useDispatch, useSelector } from 'react-redux';
 import { useConfirm } from 'material-ui-confirm';
-
+import { useTheme } from '@mui/material';
 //
 import Cards from './Cards/Cards';
 // import { boardSelector } from '~/redux/selectors/boardSelector';
@@ -34,8 +34,9 @@ import Cards from './Cards/Cards';
 // import { deleteColumn } from '~/redux/thunk/column';
 
 export default function Column({ column }) {
-//   const board = useSelector(boardSelector);
-//   const dispatch = useDispatch();
+  //   const board = useSelector(boardSelector);
+  //   const dispatch = useDispatch();
+  const theme = useTheme();
   const confirmDeleteColumn = useConfirm();
 
   const [option, setOption] = useState(null);
@@ -112,7 +113,7 @@ export default function Column({ column }) {
       .then(() => {
         // dispatch(deleteColumn(column._id));
       })
-      .catch(() => () => {});
+      .catch(() => () => { });
   };
 
   const cardsOrdered = column?.cards;
@@ -146,13 +147,13 @@ export default function Column({ column }) {
           minWidth: '272px',
           maxWidth: '272px',
           bgcolor: (theme) =>
-            theme.palette.mode === 'dark' ? '#333643' : '#ebecf0',
+            theme.palette.mode === 'dark' ? '#3C3C3C' : '#f3f3f3',
           borderRadius: '8px',
           height: 'fit-content',
-        //   maxHeight: (theme) =>
-        //     `calc(${theme.customTrello.boardContentHeight} - ${theme.spacing(
-        //       5
-        //     )})`
+          //   maxHeight: (theme) =>
+          //     `calc(${theme.customTrello.boardContentHeight} - ${theme.spacing(
+          //       5
+          //     )})`
         }}
       >
         {/* Column header */}
@@ -204,7 +205,7 @@ export default function Column({ column }) {
                   </ListItemIcon>
                   <ListItemText>Add new card</ListItemText>
                 </MenuItem>
-                <MenuItem>
+                {/* <MenuItem>
                   <ListItemIcon>
                     <ContentCutIcon />
                   </ListItemIcon>
@@ -221,7 +222,7 @@ export default function Column({ column }) {
                     <ContentPasteIcon />
                   </ListItemIcon>
                   <ListItemText>Paste</ListItemText>
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem
                   sx={{
                     '&:hover': {
@@ -238,12 +239,12 @@ export default function Column({ column }) {
                   </ListItemIcon>
                   <ListItemText>Remove this column</ListItemText>
                 </MenuItem>
-                <MenuItem onClick={handleCloseOption}>
+                {/* <MenuItem onClick={handleCloseOption}>
                   <ListItemIcon>
                     <CloudIcon />
                   </ListItemIcon>
                   <ListItemText>Archive this column</ListItemText>
-                </MenuItem>
+                </MenuItem> */}
               </MenuList>
             </Menu>
           </Box>
@@ -261,14 +262,24 @@ export default function Column({ column }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-            //   height: (theme) => theme.customTrello.footerCardHeight,
+              //   height: (theme) => theme.customTrello.footerCardHeight,
               padding: '.5rem 1rem'
             }}
           >
-            <Button onClick={toggleOpenFormCreateCard} startIcon={<AddIcon />}>
+            <Button
+              onClick={toggleOpenFormCreateCard}
+              startIcon={<AddIcon />}
+              sx={{
+                color: theme.palette.text.primary,
+                '&:hover': {
+                  backgroundColor: 'transparent', // or 'null' if you want no background change
+                  color: theme.palette.primary.main
+                },
+              }}
+            >
               Add a Card
             </Button>
-            <Box>
+            {/* <Box>
               <IconButton
                 id="basic-button-columnCard-options"
                 aria-controls={openTemplate ? 'basic-menu-recent' : undefined}
@@ -326,14 +337,14 @@ export default function Column({ column }) {
                   </Box>
                 </MenuList>
               </Menu>
-            </Box>
+            </Box> */}
           </Box>
         ) : (
           <Box
             sx={{
               width: '100%',
               p: 1,
-              bgcolor: '#fff',
+              bgcolor: theme.palette.background.default,
               borderRadius: 2
             }}
           >
@@ -349,7 +360,7 @@ export default function Column({ column }) {
                   borderRadius: 1,
                   border: 'none',
                   outline: 'none',
-                  bgcolor: '#fff',
+                  bgcolor: theme.palette.background.paper,
                   width: '100%'
                 }}
                 data-no-dnd={true}
@@ -359,7 +370,7 @@ export default function Column({ column }) {
               />
               <Box sx={{ marginTop: 0.5 }}>
                 <Button
-                  color="success"
+                  sx={{ color: theme.palette.primary.contrastText, backgroundColor: theme.palette.primary.main }}
                   variant="contained"
                   size="small"
                   onClick={handleClickAddCard}

@@ -9,9 +9,11 @@ import {
   import { PeopleAlt, Comment, Attachment } from '@mui/icons-material';
   import { useSortable } from '@dnd-kit/sortable';
   import { CSS } from '@dnd-kit/utilities';
+  import { useTheme } from '@mui/material';
   //
   
   export default function Card({ card }) {
+    const theme = useTheme();
     const shouldShowCardActions = () => {
       return (
         !!card?.memberIds?.length ||
@@ -70,7 +72,7 @@ import {
   
           <CardContent
             sx={{
-              color: 'primary.main',
+              color: theme.palette.text.primary,
               padding: 1.5,
               '&:last-child': { padding: 1.5 }
             }}
@@ -88,15 +90,15 @@ import {
               }}
             >
               {!!card?.memberIds?.length && (
-                <Button startIcon={<PeopleAlt />}>
+                <Button sx={{color:theme.palette.text.primary}} startIcon={<PeopleAlt />}>
                   {card.memberIds?.length}
                 </Button>
               )}
               {!!card?.comments?.length && (
-                <Button startIcon={<Comment />}>{card.comments?.length}</Button>
+                <Button sx={{color:theme.palette.text.primary}} startIcon={<Comment />}>{card.comments?.length}</Button>
               )}
               {!!card?.attachments?.length && (
-                <Button startIcon={<Attachment />}>
+                <Button startIcon={<Attachment />} sx={{color:theme.palette.text.primary}}>
                   {card.attachments?.length}
                 </Button>
               )}

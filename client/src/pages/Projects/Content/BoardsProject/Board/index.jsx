@@ -17,11 +17,14 @@ import { cloneDeep, isEmpty } from 'lodash';
 // import { useDispatch } from 'react-redux';
 
 //
-import { MouseSensor, TouchSensor } from '~/pages/Projects/Content/Board/customLibs/DndKitSensor';
+import { MouseSensor, TouchSensor } from '~/pages/Projects/Content/BoardsProject/Board/customLibs/DndKitSensor';
 import Columns from './Columns/Columns';
 import Column from './Columns/Column/Column';
 import Card from './Columns/Column/Cards/Card/Card';
 import { generatePlaceholderCard } from '~/utils/formatters';
+
+import { useTheme } from '@mui/material';
+
 // import { moveColumns } from '~/redux/thunk/board';
 // import {
 //   moveCardsInTheSameColumn,
@@ -29,13 +32,14 @@ import { generatePlaceholderCard } from '~/utils/formatters';
 // } from '~/redux/thunk/column';
 
 
-import { fetchProjectDetail,resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { ToastContainer, toast } from 'react-toastify';
 
+import { transformDataBoard } from '~/utils/transformDataBoard';
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
@@ -43,6 +47,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 };
 
 const Board = ({ board }) => {
+  const theme = useTheme();
   // const dispatch = useDispatch();
   // MapOrdered
   const [orderedColumnsState, setOrderedColumnsState] = useState([]);
@@ -56,40 +61,43 @@ const Board = ({ board }) => {
   const [activeColumnBeforeRerender, setActiveColumnBeforeRerender] =
     useState(null);
 
-    useEffect(() => {
-      setOrderedColumnsState(board.columns);
-    }, [board]);
+  useEffect(() => {
+    setOrderedColumnsState(board.columns);
+  }, [board]);
 
 
 
-    ////////////////////////////////
-    const dispatch = useDispatch();
-    const { projectData} = useSelector((state) => state.projectDetail);
-    const { projectId } = useParams();
-      const { accesstoken } = useSelector(state => state.auth)
+  ////////////////////////////////
+  // const dispatch = useDispatch();
+  // const { projectData } = useSelector((state) => state.projectDetail);
+  // const { projectId } = useParams();
+  // const { accesstoken } = useSelector(state => state.auth)
 
-      const refreshToken = useRefreshToken();
-      useEffect(() => {
-          const getProjectDetail = async (token) => {
-            try {
-              await dispatch(fetchProjectDetail({ accesstoken: token, projectId })).unwrap();
-            } catch (error) {
-              if (error?.err === 2) {
-                const newToken = await refreshToken();
-                return getProjectDetail(newToken);
-              }
-              toast.error(error.response?.data.message || 'Unable to load project information!');
-            }
-          };
-      
-          getProjectDetail(accesstoken);
-      
-          return () => {
-            dispatch(resetProjectDetail());
-          };
-        }, [dispatch, projectId, accesstoken]);
-    //
-    
+  // const refreshToken = useRefreshToken();
+  // useEffect(() => {
+  //   const getProjectDetail = async (token) => {
+  //     try {
+  //       await dispatch(fetchProjectDetail({ accesstoken: token, projectId })).unwrap();
+  //     } catch (error) {
+  //       if (error?.err === 2) {
+  //         const newToken = await refreshToken();
+  //         return getProjectDetail(newToken);
+  //       }
+  //       toast.error(error.response?.data.message || 'Unable to load project information!');
+  //     }
+  //   };
+
+  //   getProjectDetail(accesstoken);
+
+  //   return () => {
+  //     dispatch(resetProjectDetail());
+  //   };
+  // }, [dispatch, projectId, accesstoken]);
+
+  // const data = transformDataBoard(projectData?.project?.lists);
+  // console.log(data);
+  //////////////////////////////////////////////////////////////
+
   // Tìm column đang chứa cardId (làm dữ liệu cards rồi mới làm cho orderCard)
   const findColumnByCardId = (cardId) => {
     return orderedColumnsState.find((column) =>
@@ -185,7 +193,7 @@ const Board = ({ board }) => {
       //       nextColumnId: nextOverColumn._id,
       //       dndOrderedColumn: nextColumns
       //     })
-      
+
       //   );
       // }
 
@@ -424,22 +432,24 @@ const Board = ({ board }) => {
           width: '100%',
           // height: (theme) => theme.customTrello.boardContentHeight,
           // marginTop: (theme) => theme.customTrello.appBarHeight,
-          bgcolor: 'primary.main',
+          bgcolor: theme.palette.background.paper,
           paddingTop: '.7rem',
           paddingBottom: '.7rem',
           maxWidth: '100vw',
-          overflowX: 'auto'
+          overflowX: 'auto',
+          mt: 2,
+          borderRadius: '10px',
         }}
       >
         <Columns columns={orderedColumnsState} />
         {/* DragOverlay đặt ngang cấp với Sortable và có item bên trong là tất cả SortItem */}
         <DragOverlay dropAnimation={dropAnimation}>
           {activeDragItemId &&
-          activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN ? (
+            activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN ? (
             <Column column={activeDragItemData} />
           ) : null}
           {activeDragItemId &&
-          activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD ? (
+            activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD ? (
             <Card card={activeDragItemData} />
           ) : null}
         </DragOverlay>

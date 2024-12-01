@@ -43,7 +43,7 @@ const getActionIcon = (action, entity) => {
     return mapping;
 };
 
-const AuditLog = ({ auditLogs }) => {
+const AuditLog = () => {
     const dispatch = useDispatch();
     const [visibleLogs, setVisibleLogs] = useState(10); // Initially show 10 logs
     const { projectData } = useSelector((state) => state.projectDetail);

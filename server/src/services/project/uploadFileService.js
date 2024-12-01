@@ -25,17 +25,20 @@ const uploadFileService = {
             const attachment = new Attachments({
                 originalName: fileData.originalName,
                 fileName: fileData.fileName,
-                url: fileData.url,
+                url: process.env.URL_SERVER + fileData.url.replace('src', ''),
                 mimeType: fileData.mimeType,
                 size: fileData.size,
                 entityId: fileData.entityId,
                 entityType: fileData.entityType,
                 uploadedBy: fileData.uploadedBy
             })
-
             await attachment.save()
-            return attachment
 
+            const getNewAttachment = await Attachments.findById(attachment._id)
+            if (getNewAttachment) {
+                await addAttachmentToTask(getNewAttachment)
+            }
+            return getNewAttachment
         } catch (error) {
             throw error
         }
@@ -65,10 +68,39 @@ const uploadFileService = {
             if (!updatedAttachment) {
                 return []
             }
+            else {
+                await deleteAttachmentToTask(updatedAttachment)
+            }
             return updatedAttachment
         } catch (error) {
             throw new Error(`Failed to update attachment: ${error.message}`)
         }
+    }
+}
+
+const addAttachmentToTask = async (attachment) => {
+    try {
+        const updatedDocument = await Task.findOneAndUpdate(
+            { _id: attachment.entityId },
+            { $push: { attachments_id: attachment._id } },
+            { returnDocument: 'after' }
+        )
+        return updatedDocument
+    } catch (error) {
+        throw new Error(`Error adding attachment to task: ${error.message}`)
+    }
+}
+
+const deleteAttachmentToTask = async (attachment) => {
+    try {
+        const updatedDocument = await Task.findOneAndUpdate(
+            { _id: attachment.entityId },
+            { $pull: { attachments_id: attachment._id } },
+            { returnDocument: 'after' }
+        )
+        return updatedDocument
+    } catch (error) {
+        throw new Error(`Error adding attachment to task: ${error.message}`)
     }
 }
 
