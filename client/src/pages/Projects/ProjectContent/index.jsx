@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import TaskBoard from '~/pages/Projects/Content/TaskBoard';
 import Overview from '~/pages/Projects/Content/Overview';
-import Board from '~/pages/Projects/Content/Board';
+import Board from '~/pages/Projects/Content/BoardsProject/Board';
 import mockData from '~/apis/mockData';
 
 import Calendar from '~/pages/Projects/Content/Calendar';
@@ -12,6 +12,8 @@ import Timeline from '~/pages/Projects/Content/Timeline';
 
 import DashBoard from '~/pages/Projects/Content/DashBoard';
 import AuditLog from '~/pages/Projects/Content/AuditLog';
+
+import BoardsProject from '~/pages/Projects/Content/BoardsProject';
 const ProjectContent = () => {
     const theme = useTheme();
     return (
@@ -26,13 +28,14 @@ const ProjectContent = () => {
                     onClose={handleGoBack} // Quay về task board khi đóng
                 />
             } /> */}
-            <Route path="project-board" element={<Board board={mockData} />} />
+            {/* <Route path="project-board" element={<Board board={mockData} />} /> */}
+            <Route path="project-board" element={<BoardsProject/>} />
             <Route path="project-calendar" element={<Calendar />} />
 
             <Route path="project-timeline" element={<Timeline />} />
             
             <Route path="project-dashboard" element={<DashBoard />} />
-            <Route path="audit-log" element={<AuditLog auditLogs={mockData.auditLogs} />} />
+            <Route path="audit-log" element={<AuditLog/>} />
         </Routes>
         // </Paper>
     );

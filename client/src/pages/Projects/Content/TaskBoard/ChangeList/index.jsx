@@ -42,11 +42,6 @@ import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_
 import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
 
 
-const activities = [
-    { avatar: "LV", name: "Luyên Lê Văn", action: "created this task", timestamp: "Yesterday at 12:34am" },
-    { avatar: "JD", name: "John Doe", action: "updated the description", timestamp: "2 hours ago" },
-    // ... more activities
-];
 const ChangeList = ({ open, onClose, taskId }) => {
     const theme = useTheme();
     const [cmt, setCMT] = useState("Write a comment");

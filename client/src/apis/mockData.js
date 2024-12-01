@@ -1,6 +1,7 @@
 // mockData.js
 
 const imgTest = "https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg";
+
 const mockData = {
     columns: [
       {
@@ -19,7 +20,7 @@ const mockData = {
                 'test attachment 02',
                 'test attachment 03'
               ],
-              cover: imgTest,
+              // cover: imgTest,
 
           },
           {
