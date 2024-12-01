@@ -12,14 +12,14 @@ import {
   TextField
 } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import BackupTableIcon from '@mui/icons-material/BackupTable';
+// import BackupTableIcon from '@mui/icons-material/BackupTable';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import AddIcon from '@mui/icons-material/Add';
-import ContentCutIcon from '@mui/icons-material/ContentCut';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+// import ContentCutIcon from '@mui/icons-material/ContentCut';
+// import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+// import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CloudIcon from '@mui/icons-material/Cloud';
+// import CloudIcon from '@mui/icons-material/Cloud';
 import CloseIcon from '@mui/icons-material/Close';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -32,6 +32,18 @@ import Cards from './Cards/Cards';
 // import { boardSelector } from '~/redux/selectors/boardSelector';
 // import { createNewCard } from '~/redux/thunk/card';
 // import { deleteColumn } from '~/redux/thunk/column';
+
+import { useDispatch, useSelector } from 'react-redux'
+import { createNewTask } from '~/apis/Project/taskService'
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { getListIDProjectDetails } from '~/utils/getListIDProjectDetails';
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { getRandomColor } from '~/utils/radomColor';
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
+import dayjs from 'dayjs';
+import { useParams } from 'react-router-dom';
+import { updateList } from '~/apis/Project/listService';
+
 
 export default function Column({ column }) {
   //   const board = useSelector(boardSelector);
@@ -50,25 +62,82 @@ export default function Column({ column }) {
   };
 
   const openOption = Boolean(option);
-  const openTemplate = Boolean(template);
+  // const openTemplate = Boolean(template);
   const handleClickOpenOption = (event) => {
     setOption(event.currentTarget);
   };
   const handleCloseOption = () => {
     setOption(null);
   };
-  const handleClickOpenTemplate = (event) => {
-    setTemplate(event.currentTarget);
-  };
-  const handleCloseTemplate = () => {
-    setTemplate(null);
-  };
-  const handleClickAddCard = () => {
+  // const handleClickOpenTemplate = (event) => {
+  //   setTemplate(event.currentTarget);
+  // };
+  // const handleCloseTemplate = () => {
+  //   setTemplate(null);
+  // };
+
+  ////////////////////////////////////////////////////////////////////////
+  // refresh token die
+  const refreshToken = useRefreshToken();
+  //
+
+  const [startDate, setStartDate] = useState(dayjs());
+  const [dueDate, setDueDate] = useState(new Date());
+  const dispatch = useDispatch();
+  const { projectId } = useParams();
+  const { accesstoken, userData } = useSelector(state => state.auth)
+
+  const handleClickAddCard = async () => {
     if (!valueInputNewCard) {
-      toast.error('Please enter a new card title');
+      toast.error('Please enter a new task title');
       return;
     }
+    const taskData = {
+      task_name: valueInputNewCard,
+      list_id: column._id,
+      created_by_id: userData._id,
+      project_id: projectId,
+      start_date: startDate,
+      end_date: dueDate,
+      color: getRandomColor()
+    };
+    const handleSuccess = (message) => {
+      toast.success(message || 'Task created successfully!');
+    };
 
+    const createTask = async (token) => {
+      try {
+        const response = await createNewTask(token, taskData);
+        await dispatch(createAuditLog_project({
+          accesstoken: token,
+          data: {
+            project_id: projectId,
+            action: 'Create',
+            entity: 'Task',
+            user_id: userData?._id,
+            task_id: response?.task?._id,
+          }
+        })
+        )
+
+        await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+
+        handleSuccess(response.message);
+
+      } catch (error) {
+        if (error.response?.status === 401) {
+          const newToken = await refreshToken();
+          return createTask(newToken);
+        }
+        throw error;
+      }
+    };
+    try {
+      await createTask(accesstoken);
+
+    } catch (error) {
+      toast.error('Error creating task!' || error.response?.data.message);
+    }
     // dispatch(
     //   createNewCard({
     //     title: valueInputNewCard,
@@ -82,38 +151,52 @@ export default function Column({ column }) {
   const handleKeyDownInputNewCard = (e) => {
     if (e.keyCode !== 13) return;
     if (!valueInputNewCard.trim()) {
-      toast.error('Please enter a new card title.');
+      toast.error('Please enter a new task title.');
       return;
     }
-    // dispatch(
-    //   createNewCard({
-    //     title: valueInputNewCard,
-    //     boardId: board._id,
-    //     columnId: column._id
-    //   })
-    // );
+    handleClickAddCard();
     toggleOpenFormCreateCard();
   };
 
   //
   const handleClickDeleteColumn = () => {
-    confirmDeleteColumn({
-      description:
-        'This column will be permanently deleted and its cards, Are you sure?',
-      title: 'Delete Column',
-      dialogProps: { maxWidth: 'xs' }
+    const listData = {
+      is_active: false
+    };
+    const handleSuccess = (message) => {
+      toast.success(message || 'List created successfully!');
+    };
 
-      // confirmationKeyword: 'liem',
-      // confirmationKeywordTextFieldProps: {
-      //   autoFocus: true,
-      //   label: 'Nhap liem'
-      // }
-      // allowClose: false
-    })
-      .then(() => {
-        // dispatch(deleteColumn(column._id));
-      })
-      .catch(() => () => { });
+    const deleteList = async (token) => {
+      try {
+        const response = await updateList(token, column._id, listData);
+        const res = await dispatch(createAuditLog_project({
+          accesstoken: token,
+          data: {
+            project_id: projectId,
+            action: 'Delete',
+            entity: 'List',
+            user_id: userData?._id,
+            list_id: response?.list?._id,
+          }
+        })
+        )
+        await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+        handleSuccess(response.message);
+      } catch (error) {
+        if (error.response?.status === 401) {
+          const newToken = await refreshToken();
+          return deleteList(newToken);
+        }
+        throw error;
+      }
+    };
+    try {
+      deleteList(accesstoken);
+    } catch (error) {
+      toast.error('Error creating task!' || error.response?.data.message);
+    }
+    // dispatch(deleteColumn(column._id));
   };
 
   const cardsOrdered = column?.cards;
@@ -203,7 +286,7 @@ export default function Column({ column }) {
                   <ListItemIcon>
                     <AddIcon />
                   </ListItemIcon>
-                  <ListItemText>Add new card</ListItemText>
+                  <ListItemText>Add new task</ListItemText>
                 </MenuItem>
                 {/* <MenuItem>
                   <ListItemIcon>
@@ -277,7 +360,7 @@ export default function Column({ column }) {
                 },
               }}
             >
-              Add a Card
+              Add a Task
             </Button>
             {/* <Box>
               <IconButton
@@ -351,7 +434,7 @@ export default function Column({ column }) {
             <form action="" onSubmit={(e) => e.preventDefault()}>
               <TextField
                 id=""
-                label="New card name..."
+                label="New task name..."
                 size="small"
                 variant="outlined"
                 autoFocus={true}

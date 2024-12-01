@@ -170,7 +170,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
                     }
                 })
                 )
-                dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+                await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
                 handleSuccess(response.message);
             } catch (error) {
                 if (error.response?.status === 401) {
