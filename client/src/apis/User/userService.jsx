@@ -95,5 +95,21 @@ export const updateAll = (accesstoken, data) => new Promise(async (resolve, reje
         reject(error)
     }
 })
+export const apiResetPasswordfromAdmin = (accesstoken, email , password) => new Promise(async (resolve, reject) => {
+    try {
+        let response = await axios({
+            method: 'put',
+            url: 'http://localhost:5000/api/user/reset-password-admin',
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            data: { email, password },
+            withCredentials: true  // Set withCredentials here
+        });
+        resolve(response);
+    } catch (error) {
+        reject(error);
+    }
+});
 
 
