@@ -33,4 +33,23 @@ const addListToProject = async (list) => {
     }
 }
 
-module.exports = { createNew }
+const updateListById = async (listId, reqBody) => {
+    try {
+        const list = await List.findById(listId)
+        if (!list) {
+            return null
+        }
+        await Project.findByIdAndUpdate(
+            { _id: list.project_id },
+            { $pull: { listId: list._id } },
+            { returnDocument: 'after' }
+        )
+        Object.assign(list, reqBody)
+        const updatedTask = await list.save()
+        return updatedTask
+    } catch (error) {
+        throw new Error(error)
+    }
+}
+
+module.exports = { createNew, updateListById }

@@ -8,8 +8,13 @@ import {
 } from '@dnd-kit/sortable';
 import { toast } from 'react-toastify';
 import { useTheme } from '@mui/material';
-// import { useDispatch, useSelector } from 'react-redux';
 
+import { createNew } from '~/apis/Project/listService'
+import { useRefreshToken } from '~/utils/useRefreshToken'
+import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux'
 //
 import Column from './Column/Column';
 // import { boardSelector } from '~/redux/selectors/boardSelector';
@@ -19,7 +24,7 @@ export default function Columns({ columns = [] }) {
   const theme = useTheme();
   const [openFormCreateColumn, setOpenFormCreateColumn] = useState(false);
   const [valueInputNewColumn, setValueInputNewColumn] = useState('');
-//   const dispatch = useDispatch();
+  //   const dispatch = useDispatch();
   // const board = useSelector(boardSelector);
 
   const toggleOpenFormCreateColumn = () => {
@@ -27,12 +32,21 @@ export default function Columns({ columns = [] }) {
     setValueInputNewColumn('');
   };
 
+  ////////////////////////////////////////////////////////////////
+  const { projectId } = useParams();
+  const { accesstoken, userData } = useSelector(state => state.auth)
+  const dispatch = useDispatch();
+
+  const refreshToken = useRefreshToken();
+
+
   const handleKeyDownInputNewColumn = (e) => {
     if (e.keyCode !== 13) return;
     if (!valueInputNewColumn.trim()) {
       toast.error('Please enter a new column title.');
       return;
     }
+    handleClickAddList();
     // dispatch(
     //   createNewColumn({
     //     title: valueInputNewColumn,
@@ -48,6 +62,45 @@ export default function Columns({ columns = [] }) {
       return;
     }
 
+    const listData = {
+      list_name: valueInputNewColumn,
+      created_by_id: userData._id,
+      project_id: projectId,
+    };
+    const handleSuccess = (message) => {
+      toast.success(message || 'List created successfully!');
+    };
+
+    const createList = async (token) => {
+      try {
+        const response = await createNew(token, listData);
+        const res = await dispatch(createAuditLog_project({
+          accesstoken: token,
+          data: {
+            project_id: projectId,
+            action: 'Create',
+            entity: 'List',
+            user_id: userData?._id,
+            list_id: response?.list?._id,
+          }
+        })
+        )
+        await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+        handleSuccess(response.message);
+      } catch (error) {
+        if (error.response?.status === 401) {
+          const newToken = await refreshToken();
+          return createList(newToken);
+        }
+        throw error;
+      }
+    };
+
+    try {
+      createList(accesstoken);
+    } catch (error) {
+      toast.error(error.response?.data.message || 'Error creating list!');
+    }
     // dispatch(
     //   createNewColumn({
     //     title: valueInputNewColumn,
@@ -100,7 +153,7 @@ export default function Columns({ columns = [] }) {
                 justifyContent: 'flex-start',
                 paddingLeft: '1rem',
                 paddingY: '.6rem',
-                color: theme.palette.primary.contrastText,  
+                color: theme.palette.primary.contrastText,
               }}
               startIcon={<AddIcon />}
               onClick={toggleOpenFormCreateColumn}
@@ -114,7 +167,7 @@ export default function Columns({ columns = [] }) {
               <form action="" onSubmit={(e) => e.preventDefault()}>
                 <TextField
                   id=""
-                  label="New board name..."
+                  label="New list name..."
                   size="small"
                   variant="outlined"
                   autoFocus={true}
@@ -132,7 +185,7 @@ export default function Columns({ columns = [] }) {
                 />
                 <Box sx={{ marginTop: 0.5 }}>
                   <Button
-                    sx={{color:theme.palette.primary.contrastText, backgroundColor: theme.palette.primary.main}}
+                    sx={{ color: theme.palette.primary.contrastText, backgroundColor: theme.palette.primary.main }}
                     variant="contained"
                     size="small"
                     onClick={handleClickAddList}

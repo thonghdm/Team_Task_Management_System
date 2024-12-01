@@ -93,11 +93,28 @@ const getDetailsProject = async (projectId) => {
                 }
             },
             // Lookup lists
+            // {
+            //     $lookup: {
+            //         from: 'lists',
+            //         localField: '_id',
+            //         foreignField: 'project_id',
+            //         as: 'lists'
+            //     }
+            // },
             {
                 $lookup: {
                     from: 'lists',
-                    localField: '_id',
-                    foreignField: 'project_id',
+                    let: { projectId: '$_id' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ['$project_id', '$$projectId']
+                                },
+                                is_active: true
+                            }
+                        }
+                    ],
                     as: 'lists'
                 }
             },

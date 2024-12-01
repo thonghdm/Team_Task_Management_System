@@ -12,6 +12,21 @@ const listController = {
         } catch (error) {
             next(error)
         }
+    },
+    updateListById: async (req, res, next) => {
+        const { listId } = req.params
+        try {
+            const list = await listService.updateListById(listId, req.body)
+            if (!list) {
+                return res.status(StatusCodes.NOT_FOUND).json({ message: 'List not found' })
+            }
+            res.status(StatusCodes.OK).json({
+                message: 'List updated successfully!',
+                list: list
+            })
+        } catch (error) {
+            next(error)
+        }
     }
 
 }
