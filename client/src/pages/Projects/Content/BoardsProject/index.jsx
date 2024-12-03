@@ -29,7 +29,7 @@ const BoardsProject = () => {
                     const newToken = await refreshToken();
                     return getProjectDetail(newToken);
                 }
-                toast.error(error.response?.data.message || 'Unable to load project information!');
+                throw error;
             }
         };
 
