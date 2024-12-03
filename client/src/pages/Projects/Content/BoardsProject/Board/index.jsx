@@ -14,7 +14,6 @@ import {
 import { arrayMove } from '@dnd-kit/sortable';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { cloneDeep, isEmpty, map } from 'lodash';
-// import { useDispatch } from 'react-redux';
 
 //
 import { MouseSensor, TouchSensor } from '~/pages/Projects/Content/BoardsProject/Board/customLibs/DndKitSensor';
