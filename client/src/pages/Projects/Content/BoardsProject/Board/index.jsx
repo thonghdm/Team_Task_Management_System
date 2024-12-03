@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useCallback, useEffect, useState, useRef } from 'react';
-import { cloneDeep, isEmpty } from 'lodash';
+import { cloneDeep, isEmpty, map } from 'lodash';
 // import { useDispatch } from 'react-redux';
 
 //
@@ -32,10 +32,8 @@ import { useTheme } from '@mui/material';
 // } from '~/redux/thunk/column';
 
 
-import { updateProjectThunk } from '~/redux/project/project-slice';
-
+import { updateProjectDetailThunk } from '~/redux/project/projectDetail-slide';
 ////
-
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
@@ -44,6 +42,10 @@ import { useRefreshToken } from '~/utils/useRefreshToken'
 import { ToastContainer, toast } from 'react-toastify';
 
 import { transformDataBoard } from '~/utils/transformDataBoard';
+import { reorderLists } from '~/utils/sort';
+import { updateList } from '~/apis/Project/listService';
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
+
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
@@ -52,7 +54,6 @@ const ACTIVE_DRAG_ITEM_TYPE = {
 
 const Board = ({ board }) => {
   const theme = useTheme();
-  // const dispatch = useDispatch();
   // MapOrdered
   const [orderedColumnsState, setOrderedColumnsState] = useState([]);
 
@@ -66,31 +67,30 @@ const Board = ({ board }) => {
     useState(null);
 
   useEffect(() => {
-    setOrderedColumnsState(board.lists);
+    const boardSort = reorderLists(board);
+    const boardList = transformDataBoard(boardSort?.lists);
+    setOrderedColumnsState(boardList?.lists);
   }, [board]);
 
   ////////////////////////// move
   const dispatch = useDispatch();
-  const { projectData } = useSelector((state) => state.projectDetail);
   const { projectId } = useParams();
-  const { accesstoken } = useSelector(state => state.auth)
+  const { accesstoken, userData } = useSelector(state => state.auth)
   const refreshToken = useRefreshToken();
-
   ////////////////////////// moveColumns //////////////////////////
   const moveLists = (orderedArrMove) => {
     try {
       const dataMove = {
         listId: orderedArrMove
       };
-      console.log("dataMove:", dataMove);
       const moveListsProject = async (token) => {
         try {
-          const resultAction = await dispatch(updateProjectThunk({
+          const resultAction = await dispatch(updateProjectDetailThunk({
             accesstoken: token,
             projectId: projectId,
             projectData: dataMove
           }));
-          if (updateProjectThunk.rejected.match(resultAction)) {
+          if (updateProjectDetailThunk.rejected.match(resultAction)) {
             if (resultAction.payload?.err === 2) {
               const newToken = await refreshToken();
               return moveListsProject(newToken);
@@ -109,39 +109,41 @@ const Board = ({ board }) => {
     }
   };
 
-
-
-  ////////////////////////////////
-  // const dispatch = useDispatch();
-  // const { projectData } = useSelector((state) => state.projectDetail);
-  // const { projectId } = useParams();
-  // const { accesstoken } = useSelector(state => state.auth)
-
-  // const refreshToken = useRefreshToken();
-  // useEffect(() => {
-  //   const getProjectDetail = async (token) => {
-  //     try {
-  //       await dispatch(fetchProjectDetail({ accesstoken: token, projectId })).unwrap();
-  //     } catch (error) {
-  //       if (error?.err === 2) {
-  //         const newToken = await refreshToken();
-  //         return getProjectDetail(newToken);
-  //       }
-  //       toast.error(error.response?.data.message || 'Unable to load project information!');
-  //     }
-  //   };
-
-  //   getProjectDetail(accesstoken);
-
-  //   return () => {
-  //     dispatch(resetProjectDetail());
-  //   };
-  // }, [dispatch, projectId, accesstoken]);
-
-  // const data = transformDataBoard(projectData?.project?.lists);
-  // console.log(data);
-  //////////////////////////////////////////////////////////////
-
+  ////////////////////////////// tasks list //////////////////////////////
+  const moveCardsInTheSameColumn = (list_id, orderedArrMove) => {
+    const listData = {
+      task_id: orderedArrMove
+    };
+    const moveCards = async (token) => {
+      try {
+        const response = await updateList(token, list_id, listData);
+        const res = await dispatch(createAuditLog_project({
+          accesstoken: token,
+          data: {
+            project_id: projectId,
+            action: 'Update',
+            entity: 'List',
+            user_id: userData?._id,
+            list_id: response?.list?._id,
+          }
+        })
+        )
+        await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+      } catch (error) {
+        if (error.response?.status === 401) {
+          const newToken = await refreshToken();
+          return moveCards(newToken);
+        }
+        throw error;
+      }
+    };
+    try {
+      moveCards(accesstoken);
+    } catch (error) {
+      throw error;
+    }
+  }
+  
   // Tìm column đang chứa cardId (làm dữ liệu tasks rồi mới làm cho orderCard)
   const findColumnByCardId = (cardId) => {
     return orderedColumnsState.find((column) =>
@@ -350,14 +352,7 @@ const Board = ({ board }) => {
           );
           return cloneColumns;
         });
-
-        // Call api kéo thả card trong cùng 1 column
-        // dispatch(
-        //   moveCardsInTheSameColumn({
-        //     list_id: activeColumnBeforeRerender._id,
-        //     orderedCard: orderedArrMove
-        //   })
-        // );
+        moveCardsInTheSameColumn(activeColumnBeforeRerender._id, orderedArrMove);
       }
     }
 
@@ -379,14 +374,8 @@ const Board = ({ board }) => {
       // Vẫn có bước này để ứng dụng không bị nhấp nhấy.
       setOrderedColumnsState(orderedArrMove);
       // Call API update datas
-      // dispatch(moveColumns(orderedArrMove));
-      
-      
-      moveLists(orderedArrMove.map((column) => column._id));
-      
-      
-      
-      console.log("column:", orderedArrMove.map((column) => column._id));
+      moveLists(orderedArrMove);
+
     }
 
     // Những State này chỉ dùng 1 lần khi kéo column hoặc kéo card nên set lại null để thực hiện lần kéo tiếp theo
@@ -432,12 +421,6 @@ const Board = ({ board }) => {
       // Tìm các điểm giao nhau với con trỏ
       const pointerIntersections = pointerWithin(args);
       if (!pointerIntersections?.length > 0) return;
-
-      // Trả về 1 mảng các va chạm ở đây
-      // const intersetions =
-      //   pointerIntersections?.length > 0
-      //     ? pointerIntersections
-      //     : rectIntersection(args);
 
       let overId = getFirstCollision(pointerIntersections, 'id');
       if (overId) {

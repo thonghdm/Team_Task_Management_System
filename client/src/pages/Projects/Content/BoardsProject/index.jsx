@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
-import { transformDataBoard } from '~/utils/transformDataBoard'
 import Board from './Board';
 
 const BoardsProject = () => {
@@ -13,6 +12,12 @@ const BoardsProject = () => {
     const { projectData } = useSelector((state) => state.projectDetail);
     const { projectId } = useParams();
     const { accesstoken } = useSelector(state => state.auth)
+
+    const [project, setProject] = useState(projectData?.project);
+
+    useEffect(() => {
+        setProject(projectData?.project);
+    }, [projectData]);
 
     const refreshToken = useRefreshToken();
     useEffect(() => {
@@ -29,15 +34,14 @@ const BoardsProject = () => {
         };
 
         getProjectDetail(accesstoken);
-
         return () => {
             dispatch(resetProjectDetail());
         };
     }, [dispatch, projectId, accesstoken]);
-    const board = transformDataBoard(projectData?.project?.lists);
+
     return (
         <>
-            <Board board={board} />
+            <Board board={project} />
         </>
     );
 }

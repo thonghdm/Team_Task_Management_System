@@ -39,11 +39,15 @@ const updateListById = async (listId, reqBody) => {
         if (!list) {
             return null
         }
-        await Project.findByIdAndUpdate(
-            { _id: list.project_id },
-            { $pull: { listId: list._id } },
-            { returnDocument: 'after' }
-        )
+
+        if (reqBody.is_active === false) {
+            await Project.findByIdAndUpdate(
+                { _id: list.project_id },
+                { $pull: { listId: list._id } },
+                { returnDocument: 'after' }
+            )
+        }
+
         Object.assign(list, reqBody)
         const updatedTask = await list.save()
         return updatedTask

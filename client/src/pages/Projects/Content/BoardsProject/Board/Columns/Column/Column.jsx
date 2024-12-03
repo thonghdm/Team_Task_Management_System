@@ -164,7 +164,7 @@ export default function Column({ column }) {
       is_active: false
     };
     const handleSuccess = (message) => {
-      toast.success(message || 'List created successfully!');
+      toast.success(message || 'List delete successfully!');
     };
 
     const deleteList = async (token) => {
