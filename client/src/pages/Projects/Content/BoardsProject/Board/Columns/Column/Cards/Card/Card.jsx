@@ -16,9 +16,9 @@ export default function Card({ card }) {
   const theme = useTheme();
   const shouldShowCardActions = () => {
     return (
-      !!card?.memberIds?.length ||
+      !!card?.assigned_to_id?.length ||
       !!card?.comments?.length ||
-      !!card?.attachments?.length
+      !!card?.attachments_id?.length
     );
   };
 
@@ -86,7 +86,7 @@ export default function Card({ card }) {
               textOverflow: 'ellipsis'
             }}
           >
-            {card?.title}
+            {card?.task_name}
           </Typography>
         </CardContent>
 
@@ -99,17 +99,17 @@ export default function Card({ card }) {
               paddingTop: 0
             }}
           >
-            {!!card?.memberIds?.length && (
+            {!!card?.assigned_to_id?.length && (
               <Button sx={{ color: theme.palette.text.primary }} startIcon={<PeopleAlt />}>
-                {card.memberIds?.length}
+                {card.assigned_to_id?.length}
               </Button>
             )}
             {!!card?.comments?.length && (
               <Button sx={{ color: theme.palette.text.primary }} startIcon={<Comment />}>{card.comments?.length}</Button>
             )}
-            {!!card?.attachments?.length && (
+            {!!card?.attachments_id?.length && (
               <Button startIcon={<Attachment />} sx={{ color: theme.palette.text.primary }}>
-                {card.attachments?.length}
+                {card.attachments_id?.length}
               </Button>
             )}
           </CardActions>

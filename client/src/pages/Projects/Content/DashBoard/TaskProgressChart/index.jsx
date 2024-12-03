@@ -1,20 +1,21 @@
 import React from 'react';
-import { 
-  Typography, 
-  Paper 
+import {
+  Typography,
+  Paper,
+  Box
 } from '@mui/material';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
 } from 'recharts';
 
-const TaskProgressChart = ({dataTaskDetails}) => {
+const TaskProgressChart = ({ dataTaskDetails }) => {
   // const taskProgressData = [
   //   { month: 'T1', tasks: 40, done: 30, todo: 10, incoming: 10 },
   //   { month: 'T2', tasks: 55, done: 15, todo: 15, incoming: 40 },
@@ -32,49 +33,64 @@ const TaskProgressChart = ({dataTaskDetails}) => {
   return (
     <Paper sx={{ p: 2, height: '400px' }}>
       <Typography variant="h6" gutterBottom>
-      Mission Progress Details
+        Mission Progress Details
       </Typography>
-      <ResponsiveContainer width="100%" height="90%">
+      {dataTaskDetails && dataTaskDetails.length > 0 ? (<ResponsiveContainer width="100%" height="90%">
         <LineChart data={dataTaskDetails}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line 
-            type="monotone" 
-            dataKey="tasks" 
-            stroke="#8884d8" 
+          <Line
+            type="monotone"
+            dataKey="tasks"
+            stroke="#8884d8"
             strokeWidth={2}
             dot={{ r: 4 }}
             activeDot={{ r: 8 }}
           />
-          <Line 
-            type="monotone" 
-            dataKey="done" 
-            stroke="#82ca9d" 
+          <Line
+            type="monotone"
+            dataKey="done"
+            stroke="#82ca9d"
             strokeWidth={2}
             dot={{ r: 4 }}
             activeDot={{ r: 8 }}
           />
-          <Line 
-            type="monotone" 
-            dataKey="todo" 
-            stroke="red" 
+          <Line
+            type="monotone"
+            dataKey="todo"
+            stroke="red"
             strokeWidth={2}
             dot={{ r: 4 }}
             activeDot={{ r: 8 }}
           />
-          <Line 
-            type="monotone" 
-            dataKey="incoming" 
-            stroke="#ff7300" 
+          <Line
+            type="monotone"
+            dataKey="incoming"
+            stroke="#ff7300"
             strokeWidth={2}
             dot={{ r: 4 }}
             activeDot={{ r: 8 }}
           />
         </LineChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer>) :
+        (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: 300,
+            }}
+          >
+            <img
+              src="https://cdn-icons-png.freepik.com/256/11329/11329073.png"
+              alt="No data available"
+              style={{ maxHeight: '100%', maxWidth: '100%' }}
+            />
+          </Box>)}
     </Paper>
   );
 };

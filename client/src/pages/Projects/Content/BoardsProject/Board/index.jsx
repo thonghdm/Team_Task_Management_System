@@ -32,6 +32,10 @@ import { useTheme } from '@mui/material';
 // } from '~/redux/thunk/column';
 
 
+import { updateProjectThunk } from '~/redux/project/project-slice';
+
+////
+
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
@@ -62,8 +66,48 @@ const Board = ({ board }) => {
     useState(null);
 
   useEffect(() => {
-    setOrderedColumnsState(board.columns);
+    setOrderedColumnsState(board.lists);
   }, [board]);
+
+  ////////////////////////// move
+  const dispatch = useDispatch();
+  const { projectData } = useSelector((state) => state.projectDetail);
+  const { projectId } = useParams();
+  const { accesstoken } = useSelector(state => state.auth)
+  const refreshToken = useRefreshToken();
+
+  ////////////////////////// moveColumns //////////////////////////
+  const moveLists = (orderedArrMove) => {
+    try {
+      const dataMove = {
+        listId: orderedArrMove
+      };
+      console.log("dataMove:", dataMove);
+      const moveListsProject = async (token) => {
+        try {
+          const resultAction = await dispatch(updateProjectThunk({
+            accesstoken: token,
+            projectId: projectId,
+            projectData: dataMove
+          }));
+          if (updateProjectThunk.rejected.match(resultAction)) {
+            if (resultAction.payload?.err === 2) {
+              const newToken = await refreshToken();
+              return moveListsProject(newToken);
+            }
+            throw new Error('Move Lists Project failed');
+          }
+          await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+        } catch (error) {
+          throw error;
+        }
+      };
+      moveListsProject(accesstoken);
+    }
+    catch (error) {
+      throw error;
+    }
+  };
 
 
 
@@ -98,14 +142,14 @@ const Board = ({ board }) => {
   // console.log(data);
   //////////////////////////////////////////////////////////////
 
-  // Tìm column đang chứa cardId (làm dữ liệu cards rồi mới làm cho orderCard)
+  // Tìm column đang chứa cardId (làm dữ liệu tasks rồi mới làm cho orderCard)
   const findColumnByCardId = (cardId) => {
     return orderedColumnsState.find((column) =>
-      column?.cards.map((card) => card._id)?.includes(cardId)
+      column?.tasks.map((card) => card._id)?.includes(cardId)
     );
   };
 
-  // Di chuyển card giữa các columns khác nhau
+  // Di chuyển card giữa các lists khác nhau
   const moveCardBetweenDifferentColumns = (
     overColumn,
     overId,
@@ -118,7 +162,7 @@ const Board = ({ board }) => {
   ) => {
     setOrderedColumnsState((preveColumnsState) => {
       //  Tìm vị trí của overCardIndex (card trong column đích)
-      const overCardIndex = overColumn?.cards.findIndex(
+      const overCardIndex = overColumn?.tasks.findIndex(
         (card) => card._id === overId
       );
 
@@ -133,9 +177,9 @@ const Board = ({ board }) => {
       newCardIndex =
         overCardIndex >= 0
           ? overCardIndex + modifier
-          : overColumn?.cards?.length + 1;
+          : overColumn?.tasks?.length + 1;
 
-      // Clone ra 1 columns để xử lý dữ liệu
+      // Clone ra 1 lists để xử lý dữ liệu
       const nextColumns = cloneDeep(preveColumnsState);
       const nextActiveColumn = nextColumns.find(
         (column) => column._id === activeColumn._id
@@ -146,40 +190,40 @@ const Board = ({ board }) => {
 
       if (nextActiveColumn) {
         // Xóa card dragging ở column active
-        nextActiveColumn.cards = nextActiveColumn?.cards?.filter(
+        nextActiveColumn.tasks = nextActiveColumn?.tasks?.filter(
           (card) => card._id !== activeDraggingCardId
         );
 
         // Thêm placeholder-card nếu column không có card nào
-        if (isEmpty(nextActiveColumn.cards)) {
-          nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)];
+        if (isEmpty(nextActiveColumn.tasks)) {
+          nextActiveColumn.tasks = [generatePlaceholderCard(nextActiveColumn)];
         }
 
-        // Xóa idCard trong cardOrderIds sau khi xóa cards
-        nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(
+        // Xóa idCard trong task_id sau khi xóa tasks
+        nextActiveColumn.task_id = nextActiveColumn.tasks.map(
           (column) => column._id
         );
       }
 
       if (nextOverColumn) {
         // Xóa cardDragging đã có trong overColumn
-        nextOverColumn.cards = nextOverColumn?.cards?.filter(
+        nextOverColumn.tasks = nextOverColumn?.tasks?.filter(
           (card) => card._id !== activeDraggingCardId
         );
 
         // Thêm cardDragging vào columnOver
-        nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, {
+        nextOverColumn.tasks = nextOverColumn.tasks.toSpliced(newCardIndex, 0, {
           ...activeDraggingCardData,
-          columnId: nextOverColumn._id
+          list_id: nextOverColumn._id
         });
 
         // Xóa placeholder-card đi khi đã có card tồn tại
-        nextOverColumn.cards = nextOverColumn.cards.filter(
+        nextOverColumn.tasks = nextOverColumn.tasks.filter(
           (card) => !card.FE_placeholderCard
         );
 
-        // Cập nhật idCard trong cardOrderIds sau khi xóa cards
-        nextOverColumn.cardOrderIds = nextOverColumn.cards.map(
+        // Cập nhật idCard trong task_id sau khi xóa tasks
+        nextOverColumn.task_id = nextOverColumn.tasks.map(
           (column) => column._id
         );
       }
@@ -205,7 +249,7 @@ const Board = ({ board }) => {
   const handleDragStart = (event) => {
     setActiveDragItemId(event?.active?.id);
     setActiveDragItemType(
-      event?.active?.data?.current?.columnId
+      event?.active?.data?.current?.list_id
         ? ACTIVE_DRAG_ITEM_TYPE.CARD
         : ACTIVE_DRAG_ITEM_TYPE.COLUMN
     );
@@ -281,15 +325,15 @@ const Board = ({ board }) => {
           'handleDragEnd'
         );
       } else {
-        const oldIndex = activeColumnBeforeRerender?.cards?.findIndex(
+        const oldIndex = activeColumnBeforeRerender?.tasks?.findIndex(
           (card) => card._id === activeDragItemId
         );
-        const newIndex = overColumn?.cards?.findIndex(
+        const newIndex = overColumn?.tasks?.findIndex(
           (card) => card._id === overId
         );
 
         const orderedArrMove = arrayMove(
-          activeColumnBeforeRerender.cards,
+          activeColumnBeforeRerender.tasks,
           oldIndex,
           newIndex
         );
@@ -300,8 +344,8 @@ const Board = ({ board }) => {
           const targetColumns = cloneColumns.find(
             (column) => column._id === overColumn._id
           );
-          targetColumns.cards = orderedArrMove;
-          targetColumns.cardOrderIds = orderedArrMove?.map(
+          targetColumns.tasks = orderedArrMove;
+          targetColumns.task_id = orderedArrMove?.map(
             (column) => column._id
           );
           return cloneColumns;
@@ -310,7 +354,7 @@ const Board = ({ board }) => {
         // Call api kéo thả card trong cùng 1 column
         // dispatch(
         //   moveCardsInTheSameColumn({
-        //     columnId: activeColumnBeforeRerender._id,
+        //     list_id: activeColumnBeforeRerender._id,
         //     orderedCard: orderedArrMove
         //   })
         // );
@@ -334,9 +378,15 @@ const Board = ({ board }) => {
 
       // Vẫn có bước này để ứng dụng không bị nhấp nhấy.
       setOrderedColumnsState(orderedArrMove);
-
       // Call API update datas
       // dispatch(moveColumns(orderedArrMove));
+      
+      
+      moveLists(orderedArrMove.map((column) => column._id));
+      
+      
+      
+      console.log("column:", orderedArrMove.map((column) => column._id));
     }
 
     // Những State này chỉ dùng 1 lần khi kéo column hoặc kéo card nên set lại null để thực hiện lần kéo tiếp theo
@@ -378,7 +428,7 @@ const Board = ({ board }) => {
         return closestCorners({ ...args });
       }
 
-      // Khi là cards thì sử dụng pointerWithin , custom lại thuật toán va chạm
+      // Khi là tasks thì sử dụng pointerWithin , custom lại thuật toán va chạm
       // Tìm các điểm giao nhau với con trỏ
       const pointerIntersections = pointerWithin(args);
       if (!pointerIntersections?.length > 0) return;
@@ -402,7 +452,7 @@ const Board = ({ board }) => {
             droppableContainers: args.droppableContainers?.filter(
               (container) =>
                 container.id !== overId &&
-                checkColumn?.cardOrderIds?.includes(container.id)
+                checkColumn?.task_id?.includes(container.id)
             )
           })[0]?.id;
         }
@@ -441,7 +491,7 @@ const Board = ({ board }) => {
           borderRadius: '10px',
         }}
       >
-        <Columns columns={orderedColumnsState} />
+        <Columns lists={orderedColumnsState} />
         {/* DragOverlay đặt ngang cấp với Sortable và có item bên trong là tất cả SortItem */}
         <DragOverlay dropAnimation={dropAnimation}>
           {activeDragItemId &&

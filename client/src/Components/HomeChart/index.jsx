@@ -10,7 +10,7 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
     const completedIssues = completed.length;
     const totalIssues = completed.length + upcoming.length + overdue.length;
     const theme = useTheme();
-    
+
     const progressPercentage = Math.round((completedIssues / totalIssues) * 100) || 0;
     return (
         <Paper elevation={3} sx={{ p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
@@ -21,7 +21,7 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
                     <Card sx={{ backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
                         <CardContent>
                             {/* <Typography variant="h6" sx={{ textAlign: 'center' }} gutterBottom>Last 7 Days</Typography> */}
-                            <ResponsiveContainer width="100%" height={340}>
+                            {dataStatics && dataStatics.length > 0 ? (<ResponsiveContainer width="100%" height={340}>
                                 <BarChart data={dataStatics}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="date" />
@@ -36,7 +36,21 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
                                     <Bar dataKey="due" name="Overdue " fill="#F88379" />
                                     <Bar dataKey="completed" name="Completed" fill="#82ca9d" />
                                 </BarChart>
-                            </ResponsiveContainer>
+                            </ResponsiveContainer>) : (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        height: 300,
+                                    }}
+                                >
+                                    <img
+                                        src="https://cdn-icons-png.freepik.com/256/11329/11329073.png"
+                                        alt="No data available"
+                                        style={{ maxHeight: '100%', maxWidth: '100%' }}
+                                    />
+                                </Box>)}
                         </CardContent>
                     </Card>
                 </Grid>
@@ -48,7 +62,7 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
                     justifyContent="center"
                 >
                     <Card sx={{ backgroundColor: theme.palette.background.default, color: theme.palette.text.primary }}>
-                        <CardContent>
+                        {totalIssues > 0 ? (<CardContent>
                             <Typography sx={{ textAlign: 'center' }} variant="h6" gutterBottom>Overall Progress</Typography>
                             <Box sx={{ position: 'relative', display: 'inline-flex', pt: 4, pr: 2, pb: 4, pl: 2 }}>
                                 <Box position="relative" display="inline-flex">
@@ -91,7 +105,21 @@ const HomeChart = ({ upcoming, overdue, completed, dataStatics }) => {
                             }} >
                                 Completed issues: {completedIssues} / {totalIssues}
                             </Typography>
-                        </CardContent>
+                        </CardContent>) : (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 340,
+                                }}
+                            >
+                                <img
+                                    src="https://cdn-icons-png.freepik.com/256/11329/11329073.png"
+                                    alt="No data available"
+                                    style={{ maxHeight: '100%', maxWidth: '100%' }}
+                                />
+                            </Box>)}
                     </Card>
                 </Grid>
             </Grid>

@@ -72,7 +72,9 @@ const ProjectAnalyticsDashboard = ({dataPriorityDistribution, dataParticipantTre
     //     { name: 'Medium', value: 30 },
     //     { name: 'High', value: 20 }
     // ]
-
+    let sum = 0
+    const checkNull = (data) => {data.map((item) => {sum += item.value})}
+    checkNull(dataPriorityDistribution);
     return (
         <Box sx={{ flexGrow: 1, p: 3 }}>
             <Grid
@@ -82,6 +84,7 @@ const ProjectAnalyticsDashboard = ({dataPriorityDistribution, dataParticipantTre
             >
                 <Grid item xs={12} md={8}>
                     <ChartCard title="Participant Trends">
+                    {dataParticipantTrend && dataParticipantTrend.length > 0 ? (
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={dataParticipantTrend}>
                                 <CartesianGrid strokeDasharray="3 3" />
@@ -98,7 +101,22 @@ const ProjectAnalyticsDashboard = ({dataPriorityDistribution, dataParticipantTre
                                     fill={theme.palette.secondary.main}
                                 />
                             </BarChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer>)
+                        :(
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 300,
+                                }}
+                            >
+                                <img
+                                    src="https://cdn-icons-png.freepik.com/256/11329/11329073.png"
+                                    alt="No data available"
+                                    style={{ maxHeight: '100%', maxWidth: '100%' }}
+                                />
+                            </Box>)}
                     </ChartCard>
                 </Grid>
                 <Grid
@@ -107,7 +125,7 @@ const ProjectAnalyticsDashboard = ({dataPriorityDistribution, dataParticipantTre
                     md={4}
                 >
                     <ChartCard title="Priority Details">
-                        <ResponsiveContainer  width="100%" height={300}>
+                        {sum > 0 ? (<ResponsiveContainer  width="100%" height={300}>
                             <PieChart>
                                 <Pie
                                     data={dataPriorityDistribution}
@@ -128,7 +146,22 @@ const ProjectAnalyticsDashboard = ({dataPriorityDistribution, dataParticipantTre
                                 <Tooltip />
                                 <Legend />
                             </PieChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer>)
+                        :(
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 300,
+                                }}
+                            >
+                                <img
+                                    src="https://cdn-icons-png.freepik.com/256/11329/11329073.png"
+                                    alt="No data available"
+                                    style={{ maxHeight: '100%', maxWidth: '100%' }}
+                                />
+                            </Box>)}
                     </ChartCard>
                 </Grid>
 

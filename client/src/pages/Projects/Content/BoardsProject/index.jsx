@@ -34,7 +34,6 @@ const BoardsProject = () => {
             dispatch(resetProjectDetail());
         };
     }, [dispatch, projectId, accesstoken]);
-    console.log(projectData?.project);
     const board = transformDataBoard(projectData?.project?.lists);
     return (
         <>

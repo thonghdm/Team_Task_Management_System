@@ -81,7 +81,7 @@ const UserSearchInput = ({
         if (accesstoken) {
             dispatch(fetchAllMembers({ accesstoken }));
         }
-    }, [dispatch, accesstoken,inputValue]);
+    }, [dispatch, accesstoken, inputValue]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -94,14 +94,16 @@ const UserSearchInput = ({
             try {
                 // Simulate API call
                 await new Promise(resolve => setTimeout(resolve, 500));
-                const filtered = memberData?.data?.users.filter(user =>
-                    (
-                        user.displayName.toLowerCase().includes(inputValue.toLowerCase()) ||
-                        user.email.toLowerCase().includes(inputValue.toLowerCase()) ||
-                        user.username.toLowerCase().includes(inputValue.toLowerCase())) &&
-                    !value.find(selected => selected._id === user._id)
-                );
-                setOptions(filtered);
+                const filtered = memberData?.users?.filter(user => {
+                    const searchValue = inputValue.toLowerCase();
+                    const isMatch = user?.displayName.toLowerCase().includes(searchValue) ||
+                                    user?.email.toLowerCase().includes(searchValue) ||
+                                    user?.username.toLowerCase().includes(searchValue);
+                    const isSelected = value.some(selected => selected?._id === user?._id);
+                    return isMatch && !isSelected;
+                  });
+                if (filtered) { setOptions(filtered); }
+
             } catch (error) {
                 console.error('Error fetching users:', error);
                 setOptions([]);
@@ -186,7 +188,7 @@ const UserSearchInput = ({
                     <Paper {...props} elevation={3}>
                         {inputValue.trim() === '' ? (
                             <Box />
-                        ) : options.length === 0 ? (
+                        ) : options?.length === 0 ? (
                             <Box p={2}>
                                 <Typography variant="body2" color="textSecondary" align="center">
                                     {isSearching ? 'Searching...' : 'No users found'}
@@ -215,7 +217,7 @@ const roles = [
 const UserSearch = () => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [inviteRole, setInviteRole] = useState('Member');
-    const { accesstoken,userData } = useSelector(state => state.auth);
+    const { accesstoken, userData } = useSelector(state => state.auth);
     const [error, setError] = useState(null);
     const { projectId } = useParams();
     const dispatch = useDispatch();
@@ -288,7 +290,7 @@ const UserSearch = () => {
                 handleSuccess();
             } catch (error) {
 
-                if (error.err===2) {
+                if (error.err === 2) {
                     try {
                         const newToken = await refreshToken();
                         if (newToken) {

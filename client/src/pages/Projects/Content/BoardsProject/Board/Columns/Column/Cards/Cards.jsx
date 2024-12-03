@@ -3,9 +3,9 @@ import { Box } from '@mui/material';
 //
 import Card from './Card/Card';
 
-export default function Cards({ cards= []  }) {
+export default function Cards({ tasks= []  }) {
   return (
-    <SortableContext items={cards.map(card => card._id)} strategy={verticalListSortingStrategy}>
+    <SortableContext items={tasks.map(card => card._id)} strategy={verticalListSortingStrategy}>
       <Box
         sx={{
           display: 'flex',
@@ -27,7 +27,7 @@ export default function Cards({ cards= []  }) {
         //   }
         }}
       >
-        {cards?.map((card) => (
+        {tasks?.map((card) => (
           <Card card={card} key={card._id} />
         ))}
       </Box>

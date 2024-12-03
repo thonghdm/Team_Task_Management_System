@@ -20,7 +20,7 @@ import Column from './Column/Column';
 // import { boardSelector } from '~/redux/selectors/boardSelector';
 // import { createNewColumn } from '~/redux/thunk/column';
 
-export default function Columns({ columns = [] }) {
+export default function Columns({ lists = [] }) {
   const theme = useTheme();
   const [openFormCreateColumn, setOpenFormCreateColumn] = useState(false);
   const [valueInputNewColumn, setValueInputNewColumn] = useState('');
@@ -113,7 +113,7 @@ export default function Columns({ columns = [] }) {
   // SortableContext yêu cầu items là một dạng ['id-1', 'id-2'] chứ không phải dạng [{ id: 'id-1'}, { id: 'id-2'}]
   return (
     <SortableContext
-      items={columns.map((column) => column._id)}
+      items={lists.map((column) => column._id)}
       strategy={horizontalListSortingStrategy}
     >
       <Box
@@ -131,7 +131,7 @@ export default function Columns({ columns = [] }) {
           }
         }}
       >
-        {columns.map((column) => (
+        {lists.map((column) => (
           <Column column={column} key={column._id} />
         ))}
 

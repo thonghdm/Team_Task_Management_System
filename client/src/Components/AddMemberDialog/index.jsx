@@ -96,7 +96,7 @@ const UserSearchInput = ({
             if (!inputValue.trim()) {
                 setOptions([]);
                 return;
-            }
+            }   
 
             setIsSearching(true);
             try {
@@ -111,7 +111,9 @@ const UserSearchInput = ({
                     ) &&
                     !value.find(selected => selected?._id === member?.memberId?._id)
                 ).map(member => member?.memberId);
-                setOptions(filtered);
+                if (filtered) {
+                    setOptions(filtered);
+                }
             } catch (error) {
                 console.error('Error fetching users:', error);
                 setOptions([]);

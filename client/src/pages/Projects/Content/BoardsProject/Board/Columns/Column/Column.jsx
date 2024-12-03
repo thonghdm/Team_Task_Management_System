@@ -199,7 +199,7 @@ export default function Column({ column }) {
     // dispatch(deleteColumn(column._id));
   };
 
-  const cardsOrdered = column?.cards;
+  const cardsOrdered = column?.tasks;
 
   // Drag - Drop
   const {
@@ -252,7 +252,7 @@ export default function Column({ column }) {
           <Typography
             sx={{ fontWeight: 'bold', fontSize: '1rem', color: 'primary.main' }}
           >
-            {column?.title}
+            {column?.list_name}
           </Typography>
           <Box>
             <IconButton
@@ -335,7 +335,7 @@ export default function Column({ column }) {
 
         {/* Column content */}
         <Box>
-          <Cards cards={cardsOrdered} />
+          <Cards tasks={cardsOrdered} />
         </Box>
 
         {/* Column footer */}
@@ -412,7 +412,7 @@ export default function Column({ column }) {
                     </Box>
                     <Typography align="center" sx={{ marginY: '1rem' }}>
                       You do not have any templates. Create a template to make
-                      copying cards easy.
+                      copying tasks easy.
                     </Typography>
                     <Button variant="contained" sx={{ width: '100%' }}>
                       Create a new template
