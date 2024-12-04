@@ -1,6 +1,7 @@
 const List = require('~/models/ListSchema')
 const Task = require('~/models/TaskSchema')
 const MemberTask = require('~/models/MemberTaskSchema')
+import sendEmail from '~/utils/sendEmail'
 const createNew = async (reqBody) => {
     try {
         const newTaskData = {
@@ -137,8 +138,13 @@ const addMemberToTask = async (reqBodyArray) => {
                 { $addToSet: { assigned_to_id: memberTaskResult._id } },
                 { new: true }
             )
-
             results.push(memberTaskResult)
+            await sendEmail({
+                email: reqBody.user_email,
+                subject: 'Notification from DTPROJECT',
+                message: `User ${reqBody.user_name_invite} has assigned you the task  ${existingTask.task_name}`
+            })
+
         }
 
         // Trả về array kết quả
