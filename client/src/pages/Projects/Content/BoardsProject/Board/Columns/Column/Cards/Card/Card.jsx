@@ -12,7 +12,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useTheme } from '@mui/material';
 //
 
-export default function Card({ card }) {
+export default function Card({ card, onRowClick }) {
   const theme = useTheme();
   const shouldShowCardActions = () => {
     return (
@@ -44,6 +44,7 @@ export default function Card({ card }) {
         style={dndkitCardStyles}
         {...attributes}
         {...listeners}
+        onClick={onRowClick}  // Attach the onClick handler here
         sx={{
           borderRadius: '8px',
           cursor: 'pointer',
