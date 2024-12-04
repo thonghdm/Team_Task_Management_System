@@ -197,13 +197,17 @@ const updateTaskById = async (taskId, reqBody) => {
         if (!task) {
             throw new Error('Task not found')
         }
-        await List.findByIdAndUpdate(
-            task.list_id,
-            {
-                $pull: { task_id: taskId }
-            },
-            { new: true }
-        )
+
+        if (reqBody.is_active === false) {
+            await List.findByIdAndUpdate(
+                task.list_id,
+                {
+                    $pull: { task_id: taskId }
+                },
+                { new: true }
+            )
+        }
+
         Object.assign(task, reqBody)
         const updatedTask = await task.save()
         return updatedTask

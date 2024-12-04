@@ -3,6 +3,8 @@ const Project = require('~/models/ProjectSchema')
 const ProjectRole = require('~/models/ProjectRoleSchema')
 const mongoose = require('mongoose')
 const _ = require('lodash')
+const Task = require('~/models/TaskSchema')
+const List = require('~/models/ListSchema')
 
 const createNew = async (reqBody) => {
     try {
@@ -345,4 +347,37 @@ const getAllProjects = async () => {
     }
 }
 
-module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId, updateProjectById, getAllProjects }
+const moveTaskDiffList = async (reqBody) => {
+    try {
+        // xoa list cu
+        await List.findByIdAndUpdate(
+            reqBody.prevListId,
+            {
+                $pull: { task_id: reqBody.prevTasks }
+            },
+            { new: true }
+        )
+        //update list moi
+        const update = await List.findByIdAndUpdate(
+            reqBody.nextListId,
+            {
+                $set: { task_id: reqBody.nextTasks }
+            },
+            { new: true }
+        )
+
+        //update task
+        await Task.findByIdAndUpdate(
+            reqBody.currentTaskId,
+            { $set: { list_id: reqBody.nextListId } },
+            { new: true }
+        )
+
+        return update
+    }
+    catch (error) {
+        throw new Error('Error fetching projects: ' + error.message)
+    }
+}
+
+module.exports = { createNew, getDetails, getAllByOwnerId, getAllByMemberId, updateProjectById, getAllProjects, moveTaskDiffList }

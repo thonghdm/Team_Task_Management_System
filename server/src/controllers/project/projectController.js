@@ -82,6 +82,17 @@ const projectController = {
         } catch (error) {
             next(error) // Pass error to global error handler
         }
+    },
+    moveTaskDiffList: async (req, res, next) => {
+        try {
+            const updatedProject = await projectService.moveTaskDiffList(req.body)
+            res.status(StatusCodes.OK).json({
+                message: 'Task moved to different list successfully!',
+                project: updatedProject
+            })
+        } catch (error) {
+            next(error)
+        }
     }
 }
 
