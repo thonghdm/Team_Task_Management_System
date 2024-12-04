@@ -99,7 +99,7 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
             <MenuItem onClick={handleDelete}>Delete</MenuItem>
           </Menu>
         </Box>
-        <ProjectDescription initialContent={content} context={"comment"} commentID={commentID} taskId={taskId} />
+        <ProjectDescription isEditable={userData._id === id ? true : false} initialContent={content} context={"comment"} commentID={commentID} taskId={taskId} />
       </Box>
     </Box>
   );

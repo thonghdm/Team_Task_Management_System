@@ -14,7 +14,6 @@ import {
 import { arrayMove } from '@dnd-kit/sortable';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { cloneDeep, isEmpty, map } from 'lodash';
-// import { useDispatch } from 'react-redux';
 
 //
 import { MouseSensor, TouchSensor } from '~/pages/Projects/Content/BoardsProject/Board/customLibs/DndKitSensor';
@@ -46,6 +45,7 @@ import { reorderLists } from '~/utils/sort';
 import { updateList } from '~/apis/Project/listService';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 
+import { moveCardTodifferentColumn } from '~/apis/Project/projectService'
 
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
@@ -79,6 +79,7 @@ const Board = ({ board }) => {
   const refreshToken = useRefreshToken();
   ////////////////////////// moveColumns //////////////////////////
   const moveLists = (orderedArrMove) => {
+    console.log(orderedArrMove);
     try {
       const dataMove = {
         listId: orderedArrMove
@@ -143,7 +144,39 @@ const Board = ({ board }) => {
       throw error;
     }
   }
-  
+
+  /////////////////////////// moveCardTodifferentColumn ///////////////////////////
+  const moveCardTodifferentColumns = (data) => {
+    const moveCardDiffColumn = async (token) => {
+      try {
+        const response = await moveCardTodifferentColumn(token, data);
+        const res = await dispatch(createAuditLog_project({
+          accesstoken: token,
+          data: {
+            project_id: projectId,
+            action: 'Update',
+            entity: 'List',
+            user_id: userData?._id,
+            list_id: response?.list?._id,
+          }
+        })
+        )
+        await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+      } catch (error) {
+        if (error.response?.status === 401) {
+          const newToken = await refreshToken();
+          return moveCardDiffColumn(newToken);
+        }
+        throw error;
+      }
+    };
+    try {
+      moveCardDiffColumn(accesstoken);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Tìm column đang chứa cardId (làm dữ liệu tasks rồi mới làm cho orderCard)
   const findColumnByCardId = (cardId) => {
     return orderedColumnsState.find((column) =>
@@ -195,7 +228,7 @@ const Board = ({ board }) => {
         nextActiveColumn.tasks = nextActiveColumn?.tasks?.filter(
           (card) => card._id !== activeDraggingCardId
         );
-
+        console.log(nextActiveColumn);
         // Thêm placeholder-card nếu column không có card nào
         if (isEmpty(nextActiveColumn.tasks)) {
           nextActiveColumn.tasks = [generatePlaceholderCard(nextActiveColumn)];
@@ -221,13 +254,31 @@ const Board = ({ board }) => {
 
         // Xóa placeholder-card đi khi đã có card tồn tại
         nextOverColumn.tasks = nextOverColumn.tasks.filter(
-          (card) => !card.FE_placeholderCard
+          (card) => !card.FE_PlaceholderCard
         );
 
         // Cập nhật idCard trong task_id sau khi xóa tasks
         nextOverColumn.task_id = nextOverColumn.tasks.map(
           (column) => column._id
         );
+      }
+      if (triggerFrom === 'handleDragEnd') {
+        // Call api drag card to different column
+
+        let prevTask = nextColumns.find(c => c._id === activeColumnBeforeRerender._id).tasks || [];
+        if (prevTask.length ===1) {
+          prevTask = [];
+        }
+
+        const data = {
+          currentTaskId: activeDraggingCardId,
+          prevListId: activeColumnBeforeRerender._id,
+          prevTasks: prevTask,
+          nextListId: nextOverColumn._id,
+          nextTasks: nextColumns.find(c => c._id === nextOverColumn._id).tasks,
+        }
+        moveCardTodifferentColumns(data);
+
       }
 
       // if (triggerFrom === 'handleDragEnd') {

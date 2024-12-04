@@ -337,7 +337,8 @@ const TaskBoard = () => {
                           sx={{
                             backgroundColor: label.color || 'transparent',
                             marginRight: 1,
-                            marginBottom: 1
+                            marginBottom: 1,
+                            color: "white"
                           }}
                         />
                       ))}

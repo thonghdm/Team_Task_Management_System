@@ -12,7 +12,11 @@ Router.route('/by-member')
     .get(verifyToken, projectController.getAllByMemberId)
 
 Router.route('/all-projects')
-    .get( projectController.getAllProjects)
+    .get(verifyToken, projectController.getAllProjects)
+
+Router.route('/move-task')
+    .put(verifyToken, projectController.moveTaskDiffList)
+
 
 Router.route('/:id')
     .get(verifyToken, projectController.getDetails)

@@ -51,7 +51,14 @@ export default function Card({ card }) {
           boxShadow:
             '-2px -3px rgba(0, 0, 0, .2), inset -2px -2px rgba(0, 0, 0, .1)',
           border: '1px solid transparent',
-          display: card?.FE_placeholderCard ? 'none' : 'block',
+          display: card?.FE_PlaceholderCard ? 'none' : 'block',
+
+
+          // opacity: card.FE_PlaceholderCard ? '0' : '1',
+          // minWidth: card.FE_PlaceholderCard ? '280px' : 'unset',
+          // pointerEvents: card.FE_PlaceholderCard ? 'none' : 'unset',
+          // position: card.FE_PlaceholderCard ? 'fixed' : 'unset',
+
           '&:hover': {
             boxShadow: (theme) => `2px 3px ${theme.palette.primary.light}`
           },

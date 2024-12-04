@@ -6,6 +6,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import Board from './Board';
 
+import mockData from '~/apis/mockData'
+import { isEmpty } from 'lodash';
+import { generatePlaceholderCard } from '~/utils/formatters';
+
 const BoardsProject = () => {
     ////////////////////////////////
     const dispatch = useDispatch();
@@ -16,8 +20,23 @@ const BoardsProject = () => {
     const [project, setProject] = useState(projectData?.project);
 
     useEffect(() => {
-        setProject(projectData?.project);
-    }, [projectData]);
+        const updatedProject = {
+          ...projectData?.project,
+          lists: projectData?.project?.lists?.map(list => {
+            if (isEmpty(list.tasks)) {
+              const placeholderCard = generatePlaceholderCard(list);
+              return {
+                ...list,
+                tasks: [placeholderCard],
+                task_id: [placeholderCard._id]
+              };
+            }
+            return list;
+          })
+        };
+        
+        setProject(updatedProject);
+      }, [projectData]);
 
     const refreshToken = useRefreshToken();
     useEffect(() => {

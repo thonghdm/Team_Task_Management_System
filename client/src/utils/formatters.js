@@ -6,8 +6,7 @@ export const toUpperCaseFirstLetter = (string) => {
 export const generatePlaceholderCard = (column) => {
   return {
     _id: `${column._id}-placeholder-card`,
-    boardId: column.boardId,
-    columnId: column._id,
-    FE_placeholderCard: true
+    task_id: column._id,
+    FE_PlaceholderCard: true
   };
 };

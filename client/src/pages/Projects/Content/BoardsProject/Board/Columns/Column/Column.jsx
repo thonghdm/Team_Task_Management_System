@@ -159,13 +159,29 @@ export default function Column({ column }) {
   };
 
   //
-  const handleClickDeleteColumn = () => {
+  const handleClickDeleteColumn = async () => {
     const listData = {
       is_active: false
     };
     const handleSuccess = (message) => {
       toast.success(message || 'List delete successfully!');
     };
+
+    const update = async (token) => {
+      try {
+        const resultAction = await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+        if (fetchProjectDetail.rejected.match(resultAction)) {
+          if (resultAction.payload?.err === 2) {
+            const newToken = await refreshToken();
+            return update(newToken);
+          }
+          throw new Error('Project failed');
+        }
+      }
+      catch(error) {
+        throw error;
+      }
+    }
 
     const deleteList = async (token) => {
       try {
@@ -181,7 +197,7 @@ export default function Column({ column }) {
           }
         })
         )
-        await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+        await update(accesstoken);
         handleSuccess(response.message);
       } catch (error) {
         if (error.response?.status === 401) {
@@ -192,7 +208,7 @@ export default function Column({ column }) {
       }
     };
     try {
-      deleteList(accesstoken);
+      await deleteList(accesstoken);
     } catch (error) {
       toast.error('Error creating task!' || error.response?.data.message);
     }
