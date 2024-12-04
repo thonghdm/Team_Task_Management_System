@@ -596,6 +596,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                     }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     handleSuccess();
                 } catch (error) {
                     throw error;

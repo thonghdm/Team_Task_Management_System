@@ -25,10 +25,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { createAuditLog } from '~/redux/project/auditLog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { fetchTaskById } from '~/redux/project/task-slice';
+
+import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
+import { useParams } from 'react-router-dom';
+
+
 const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
   const [link, setLink] = useState('');
   const [displayText, setDisplayText] = useState('');
   const [file, setFile] = useState(null);
+  const { projectId } = useParams();
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -81,6 +87,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
               user_id: userData?._id,
               task_id: taskId,
             }}))
+            if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
           toast.success("File upload successfully");
           setLink('');
           setDisplayText('');
