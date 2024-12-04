@@ -236,7 +236,7 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
     function checkMemberIdExists(members, users) {
         for (const member of members) {
             for (const user of users) {
-                if (member.memberId === user._id) {
+                if (member.memberId === user?.memberId?._id) {
                     return true;
                 }
             }
@@ -255,15 +255,18 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
                 setError('Please select at least one user');
                 return;
             }
-
+            console.log('selectedUsers', selectedUsers);
             // Format data
             const userInvite = selectedUsers.map(user => ({
                 memberId: user._id,
                 task_id: taskId,
                 user_invite: userData._id,
-                user_name: userData.username
+                user_name_invite: userData.username,
+                user_name: user.username,
+                user_email: user.email
             }));
-
+            console.log('task?.assigned_to_id', task?.assigned_to_id);
+            console.log('userInvite', userInvite);
             // Check existing members
             if (checkMemberIdExists(userInvite, task?.assigned_to_id)) {
                 toast.error('One or more users already exist');

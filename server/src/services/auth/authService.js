@@ -98,7 +98,6 @@ const resetPasswordOTPService = (email) => new Promise((resolve, reject) => {
     (async () => {
         try {
             const user = await User.findOne({ email })
-            console.log(user)
             if (!user) {
                 return resolve({
                     err: 1,
