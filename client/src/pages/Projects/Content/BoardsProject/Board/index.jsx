@@ -150,6 +150,7 @@ const Board = ({ board }) => {
     const moveCardDiffColumn = async (token) => {
       try {
         const response = await moveCardTodifferentColumn(token, data);
+        console.log('response', response.project._id);
         const res = await dispatch(createAuditLog_project({
           accesstoken: token,
           data: {
@@ -157,7 +158,7 @@ const Board = ({ board }) => {
             action: 'Update',
             entity: 'List',
             user_id: userData?._id,
-            list_id: response?.list?._id,
+            list_id: response?.project?._id,
           }
         })
         )
