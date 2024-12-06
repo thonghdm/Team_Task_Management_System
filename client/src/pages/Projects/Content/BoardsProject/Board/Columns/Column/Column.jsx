@@ -87,9 +87,22 @@ export default function Column({ column }) {
   const { projectId } = useParams();
   const { accesstoken, userData } = useSelector(state => state.auth)
 
+
+  const { members } = useSelector((state) => state.memberProject);
+  const currentUserRole = members?.members?.find(
+    member => member.memberId._id === userData?._id
+  )?.isRole;
+  const isViewer = currentUserRole === 'Viewer';
+
+
+
   const handleClickAddCard = async () => {
+    if (isViewer) {
+      toast.error('You do not have permission to create a task');
+      return;
+    }
     if (!valueInputNewCard) {
-      toast.error('Please enter a new task title');
+      toast.error('Please write a new task title');
       return;
     }
     const taskData = {
@@ -160,6 +173,10 @@ export default function Column({ column }) {
 
   //
   const handleClickDeleteColumn = async () => {
+    if (isViewer) {
+      toast.error('You do not have permission to remove a task');
+      return;
+    }
     const listData = {
       is_active: false
     };
@@ -178,7 +195,7 @@ export default function Column({ column }) {
           throw new Error('Project failed');
         }
       }
-      catch(error) {
+      catch (error) {
         throw error;
       }
     }

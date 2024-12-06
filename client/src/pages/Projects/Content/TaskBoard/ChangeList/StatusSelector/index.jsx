@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Select, MenuItem } from '@mui/material';
 import { useTheme } from '@mui/material';
 
-const StatusSelector = ({ value, onChange, title="Status" }) => {
+const StatusSelector = ({ value, onChange, title = "Status", isClickable = true }) => {
   const [status, setStatus] = useState(value || 'To Do');
   const theme = useTheme();
 
-  useEffect(() => {
-    setStatus(value || 'To Do');
-  }, [value]);
+  // useEffect(() => {
+  //   setStatus(value || 'To Do');
+  // }, [value]);
 
   const handleChange = (event) => {
     const newValue = event.target.value;
@@ -16,6 +16,8 @@ const StatusSelector = ({ value, onChange, title="Status" }) => {
     if (onChange) {
       onChange(newValue);
     }
+    if (!isClickable) setStatus(value);
+
   };
 
   const getStatusColor = (level) => {

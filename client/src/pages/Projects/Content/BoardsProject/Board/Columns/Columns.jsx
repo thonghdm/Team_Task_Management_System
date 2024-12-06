@@ -19,8 +19,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import Column from './Column/Column';
 // import { boardSelector } from '~/redux/selectors/boardSelector';
 // import { createNewColumn } from '~/redux/thunk/column';
+import './styles.css';
 
-export default function Columns({ lists = [] }) {
+export default function Columns({ lists = [], isClickable = true }) {
   const theme = useTheme();
   const [openFormCreateColumn, setOpenFormCreateColumn] = useState(false);
   const [valueInputNewColumn, setValueInputNewColumn] = useState('');
@@ -31,7 +32,6 @@ export default function Columns({ lists = [] }) {
     setOpenFormCreateColumn(!openFormCreateColumn);
     setValueInputNewColumn('');
   };
-
   ////////////////////////////////////////////////////////////////
   const { projectId } = useParams();
   const { accesstoken, userData } = useSelector(state => state.auth)
@@ -57,8 +57,13 @@ export default function Columns({ lists = [] }) {
   };
 
   const handleClickAddList = () => {
+    console.log('lists', isClickable)
+    if (!isClickable) {
+      toast.error('You do not have permission to add list');
+      return;
+    }
     if (!valueInputNewColumn.trim()) {
-      toast.error('Please enter a new column title.');
+      toast.error('Please write a new column title.');
       return;
     }
 
@@ -117,10 +122,11 @@ export default function Columns({ lists = [] }) {
       strategy={horizontalListSortingStrategy}
     >
       <Box
+        className="scrollable"
         sx={{
           display: 'flex',
           height: '100%',
-          maxWidth: '100vw',
+          maxWidth: '82vw',
           overflowX: 'auto',
           '&::-webkit-scrollbar-thumb': {
             backgroundColor: 'primary.light',

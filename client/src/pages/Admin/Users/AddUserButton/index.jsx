@@ -17,14 +17,18 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useTheme } from '@mui/system';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { registerWithEmail } from '~/redux/actions/authAction';
+import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
 
 
 
 
-const AddUserButton = ({ initialUser }) => {
+const AddUserButton = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [user, setUser] = useState(initialUser || {
+  const dispatch = useDispatch(); 
+  const [user, setUser] = useState({
     name: '',
     email: '',
     newPassword: '',
@@ -80,29 +84,45 @@ const AddUserButton = ({ initialUser }) => {
     else if (!isValidName(user.name)) newErrors.name = 'Name is invalid';
 
     if (!user.email) newErrors.email = 'Email is required';  // Kiểm tra email
-    else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(user.email)) newErrors.email = 'Email is invalid';  
-    
+    else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(user.email)) newErrors.email = 'Email is invalid';
+
     if (!user.newPassword) newErrors.newPassword = 'New password is required';
-    
+
     if (user.newPassword !== user.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     if (!isStrongPassword(user.newPassword)) {
       newErrors.newPassword = 'Password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special character';
     }
-    
+
     if (!isStrongPassword(user.confirmPassword)) {
       newErrors.confirmPassword = 'Password must be at least 8 characters long, contain uppercase and lowercase letters, at least one number, and one special character';
     }
-    
+
     setError(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
-    console.log(user);
+    try {
+      const res = await dispatch(registerWithEmail(user.name, user.email, user.newPassword));
+      if (res.success === true) {
+        toast.success('User added successfully');
+        setUser({
+          name: '',
+          email: '',
+          newPassword: '',
+          confirmPassword: '',
+        }); // Reset form
+      }
+      else {
+        setError(res.message);
+      }
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   const handleCancel = () => {
@@ -140,8 +160,7 @@ const AddUserButton = ({ initialUser }) => {
         </Button>
       </Box>
       <CardContent>
-        <Box component="form" onSubmit={handleSubmit}>
-
+        <Box>
           <TextField
             fullWidth
             label="Name"
@@ -150,7 +169,7 @@ const AddUserButton = ({ initialUser }) => {
             error={!!error.name}
             helperText={error.name}
             onChange={handleChange}
-            placeholder="Điệp Thảo"
+            placeholder="Hasde Tung"
             variant="outlined"
             margin="normal"
           />
@@ -163,11 +182,12 @@ const AddUserButton = ({ initialUser }) => {
             error={!!error.email}
             helperText={error.email}
             onChange={handleChange}
-            placeholder="diepthao@gmail.com"
+            placeholder="ooooo@gmail.com"
             variant="outlined"
             margin="normal"
             sx={{
-              mb: 2}}
+              mb: 2
+            }}
           />
 
 
@@ -267,7 +287,7 @@ const AddUserButton = ({ initialUser }) => {
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-        >
+          >
           Add
         </Button>
       </CardActions>

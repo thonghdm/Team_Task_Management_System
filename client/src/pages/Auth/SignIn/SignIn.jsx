@@ -13,6 +13,7 @@ import Card from '@mui/material/Card';
 import { loginWithEmail } from '~/redux/actions/authAction'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 
 
@@ -54,7 +55,15 @@ export default function SignIn() {
 
         return isValid;
     };
-
+    const resendOtp = async () => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/auth/resend-otp', { email });
+        }
+        catch (error) {
+            console.error('OTP resend error:', error);
+        }
+    };
+    const typeOtp = 1;
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateInputs()) {
@@ -66,7 +75,13 @@ export default function SignIn() {
                     if (result?.data?.userWithToken?.isAdmin === true) {
                         navigate('/admin/users/101');
                     } else {
-                        navigate('/board/home/1');
+                        if (result?.data?.userWithToken?.is_verified === false) {
+                            await resendOtp();
+                            navigate('/otp', { state: { email, typeOtp } }); // Pass email to OTP page
+                        }
+                        else {
+                            navigate('/board/home/1');
+                        }
                     }
                 }
 

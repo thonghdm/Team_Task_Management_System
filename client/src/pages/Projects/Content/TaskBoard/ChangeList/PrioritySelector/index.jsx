@@ -1,18 +1,19 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Select, MenuItem } from '@mui/material';
 import { useTheme } from '@mui/material';
-const PrioritySelector = ({ value, onChange }) => {
+const PrioritySelector = ({ value, onChange, isClickable = true }) => {
   const [priority, setPriority] = useState(value || 'Medium');
   const theme = useTheme();
-  useEffect(() => {
-    setPriority(value || 'Medium');
-  }, [value]);
+  // useEffect(() => {
+  //   setPriority(value || 'Medium');
+  // }, [value]);
   const handleChange = (event) => {
     const newValue = event.target.value;
     setPriority(newValue);
     if (onChange) {
       onChange(newValue);
     }
+    if (!isClickable) setPriority(value);
   };
 
   const getPriorityColor = (level) => {
@@ -33,7 +34,7 @@ const PrioritySelector = ({ value, onChange }) => {
       backgroundColor: 'transparent',
       color: getPriorityColor(priority),
       border: `1px solid ${theme.palette.text.secondary}`,
-        borderRadius: '16px',
+      borderRadius: '16px',
       '& .MuiOutlinedInput-notchedOutline': {
         border: 'none'
       },
@@ -78,7 +79,7 @@ const PrioritySelector = ({ value, onChange }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Typography sx={{ width: '100px', color: 'text.primary' }}>
         Priority
       </Typography>

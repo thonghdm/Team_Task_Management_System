@@ -11,7 +11,8 @@ import { useTheme } from '@mui/material/styles';
 const DueDatePicker = ({ 
     lableDate, 
     onDateChange, 
-    initialDate = null  // Add an optional initialDate prop
+    initialDate = null,  // Add an optional initialDate prop
+    isClickable = true
 }) => {
     const theme = useTheme();
     const [date, setDate] = useState(() => {
@@ -20,12 +21,12 @@ const DueDatePicker = ({
     });
     const [open, setOpen] = useState(false);
 
-    // Add useEffect to update state if initialDate changes
-    useEffect(() => {
-        if (initialDate) {
-            setDate(dayjs(initialDate));
-        }
-    }, [initialDate]);
+    // // Add useEffect to update state if initialDate changes
+    // useEffect(() => {
+    //     if (initialDate) {
+    //         setDate(dayjs(initialDate));
+    //     }
+    // }, [initialDate]);
 
     const handleDateChange = (newDate) => {
         // Use the provided newDate or fall back to initial value
@@ -39,6 +40,7 @@ const DueDatePicker = ({
     };
 
     const handleChipClick = () => {
+        if (!isClickable) return;
         setOpen(true);
     };
 

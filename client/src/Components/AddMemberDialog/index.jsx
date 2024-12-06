@@ -19,8 +19,8 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { styled } from '@mui/material/styles';
-import {createAuditLog} from '~/redux/project/auditLog-slice';
-import {createAuditLog_project} from '~/redux/project/auditlog-slice/auditlog_project';
+import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom';
@@ -96,7 +96,7 @@ const UserSearchInput = ({
             if (!inputValue.trim()) {
                 setOptions([]);
                 return;
-            }   
+            }
 
             setIsSearching(true);
             try {
@@ -220,7 +220,7 @@ const UserSearchInput = ({
     );
 };
 
-const AddMemberDialog = ({ open, onClose, taskId }) => {
+const AddMemberDialog = ({ open, onClose, taskId, isClickable = true }) => {
     const theme = useTheme();
     const { accesstoken, userData } = useSelector(state => state.auth)
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -255,8 +255,11 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
                 setError('Please select at least one user');
                 return;
             }
-            console.log('selectedUsers', selectedUsers);
-            console.log('userData', userData);
+
+            if(!isClickable) {
+                toast.error("You don't have permission to invite user");
+                return;
+            }
             // Format data
             const userInvite = selectedUsers.map(user => ({
                 memberId: user._id,
@@ -291,7 +294,7 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
                         accesstoken: token,
                         data: userInvite
                     }));
-                    
+
                     if (inviteUserTask.rejected.match(resultAction)) {
                         if (resultAction.payload?.err === 2) {
                             const newToken = await refreshToken();
@@ -299,32 +302,35 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Invite members failed');
                     }
-                    if(userInvite.length > 0)
-                    {
-                            await dispatch(createAuditLog({ 
-                                accesstoken: token, 
-                                data: { task_id: taskId, 
-                                        action:'Add', 
-                                        entity:'Member', 
-                                        old_value: userInvite.map(user => user.user_name).join(','),
-                                        user_id:userData?._id} }));
-                            await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-                            await dispatch(createAuditLog_project({
-                                accesstoken: token,
-                                data: {
-                                  project_id: projectId,
-                                  action: 'Update',
-                                  entity: 'Task',
-                                  user_id: userData?._id,
-                                  task_id: taskId,
-                                }}))
-                              await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                    if (userInvite.length > 0) {
+                        await dispatch(createAuditLog({
+                            accesstoken: token,
+                            data: {
+                                task_id: taskId,
+                                action: 'Add',
+                                entity: 'Member',
+                                old_value: userInvite.map(user => user.user_name).join(','),
+                                user_id: userData?._id
+                            }
+                        }));
+                        await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                        await dispatch(createAuditLog_project({
+                            accesstoken: token,
+                            data: {
+                                project_id: projectId,
+                                action: 'Update',
+                                entity: 'Task',
+                                user_id: userData?._id,
+                                task_id: taskId,
+                            }
+                        }))
+                        await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     }
                     await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
                     onClose();
                 } catch (error) {
-                    throw error; 
+                    throw error;
                 }
             };
             // Start the invite process

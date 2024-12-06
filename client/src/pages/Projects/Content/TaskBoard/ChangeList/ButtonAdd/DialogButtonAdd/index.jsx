@@ -54,6 +54,15 @@ const DialogButtonAdd = ({ open, onClose }) => {
         }
     }, [projectData]);
 
+
+    //////////////////////////////// check view
+    const { members } = useSelector((state) => state.memberProject);
+    const currentUserRole = members?.members?.find(
+        member => member.memberId._id === userData?._id
+    )?.isRole;
+    const isViewer = currentUserRole === 'Viewer';
+
+
     const handleAddTaskDialogOpen = () => {
         onClose();  // Đóng Dialog chính
         setAddTaskDialogOpen(true);
@@ -76,6 +85,10 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const handleAddTask = async () => {
         if (!newTaskName || !selectedList) {
             toast.error('Task name or list is missing!');
+            return;
+        }
+        if (isViewer) {
+            toast.error('You do not have permission to perform this action!');
             return;
         }
         if (new Date(startDate) > new Date(dueDate)) {
@@ -140,6 +153,10 @@ const DialogButtonAdd = ({ open, onClose }) => {
     const handleAddList = async () => {
         if (!newListName) {
             toast.error('List name is missing!');
+            return;
+        }
+        if (isViewer) {
+            toast.error('You do not have permission to perform this action!');
             return;
         }
         const listData = {
@@ -250,7 +267,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
                     <FormControl fullWidth variant="outlined" margin="normal">
                         <InputLabel>List</InputLabel>
                         <Select
-                        
+
                             value={selectedList}
                             onChange={(e) => setSelectedList(e.target.value)}
                             label="List"
@@ -264,7 +281,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
                             }}
                         >
                             {getNameIdList.map((list) => (
-                                <MenuItem key={list.listId} value={list.listId} 
+                                <MenuItem key={list.listId} value={list.listId}
                                 >
                                     {list.listName}
                                 </MenuItem>

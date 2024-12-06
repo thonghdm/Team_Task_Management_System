@@ -77,13 +77,20 @@ const Overview = () => {
   // const isAdmin = (members, userId) => {
   //   return members.some(member => member?.isRole === "Admin" && member?.memberId?._id === userId);
   // };
+
+  const currentUserRole = members?.members?.find(
+    member => member.memberId._id === userData?._id
+  )?.isRole;
+  const isViewer = currentUserRole === 'Viewer';
+
+
   return (
     <>
       <Paper className="scrollable" elevation={3} sx={{ maxHeight: 500, p: 2, backgroundColor: theme.palette.background.default, color: theme.palette.text.primary, mt: 3 }}>
         <Typography variant="h5" gutterBottom>
           Project description
         </Typography>
-        <ProjectDescription initialContent={projectData?.project?.description} context={"descriptionProject"} />
+        <ProjectDescription isEditable={isViewer ? false : true} initialContent={projectData?.project?.description} context={"descriptionProject"} />
       </Paper>
       <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
@@ -155,7 +162,7 @@ const Overview = () => {
         projectName={projectData?.project?.projectName}
         projectData={projectData}
       />
-      <ProfileDialog open={Boolean(anchorEl)} onClose={handleClose} member={selectedMember}/>
+      <ProfileDialog open={Boolean(anchorEl)} onClose={handleClose} member={selectedMember} />
       {/* <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}

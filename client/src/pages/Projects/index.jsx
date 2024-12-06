@@ -46,7 +46,7 @@ const Projects = () => {
   const isStarreds = Array.isArray(starred?.data) && starred.data.some(
     (item) => item?.projectId?._id === projectId && item?.userId === userData?._id && item?.isStarred
   );
-    
+
   const [isClicked, setIsClicked] = useState(isStarreds);
 
 
@@ -123,7 +123,7 @@ const Projects = () => {
           // toast.success('Update title task successfully!');
           setIsClicked(true);
         };
-      const saveStarredProject = async (token) => {
+        const saveStarredProject = async (token) => {
           try {
             const resultAction = await dispatch(createStarred({
               accesstoken: token,
@@ -135,14 +135,14 @@ const Projects = () => {
                 return saveStarredProject(newToken);
               }
               throw new Error('Starred failed');
-            }    
+            }
             await dispatch(getStarredThunks({ accesstoken: token, memberId: userData._id }));
             handleSuccess();
           } catch (error) {
             throw error;
           }
         };
-        saveStarredProject(accesstoken);  
+        saveStarredProject(accesstoken);
       }
       else {
         const data = {
@@ -166,7 +166,7 @@ const Projects = () => {
                 return updateStarredProject(newToken);
               }
               throw new Error('Starred failed');
-            }    
+            }
             await dispatch(getStarredThunks({ accesstoken: token, memberId: userData._id }));
             handleSuccess();
           } catch (error) {
@@ -179,6 +179,13 @@ const Projects = () => {
       throw error;
     }
   }
+
+  const currentUserRole = members?.members?.find(
+    member => member.memberId._id === userData?._id
+  )?.isRole;
+  const isViewer = currentUserRole === 'Viewer';
+  const isAdmin = currentUserRole === 'Admin';
+
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: 'calc(100vh - 64px)' }}>
       <Paper elevation={3} sx={{ p: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
@@ -187,8 +194,10 @@ const Projects = () => {
             {projectData && <Typography>
               <EditableText initialText={projectData?.project?.projectName}
                 onSave={handleSaveTitle}
-                maxWidth="1000px" t
-                itleColor="primary.main" />
+                maxWidth="1000px"
+                itleColor="primary.main"
+                isClickable={!isViewer}
+              />
             </Typography>}
 
             <IconButton
@@ -219,7 +228,7 @@ const Projects = () => {
                     width: 30,
                     height: 30,
                     backgroundColor: 'text.secondary',
-                    border:  `2px solid ${theme.palette.text.secondary}`,
+                    border: `2px solid ${theme.palette.text.secondary}`,
 
                   }
                 }}
@@ -255,7 +264,7 @@ const Projects = () => {
             >
               Share
             </Button>
-            <ProjectMenu />
+            <ProjectMenu isClickable={isAdmin}/>
           </Box>
         </Box>
         <Button

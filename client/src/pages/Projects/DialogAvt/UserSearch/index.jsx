@@ -97,11 +97,11 @@ const UserSearchInput = ({
                 const filtered = memberData?.users?.filter(user => {
                     const searchValue = inputValue.toLowerCase();
                     const isMatch = user?.displayName.toLowerCase().includes(searchValue) ||
-                                    user?.email.toLowerCase().includes(searchValue) ||
-                                    user?.username.toLowerCase().includes(searchValue);
+                        user?.email.toLowerCase().includes(searchValue) ||
+                        user?.username.toLowerCase().includes(searchValue);
                     const isSelected = value.some(selected => selected?._id === user?._id);
                     return isMatch && !isSelected;
-                  });
+                });
                 if (filtered) { setOptions(filtered); }
 
             } catch (error) {
@@ -212,9 +212,9 @@ const UserSearchInput = ({
 const roles = [
     { value: 'Admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
     { value: 'Member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
-    // { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
+    { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
 ];
-const UserSearch = () => {
+const UserSearch = ({ isClickable = false }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [inviteRole, setInviteRole] = useState('Member');
     const { accesstoken, userData } = useSelector(state => state.auth);
@@ -242,7 +242,10 @@ const UserSearch = () => {
             setError('Please select at least one user');
             return;
         }
-        console.log('userData', userData);
+        if (!isClickable){
+            toast.error('You do not have permission to invite members');
+            return;
+        }
         const usersWithRole = selectedUsers.map(user => ({
             isRole: inviteRole,
             memberId: user._id,

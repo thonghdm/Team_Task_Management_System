@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { TextField, IconButton } from '@mui/material';
 import { Close, CheckCircle } from '@mui/icons-material';
 
-function EditableText({ initialText, onSave, maxWidth, titleColor }) {
+function EditableText({ initialText, onSave, maxWidth, titleColor, isClickable = true }) {
     const [isEditing, setIsEditing] = useState(false);
     const [text, setText] = useState(initialText);
     const [inputWidth, setInputWidth] = useState('auto');
@@ -19,7 +19,9 @@ function EditableText({ initialText, onSave, maxWidth, titleColor }) {
     }, [text]);
 
     const handleTextClick = () => {
-        setIsEditing(true);
+        if (isClickable) {
+            setIsEditing(true);
+        }
     };
 
     const handleSave = () => {
@@ -96,14 +98,14 @@ function EditableText({ initialText, onSave, maxWidth, titleColor }) {
                             onClick={handleCancel}
                             sx={{ width: '23px', height: '23px' }}
                         >
-                            <Close sx={{ color: '#f44336', fontSize: '20px'}} />
+                            <Close sx={{ color: '#f44336', fontSize: '20px' }} />
                         </IconButton>
                         <IconButton
                             onMouseDown={(e) => e.preventDefault()} // Prevent onBlur from being triggered
                             onClick={handleSave}
                             sx={{ width: '23px', height: '23px' }}
                         >
-                            <CheckCircle sx={{ color: '#4caf50', fontSize: '20px'}} />
+                            <CheckCircle sx={{ color: '#4caf50', fontSize: '20px' }} />
                         </IconButton>
 
                     </div>
