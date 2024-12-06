@@ -30,7 +30,7 @@ import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 
 
-const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
+const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = true }) => {
   const [link, setLink] = useState('');
   const [displayText, setDisplayText] = useState('');
   const [file, setFile] = useState(null);
@@ -49,6 +49,10 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
     try {
       if (!file) {
         toast.error("File is required");
+        return;
+      }
+      if (!isClickable) {
+        toast.error("You don't have permission to upload file");
         return;
       }
       const fileData = {
@@ -135,7 +139,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
         {file && <Typography sx={{ mb: 2 }} variant="body2" gutterBottom>
           {file?.name}
         </Typography>}
-        <TextField
+        {/* <TextField
           fullWidth
           placeholder="Find recent links or paste a new link"
           variant="outlined"
@@ -150,7 +154,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType }) => {
           value={displayText}
           onChange={(e) => setDisplayText(e.target.value)}
           sx={{ mb: 2 }}
-        />
+        /> */}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>

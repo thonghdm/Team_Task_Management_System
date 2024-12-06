@@ -36,7 +36,7 @@ import { updateTaskThunks } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 
-import { createAuditLog} from '~/redux/project/auditLog-slice';
+import { createAuditLog } from '~/redux/project/auditLog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 // import AnimationDone from '~/Components/AnimationDone';
 import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
@@ -77,7 +77,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
     const [openMember, setOpenMember] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
     const [selectedMemberName, setSelectedMemberName] = useState(null);
-    const handleDeleteMemberClick = (memberId,memberName) => {
+    const handleDeleteMemberClick = (memberId, memberName) => {
         setSelectedMember(memberId);
         setSelectedMemberName(memberName);
         setOpenMember(true);
@@ -115,8 +115,17 @@ const ChangeList = ({ open, onClose, taskId }) => {
             }
         };
         getTaskDetail(accesstoken);
-        
+
     }, [dispatch, taskId, accesstoken]);
+
+    //check view
+    const { members } = useSelector((state) => state.memberProject);
+    const currentUserRole = members?.members?.find(
+        member => member.memberId._id === userData?._id
+    )?.isRole;
+    const isViewer = currentUserRole === 'Viewer';
+
+
     /// get file
     const { files } = useSelector(state => state.uploadFile);
 
@@ -146,6 +155,10 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 name: selectedMemberName,
                 is_active: false
             };
+            if (isViewer) {
+                toast.error('You do not have permission to perform this action!');
+                return;
+            }
             const handleSuccess = () => {
                 toast.success('Delete member successfully!');
                 setOpenMember(false);
@@ -165,13 +178,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete members failed');
                     }
-                    await dispatch(createAuditLog({ 
-                        accesstoken: token, 
-                        data: { task_id: taskId, 
-                                action:'Delete', 
-                                entity:'Member',
-                                old_value: dataDelete?.name, 
-                                user_id:userData?._id} }));
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Delete',
+                            entity: 'Member',
+                            old_value: dataDelete?.name,
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(createAuditLog_project({
                         accesstoken: token,
                         data: {
@@ -183,7 +199,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                     }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -211,6 +227,10 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 is_active: false,
                 old_value: selectedLabelName
             };
+            if (isViewer) {
+                toast.error('You do not have permission to perform this action!');
+                return;
+            }
             const handleSuccess = () => {
                 toast.success('Delete label successfully!');
                 setOpenLabel(false);
@@ -230,13 +250,16 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete label failed');
                     }
-                    await dispatch(createAuditLog({ 
-                        accesstoken: token, 
-                        data: { task_id: taskId, 
-                                action:'Delete', 
-                                entity:'Label',
-                                old_value: dataDelete?.old_value, 
-                                user_id:userData?._id} }));
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Delete',
+                            entity: 'Label',
+                            old_value: dataDelete?.old_value,
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(createAuditLog_project({
                         accesstoken: token,
@@ -248,7 +271,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             user_id: userData?._id
                         }
                     }));
-                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -290,8 +313,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Update title task failed');
                     }
-                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
-                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -310,6 +333,10 @@ const ChangeList = ({ open, onClose, taskId }) => {
             const dataSave = {
                 priority: newPriority
             };
+            if (isViewer) {
+                toast.error('You do not have permission to perform this action!');
+                return;
+            }
             const handleSuccess = () => {
                 // toast.success('Update priority task successfully!');
             };
@@ -327,14 +354,17 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete priority task failed');
                     }
-                    await dispatch(createAuditLog({ 
-                        accesstoken: token, 
-                        data: { task_id: taskId, 
-                                action:'Update', 
-                                entity:'Priority',
-                                old_value: task?.priority,
-                                new_value: newPriority, 
-                                user_id:userData?._id} }));
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Priority',
+                            old_value: task?.priority,
+                            new_value: newPriority,
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(createAuditLog_project({
                         accesstoken: token,
@@ -346,8 +376,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             user_id: userData?._id
                         }
                     }));
-                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
-                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -367,6 +397,10 @@ const ChangeList = ({ open, onClose, taskId }) => {
             let dataSave = {
                 status: newStatus
             };
+            if (isViewer) {
+                toast.error('You do not have permission to perform this action!');
+                return;
+            }
             if (newStatus === 'Completed') {
                 dataSave = { ...dataSave, done_date: new Date().toISOString() };
             } else {
@@ -395,14 +429,17 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete status task failed');
                     }
-                     await dispatch(createAuditLog({ 
-                        accesstoken: token, 
-                        data: { task_id: taskId, 
-                                action:'Update', 
-                                entity:'Status', 
-                                old_value: task?.status,
-                                new_value: newStatus,
-                                user_id:userData?._id} }));
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Status',
+                            old_value: task?.status,
+                            new_value: newStatus,
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(createAuditLog_project({
                         accesstoken: token,
@@ -414,8 +451,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             user_id: userData?._id
                         }
                     }));
-                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
-                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -451,17 +488,20 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete start date task failed');
                     }
-                    await dispatch(createAuditLog({ 
-                        accesstoken: token, 
-                        data: { task_id: taskId, 
-                                action:'Update', 
-                                entity:'Start Date',
-                                old_value: dayjs(task?.start_date).format('MMM DD, hh:mm A'),
-                                new_value: dayjs(newStartDate).format('MMM DD, hh:mm A'),
-                                user_id:userData?._id} }));
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Start Date',
+                            old_value: dayjs(task?.start_date).format('MMM DD, hh:mm A'),
+                            new_value: dayjs(newStartDate).format('MMM DD, hh:mm A'),
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
-                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -501,14 +541,17 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                         throw new Error('Delete due date task failed');
                     }
-                    await dispatch(createAuditLog({ 
-                        accesstoken: token, 
-                        data: { task_id: taskId, 
-                                action:'Update', 
-                                entity:'Due Date', 
-                                old_value: dayjs(task?.end_date).format('MMM DD, hh:mm A'),
-                                new_value: dayjs(newDueDate).format('MMM DD, hh:mm A'),
-                                user_id:userData?._id} }));
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Due Date',
+                            old_value: dayjs(task?.end_date).format('MMM DD, hh:mm A'),
+                            new_value: dayjs(newDueDate).format('MMM DD, hh:mm A'),
+                            user_id: userData?._id
+                        }
+                    }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(createAuditLog_project({
                         accesstoken: token,
@@ -520,8 +563,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             user_id: userData?._id
                         }
                     }));
-                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
-                    await dispatch(getTaskByMemberIDThunk({ accesstoken:token, memberID: userData?._id }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -536,12 +579,12 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
     /// check ID leave task
     const isAssignedToMe = (assignedToIdArray, userId) => {
-        return assignedToIdArray.some(item => item.memberId?._id === userId);
+        return assignedToIdArray?.some(item => item?.memberId?._id === userId);
     };
 
     /// leave task
     const findAssignedMember = (assignedToId, userId) => {
-        const matchedItem = assignedToId.find(item => item.memberId?._id === userId);
+        const matchedItem = assignedToId?.find(item => item?.memberId?._id === userId);
         return matchedItem?._id || null; // Trả về _id hoặc null nếu không tìm thấy
     }
 
@@ -596,7 +639,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                     }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
-                    if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -629,7 +672,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                     {/* <Typography variant="h6">{task?.task_name}</Typography> */}
                     <Typography >
-                        <EditableText initialText={task?.task_name} onSave={handleSaveTitle} maxWidth="780px" titleColor="primary.main" />
+                        <EditableText isClickable={!isViewer} initialText={task?.task_name} onSave={handleSaveTitle} maxWidth="780px" titleColor="primary.main" />
                     </Typography>
                     <IconButton onClick={onClose} sx={{ color: theme.palette.text.primary }}>
                         <Close />
@@ -697,11 +740,13 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     <PrioritySelector
                         value={task?.priority}
                         onChange={handleSavePriority}
+                        isClickable={!isViewer}
                     />
 
                     <StatusSelector
                         value={task?.status}
                         onChange={handleSaveStatus}
+                        isClickable={!isViewer}
                     />
                     {/* {showAnimation && <AnimationDone />} */}
 
@@ -709,11 +754,13 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         lableDate="Start Date"
                         onDateChange={handleSaveStartDate}
                         initialDate={task?.start_date}
+                        isClickable={!isViewer}
                     />
                     <DueDatePicker
                         lableDate="Due Date"
                         onDateChange={handleSaveDueDate}
                         initialDate={task?.end_date}
+                        isClickable={!isViewer}
                     />
 
                     <Box>
@@ -724,7 +771,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                     Add
                                 </Button>
                             </Box>
-                            <FileUploadDialog open={openFile} onClose={handleCloseFile} taskId={taskId} entityType={"Task"} />
+                            <FileUploadDialog open={openFile} onClose={handleCloseFile} taskId={taskId} entityType={"Task"} isClickable={!isViewer} />
                         </Box>
                         <Box>
                             {files?.length > 0 && (files?.map((file, index) => (
@@ -738,7 +785,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                             </Box>
                                         </Box>
                                     </Box>
-                                    <FileManagementDialog fileManagement={file} userData={userData} taskId={taskId} />
+                                    <FileManagementDialog fileManagement={file} userData={userData} taskId={taskId} isClickable={!isViewer} />
                                     {/* <FileManagementDialogs open={openManagement} onClose={handleCloseManagement} /> */}
                                 </Box>
                             )))}
@@ -749,7 +796,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Typography>Description</Typography>
-                        <ProjectDescription initialContent={task?.description} context={"descriptionTask"} taskId={taskId} />
+                        <ProjectDescription isEditable={isViewer ? false : true} initialContent={task?.description} context={"descriptionTask"} taskId={taskId} />
                     </Box>
 
 
@@ -816,7 +863,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                     </Box>
 
-                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} />
+                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} isClickable={!isViewer}/>
                 </Box>
             </DialogContent>
 

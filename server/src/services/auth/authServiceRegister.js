@@ -130,7 +130,7 @@ const authServiceRegister = {
                 otp_expired: new Date(Date.now() + 600000), // 60s
                 otp_type: 'register'
             })
-
+            
             const savedUser = await newUser.save()
             // eslint-disable-next-line no-unused-vars
             const { password, otp_code, ...userWithoutPasswordOTP } = savedUser._doc
@@ -141,7 +141,7 @@ const authServiceRegister = {
                 message: `Your OTP code is ${otp}` // Nội dung email
             }
             try {
-                sendEmail(emailOptions)
+                await sendEmail(emailOptions)
                 console.log('Email sent successfully!')
             } catch (error) {
                 console.error('Error sending email:', error)

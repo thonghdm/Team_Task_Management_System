@@ -108,7 +108,7 @@ const Comment = ({ img, author, content, id, timestamp, commentID, taskId }) => 
 const CommentList = ({ comments, taskId }) => {
   return (
     <Box sx={{ mt: 1 }}>
-      {[...comments]?.reverse().map((comment, index) => (
+      {[...comments]?.reverse()?.map((comment, index) => (
         <Comment
           key={`${comment?._id}-${index}`}
           img={comment?.user_id?.image}

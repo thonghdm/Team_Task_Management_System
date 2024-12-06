@@ -71,7 +71,7 @@ const StyledDivider = styled(Divider)(({ theme }) => ({
     borderColor: theme.palette.grey[800]
 }));
 
-const ProjectMenu = () => {
+const ProjectMenu = ({ isClickable = false }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const [openDialog, setOpenDialog] = useState(false);
@@ -107,6 +107,10 @@ const ProjectMenu = () => {
             const dataDelete = {
                 isActive: false
             };
+            if(!isClickable){
+                toast.error('You do not have permission to delete this project!');
+                return;
+            }
             const handleSuccess = () => {
                 toast.success('Delete project successfully!');
                 handleCloseAlert();
@@ -156,7 +160,7 @@ const ProjectMenu = () => {
                 open={open}
                 onClose={handleClose}
             >
-                <StyledMenuItem onClick={handleOpenDialog}>
+                {/* <StyledMenuItem onClick={handleOpenDialog}>
                     <ListItemIcon>
                         <Edit fontSize="small" />
                     </ListItemIcon>
@@ -226,9 +230,9 @@ const ProjectMenu = () => {
                         <Archive fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>Archive</ListItemText>
-                </StyledMenuItem>
+                </StyledMenuItem> */}
 
-                <StyledDivider />
+                {/* <StyledDivider /> */}
 
                 <DeleteMenuItem onClick={() => setIsAlertOpen(true)}>
                     <ListItemIcon>

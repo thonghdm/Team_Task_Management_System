@@ -32,8 +32,9 @@ import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectD
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { fetchDeleteMember, fetchUpdateMemberRole, fetchLeaveProjectAdmin} from '~/redux/project/projectRole-slice/index';
+import { fetchDeleteMember, fetchUpdateMemberRole, fetchLeaveProjectAdmin } from '~/redux/project/projectRole-slice/index';
 import { useNavigate } from 'react-router-dom';
+
 
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
@@ -58,7 +59,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 const roles = [
     { value: 'Admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
     { value: 'Member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
-    // { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
+    { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
     { value: 'KickMember', label: 'KickMember', description: "KickMember" },
 ];
 const DialogAvt = ({ open, onClose, projectName }) => {
@@ -101,6 +102,9 @@ const DialogAvt = ({ open, onClose, projectName }) => {
         member => member.memberId._id === userData?._id
     )?.isRole;
     const isAdmin = currentUserRole === 'Admin';
+    const isViewer = currentUserRole === 'Viewer';
+
+
 
     const refreshToken = useRefreshToken();
 
@@ -197,7 +201,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 await dispatch(fetchLeaveProjectAdmin({ accesstoken: token, data: dataDelete })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
                 await dispatch(fetchProjectDetail({ accesstoken, projectId }));
-                handleLeaveProject(); 
+                handleLeaveProject();
                 navigate('/board/tasks/mytask');
 
             } catch (error) {
@@ -227,8 +231,9 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 <DialogContent sx={{ bgcolor: 'background.paper', color: 'text.primary' }}>
                     <Box sx={{ fontSize: '0.75rem' }}>
                         <Typography variant="subtitle1" sx={{ mb: 1 }}>Invite with email</Typography>
-                        <UserSearch />
-                        <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>Access settings</Typography>
+                        <UserSearch isClickable={isAdmin} />
+
+                        {/* <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>Access settings</Typography>
                         <Select
                             fullWidth
                             value={accessSetting}
@@ -256,7 +261,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                                     </Box>
                                 </Box>
                             </StyledMenuItem>
-                        </Select>
+                        </Select> */}
 
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
                             <Typography variant="subtitle1">Members</Typography>

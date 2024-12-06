@@ -53,7 +53,7 @@ const DeleteMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 
-const FileManagementDialog = ({ fileManagement, taskId }) => {
+const FileManagementDialog = ({ fileManagement, taskId, isClickable = true }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -94,6 +94,9 @@ const FileManagementDialog = ({ fileManagement, taskId }) => {
         try {
             if (!fileManagement) {
                 toast.error("File is required");
+            }
+            if(!isClickable) {
+                toast.error("You don't have permission to download file");
                 return;
             }
             const fileData = {
@@ -109,26 +112,29 @@ const FileManagementDialog = ({ fileManagement, taskId }) => {
                         }
                         throw new Error('File delete failed');
                     }
-                    
-                    await dispatch(createAuditLog({ 
-                        accesstoken: token, 
-                        data: { task_id: taskId, 
-                                action:'Delete', 
-                                entity:'Attachment', 
-                                user_id:userData?._id,
-                                old_value: fileManagement?.originalName
-                            } }));
+
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Delete',
+                            entity: 'Attachment',
+                            user_id: userData?._id,
+                            old_value: fileManagement?.originalName
+                        }
+                    }));
                     const taskdata = await dispatch(fetchTaskById({ accesstoken: token, taskId }));
 
                     await dispatch(createAuditLog_project({
                         accesstoken: token,
                         data: {
-                          project_id: taskdata?.payload?.project_id?._id,
-                          action: 'Update',
-                          entity: 'Task',
-                          user_id: userData?._id,
-                          task_id: taskId,
-                        }}))
+                            project_id: taskdata?.payload?.project_id?._id,
+                            action: 'Update',
+                            entity: 'Task',
+                            user_id: userData?._id,
+                            task_id: taskId,
+                        }
+                    }))
                     await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
                     handleClose();
                     toast.success("File delete successfully");

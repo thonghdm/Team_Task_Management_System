@@ -267,7 +267,7 @@ const Board = ({ board }) => {
         // Call api drag card to different column
 
         let prevTask = nextColumns.find(c => c._id === activeColumnBeforeRerender._id).tasks || [];
-        if (prevTask.length ===1) {
+        if (prevTask.length === 1) {
           prevTask = [];
         }
 
@@ -501,45 +501,71 @@ const Board = ({ board }) => {
     [activeDragItemType, orderedColumnsState]
   );
 
-  return (
-    <DndContext
-      sensors={sensors}
-      // Thuật toán phát hiện va chạm
-      collisionDetection={collisionDetectionStrategy}
-      // collisionDetection={closestCorners}
+  const { members } = useSelector((state) => state.memberProject);
+  const currentUserRole = members?.members?.find(
+    member => member.memberId._id === userData?._id
+  )?.isRole;
+  const isViewer = currentUserRole === 'Viewer';
 
-      onDragEnd={handleDragEnd}
-      onDragOver={handleDragOver}
-      onDragStart={handleDragStart}
-    >
-      <Box
-        sx={{
-          width: '100%',
-          // height: (theme) => theme.customTrello.boardContentHeight,
-          // marginTop: (theme) => theme.customTrello.appBarHeight,
-          bgcolor: theme.palette.background.paper,
-          paddingTop: '.7rem',
-          paddingBottom: '.7rem',
-          maxWidth: '100vw',
-          overflowX: 'auto',
-          mt: 2,
-          borderRadius: '10px',
-        }}
+
+  return (
+    <>
+      {!isViewer ? (<DndContext
+        sensors={sensors}
+        // Thuật toán phát hiện va chạm
+        collisionDetection={collisionDetectionStrategy}
+        // collisionDetection={closestCorners}
+
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        onDragStart={handleDragStart}
       >
-        <Columns lists={orderedColumnsState} />
-        {/* DragOverlay đặt ngang cấp với Sortable và có item bên trong là tất cả SortItem */}
-        <DragOverlay dropAnimation={dropAnimation}>
-          {activeDragItemId &&
-            activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN ? (
-            <Column column={activeDragItemData} />
-          ) : null}
-          {activeDragItemId &&
-            activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD ? (
-            <Card card={activeDragItemData} />
-          ) : null}
-        </DragOverlay>
-      </Box>
-    </DndContext>
+        <Box
+          sx={{
+            width: '100%',
+            // height: (theme) => theme.customTrello.boardContentHeight,
+            // marginTop: (theme) => theme.customTrello.appBarHeight,
+            bgcolor: theme.palette.background.paper,
+            paddingTop: '.7rem',
+            paddingBottom: '.7rem',
+            maxWidth: '100vw',
+            overflowX: 'auto',
+            mt: 2,
+            borderRadius: '10px',
+          }}
+        >
+          <Columns lists={orderedColumnsState}/>
+          {/* DragOverlay đặt ngang cấp với Sortable và có item bên trong là tất cả SortItem */}
+          <DragOverlay dropAnimation={dropAnimation}>
+            {activeDragItemId &&
+              activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN ? (
+              <Column column={activeDragItemData} />
+            ) : null}
+            {activeDragItemId &&
+              activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD ? (
+              <Card card={activeDragItemData} />
+            ) : null}
+          </DragOverlay>
+        </Box>
+      </DndContext>) : (
+        <Box
+          sx={{
+            width: '100%',
+            // height: (theme) => theme.customTrello.boardContentHeight,
+            // marginTop: (theme) => theme.customTrello.appBarHeight,
+            bgcolor: theme.palette.background.paper,
+            paddingTop: '.7rem',
+            paddingBottom: '.7rem',
+            maxWidth: '100vw',
+            overflowX: 'auto',
+            mt: 2,
+            borderRadius: '10px',
+          }}
+        >
+          <Columns lists={orderedColumnsState} isClickable={!isViewer}/>
+        </Box>
+      )}
+    </>
   );
 };
 
