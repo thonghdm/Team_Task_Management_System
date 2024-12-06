@@ -67,7 +67,7 @@ const getOneService = (id) => new Promise((resolve, reject) => {
     (async () => {
         try {
             const response = await User.findOne({ _id: id })
-                .select('_id email displayName image isAdmin is_active createdAt phoneNumber company location jobTitle department note password')
+                .select('_id email displayName image isAdmin is_active createdAt phoneNumber company location jobTitle department note password username')
                 .lean()
             resolve({
                 err: response ? 0 : 4,

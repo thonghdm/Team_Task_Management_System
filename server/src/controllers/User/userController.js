@@ -86,7 +86,7 @@ const resetPasswordfromAdmin = async (req, res) => {
         if (response.err) {
             return res.status(400).json(response);
         }
-        await sendEmail({
+        sendEmail({
             email: req.body.email, 
             subject: 'Your Password Has Been Reset',
             message: `Your new password is: ${req.body.password}`

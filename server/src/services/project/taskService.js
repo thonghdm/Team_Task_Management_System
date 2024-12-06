@@ -139,7 +139,7 @@ const addMemberToTask = async (reqBodyArray) => {
                 { new: true }
             )
             results.push(memberTaskResult)
-            await sendEmail({
+            sendEmail({
                 email: reqBody.user_email,
                 subject: 'Notification from DTPROJECT',
                 message: `User ${reqBody.user_name_invite} has assigned you the task  ${existingTask.task_name}`

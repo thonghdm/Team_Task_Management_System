@@ -109,7 +109,7 @@ const resetPasswordOTPService = (email) => new Promise((resolve, reject) => {
             user.otp_expired = new Date(Date.now() + 600000) // 60s
             user.otp_type = 'reset_password'
             await user.save()
-            await sendEmail({
+            sendEmail({
                 email: user.email,
                 subject: 'OTP Verification',
                 message: `Your OTP code is ${otp}`
