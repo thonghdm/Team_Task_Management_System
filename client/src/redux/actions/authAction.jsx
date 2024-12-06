@@ -85,14 +85,24 @@ export const resetPassword = (email) => async (dispatch) => {
         dispatch({ type: actionTypes.RESET_PASSWORD_REQUEST });        
         const response = await apiResetPassword(email);
         console.log('resetPassword response:', response);
-        if (response && response.data) {
+        console.log('resetPassword responseresponse.data.response:', response.data.err);
+        if (response && response.data && response.data.err === 0) {
             dispatch({
                 type: actionTypes.RESET_PASSWORD_REQUEST,
                 payload: response.data
             });
             console.log('resetPassword responseeeeeeeee:', response);
             return { success: true };
-        } else {
+        }
+        else if (response && response.data && response.data.err === 1) {
+            console.log('resetPassword responseeeeeeeee:', response.data.msg);
+            dispatch({
+                type: actionTypes.RESET_PASSWORD_FAILURE,
+                payload: response.data.msg
+            });
+            return { success: false, message: response.data.msg };
+        } 
+        else {
             throw new Error('Invalid response format');
         }
     } catch (error) {

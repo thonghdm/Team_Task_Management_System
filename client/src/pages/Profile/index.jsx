@@ -59,6 +59,10 @@ const ProfilePage = () => {
     }, [previewUrl]);
     const validatePhoneNumber = (phone) => {
         const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+        if(!phone) {
+            setPhoneError('');
+            return true;
+        }
         if (!phoneRegex.test(phone)) {
             setPhoneError('Invalid phone number');
             return false;

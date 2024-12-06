@@ -152,7 +152,7 @@ const Overview = () => {
       <DialogAvt
         open={isShareDialogOpen}
         onClose={handleCloseShareDialog}
-        projectName={projectId}
+        projectName={projectData?.project?.projectName}
         projectData={projectData}
       />
       <ProfileDialog open={Boolean(anchorEl)} onClose={handleClose} member={selectedMember}/>

@@ -212,7 +212,7 @@ const UserSearchInput = ({
 const roles = [
     { value: 'Admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
     { value: 'Member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
-    { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
+    // { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
 ];
 const UserSearch = () => {
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -242,13 +242,15 @@ const UserSearch = () => {
             setError('Please select at least one user');
             return;
         }
-
+        console.log('userData', userData);
         const usersWithRole = selectedUsers.map(user => ({
             isRole: inviteRole,
             memberId: user._id,
             projectId: projectId,
             user_invite: userData._id,
+            user_name_invite: userData.username,
             username: user.username,
+            user_email: user.email
         }));
 
         if (usersWithRole.some(user => projectData?.project?.membersId.includes(user.memberId))) {

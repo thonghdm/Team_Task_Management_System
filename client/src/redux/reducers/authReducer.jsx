@@ -102,6 +102,12 @@ const authReducer = (state = initState, action) => {
                 userData: {},  // Reset userData
                 error: action.error,
             };
+        case actionTypes.RESET_PASSWORD_FAILURE:
+            return {
+                ...state,
+                userData: {},  // Reset userData
+                error: action.error,
+            };
         default:
             return state;
     }
