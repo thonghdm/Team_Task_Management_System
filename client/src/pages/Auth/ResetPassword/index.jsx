@@ -47,7 +47,11 @@ export default function ResetPassword() {
                 console.log('res:', res);
                 setIsSignedUp(true);
                 console.log('Email:', email, typeOtp);
-                navigate('/otp', { state: { email, typeOtp } }); // Navigate to check email page
+                if (res.success) {
+                    navigate('/otp', { state: { email, typeOtp } }); // Navigate to check email page
+                } else {
+                    setGeneralError(res.message || 'Failed to send reset email. Please try again.');
+                }
             } catch (error) {
                 setGeneralError(error.message || 'Failed to send reset email. Please try again.');
             }
@@ -134,7 +138,7 @@ export default function ResetPassword() {
                             </Typography>
                         )}
                         <Button type="submit" fullWidth variant="contained">
-                            Send password reset email
+                            Send confirmation email
                         </Button>
                     </Box>
                 </Card>

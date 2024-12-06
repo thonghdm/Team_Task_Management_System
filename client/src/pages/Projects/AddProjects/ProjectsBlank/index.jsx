@@ -76,6 +76,8 @@ const ProjectBlank = () => {
             try {
                 const response = await createNew(token, projectData);
                 handleSuccess(response.message);
+                console.log(response)
+                navigate('/board/' + response.project.createdProject._id+'/2/project-board');
             } catch (error) {
                 if (error.response?.status === 401) {
                     const newToken = await refreshToken();

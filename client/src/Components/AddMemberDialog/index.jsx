@@ -256,6 +256,7 @@ const AddMemberDialog = ({ open, onClose, taskId }) => {
                 return;
             }
             console.log('selectedUsers', selectedUsers);
+            console.log('userData', userData);
             // Format data
             const userInvite = selectedUsers.map(user => ({
                 memberId: user._id,

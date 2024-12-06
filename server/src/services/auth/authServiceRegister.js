@@ -52,7 +52,7 @@ const authServiceRegister = {
                 message: `Your OTP code is ${otp}`
             }
             try {
-                await sendEmail(emailOptions)
+                sendEmail(emailOptions)
                 console.log('Email sent successfully!')
             } catch (error) {
                 console.error('Error sending email:', error)
@@ -141,7 +141,7 @@ const authServiceRegister = {
                 message: `Your OTP code is ${otp}` // Nội dung email
             }
             try {
-                await sendEmail(emailOptions)
+                sendEmail(emailOptions)
                 console.log('Email sent successfully!')
             } catch (error) {
                 console.error('Error sending email:', error)
@@ -168,7 +168,7 @@ const authServiceRegister = {
                 message: `Your OTP code is ${user.otp_code}`
             }
             try {
-                await sendEmail(emailOptions)
+                sendEmail(emailOptions)
                 console.log('Email sent successfully!')
             } catch (error) {
                 console.error('Error sending email:', error)

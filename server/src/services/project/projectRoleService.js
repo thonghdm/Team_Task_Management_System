@@ -1,11 +1,12 @@
 const ProjectRole = require('~/models/ProjectRoleSchema')
 const Project = require('~/models/ProjectSchema')
+import sendEmail from '~/utils/sendEmail'
 const createNewRole = async (rolesArray) => {
     try {
         const createdOrUpdatedRoles = []
 
         for (const role of rolesArray) {
-            const { projectId, memberId, isRole, user_invite } = role
+            const { projectId, memberId, isRole, user_invite, user_name_invite, user_email } = role
             // Check if the project exists
             const project = await Project.findById(projectId)
             if (!project) {
@@ -38,6 +39,11 @@ const createNewRole = async (rolesArray) => {
                 { $addToSet: { membersId: memberId } },
                 { new: true }
             )
+            sendEmail({
+                email: user_email,
+                subject: 'Notification from DTPROJECT',
+                message: `User ${user_name_invite} has invited you the project  ${project.projectName}`
+            })
         }
         return createdOrUpdatedRoles
     } catch (error) {
