@@ -10,7 +10,7 @@ const SidebarList = ({ linkData, isProject = false, Id , URL = "board"}) => {
   return (
     <List disablePadding>
       {linkData?.map((item,index) => {
-        const isSelected = `${path}` === `${item?._id}` && location.pathname.includes(`/${Id}/`);
+        const isSelected = `${path}` === `${item?._id}` && location.pathname.includes(`/${Id}`);
         return (
           <ListItem key={index} disablePadding>
             <ListItemButton

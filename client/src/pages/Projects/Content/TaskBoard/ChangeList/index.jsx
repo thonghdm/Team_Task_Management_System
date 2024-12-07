@@ -272,6 +272,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                     }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -720,7 +721,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 Add
                             </Button>
                         </Box>
-                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId} userData={userData} />
+                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId} userData={userData} isClickable={!isViewer}/>
                         {/* {label.title && (
                             <p>Created Label: {label.title} (Color: {label.color})</p>
                         )} */}

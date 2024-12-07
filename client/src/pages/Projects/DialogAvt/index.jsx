@@ -200,7 +200,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
             try {
                 await dispatch(fetchLeaveProjectAdmin({ accesstoken: token, data: dataDelete })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
-                await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                 handleLeaveProject();
                 navigate('/board/tasks/1/mytask');
 

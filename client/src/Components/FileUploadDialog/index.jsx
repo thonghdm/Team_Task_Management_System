@@ -71,15 +71,16 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
             }
             throw new Error('File upload failed');
           }
-          await dispatch(createAuditLog({ 
-            accesstoken: token, 
-            data: { task_id: taskId, 
-                    action:'Create', 
-                    entity:'Attachment', 
-                    user_id:userData?._id,
-                    old_value: fileData?.file?.name
-                  }
-                  }));
+          await dispatch(createAuditLog({
+            accesstoken: token,
+            data: {
+              task_id: taskId,
+              action: 'Create',
+              entity: 'Attachment',
+              user_id: userData?._id,
+              old_value: fileData?.file?.name
+            }
+          }));
           const tastData = await dispatch(fetchTaskById({ accesstoken: token, taskId }));
           await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
           await dispatch(createAuditLog_project({
@@ -90,8 +91,9 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
               entity: 'Task',
               user_id: userData?._id,
               task_id: taskId,
-            }}))
-            if(projectId) await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+            }
+          }))
+          if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
           toast.success("File upload successfully");
           setLink('');
           setDisplayText('');
@@ -105,7 +107,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
     } catch (error) {
       throw error;
     }
-  };  
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

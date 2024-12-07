@@ -71,8 +71,8 @@ const Header = ({ toggleDrawer }) => {
           alignItems: 'center',
           minWidth: isSmallScreen ? '80px' : '100px',
         }}>
-          <IconButton color="inherit" sx={{ marginRight: 1 }}>
-            <NotificationPanel />
+          <IconButton color="inherit" sx={{ marginRight: 4 }}>
+            {/* <NotificationPanel /> */}
           </IconButton>
           <UserAvatar />
         </div>

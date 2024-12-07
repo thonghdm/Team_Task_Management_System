@@ -32,7 +32,7 @@ const colors = [
   '#7d6608', '#784212'
 ];
 
-const ColorPickerDialog = ({ open, onClose,taskId }) => {
+const ColorPickerDialog = ({ open, onClose, taskId, isClickable = true }) => {
   const [selectedColor, setSelectedColor] = useState('#1a5fb4');
   const [title, setTitle] = useState('');
   const theme = useTheme();
@@ -51,12 +51,16 @@ const ColorPickerDialog = ({ open, onClose,taskId }) => {
   ///
   const refreshToken = useRefreshToken();
   const dispatch = useDispatch();
-  const {accesstoken, userData } = useSelector(state => state.auth)
+  const { accesstoken, userData } = useSelector(state => state.auth)
 
   const handleSubmit = () => {
-    try{
-      if(!title){
+    try {
+      if (!title) {
         toast.error("Title is required");
+        return;
+      }
+      if (!isClickable) {
+        toast.error("You don't have permission to create label");
         return;
       }
       const labelData = {
@@ -64,7 +68,7 @@ const ColorPickerDialog = ({ open, onClose,taskId }) => {
         task_id: taskId,
         name: title,
       }
-      
+
       const createLabels = async (token) => {
         try {
           const resultAction = await dispatch(createLabel({ accesstoken: token, data: labelData }));
@@ -75,13 +79,16 @@ const ColorPickerDialog = ({ open, onClose,taskId }) => {
             }
             throw new Error('Label creation failed');
           }
-          await dispatch(createAuditLog({ 
-            accesstoken: token, 
-            data: { task_id: taskId, 
-                    action:'Create', 
-                    entity:'Label', 
-                    old_value: labelData?.name,
-                    user_id:userData?._id} }));
+          await dispatch(createAuditLog({
+            accesstoken: token,
+            data: {
+              task_id: taskId,
+              action: 'Create',
+              entity: 'Label',
+              old_value: labelData?.name,
+              user_id: userData?._id
+            }
+          }));
           await dispatch(fetchTaskById({ accesstoken: token, taskId }));
           await dispatch(createAuditLog_project({
             accesstoken: token,
@@ -91,9 +98,10 @@ const ColorPickerDialog = ({ open, onClose,taskId }) => {
               entity: 'Task',
               user_id: userData?._id,
               task_id: taskId,
-            }}))
+            }
+          }))
           await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
-          await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+          await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
           toast.success("Label created successfully");
           handleClose();
         } catch (error) {

@@ -102,7 +102,7 @@ const ExpandTask = ({ taskId }) => {
                         }
                         throw new Error('Delete task failed');
                     }
-                    await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+                    await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -135,12 +135,12 @@ const ExpandTask = ({ taskId }) => {
                 open={open}
                 onClose={handleClose}
             >
-                <StyledMenuItem>
+                {/* <StyledMenuItem>
                     <ListItemIcon>
                         <Lock fontSize="small" />
                     </ListItemIcon>
                     <ListItemText>View Details</ListItemText>
-                </StyledMenuItem>
+                </StyledMenuItem> */}
 
                 <DeleteMenuItem onClick={() => setIsAlertOpen(true)}>
                     <ListItemIcon>
