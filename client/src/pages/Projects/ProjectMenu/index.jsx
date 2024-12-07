@@ -131,7 +131,7 @@ const ProjectMenu = ({ isClickable = false }) => {
                         throw new Error('Delete project failed');
                     }
                     await dispatch(fetchProjectsByMemberId({ accesstoken: token, memberId: userData._id }));
-                    navigate('/board/tasks/mytask');
+                    navigate('/board/tasks/1/mytask');
                     handleSuccess();
                 } catch (error) {
                     throw error;

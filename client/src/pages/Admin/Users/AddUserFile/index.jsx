@@ -189,9 +189,19 @@ const AddUserFile = () => {
                 )}
 
                 {data.length === 0 && (
-                    <Typography variant="body1" color="textSecondary" align="center">
-                        No data uploaded. Please upload an Excel file.
-                    </Typography>
+                    <>
+                        <Typography variant="body1" color="textSecondary" align="center">
+                            No data uploaded. Please upload an Excel file.
+                        </Typography>
+                        <Typography variant="body1" color="textSecondary" align="center">
+                            The file must include the following
+                            <span style={{ color: '#f50057', fontWeight: 'bold' }}> mandatory columns</span>:
+                            <span style={{ color: '#3f51b5', fontWeight: 'bold' }}> name</span>,
+                            <span style={{ color: '#3f51b5', fontWeight: 'bold' }}> email</span>,
+                            <span style={{ color: '#3f51b5', fontWeight: 'bold' }}> password</span>,
+                           
+                        </Typography>
+                    </>
                 )}
             </Box>
         </Card>

@@ -27,47 +27,10 @@ import ProjectsBlank from './pages/Projects/AddProjects/ProjectsBlank'
 import { ToastContainer, toast } from 'react-toastify';
 
 import Introduce from '~/pages/Introduce'
-
+import ImportProject from './pages/Projects/AddProjects/ImportProject'
 
 import Admin from '~/pages/Admin'
-function ModeSelect() {
-  const { mode, setMode } = useColorScheme()
 
-  const handleChange = (event) => {
-    setMode(event.target.value)
-  };
-
-  return (
-    <Box >
-      <FormControl sx={{ minWidth: 30, m: 2 }} size="small">
-        <InputLabel id="lable-select-dark-light-mode">Mode</InputLabel>
-        <Select
-          labelId="lable-select-dark-light-mode"
-          id="select-dark-light-mode"
-          value={mode}
-          label="Mode"
-          onChange={handleChange}
-        >
-          <MenuItem value="light">
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <LightModeIcon />Light
-            </Box>
-          </MenuItem>
-          <MenuItem value="dark">
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <SettingsBrightnessIcon />Dark
-            </Box>
-          </MenuItem>
-          <MenuItem value="system">
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <DarkModeIcon />System
-            </Box>
-          </MenuItem>
-        </Select>
-      </FormControl>
-    </Box>
-  );
-}
 
 function App() {
   return (
@@ -91,6 +54,7 @@ function App() {
         <Route path='/board/*' element={<Boards />} />
         <Route path="/projects-new" element={<AddProjects />} />
         <Route path="/projects-new/blank" element={<ProjectsBlank />} />
+        <Route path="/projects-new/import-sheet" element={<ImportProject />} />
 
         <Route path='/admin/*' element={<Admin />} />
         
