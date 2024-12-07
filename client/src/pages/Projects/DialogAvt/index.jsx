@@ -99,7 +99,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
     ////
 
     const currentUserRole = members?.members?.find(
-        member => member.memberId._id === userData?._id
+        member => member?.memberId?._id === userData?._id
     )?.isRole;
     const isAdmin = currentUserRole === 'Admin';
     const isViewer = currentUserRole === 'Viewer';
