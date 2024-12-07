@@ -206,14 +206,14 @@ const Sidebar = ({ open }) => {
             {starred?.data && <SidebarList linkData={convertBtoA(starred?.data)} isProject={true} open={open} Id = {3}/>  }
           </Box>
 
-          <Box>
+          {/* <Box>
             <SectionTitle>TEAM</SectionTitle>
             <SidebarList linkData={teamLinkData} open={open} Id={4}/>
-          </Box>
+          </Box> */}
         </ScrollableSection>
 
 
-        <Box sx={{ marginTop: 'auto' }}>
+        {/* <Box sx={{ marginTop: 'auto' }}>
           <TrialInfo>
             <Box display="flex" alignItems="center" mb={1}>
               <Box
@@ -241,7 +241,7 @@ const Sidebar = ({ open }) => {
             >
             </Typography>
           </Box>
-        </Box>
+        </Box> */}
       </Box>
     </StyledDrawer>
   );

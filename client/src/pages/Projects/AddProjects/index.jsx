@@ -47,7 +47,7 @@ const AddProjects = () => {
                         <Typography variant="caption" color="text.secondary">Blank project</Typography>
                     </Button>
 
-                    <Button
+                    {/* <Button
                         variant="outlined"
                         sx={{
                             width: 120,
@@ -68,7 +68,7 @@ const AddProjects = () => {
                     >
                         <RocketLaunchIcon sx={{ fontSize: 40, m: 1, color: 'primary.main' }} />
                         <Typography variant="caption" color="text.secondary">Use a template</Typography>
-                    </Button>
+                    </Button> */}
 
                     <Button
                         variant="outlined"

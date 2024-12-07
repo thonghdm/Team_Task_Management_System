@@ -34,7 +34,6 @@ const UserAvatar = () => {
   const { isLoggedIn, typeLogin, accesstoken, userData } = useSelector(state => state.auth)
   const [hasFetchedUser, setHasFetchedUser] = useState(false); // Track if user data has been fetched
   const theme = useTheme();
-
   const isTokenExpired = (token) => {
     if (!token) return true;
     try {
@@ -163,7 +162,7 @@ const UserAvatar = () => {
           </Box>
         </MenuItem>
         <Divider />
-        <MenuItem>
+        {/* <MenuItem>
           <ListItemIcon>
             <SettingsIcon fontSize="small" />
           </ListItemIcon>
@@ -181,19 +180,19 @@ const UserAvatar = () => {
           </ListItemIcon>
           <ListItemText>Invite to Asana</ListItemText>
         </MenuItem>
-        <Divider />
+        <Divider /> */}
         <ModeSelect />
         <Divider />
 
-        <MenuItem onClick={ProfileHandle}>
+        {!userData?.isAdmin && <MenuItem onClick={ProfileHandle}>
           <ListItemText>Profile</ListItemText>
-        </MenuItem>
-        <MenuItem>
+        </MenuItem>}
+        {/* <MenuItem>
           <ListItemText>Settings</ListItemText>
         </MenuItem>
         <MenuItem>
           <ListItemText>Add another account</ListItemText>
-        </MenuItem>
+        </MenuItem> */}
 
         <MenuItem onClick={logoutHandler}>
           <ListItemText>Log out</ListItemText>

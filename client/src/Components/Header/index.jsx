@@ -63,7 +63,7 @@ const Header = ({ toggleDrawer }) => {
           justifyContent: 'center',
           margin: '0 16px',
         }}>
-          <SearchWithFilters width={getSearchWidth()} />
+          {/* <SearchWithFilters width={getSearchWidth()} /> */}
         </div>
 
         <div style={{ 
@@ -71,8 +71,8 @@ const Header = ({ toggleDrawer }) => {
           alignItems: 'center',
           minWidth: isSmallScreen ? '80px' : '100px',
         }}>
-          <IconButton color="inherit" sx={{ marginRight: 1 }}>
-            <NotificationPanel />
+          <IconButton color="inherit" sx={{ marginRight: 4 }}>
+            {/* <NotificationPanel /> */}
           </IconButton>
           <UserAvatar />
         </div>
