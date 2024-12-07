@@ -108,17 +108,26 @@ const authServiceRegister = {
             }
             const salt = await bcrypt.genSalt(10)
             const hashed = await bcrypt.hash(userData.password, salt)
+            const otp = generateOTP()
             if (existingUser)
             {
                 existingUser.password = hashed
+                existingUser.otp_code= otp,
+                existingUser.otp_expired= new Date(Date.now() + 600000), // 60s
+                existingUser.otp_type= 'register'
                 await existingUser.save()
+                const gemailOptions = {
+                    email: existingUser.email, // Địa chỉ email người nhận
+                    subject: 'OTP Verification', // Tiêu đề email
+                    message: `Your OTP code is ${otp}` // Nội dung email
+                }
+                await sendEmail(gemailOptions)
                 return { user: existingUser }
             }
             if (!isValidName(userData.name)) {
                 console.log('Invalid name')
                 return { error: 'Invalid name' }
             }
-            const otp = generateOTP()
             const usernameData = await getUsernameData()
             const username = generateUniqueUsername(userData.name, usernameData)
             const newUser = new User({
@@ -130,7 +139,6 @@ const authServiceRegister = {
                 otp_expired: new Date(Date.now() + 600000), // 60s
                 otp_type: 'register'
             })
-            
             const savedUser = await newUser.save()
             // eslint-disable-next-line no-unused-vars
             const { password, otp_code, ...userWithoutPasswordOTP } = savedUser._doc
