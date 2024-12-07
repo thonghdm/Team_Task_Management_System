@@ -58,7 +58,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
     //////////////////////////////// check view
     const { members } = useSelector((state) => state.memberProject);
     const currentUserRole = members?.members?.find(
-        member => member.memberId._id === userData?._id
+        member => member?.memberId?._id === userData?._id
     )?.isRole;
     const isViewer = currentUserRole === 'Viewer';
 
