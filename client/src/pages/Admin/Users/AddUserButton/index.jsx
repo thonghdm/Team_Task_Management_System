@@ -17,9 +17,9 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useTheme } from '@mui/system';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { registerWithEmail } from '~/redux/actions/authAction';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
+import { apiRegisterWithEmail } from '~/apis/Auth/authService';
 
 
 
@@ -27,7 +27,7 @@ import { useDispatch } from 'react-redux';
 const AddUserButton = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const [user, setUser] = useState({
     name: '',
     email: '',
@@ -107,8 +107,8 @@ const AddUserButton = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
     try {
-      const res = await dispatch(registerWithEmail(user.name, user.email, user.newPassword));
-      if (res.success === true) {
+      const res = await apiRegisterWithEmail(user.name, user.email, user.newPassword);
+      if (res) {
         toast.success('User added successfully');
         setUser({
           name: '',
@@ -118,10 +118,10 @@ const AddUserButton = () => {
         }); // Reset form
       }
       else {
-        setError(res.message);
+        toast.error("User add failed");
       }
     } catch (error) {
-      setError(error.message);
+      toast.error("User add failed");
     }
   };
 
@@ -149,7 +149,7 @@ const AddUserButton = () => {
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
-          onClick={handleOpen}
+          onClick={() => navigate('/admin/users/101/add-user-file')}
           sx={{
             textTransform: 'none',
             borderRadius: '8px',
@@ -287,7 +287,7 @@ const AddUserButton = () => {
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          >
+        >
           Add
         </Button>
       </CardActions>

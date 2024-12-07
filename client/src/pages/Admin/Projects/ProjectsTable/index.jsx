@@ -220,7 +220,7 @@ const ProjectsTable = ({ projects, isArchived }) => {
                   }}
                     src={project?.ownerId?.image}
                   />
-                  <Typography sx={{ mt: 1 }}>{project.ownerId.displayName}</Typography>
+                  <Typography sx={{ mt: 1 }}>{project?.ownerId?.displayName}</Typography>
 
                 </TableCell>
                 <TableCell>
