@@ -3,7 +3,7 @@ import { Dialog, Box, DialogContent, DialogTitle, DialogActions, Button, List, L
 import DueDatePicker from '~/Components/DueDatePicker';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
-import { createNew } from '~/apis/Project/listService'
+import { createNewList } from '~/apis/Project/listService'
 import { createNewTask } from '~/apis/Project/taskService'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -175,7 +175,7 @@ const DialogButtonAdd = ({ open, onClose }) => {
 
         const createList = async (token) => {
             try {
-                const response = await createNew(token, listData);
+                const response = await createNewList(token, listData);
                 const res = await dispatch(createAuditLog_project({
                     accesstoken: token,
                     data: {

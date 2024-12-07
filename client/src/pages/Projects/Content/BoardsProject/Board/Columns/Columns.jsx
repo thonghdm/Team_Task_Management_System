@@ -9,7 +9,7 @@ import {
 import { toast } from 'react-toastify';
 import { useTheme } from '@mui/material';
 
-import { createNew } from '~/apis/Project/listService'
+import { createNewList } from '~/apis/Project/listService'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
@@ -78,7 +78,7 @@ export default function Columns({ lists = [], isClickable = true }) {
 
     const createList = async (token) => {
       try {
-        const response = await createNew(token, listData);
+        const response = await createNewList(token, listData);
         const res = await dispatch(createAuditLog_project({
           accesstoken: token,
           data: {

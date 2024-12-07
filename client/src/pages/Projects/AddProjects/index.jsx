@@ -88,6 +88,7 @@ const AddProjects = () => {
                                 transform: 'scale(1.05)',
                             },
                         }}
+                        onClick={() => navigate('import-sheet')}
                     >
                         <TableChartIcon sx={{ fontSize: 40, m: 1, color: 'success.main' }} />
                         <Typography variant="caption">Import spreadsheet</Typography>

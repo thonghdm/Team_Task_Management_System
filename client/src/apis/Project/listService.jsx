@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const createNew = async (accesstoken, listData) => {
+export const createNewList = async (accesstoken, listData) => {
     try {
         const response = await axios.post('http://localhost:5000/api/list/by-owner', listData, {
             headers: {

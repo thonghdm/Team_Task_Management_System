@@ -202,7 +202,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
                 await dispatch(fetchProjectDetail({ accesstoken, projectId }));
                 handleLeaveProject();
-                navigate('/board/tasks/mytask');
+                navigate('/board/tasks/1/mytask');
 
             } catch (error) {
                 if (error?.err === 2) {
