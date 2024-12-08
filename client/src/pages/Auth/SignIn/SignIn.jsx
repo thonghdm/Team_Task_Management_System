@@ -24,10 +24,10 @@ export default function SignIn() {
     const [emailErrorMessage, setEmailErrorMessage] = useState('');
     const [passwordError, setPasswordError] = useState(false);
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-    const [password, setPassword] = useState("Admin#123");
+    const [password, setPassword] = useState("");
 
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setGmail] = useState("thongdzprooo100@gmail.com");
+    const [email, setGmail] = useState("");
 
     const { isLoggedIn, typeLogin, error } = useSelector(state => state.auth)
     const togglePasswordVisibility = () => setShowPassword((prev) => !prev);

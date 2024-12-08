@@ -4,9 +4,10 @@ import { useTheme } from '@mui/material';
 const PrioritySelector = ({ value, onChange, isClickable = true }) => {
   const [priority, setPriority] = useState(value || 'Medium');
   const theme = useTheme();
-  // useEffect(() => {
-  //   setPriority(value || 'Medium');
-  // }, [value]);
+  useEffect(() => {
+    setPriority(value || 'Medium');
+  }, [value]);
+  
   const handleChange = (event) => {
     const newValue = event.target.value;
     setPriority(newValue);

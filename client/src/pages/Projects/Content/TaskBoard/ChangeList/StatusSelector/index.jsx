@@ -6,9 +6,9 @@ const StatusSelector = ({ value, onChange, title = "Status", isClickable = true 
   const [status, setStatus] = useState(value || 'To Do');
   const theme = useTheme();
 
-  // useEffect(() => {
-  //   setStatus(value || 'To Do');
-  // }, [value]);
+  useEffect(() => {
+    setStatus(value || 'To Do');
+  }, [value]);
 
   const handleChange = (event) => {
     const newValue = event.target.value;
