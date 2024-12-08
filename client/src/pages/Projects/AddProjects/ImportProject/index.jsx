@@ -205,11 +205,27 @@ const ImportProject = () => {
         }
     };
 
-
+    const validateTasks = (tasks) => {
+        for (const task of tasks) {
+            if (
+                !task.list?.trim() ||
+                !task.task?.trim() ||
+                task.start_date == null ||
+                task.end_date == null
+            ) {
+                return false;
+            }
+        }
+        return true;
+    };
 
     const handleSubmit = async () => {
         if (data.length === 0) {
             toast.error("No data to submit");
+            return;
+        }
+        if (!validateTasks(data)) {
+            toast.error("Missing required fields");
             return;
         }
         try {
@@ -240,6 +256,7 @@ const ImportProject = () => {
         }
     };
 
+    
     return (
         <>
             <Box sx={{ position: 'fixed', top: 0, width: '100%', zIndex: 1000 }}>
@@ -338,7 +355,7 @@ const ImportProject = () => {
                                 [<span style={{ color: '#ff4081', fontWeight: 'bold' }}> To Do</span>,
                                 <span style={{ color: '#ff4081', fontWeight: 'bold' }}> In Progress</span>,
                                 <span style={{ color: '#ff4081', fontWeight: 'bold' }}> Completed</span>]),
-                                and <span style={{ color:'#3f51b5' , fontWeight: 'bold' }}> priority</span>
+                                and <span style={{ color: '#3f51b5', fontWeight: 'bold' }}> priority</span>
                                 (<span style={{ color: '#f50057', fontWeight: 'bold' }}> mandatory values</span>:
                                 [<span style={{ color: '#ff4081', fontWeight: 'bold' }}> Low</span>,
                                 <span style={{ color: '#ff4081', fontWeight: 'bold' }}> Medium</span>,
