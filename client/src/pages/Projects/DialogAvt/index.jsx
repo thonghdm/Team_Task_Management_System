@@ -34,7 +34,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { fetchDeleteMember, fetchUpdateMemberRole, fetchLeaveProjectAdmin } from '~/redux/project/projectRole-slice/index';
 import { useNavigate } from 'react-router-dom';
-
+import {fetchProjectsByMemberId} from '~/redux/project/projectArray-slice';
 
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
@@ -191,7 +191,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
             member => member?.isRole === 'Admin'
         );
 
-        if (adminMembers?.length <= 1) {
+        if (adminMembers?.length <= 1 && isAdmin) {
             toast.error('The project must have at least one active Admin.');
             return;
         }
@@ -201,6 +201,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                 await dispatch(fetchLeaveProjectAdmin({ accesstoken: token, data: dataDelete })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
                 await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                await dispatch(fetchProjectsByMemberId({ accesstoken: token, memberId: userData._id }));
                 handleLeaveProject();
                 navigate('/board/tasks/1/mytask');
 
@@ -209,7 +210,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                     const newToken = await refreshToken();
                     return leaveProjectAdmin(newToken); // Retry with new token
                 }
-                toast.error(error.response?.data.message || 'Error leave project!');
+                // toast.error(error.response?.data.message || 'Error leave project!');
             }
         };
         try {

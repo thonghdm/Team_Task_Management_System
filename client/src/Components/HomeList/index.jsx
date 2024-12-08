@@ -92,7 +92,7 @@ const HomeList = ({ upcoming, overdue, completed, onRowClick}) => {
                         marginRight: 1,
                         backgroundColor: task?.task_id?.priority === 'Low'
                           ? '#4CD2C0'
-                          : task?.task_id?.status === 'High'
+                          : task?.task_id?.priority === 'High'
                             ? '#E587FF'
                             : '#FFB84D'
                       }}

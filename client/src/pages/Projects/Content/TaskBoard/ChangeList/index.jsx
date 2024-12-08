@@ -712,7 +712,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                     key={lb?._id}
                                     label={lb?.name}
                                     onDelete={() => handleDeleteLabelClick(lb?._id, lb?.name)}
-                                    sx={{ bgcolor: `${lb?.color}`, p: 1, color: theme.palette.text.primary }}
+                                    sx={{ bgcolor: `${lb?.color}`, p: 1, color: 'white' }}
                                 />
                             ))}
                         </Box>
