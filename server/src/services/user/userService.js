@@ -31,11 +31,17 @@ const changePasswordService = (email, password) => new Promise((resolve, reject)
 const changePasswordProfileService = (email, password, newPassword) => new Promise((resolve, reject) => {
     (async () => {
         try {
-            const user = await User.findOne({ email})
+            const user = await User.findOne({ email })
             if (!user) {
                 return resolve({
                     err: 4,
                     msg: 'User not found!'
+                })
+            }
+            if (!user.password) {
+                return resolve({
+                    err: 5,
+                    msg: 'Password not set!'
                 })
             }
             const validPassword = await bcrypt.compare(password, user.password)
