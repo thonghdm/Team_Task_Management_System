@@ -705,7 +705,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography sx={{ width: '100px' }}>Lables</Typography>
+                        <Typography sx={{ width: '100px' }}>Labels</Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                             {task?.label_id?.map(lb => (
                                 <Chip

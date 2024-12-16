@@ -272,7 +272,7 @@ const UserSearch = ({ isClickable = false }) => {
         };
 
         const handleSuccess = () => {
-            toast.success('Task created successfully!');
+            toast.success('Member invite successfully!');
             resetFormState();
         };
 

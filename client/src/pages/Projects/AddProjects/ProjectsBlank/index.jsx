@@ -90,7 +90,7 @@ const ProjectBlank = () => {
         try {
             await createProject(accesstoken);
         } catch (error) {
-            toast.error(error.response?.data.message || 'Error creating project!');
+            toast.error('Error: Project name is too short (minimum 3 characters)');
         }
     };
     
