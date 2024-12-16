@@ -99,13 +99,11 @@ const authReducer = (state = initState, action) => {
         case actionTypes.CHANGE_PASSWORD_FAILURE:
             return {
                 ...state,
-                userData: {},  // Reset userData
                 error: action.error,
             };
         case actionTypes.RESET_PASSWORD_FAILURE:
             return {
                 ...state,
-                userData: {},  // Reset userData
                 error: action.error,
             };
         default:
