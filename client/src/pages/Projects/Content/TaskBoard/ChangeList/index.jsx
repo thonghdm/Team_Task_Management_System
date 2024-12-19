@@ -469,6 +469,10 @@ const ChangeList = ({ open, onClose, taskId }) => {
     /// save Start Date 
     const handleSaveStartDate = (newStartDate) => {
         try {
+            if (new Date(newStartDate) > new Date(task?.end_date)) {
+                toast.error('Due date must be greater than start date!');
+                return;
+            }
             const dataSave = {
                 start_date: newStartDate
             };
