@@ -21,12 +21,13 @@ const DueDatePicker = ({
     });
     const [open, setOpen] = useState(false);
 
-    // // Add useEffect to update state if initialDate changes
-    // useEffect(() => {
-    //     if (initialDate) {
-    //         setDate(dayjs(initialDate));
-    //     }
-    // }, [initialDate]);
+    useEffect(() => {
+        if (initialDate) {
+            setDate(dayjs(initialDate));
+        } else {
+            setDate(dayjs()); 
+        }
+    }, [initialDate]);
 
     const handleDateChange = (newDate) => {
         // Use the provided newDate or fall back to initial value

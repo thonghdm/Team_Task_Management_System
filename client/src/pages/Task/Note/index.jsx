@@ -26,7 +26,7 @@ const Note = () => {
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <Typography variant="h5" gutterBottom sx={{fontWeight: 'bold',mt:1}}>
-                Project description
+                Note
             </Typography>
             <ProjectDescription initialContent={userData?.note} context={"descriptionMyTask"} />
         </Box>
