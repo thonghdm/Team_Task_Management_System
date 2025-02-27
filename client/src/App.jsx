@@ -31,6 +31,7 @@ import ImportProject from './pages/Projects/AddProjects/ImportProject'
 
 import Admin from '~/pages/Admin'
 
+import TransactionHistory from '~/pages/TransactionHistory'
 
 function App() {
   return (
@@ -57,6 +58,8 @@ function App() {
         <Route path="/projects-new/import-sheet" element={<ImportProject />} />
 
         <Route path='/admin/*' element={<Admin />} />
+
+        <Route path='/transaction-history/*' element={<TransactionHistory />} />
         
       </Routes>
 

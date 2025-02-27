@@ -103,6 +103,11 @@ const UserAvatar = () => {
       handleClose();
     };
   };
+
+  const TransactionHistoryHandle = () => {
+    navigate(`/transaction-history/${userData._id}`);
+  };
+
   return (
     <div>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -184,6 +189,10 @@ const UserAvatar = () => {
         <ModeSelect />
         <Divider />
 
+        <MenuItem onClick={TransactionHistoryHandle}>
+          <ListItemText>Transaction history</ListItemText>
+        </MenuItem>
+
         {!userData?.isAdmin && <MenuItem onClick={ProfileHandle}>
           <ListItemText>Profile</ListItemText>
         </MenuItem>}
@@ -193,7 +202,7 @@ const UserAvatar = () => {
         <MenuItem>
           <ListItemText>Add another account</ListItemText>
         </MenuItem> */}
-
+        
         <MenuItem onClick={logoutHandler}>
           <ListItemText>Log out</ListItemText>
         </MenuItem>

@@ -10,7 +10,8 @@ import Team from '~/pages/Team';
 import Projects from '~/pages/Projects';
 // import AddProjects from '~/pages/Projects/AddProjects';
 import Inbox from '~/pages/Inbox';
-
+import PaymentError from '~/pages/Payment/PaymentError';
+import PaymentSuccess from '~/pages/Payment/PaymentSuccess';
 
 const Boards = () => {
   const [open, setOpen] = useState(true);
@@ -33,6 +34,9 @@ const Boards = () => {
           {/* <Route path="/projects/new" element={<AddProjects />} /> */}
           <Route path=":projectId/2/*" element={<Projects />} />
           <Route path=":projectId/3/*" element={<Projects />} />
+
+          <Route path="payment/success" element={<PaymentSuccess />} />
+          <Route path="payment/error" element={<PaymentError/>} />
         </Routes>
       </Box>
     </Box>

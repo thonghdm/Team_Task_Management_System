@@ -17,6 +17,9 @@ const uploadController = require('~/routes/v1/project/uploadFileRouter')
 const memberTaskRouter = require('~/routes/v1/project/memberTaskRouter')
 const starredRouter = require('~/routes/v1/project/starredRouter')
 const auditLogRouter = require('~/routes/v1/project/auditLogRouter')
+const stripeRouter = require('~/routes/v1/project/stripeRouter')
+
+
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
 
@@ -37,7 +40,6 @@ app.use(express.urlencoded({ extended: true }))
 const uploadsPath = path.join(__dirname, 'uploads/projects')
 app.use('/uploads/projects', express.static(uploadsPath))
 
-
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
 app.use('/api/project', projectRouter)
@@ -51,6 +53,9 @@ app.use('/api/file', uploadController)
 app.use('/api/member-task', memberTaskRouter)
 
 app.use('/api/starred', starredRouter) //////
+
+app.use('/api/stripe', stripeRouter)
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }))
 
 app.use(errorHandling)
 const port = process.env.PORT || 8888

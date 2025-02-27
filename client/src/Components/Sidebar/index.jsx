@@ -27,6 +27,7 @@ import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectD
 
 import { getStarredThunks } from '~/redux/project/starred-slice';
 
+import UpgradePlan from '~/pages/UpgradePlan';
 
 const drawerWidth = 240;
 
@@ -166,6 +167,16 @@ const Sidebar = ({ open }) => {
   };
   
 
+  /////
+  const [openUpgradePlan, setOpenUpgradePlan] = useState(false);
+  const handleOpenUpgradePlan = () => {
+      setOpenUpgradePlan(true);
+  };
+
+  const handleCloseUpgradePlan = () => {
+      setOpenUpgradePlan(false);
+  };
+  /////
 
   return (
     <StyledDrawer variant="permanent" open={open}>
@@ -213,7 +224,7 @@ const Sidebar = ({ open }) => {
         </ScrollableSection>
 
 
-        {/* <Box sx={{ marginTop: 'auto' }}>
+        <Box sx={{ marginTop: 'auto' }}>
           <TrialInfo>
             <Box display="flex" alignItems="center" mb={1}>
               <Box
@@ -228,9 +239,10 @@ const Sidebar = ({ open }) => {
               <Typography>Advanced free trial</Typography>
             </Box>
             <Typography variant="body2" mb={1}>30 days left</Typography>
-            <AddBillingButton fullWidth variant="contained">
-              Add billing info
+            <AddBillingButton fullWidth variant="contained" onClick={handleOpenUpgradePlan}>
+              Upgrade plan
             </AddBillingButton>
+            <UpgradePlan open={openUpgradePlan} onClose={handleCloseUpgradePlan} />
           </TrialInfo>
           <Box textAlign="center" mb={2}>
             <Typography
@@ -241,7 +253,7 @@ const Sidebar = ({ open }) => {
             >
             </Typography>
           </Box>
-        </Box> */}
+        </Box>
       </Box>
     </StyledDrawer>
   );
