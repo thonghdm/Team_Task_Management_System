@@ -1,5 +1,5 @@
 // UpgradePlanDialog.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -14,7 +14,9 @@ import PlanCard from '~/pages/UpgradePlan/PlanCard';
 import PlanTypeTabs from '~/pages/UpgradePlan/PlanTypeTabs';
 import { plans } from '~/pages/UpgradePlan/plansData';
 import { useDispatch, useSelector } from "react-redux";
-import {createCheckoutSession} from '~/apis/Project/subscriptionApi'
+import { createCheckoutSession } from '~/apis/Project/subscriptionApi'
+
+import { getAllSubPlan } from '~/apis/Project/subscriptionPlan';
 
 const UpgradePlan = ({ open, onClose }) => {
   const [tabValue, setTabValue] = useState(0);
@@ -30,7 +32,7 @@ const UpgradePlan = ({ open, onClose }) => {
 
   //
   const dispatch = useDispatch();
-  const {accesstoken, userData } = useSelector(state => state.auth)
+  const { accesstoken, userData } = useSelector(state => state.auth)
 
 
   const handleSubscription = async (_id) => {
@@ -44,6 +46,19 @@ const UpgradePlan = ({ open, onClose }) => {
       window.location.href = response
     }
   };
+
+  const [subPlan, setSubPlan] = useState(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getAllSubPlan(accesstoken);
+        setSubPlan(data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+    fetchUser();
+  }, [accesstoken])
 
   return (
     <Dialog
@@ -70,9 +85,9 @@ const UpgradePlan = ({ open, onClose }) => {
       <DialogContent>
         <PlanTypeTabs tabValue={tabValue} handleTabChange={handleTabChange} />
 
-        <Grid container spacing={3} sx={{ mt: 1 }}>
-          {plans.map((plan) => (
-            <Grid item xs={12} md={4} key={plan._id}>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          {subPlan?.plans?.map((plan) => (
+            <Grid item xs={12} md={6} key={plan._id}>
               <PlanCard
                 plan={plan}
                 isSelected={selectedPlan === plan.title}

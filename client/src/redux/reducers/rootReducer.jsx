@@ -21,6 +21,7 @@ import starredSlice from '~/redux/project/starred-slice/index';
 import auditLogSlice from '~/redux/project/auditLog-slice/index';
 import taskInviteUserSlice from '~/redux/project/task-slice/task-inviteUser-slice/index';
 
+import subscriptionSlice from '~/redux/project/subscription-slice/index';
 
 // Cấu hình cho persist
 const commonConfig = {
@@ -119,6 +120,11 @@ const taskInviteUserSliceConfig = {
 };
 
 // Cấu hình cho persist
+const subscriptionConfig = {
+    ...commonConfig,
+    key: 'subscription',
+    whitelist: ['subscription', 'loading', 'error'],
+};
 
 const rootReducer = combineReducers({
     auth: persistReducer(authConfig, authReducer),
@@ -138,6 +144,7 @@ const rootReducer = combineReducers({
     starred: persistReducer(starredSliceConfig, starredSlice),
     auditLog: persistReducer(auditLogSliceConfig, auditLogSlice),
     taskInviteUser: persistReducer(taskInviteUserSliceConfig, taskInviteUserSlice),
+    subscription: persistReducer(subscriptionConfig, subscriptionSlice)
 })
 
 

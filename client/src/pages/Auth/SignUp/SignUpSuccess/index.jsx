@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
@@ -21,7 +21,7 @@ const SignUpSuccess = () => {
 
     return (
         <Box sx={{
-            backgroundColor:  theme.palette.background.default,
+            backgroundColor: theme.palette.background.default,
             minHeight: '100vh',
             display: 'flex',
             flexDirection: 'column',
@@ -39,10 +39,10 @@ const SignUpSuccess = () => {
                 textAlign: 'center',
                 border: `1px solid ${theme.palette.divider}`,
             }}>
-                <Typography variant="h4" sx={{ color:  theme.palette.success.light, marginBottom: '20px', fontWeight:'bold' }}>
+                <Typography variant="h4" sx={{ color: theme.palette.success.light, marginBottom: '20px', fontWeight: 'bold' }}>
                     Registration Successful!
                 </Typography>
-                <Typography variant="body1" sx={{ color:  theme.palette.success.light, marginBottom: '20px' }}>
+                <Typography variant="body1" sx={{ color: theme.palette.success.light, marginBottom: '20px' }}>
                     Your account has been successfully created.
                 </Typography>
                 <Button variant="contained" color="primary" onClick={handleGoToDashboard}>

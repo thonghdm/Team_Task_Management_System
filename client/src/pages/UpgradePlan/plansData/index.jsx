@@ -36,23 +36,5 @@ export const plans = [
     max_member : 1,
     max_task : 10,
     max_list : 10,
-  },
-  {
-    _id: '3',
-    subscription_type: 'Premium',
-    price: 50,
-    description: 'Unlock the full potential of task management',
-    features: [
-      'Everything in Standard',
-      'Multi-project management',
-      'AI-powered progress analysis and improvement suggestions',
-      'Custom API integration',
-      'Priority technical support',
-      'Advanced data security and storage'
-    ],
-    max_project : 1,
-    max_member : 1,
-    max_task : 10,
-    max_list : 10,
   }
 ];

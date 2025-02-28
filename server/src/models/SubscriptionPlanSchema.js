@@ -3,11 +3,15 @@ const mongoose = require('mongoose');
 const SubscriptionPlanSchema = new mongoose.Schema({
     subscription_type: {
         type: String,
-        enum: ['Free', 'Plus', 'Pro'],
+        enum: ['Free', 'Premium'],
         required: true
     },
     description: {
         type: String
+    },
+    features: {
+        type: [],
+        required: true
     },
     price: {
         type: Number,

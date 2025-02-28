@@ -18,7 +18,8 @@ const memberTaskRouter = require('~/routes/v1/project/memberTaskRouter')
 const starredRouter = require('~/routes/v1/project/starredRouter')
 const auditLogRouter = require('~/routes/v1/project/auditLogRouter')
 const stripeRouter = require('~/routes/v1/project/stripeRouter')
-
+const subscriptionplanRouter = require('~/routes/v1/project/subscriptionplanRouter')
+const subscriptionRouter = require('~/routes/v1/project/subscriptionRouter')
 
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
@@ -56,6 +57,10 @@ app.use('/api/starred', starredRouter) //////
 
 app.use('/api/stripe', stripeRouter)
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }))
+
+app.use('/api/subscription-plan', subscriptionplanRouter)
+
+app.use('/api/subscription', subscriptionRouter)
 
 app.use(errorHandling)
 const port = process.env.PORT || 8888
