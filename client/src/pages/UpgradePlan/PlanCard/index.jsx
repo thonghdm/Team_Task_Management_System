@@ -8,13 +8,21 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  CircularProgress
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import { useTheme } from '@mui/material/styles';
 
-
-const PlanCard = ({ plan, isSelected, onSelect, isPopular }) => {
+const PlanCard = ({ 
+  plan, 
+  isSelected, 
+  onSelect, 
+  onSubscribe, 
+  isPopular, 
+  isCurrent,
+  processingSubscription
+}) => {
   const { subscription_type, price, description, features } = plan;
   const theme = useTheme();
   
@@ -48,6 +56,23 @@ const PlanCard = ({ plan, isSelected, onSelect, isPopular }) => {
         </Box>
       )}
       
+      {isCurrent && (
+        <Box 
+          sx={{ 
+            position: 'absolute', 
+            top: isPopular ? 40 : 10, 
+            right: 10, 
+            backgroundColor: theme.palette.primary.main, 
+            color: 'white',
+            fontSize: '12px',
+            padding: '2px 8px',
+            borderRadius: '4px'
+          }}
+        >
+          CURRENT PLAN
+        </Box>
+      )}
+      
       <Typography variant="h5" component="h2" sx={{ mb: 1 }}>
         {subscription_type}
       </Typography>
@@ -66,19 +91,26 @@ const PlanCard = ({ plan, isSelected, onSelect, isPopular }) => {
       </Typography>
       
       <Button 
-        variant={isSelected ? "contained" : "outlined"} 
+        variant={isCurrent ? "contained" : "outlined"} 
         color="primary" 
         fullWidth 
-        onClick={onSelect}
+        onClick={isCurrent ? onSelect : onSubscribe}
+        disabled={processingSubscription || isCurrent}
         sx={{ 
           mb: 3, 
-          backgroundColor: isSelected ? '#1db954' : 'transparent',
+          backgroundColor: isCurrent ? '#1db954' : 'transparent',
           '&:hover': {
-            backgroundColor: isSelected ? '#19a34a' : 'rgba(29, 185, 84, 0.08)'
+            backgroundColor: isCurrent ? '#19a34a' : 'rgba(29, 185, 84, 0.08)'
           }
         }}
       >
-        {isSelected ? 'Your current plan' : `Get ${subscription_type}`}
+        {processingSubscription ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : isCurrent ? (
+          'Current Plan'
+        ) : (
+          `Subscribe to ${subscription_type}`
+        )}
       </Button>
       
       <List>

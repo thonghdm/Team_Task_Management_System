@@ -9,6 +9,9 @@ import {
 } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
+import { createCheckoutSession } from '~/apis/Project/subscriptionApi'
+import { useSelector } from "react-redux";
 
 // Create a custom theme with error color
 const theme = createTheme({
@@ -29,10 +32,10 @@ const theme = createTheme({
   },
 });
 
-const PaymentErrorModal = ({ open, onClose, errorMessage }) => {
+const PaymentErrorModal = ({ open, onClose, errorMessage, onRetry }) => {
   // Default error message if none provided
   const defaultErrorMessage = 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau hoặc liên hệ với bộ phận hỗ trợ của MISA.';
-  
+
   return (
     <ThemeProvider theme={theme}>
       <Dialog
@@ -46,6 +49,12 @@ const PaymentErrorModal = ({ open, onClose, errorMessage }) => {
             p: 1,
             maxWidth: '500px',
           }
+        }}
+        BackdropProps={{
+          sx: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Màu nền tối nhẹ
+            backdropFilter: 'blur(5px)', // Hiệu ứng mờ
+          },
         }}
       >
         <DialogContent>
@@ -108,14 +117,10 @@ const PaymentErrorModal = ({ open, onClose, errorMessage }) => {
               >
                 Đóng
               </Button>
-              
+
               <Button
                 variant="contained"
-                onClick={() => {
-                  // Here you would implement retry logic
-                  console.log('Retrying payment');
-                  onClose();
-                }}
+                onClick={onRetry}
                 sx={{
                   minWidth: '120px',
                   py: 1,
@@ -138,22 +143,45 @@ const PaymentErrorModal = ({ open, onClose, errorMessage }) => {
 // Example usage
 const PaymentError = () => {
   const [open, setOpen] = React.useState(true);
+  const navigate = useNavigate();
+  const { accesstoken, userData } = useSelector(state => state.auth);
 
   const [errorMessage, setErrorMessage] = React.useState(
     'Đã xảy ra lỗi kết nối với cổng thanh toán. Vui lòng kiểm tra kết nối internet và thử lại.'
   );
-  
-  
+
+
   const handleClose = () => {
+    navigate('/board/home/1');
     setOpen(false);
     // Additional actions after closing could go here
   };
 
-  
+  const retryPayment = async () => {
+    const savedData = localStorage.getItem('pendingSubscription');
+    if (!savedData) {
+      console.error("No pending subscription found.");
+      return;
+    }
+
+    const data = JSON.parse(savedData);
+
+    try {
+      const response = await createCheckoutSession(accesstoken, data);
+      if (response) {
+        window.location.href = response;
+      }
+    } catch (error) {
+      console.error("Error retrying payment:", error.message);
+    }
+  };
+
+
   return (
-    <PaymentErrorModal 
-      open={open} 
-      onClose={handleClose} 
+    <PaymentErrorModal
+      open={open}
+      onClose={handleClose}
+      onRetry={retryPayment}
       errorMessage={errorMessage}
     />
   );

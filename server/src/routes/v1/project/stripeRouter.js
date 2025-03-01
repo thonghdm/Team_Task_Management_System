@@ -8,6 +8,6 @@ Router.route('/create-checkout-session')
     .post(stripeController.createCheckoutSession)
 
 Router.route('/webhook')
-    .post(express.raw({ type: 'application/json' }), stripeController.stripeWebhook)
+    .post(stripeController.stripeWebhook)
 
 module.exports = Router

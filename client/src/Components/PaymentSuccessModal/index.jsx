@@ -44,6 +44,12 @@ const PaymentSuccessModal = ({ open, onClose, titile, message }) => {
             maxWidth: '500px',
           }
         }}
+        BackdropProps={{
+          sx: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Màu nền tối nhẹ
+            backdropFilter: 'blur(5px)', // Hiệu ứng mờ
+          },
+        }}
       >
         <DialogContent>
           <Box

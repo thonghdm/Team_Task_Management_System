@@ -33,6 +33,7 @@ app.use(cors({
     origin: process.env.URL_CLIENT
 }))
 
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }))
 
 app.use(cookieParser())
 app.use(express.json())
@@ -56,7 +57,6 @@ app.use('/api/member-task', memberTaskRouter)
 app.use('/api/starred', starredRouter) //////
 
 app.use('/api/stripe', stripeRouter)
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }))
 
 app.use('/api/subscription-plan', subscriptionplanRouter)
 

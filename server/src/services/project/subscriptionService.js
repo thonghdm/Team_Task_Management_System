@@ -37,6 +37,9 @@ const subscriptionService = {
                 throw new Error('User ID is required.')
             }
             const subscriptionItems = await Subscription.find({ user_id: userId })
+                .populate('plan_id') // Chỉ lấy 3 field từ plan_id
+                .lean()
+
 
             if (!subscriptionItems) {
                 return []
