@@ -20,6 +20,7 @@ const auditLogRouter = require('~/routes/v1/project/auditLogRouter')
 const stripeRouter = require('~/routes/v1/project/stripeRouter')
 const subscriptionplanRouter = require('~/routes/v1/project/subscriptionplanRouter')
 const subscriptionRouter = require('~/routes/v1/project/subscriptionRouter')
+const chatAiRouter = require('~/routes/v1/AI/chatAiRoutes')
 
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
@@ -61,6 +62,8 @@ app.use('/api/stripe', stripeRouter)
 app.use('/api/subscription-plan', subscriptionplanRouter)
 
 app.use('/api/subscription', subscriptionRouter)
+app.use('/api/chat-ai', chatAiRouter)
+
 
 app.use(errorHandling)
 const port = process.env.PORT || 8888

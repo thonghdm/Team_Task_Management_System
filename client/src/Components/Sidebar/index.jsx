@@ -16,6 +16,7 @@ import {
   Folder as PortfoliosIcon,
   Flag as GoalsIcon,
   Add as AddIcon,
+  Chat as ChatIcon,
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import SidebarList from '../SidebarList';
@@ -113,6 +114,7 @@ const mainLinkData = [
   { projectName: 'Home', _id: 'home', icon: <HomeIcon />, main: 'Home' },
   { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon />, main: 'My tasks' },
   { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon />, main: 'Inbox' },
+  { projectName: 'ChatAI', _id: 'chat-ai', icon: <ChatIcon />, main: 'ChatAI' },
 ];
 
 
