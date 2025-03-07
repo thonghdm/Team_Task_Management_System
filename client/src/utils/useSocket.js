@@ -37,7 +37,6 @@ const useSocket = (userId, accesstoken) => {
     useEffect(() => {
         if (!userId) return;
 
-        // Initialize socket connection
         if (!socketRef.current) {
             socketRef.current = io(SOCKET_SERVER_URL, {
                 withCredentials: true,
@@ -53,9 +52,6 @@ const useSocket = (userId, accesstoken) => {
                 console.log("New notification received:", notification);
                 setNotifications((prev) => [notification, ...prev]);
                 setUnreadCount(prev => prev + 1);
-                
-                // You could add toast notification here
-                // toast.info(notification.message);
             });
         }
 
@@ -72,7 +68,6 @@ const useSocket = (userId, accesstoken) => {
         if (!accesstoken) return;
         
         try {
-            // API call to mark notification as read
             await markAsReadNotification(accesstoken, notificationId);
             
             // Update local state

@@ -62,27 +62,21 @@ const NotificationPanel = () => {
     await markAllAsRead();
   };
 
-  // Helper function to check if a notification is read
   const isNotificationRead = (notification) => {
-    // Check if isRead is a boolean
     if (typeof notification.isRead === 'boolean') {
       return notification.isRead;
     }
     
-    // Check if isRead is an array containing the user ID
     if (Array.isArray(notification.isRead)) {
       return notification.isRead.includes(userData?._id);
     }
     
-    // If isRead is empty or undefined, consider it unread
     return false;
   };
 
   const viewHandler = (notification) => {
-    // Mark as read when clicked
     handleMarkAsRead(notification._id);
     
-    // Navigate to the relevant task/project based on notification type
     const { task, notiType } = notification;
     
     if (task && task._id) {
