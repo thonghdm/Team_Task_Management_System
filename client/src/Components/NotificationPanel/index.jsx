@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
+import { useSelector } from 'react-redux';
 import {
-  Popover,
-  IconButton,
   Badge,
-  Typography,
-  Box,
+  IconButton,
+  Popover,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  Typography,
   Divider,
+  Box,
+  CircularProgress,
   Button
 } from '@mui/material';
 import {
@@ -18,88 +21,99 @@ import {
   Message as MessageIcon
 } from '@mui/icons-material';
 import moment from 'moment';
-import { useTheme } from '@mui/material/styles';
-
-
-const data = [
-  {
-    _id: "65c5bbf3787832cf99f28e6d",
-    team: [
-      "65c202d4aa62f32ffd1303cc",
-      "65c27a0e18c0a1b750ad5cad",
-      "65c30b96e639681a13def0b5",
-    ],
-    text: "New task has been assigned to you and 2 others. The task priority is set a normal priority, so check and act accordingly. The task date is Thu Feb 29 2024. Thank you!!!",
-    task: null,
-    notiType: "alert",
-    isRead: [],
-    createdAt: "2024-02-09T05:45:23.353Z",
-    updatedAt: "2024-02-09T05:45:23.353Z",
-    __v: 0,
-  },
-  {
-    _id: "65c5f12ab5204a81bde866ab",
-    team: [
-      "65c202d4aa62f32ffd1303cc",
-      "65c30b96e639681a13def0b5",
-      "65c317360fd860f958baa08e",
-    ],
-    text: "New task has been assigned to you and 2 others. The task priority is set a high priority, so check and act accordingly. The task date is Fri Feb 09 2024. Thank you!!!",
-    task: {
-      _id: "65c5f12ab5204a81bde866a9",
-      title: "Test task",
-    },
-    notiType: "alert",
-    isRead: [],
-    createdAt: "2024-02-09T09:32:26.810Z",
-    updatedAt: "2024-02-09T09:32:26.810Z",
-    __v: 0,
-  },
-];
+import useSocket from '~/utils/useSocket';
 
 const ICONS = {
   alert: <NotificationsActiveIcon />,
   message: <MessageIcon />,
+  task_invite: <NotificationsActiveIcon />
 };
 
 const NotificationPanel = () => {
   const theme = useTheme();
-
   const [anchorEl, setAnchorEl] = useState(null);
+  const { accesstoken, userData } = useSelector(state => state.auth);
+  
+  // Initialize socket hook with user ID and access token
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    refreshNotifications,
+    loading 
+  } = useSocket(userData?._id, accesstoken);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
+    // Refresh notifications when opening the menu
+    refreshNotifications();
   };
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const readHandler = () => {
-    // Implement read handler
+  const handleMarkAsRead = async (notificationId) => {
+    await markAsRead(notificationId);
   };
 
-  const viewHandler = (item) => {
-    // Implement view handler
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
   };
 
-  const callsToAction = [
-    { name: "Cancel", onClick: handleClose },
-    { name: "Mark All Read", onClick: () => readHandler("all", "") },
-  ];
+  // Helper function to check if a notification is read
+  const isNotificationRead = (notification) => {
+    // Check if isRead is a boolean
+    if (typeof notification.isRead === 'boolean') {
+      return notification.isRead;
+    }
+    
+    // Check if isRead is an array containing the user ID
+    if (Array.isArray(notification.isRead)) {
+      return notification.isRead.includes(userData?._id);
+    }
+    
+    // If isRead is empty or undefined, consider it unread
+    return false;
+  };
+
+  const viewHandler = (notification) => {
+    // Mark as read when clicked
+    handleMarkAsRead(notification._id);
+    
+    // Navigate to the relevant task/project based on notification type
+    const { task, notiType } = notification;
+    
+    if (task && task._id) {
+      // Navigate to the task
+      // window.location.href = `/tasks/${task._id}`;
+      console.log(`Navigating to task ${task._id}: ${task.title}`);
+    }
+    
+    handleClose();
+  };
 
   const open = Boolean(anchorEl);
 
   return (
-    <div>
-      <IconButton onClick={handleClick}>
-        <Badge badgeContent={data.length} color="error">
+    <>
+      <IconButton
+        color="inherit"
+        onClick={handleClick}
+        aria-controls={open ? 'notification-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+      >
+        <Badge badgeContent={unreadCount} color="error">
           <NotificationsIcon />
         </Badge>
       </IconButton>
+      
       <Popover
-        open={open}
+        id="notification-menu"
         anchorEl={anchorEl}
+        open={open}
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
@@ -109,24 +123,64 @@ const NotificationPanel = () => {
           vertical: 'top',
           horizontal: 'right',
         }}
+        PaperProps={{
+          sx: {
+            width: 360,
+            maxWidth: '100%',
+          },
+        }}
       >
-        <Box sx={{ width: 360, maxWidth: '100%' }}>
-          <List sx={{ maxHeight: 300, overflow: 'auto' }}>
-            {data.slice(0, 5).map((item, index) => (
-              <ListItem
-                key={item._id + index}
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6">Notifications</Typography>
+          {unreadCount > 0 && (
+            <Typography 
+              variant="body2" 
+              color="primary" 
+              sx={{ cursor: 'pointer' }}
+              onClick={handleMarkAllAsRead}
+            >
+              Mark all as read
+            </Typography>
+          )}
+        </Box>
+        <Divider />
+        
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : notifications.length === 0 ? (
+          <Box sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="body2">No notifications</Typography>
+          </Box>
+        ) : (
+          <List sx={{ maxHeight: 300, overflow: 'auto', padding: 0 }}>
+            {notifications.map((notification) => (
+              <ListItem 
+                key={notification._id} 
                 button
-                onClick={() => viewHandler(item)}
-                sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+                onClick={() => viewHandler(notification)}
+                sx={{
+                  backgroundColor: isNotificationRead(notification) ? 'inherit' : 'rgba(25, 118, 210, 0.08)',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  },
+                  borderBottom: `1px solid ${theme.palette.divider}`
+                }}
               >
                 <ListItemIcon>
-                  <div>{ICONS[item.notiType]}</div> {/* Ensure this is not a button */}
+                  {ICONS[notification.notiType] || <NotificationsIcon />}
                 </ListItemIcon>
                 <ListItemText
                   primary={
                     <Box display="flex" justifyContent="space-between">
-                      <Typography variant="subtitle2">{item.notiType}</Typography>
-                      <Typography variant="caption">{moment(item.createdAt).fromNow()}</Typography>
+                      <Typography variant="subtitle2">
+                        {notification.task?.title || notification.notiType || 'Notification'}
+                      </Typography>
+                      <Typography variant="caption">
+                        {notification.createdAt ? moment(notification.createdAt).fromNow() : ''}
+                      </Typography>
                     </Box>
                   }
                   secondary={
@@ -136,39 +190,46 @@ const NotificationPanel = () => {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: '-webkit-box',
-                        WebkitLineClamp: 1,
+                        WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
-                        color: theme.palette.text.primary
+                        color: theme.palette.text.secondary,
+                        fontWeight: isNotificationRead(notification) ? 'normal' : 'medium',
                       }}
                     >
-                      {item.text}
+                      {notification.text || notification.message}
                     </Typography>
                   }
                 />
               </ListItem>
             ))}
           </List>
-          <Divider />
-          <Box display="flex">
-            {callsToAction.map((action, index) => (
-              <Button
-                key={action.name}
-                fullWidth
-                onClick={action.onClick}
-                sx={{
-                  py: 1,
-                  borderRight: index === 0 ? 1 : 0,
-                  borderColor: 'divider'
-                }}
-              >
-                {action.name}
-              </Button>
-            ))}
-          </Box>
+        )}
+        
+        <Divider />
+        <Box display="flex">
+          <Button
+            fullWidth
+            onClick={handleClose}
+            sx={{
+              py: 1,
+              borderRight: 1,
+              borderColor: 'divider'
+            }}
+          >
+            Close
+          </Button>
+          <Button
+            fullWidth
+            onClick={handleMarkAllAsRead}
+            disabled={unreadCount === 0}
+            sx={{ py: 1 }}
+          >
+            Mark All Read
+          </Button>
         </Box>
       </Popover>
-    </div>
+    </>
   );
 };
 
-export default NotificationPanel;
+export default NotificationPanel; 

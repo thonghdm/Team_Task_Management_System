@@ -38,7 +38,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
-    console.log(event.target.files[0]);
+    // console.log(event.target.files[0]);
   };
   ////////////////////////////////
   const refreshToken = useRefreshToken();

@@ -32,6 +32,8 @@ import { fetchTaskById } from '~/redux/project/task-slice';
 import { inviteUserTask } from '~/redux/project/task-slice/task-inviteUser-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 
+import { addNotification } from '~/redux/project/notifications-slice/index';
+
 const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
     '& .MuiOutlinedInput-root': {
         padding: '2px 8px',
@@ -220,7 +222,7 @@ const UserSearchInput = ({
     );
 };
 
-const AddMemberDialog = ({ open, onClose, taskId, isClickable = true }) => {
+const AddMemberDialog = ({ open, onClose, taskId, isClickable = true, taskData }) => {
     const theme = useTheme();
     const { accesstoken, userData } = useSelector(state => state.auth)
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -256,7 +258,7 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true }) => {
                 return;
             }
 
-            if(!isClickable) {
+            if (!isClickable) {
                 toast.error("You don't have permission to invite user");
                 return;
             }
@@ -269,8 +271,6 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true }) => {
                 user_name: user.username,
                 user_email: user.email
             }));
-            console.log('task?.assigned_to_id', task?.assigned_to_id);
-            console.log('userInvite', userInvite);
             // Check existing members
             if (checkMemberIdExists(userInvite, task?.assigned_to_id)) {
                 toast.error('One or more users already exist');
@@ -288,7 +288,7 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true }) => {
                 resetFormState();
             };
 
-            const inviteMembers = async (token) => {
+            const inviteMembers = async (token, taskData) => {
                 try {
                     const resultAction = await dispatch(inviteUserTask({
                         accesstoken: token,
@@ -327,6 +327,16 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true }) => {
                         await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     }
                     await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+
+                    const notificationData = {
+                        senderId: userData._id,
+                        receiverId: selectedUsers.map(user => user._id),
+                        projectId: projectId,
+                        type: 'task_invite',
+                        message: `You have been invited to the task ${taskData?.task_name} in project ${taskData?.project_id?.projectName}`
+                    };
+
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     handleSuccess();
                     onClose();
                 } catch (error) {
@@ -334,7 +344,7 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true }) => {
                 }
             };
             // Start the invite process
-            inviteMembers(accesstoken);
+            inviteMembers(accesstoken, taskData);
             onClose();
         } catch (error) {
             throw error;

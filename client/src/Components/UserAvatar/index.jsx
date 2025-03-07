@@ -92,7 +92,6 @@ const UserAvatar = () => {
   };
 
   const logoutHandler = async () => {
-    console.log("logout");
     try {
       const response = await apiLogOut();
       dispatch({

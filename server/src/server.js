@@ -21,6 +21,12 @@ const stripeRouter = require('~/routes/v1/project/stripeRouter')
 const subscriptionplanRouter = require('~/routes/v1/project/subscriptionplanRouter')
 const subscriptionRouter = require('~/routes/v1/project/subscriptionRouter')
 const chatAiRouter = require('~/routes/v1/AI/chatAiRoutes')
+const notificationRoutes = require('~/routes/v1/project/notificationRoutes')
+const socketManager = require('~/sockets/socketManager')
+
+
+const http = require('http')
+const { Server } = require('socket.io')
 
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
@@ -28,6 +34,19 @@ const { errorHandling } = require('~/middlewares/errorHandling')
 const cookieParser = require('cookie-parser')
 
 const app = express()
+const server = http.createServer(app)
+const io = new Server(server, {
+    cors: {
+        credentials: true,
+        origin: process.env.URL_CLIENT
+    }
+})
+
+const socketIoInstance = socketManager(io)
+app.use((req, res, next) => {
+    req.io = socketIoInstance
+    next()
+})
 
 app.use(cors({
     credentials: true,
@@ -63,10 +82,12 @@ app.use('/api/subscription-plan', subscriptionplanRouter)
 
 app.use('/api/subscription', subscriptionRouter)
 app.use('/api/chat-ai', chatAiRouter)
-
+app.use('/api/notifications', notificationRoutes)
 
 app.use(errorHandling)
-const port = process.env.PORT || 8888
+
+
+const port = process.env.PORT
 
 // eslint-disable-next-line no-console
-app.listen(port, () => { console.log('Server is running on the port ' + port) })
+server.listen(port, () => { console.log('Server is running on the port ' + port) })

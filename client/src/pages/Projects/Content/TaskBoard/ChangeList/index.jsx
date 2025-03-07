@@ -868,7 +868,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                     </Box>
 
-                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} isClickable={!isViewer}/>
+                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} isClickable={!isViewer} taskData={task}/>
                 </Box>
             </DialogContent>
 

@@ -14,7 +14,6 @@ const FileManagementDialogs = ({ open, onClose }) => {
     } else if (option === 'Delete') {
       setDeleteOpen(true);
     }
-    console.log(`Selected option: ${option}`);
   };
 
   const handleEditClose = () => {
@@ -26,7 +25,6 @@ const FileManagementDialogs = ({ open, onClose }) => {
   };
 
   const handleDeleteConfirm = () => {
-    console.log(`File deleted: ${fileName}`);
     setDeleteOpen(false);
   };
 

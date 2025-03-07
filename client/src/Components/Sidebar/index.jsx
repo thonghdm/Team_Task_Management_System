@@ -197,11 +197,33 @@ const Sidebar = ({ open }) => {
   }, [accesstoken, userData, dispatch]);
 
   const [isCurrentPlan, setIsCurrentPlan] = useState(null);
+  const [isMainLinkData, setIsMainLinkData] = useState([]);
+
   useEffect(() => {
     if (subscription) {
       setIsCurrentPlan(subscription?.data[0]?.plan_id.subscription_type);
     }
   }, [subscription]);
+
+  useEffect(() => {
+    if (isCurrentPlan === 'Free') {
+      const filteredData = mainLinkData.filter(item => item._id !== 'chat-ai');
+      setIsMainLinkData(filteredData);
+    } else {
+      setIsMainLinkData(mainLinkData);
+    }
+  }, [isCurrentPlan]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace(',', ' ---');
+  };
 
   return (
     <StyledDrawer variant="permanent" open={open}>
@@ -215,7 +237,7 @@ const Sidebar = ({ open }) => {
         }}
       >
         <Box sx={{ fontSize: '14px' }}>
-          <SidebarList linkData={mainLinkData} Id={1} />
+          <SidebarList linkData={isMainLinkData} Id={1} />
         </Box>
 
 
@@ -286,7 +308,7 @@ const Sidebar = ({ open }) => {
                   }}
                   ml={1}
                 >
-                  2025/02/23 17:06:19
+                    {subscription?.data[0]?.end_date ? formatDate(subscription.data[0].end_date) : ''}
                 </Typography>
               </>
             )}

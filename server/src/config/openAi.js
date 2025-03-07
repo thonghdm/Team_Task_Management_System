@@ -3,7 +3,7 @@ require('dotenv').config()
 
 const client = new OpenAI({
     baseURL: 'https://openrouter.ai/api/v1',
-    apiKey: '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',
+    apiKey: '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',
     defaultHeaders: {
         'HTTP-Referer': 'http://localhost:3000',
         'X-Title': 'Local Development'

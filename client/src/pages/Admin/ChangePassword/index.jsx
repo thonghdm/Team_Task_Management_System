@@ -137,7 +137,6 @@ const ChangePassword = ({ initialUser }) => {
     setOpenSnackbar(false);
   };
   const handleSubmit = async () => {
-    console.log('submit', user);
     if(previewUrl) {
       await updateUserInfo();
     }
