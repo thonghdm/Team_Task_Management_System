@@ -13,17 +13,8 @@ const getNotifications = async (req, res) => {
 
 const addNotification = async (req, res) => {
     try {
-        const { senderId, receiverId, projectId, message, type } = req.body;
-        if (!senderId || !receiverId || !message || !projectId) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
-
         const newNotification = await notificationService.createNotification(
-            senderId,
-            receiverId,
-            projectId,
-            message,
-            type,
+            req.body,
             req.io
         )
         res.status(201).json(newNotification)

@@ -9,30 +9,41 @@ const getUserNotifications = async (userId) => {
         .limit(50)
 }
 
-const createNotification = async (senderId, receiverId, projectId, message, type = 'add_to_room', io) => {
-    if (!senderId || !receiverId || !message || !projectId) {
-        throw new Error('Missing required fields')
+const createNotification = async (notifications, io) => {
+    if (!Array.isArray(notifications) || notifications.length === 0) {
+        throw new Error('Notifications must be a non-empty array')
     }
+
     try {
-        const notification = new Notification({
-            senderId,
-            receiverId,
-            projectId,
-            message,
-            type,
+        // Validate each notification object
+        notifications.forEach(notification => {
+            const { senderId, receiverId, projectId, message } = notification
+            if (!senderId || !receiverId || !message || !projectId) {
+                throw new Error('Missing required fields in one of the notifications')
+            }
+        })
+
+        const notificationDocs = notifications.map(notification => ({
+            ...notification,
             read: false,
             createdAt: new Date()
-        })
-        await notification.save()
+        }))
+
+        // Insert many notifications
+        const createdNotifications = await Notification.insertMany(notificationDocs)
+
+        // Emit socket events if io is provided
         if (io) {
-            io.to(receiverId.toString()).emit('newNotification', {
-                notification,
-                type: 'add_to_room'
+            createdNotifications.forEach(notification => {
+                io.to(notification.receiverId.toString()).emit('newNotification', {
+                    notification,
+                    type: notification.type || 'add_to_room'
+                })
             })
         }
-        return notification
+        return createdNotifications
     } catch (error) {
-        throw new Error(`Error creating notification: ${error.message}`)
+        throw new Error(`Error creating notifications: ${error.message}`)
     }
 }
 

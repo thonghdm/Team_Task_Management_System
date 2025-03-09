@@ -43,6 +43,7 @@ import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_
 import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom';
 import { updateList } from '~/apis/Project/listService';
+import { addNotification } from '~/redux/project/notifications-slice/index';
 
 
 export default function Column({ column }) {
@@ -86,6 +87,7 @@ export default function Column({ column }) {
   const dispatch = useDispatch();
   const { projectId } = useParams();
   const { accesstoken, userData } = useSelector(state => state.auth)
+  const { projectData } = useSelector((state) => state.projectDetail);
 
 
   const { members } = useSelector((state) => state.memberProject);
@@ -174,7 +176,7 @@ export default function Column({ column }) {
   //
   const handleClickDeleteColumn = async () => {
     if (isViewer) {
-      toast.error('You do not have permission to remove a task');
+      toast.error('You do not have permission to remove a list');
       return;
     }
     const listData = {
@@ -183,6 +185,16 @@ export default function Column({ column }) {
     const handleSuccess = (message) => {
       toast.success(message || 'List delete successfully!');
     };
+
+    const notificationData = members.members
+      .filter(member => member.memberId._id !== userData._id && member.is_active === true)
+      .map(member => ({
+        senderId: userData._id,
+        receiverId: member.memberId._id,
+        projectId: projectId,
+        type: 'project_update',
+        message: `${userData?.displayName || 'User'} deleted list "${column?.list_name || 'Untitled'}" in project "${projectData?.project?.projectName}"`
+      }))
 
     const update = async (token) => {
       try {
@@ -194,6 +206,7 @@ export default function Column({ column }) {
           }
           throw new Error('Project failed');
         }
+        await dispatch(addNotification({ accesstoken: token, data: notificationData }))
       }
       catch (error) {
         throw error;

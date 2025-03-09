@@ -92,7 +92,6 @@ const UserSearchInput = ({
             dispatch(fetchMemberProject({ accesstoken, projectId }));
         }
     }, [dispatch, accesstoken, inputValue]);
-
     useEffect(() => {
         const fetchData = async () => {
             if (!inputValue.trim()) {
@@ -106,6 +105,7 @@ const UserSearchInput = ({
                 await new Promise(resolve => setTimeout(resolve, 500));
 
                 const filtered = members?.members?.filter(member =>
+                    member?.is_active === true &&
                     (
                         member?.memberId?.displayName.toLowerCase().includes(inputValue.toLowerCase()) ||
                         member?.memberId?.email.toLowerCase().includes(inputValue.toLowerCase()) ||
@@ -328,14 +328,14 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true, taskData }
                     }
                     await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
 
-                    const notificationData = {
+                    const notificationData = selectedUsers.map(user => ({
                         senderId: userData._id,
-                        receiverId: selectedUsers.map(user => user._id),
+                        receiverId: user._id,
                         projectId: projectId,
+                        taskId: taskId,
                         type: 'task_invite',
                         message: `You have been invited to the task ${taskData?.task_name} in project ${taskData?.project_id?.projectName}`
-                    };
-
+                    }))
                     await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     handleSuccess();
                     onClose();

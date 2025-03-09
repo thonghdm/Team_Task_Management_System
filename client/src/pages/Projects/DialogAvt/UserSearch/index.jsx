@@ -25,7 +25,10 @@ import { useParams } from 'react-router-dom';
 import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProjectSlice';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
+import { addNotification } from '~/redux/project/notifications-slice/index';
+
 // Custom styles for Autocomplete
+
 const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
     '& .MuiOutlinedInput-root': {
         padding: '2px 8px',
@@ -242,7 +245,7 @@ const UserSearch = ({ isClickable = false }) => {
             setError('Please select at least one user');
             return;
         }
-        if (!isClickable){
+        if (!isClickable) {
             toast.error('You do not have permission to invite members');
             return;
         }
@@ -271,6 +274,15 @@ const UserSearch = ({ isClickable = false }) => {
             setError(null);
         };
 
+        const notificationData = selectedUsers.map(user => ({
+            senderId: userData._id,
+            receiverId: user._id,
+            projectId: projectId,
+            // taskId: taskId,
+            type: 'project_invite',
+            message: `${userData.displayName} have been invited to the project ${projectData?.project?.projectName}`
+        }))
+
         const handleSuccess = () => {
             toast.success('Member invite successfully!');
             resetFormState();
@@ -291,7 +303,8 @@ const UserSearch = ({ isClickable = false }) => {
                     }
                 }));
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId }))
-                await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                await dispatch(fetchProjectDetail({ accesstoken: token, projectId }))
+                await dispatch(addNotification({ accesstoken: token, data: notificationData }))
                 handleSuccess();
             } catch (error) {
 

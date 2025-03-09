@@ -40,6 +40,7 @@ import { createAuditLog } from '~/redux/project/auditLog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 // import AnimationDone from '~/Components/AnimationDone';
 import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
+import { addNotification } from '~/redux/project/notifications-slice/index';
 
 const ChangeList = ({ open, onClose, taskId }) => {
     const theme = useTheme();
@@ -76,10 +77,12 @@ const ChangeList = ({ open, onClose, taskId }) => {
     ///delete assignee
     const [openMember, setOpenMember] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [idMember, setIdMemberMember] = useState(null);
     const [selectedMemberName, setSelectedMemberName] = useState(null);
-    const handleDeleteMemberClick = (memberId, memberName) => {
+    const handleDeleteMemberClick = (memberId, memberName, userIdx) => {
         setSelectedMember(memberId);
         setSelectedMemberName(memberName);
+        setIdMemberMember(userIdx);
         setOpenMember(true);
     };
 
@@ -125,10 +128,8 @@ const ChangeList = ({ open, onClose, taskId }) => {
     )?.isRole;
     const isViewer = currentUserRole === 'Viewer';
 
-
     /// get file
     const { files } = useSelector(state => state.uploadFile);
-
     useEffect(() => {
         const getFileDetail = async (token) => {
             try {
@@ -155,6 +156,23 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 name: selectedMemberName,
                 is_active: false
             };
+
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'delete_member',
+                    message: `${userData.displayName} has removed ${task?.assigned_to_id.find(m => m.memberId._id === idMember)?.memberId?.displayName} from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
             if (isViewer) {
                 toast.error('You do not have permission to perform this action!');
                 return;
@@ -200,6 +218,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -231,6 +250,22 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 toast.error('You do not have permission to perform this action!');
                 return;
             }
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'task_update',
+                    message: `${userData.displayName} has removed label "${selectedLabelName}" from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
             const handleSuccess = () => {
                 toast.success('Delete label successfully!');
                 setOpenLabel(false);
@@ -272,6 +307,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                     }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
                 } catch (error) {
@@ -297,6 +333,24 @@ const ChangeList = ({ open, onClose, taskId }) => {
             const dataSave = {
                 task_name: newText
             };
+
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'task_update',
+                    message: `${userData.displayName} has save title "${newText}" from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
+
             const handleSuccess = () => {
                 // toast.success('Update title task successfully!');
             };
@@ -316,6 +370,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     }
                     if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -338,6 +393,23 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 toast.error('You do not have permission to perform this action!');
                 return;
             }
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'task_update',
+                    message: `${userData.displayName} has save priority "${newPriority}" from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
+
             const handleSuccess = () => {
                 // toast.success('Update priority task successfully!');
             };
@@ -379,6 +451,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     }));
                     if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -402,6 +475,23 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 toast.error('You do not have permission to perform this action!');
                 return;
             }
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'task_update',
+                    message: `${userData.displayName} has save status "${newStatus}" from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
+
             if (newStatus === 'Completed') {
                 dataSave = { ...dataSave, done_date: new Date().toISOString() };
             } else {
@@ -454,6 +544,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     }));
                     if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -479,6 +570,22 @@ const ChangeList = ({ open, onClose, taskId }) => {
             const handleSuccess = () => {
                 // toast.success('Update start date task successfully!');
             };
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'task_update',
+                    message: `${userData.displayName} has Update start date from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
             const saveStartDateTask = async (token) => {
                 try {
                     const resultAction = await dispatch(updateTaskThunks({
@@ -507,6 +614,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -529,6 +637,22 @@ const ChangeList = ({ open, onClose, taskId }) => {
             const dataSave = {
                 end_date: newDueDate
             };
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'task_update',
+                    message: `${userData.displayName} has Update end date from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
             const handleSuccess = () => {
                 // toast.success('Update due date task successfully!');
             };
@@ -568,6 +692,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                             user_id: userData?._id
                         }
                     }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     handleSuccess();
@@ -611,6 +736,24 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 setOpenLeaveMember(false);
                 setSelectedLeaveMember(null);
             };
+
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'leave_task',
+                    message: `${userData.displayName} has left task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
+
             const leaveMembers = async (token) => {
                 try {
                     const resultAction = await dispatch(updateMemberTaskThunks({
@@ -645,6 +788,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     }));
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -693,7 +837,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 key={member?.memberId?._id}
                                 avatar={<Avatar sx={{ bgcolor: '#c9b458' }} src={member?.memberId?.image} />}
                                 label={member?.memberId?.displayName}
-                                onDelete={() => handleDeleteMemberClick(member?._id, member?.memberId?.displayName)}
+                                onDelete={() => handleDeleteMemberClick(member?._id, member?.memberId?.displayName, member?.memberId?._id)}
                                 sx={{ bgcolor: 'transparent', border: `1px solid ${theme.palette.text.secondary}` }}
                             />
                         ))}
@@ -725,7 +869,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 Add
                             </Button>
                         </Box>
-                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId} userData={userData} isClickable={!isViewer}/>
+                        <ColorPickerDialog open={openColorPicker} onClose={handleCloseColorPicker} taskId={taskId} userData={userData} isClickable={!isViewer} />
                         {/* {label.title && (
                             <p>Created Label: {label.title} (Color: {label.color})</p>
                         )} */}
@@ -776,7 +920,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                     Add
                                 </Button>
                             </Box>
-                            <FileUploadDialog open={openFile} onClose={handleCloseFile} taskId={taskId} entityType={"Task"} isClickable={!isViewer} />
+                            <FileUploadDialog open={openFile} onClose={handleCloseFile} taskId={taskId} entityType={"Task"} isClickable={!isViewer} members={members} task={task} />
                         </Box>
                         <Box>
                             {files?.length > 0 && (files?.map((file, index) => (
@@ -790,7 +934,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                             </Box>
                                         </Box>
                                     </Box>
-                                    <FileManagementDialog fileManagement={file} userData={userData} taskId={taskId} isClickable={!isViewer} />
+                                    <FileManagementDialog fileManagement={file} userData={userData} taskId={taskId} isClickable={!isViewer} members={members} task={task}/>
                                     {/* <FileManagementDialogs open={openManagement} onClose={handleCloseManagement} /> */}
                                 </Box>
                             )))}
@@ -801,7 +945,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Typography>Description</Typography>
-                        <ProjectDescription isEditable={isViewer ? false : true} initialContent={task?.description} context={"descriptionTask"} taskId={taskId} />
+                        <ProjectDescription isEditable={isViewer ? false : true} initialContent={task?.description} context={"descriptionTask"} taskId={taskId} members={members} task={task}/>
                     </Box>
 
 
@@ -841,11 +985,11 @@ const ChangeList = ({ open, onClose, taskId }) => {
                                 padding: "8px!important"
                             }}
                         >
-                            <ProjectDescription initialContent={cmt} isLabled={false} context={"comment"} taskId={taskId} />
+                            <ProjectDescription initialContent={cmt} isLabled={false} context={"comment"} taskId={taskId} members={members} task={task}/>
                         </Box>
                     </Box>
 
-                    <CommentList comments={task?.comment_id} taskId={taskId} />
+                    {task?.comment_id && <CommentList comments={task?.comment_id} taskId={taskId} />}
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography variant="caption">Collaborators</Typography>
@@ -868,7 +1012,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         }
                     </Box>
 
-                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} isClickable={!isViewer} taskData={task}/>
+                    <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} isClickable={!isViewer} taskData={task} />
                 </Box>
             </DialogContent>
 
@@ -877,7 +1021,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 open={openMember}
                 onClose={handleCancelDeleteMember}
                 projectName="Confirm delete member"
-                lable="Are you sure you want to delete member this project?"
+                lable="Are you sure you want to delete member this task?"
                 onConfirm={handleConfirmDeleteMember}
             />
 
