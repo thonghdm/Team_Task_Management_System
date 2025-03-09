@@ -10,8 +10,10 @@ import Team from '~/pages/Team';
 import Projects from '~/pages/Projects';
 // import AddProjects from '~/pages/Projects/AddProjects';
 import Inbox from '~/pages/Inbox';
+import PaymentError from '~/pages/Payment/PaymentError';
+import PaymentSuccess from '~/pages/Payment/PaymentSuccess';
 
-
+import ChatAI from '~/pages/ChatAI';
 const Boards = () => {
   const [open, setOpen] = useState(true);
 
@@ -30,9 +32,13 @@ const Boards = () => {
           <Route path="tasks/1/*" element={<Task />} />
           <Route path="team/4" element={<Team />} />
           <Route path="inbox/1/*" element={<Inbox />} />
+          <Route path="chat-ai/1/*" element={<ChatAI />} />
           {/* <Route path="/projects/new" element={<AddProjects />} /> */}
           <Route path=":projectId/2/*" element={<Projects />} />
           <Route path=":projectId/3/*" element={<Projects />} />
+
+          <Route path="payment/success" element={<PaymentSuccess />} />
+          <Route path="payment/error" element={<PaymentError/>} />
         </Routes>
       </Box>
     </Box>

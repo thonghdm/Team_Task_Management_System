@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
+import { addNotification } from '~/redux/project/notifications-slice/index';
 
 
 
@@ -55,10 +56,11 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     }
 }));
 
-const ExpandTask = ({ taskId }) => {
+const ExpandTask = ({ taskId, taskName, projectName }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-
+    const { members } = useSelector((state) => state.memberProject);
+    console.log(members);
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -73,16 +75,25 @@ const ExpandTask = ({ taskId }) => {
     };
 
     ////////////////////////////////////////////////////////////////
-    const { accesstoken } = useSelector(state => state.auth)
+    const { accesstoken, userData } = useSelector(state => state.auth)
     const refreshToken = useRefreshToken();
     const dispatch = useDispatch();
     const { projectId } = useParams();
 
-    const confirmLeaveProject = () => {
+    const confirmDeleteTask = () => {
         try {
             const dataDelete = {
                 is_active: false
             };
+            const notificationData = members.members
+                .filter(member => member.memberId._id !== userData._id && member.is_active === true)
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    type: 'task_update',
+                    message: `${userData?.displayName || 'User'} deleted task "${taskName || 'Untitled'}" in project "${projectName || 'Untitled Project'}"`
+                }))
             const handleSuccess = () => {
                 toast.success('Delete task successfully!');
                 handleCloseAlert();
@@ -102,7 +113,8 @@ const ExpandTask = ({ taskId }) => {
                         }
                         throw new Error('Delete task failed');
                     }
-                    await dispatch(fetchProjectDetail({ accesstoken:token, projectId }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }))
+                    await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
                 } catch (error) {
                     throw error;
@@ -155,7 +167,7 @@ const ExpandTask = ({ taskId }) => {
                 onClose={handleCloseAlert}
                 projectName="Confirm Delete Task"
                 lable="Are you sure you want to delete task?"
-                onConfirm={confirmLeaveProject}
+                onConfirm={confirmDeleteTask}
             />
         </>
     );

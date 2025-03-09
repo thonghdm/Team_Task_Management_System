@@ -13,6 +13,7 @@ import {
 } from '@mui/icons-material';
 import { MoreHoriz as MoreHorizIcon } from '@mui/icons-material';
 import { toast } from 'react-toastify';
+import { useParams } from 'react-router-dom';
 
 import { fetchFileByIdTask, updateAttachmentByIdFileThunk } from '~/redux/project/uploadFile-slice';
 import { useDispatch, useSelector } from 'react-redux'
@@ -22,6 +23,9 @@ import { createAuditLog } from '~/redux/project/auditLog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
+import { addNotification } from '~/redux/project/notifications-slice/index';
+
+
 // Styled components
 const StyledMenu = styled(Menu)(({ theme }) => ({
     '& .MuiPaper-root': {
@@ -53,9 +57,10 @@ const DeleteMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 
-const FileManagementDialog = ({ fileManagement, taskId, isClickable = true }) => {
+const FileManagementDialog = ({ fileManagement, taskId, isClickable = true, members, task }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+    const { projectId } = useParams();
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -95,13 +100,29 @@ const FileManagementDialog = ({ fileManagement, taskId, isClickable = true }) =>
             if (!fileManagement) {
                 toast.error("File is required");
             }
-            if(!isClickable) {
+            if (!isClickable) {
                 toast.error("You don't have permission to download file");
                 return;
             }
             const fileData = {
                 is_active: false
             };
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'task_update',
+                    message: `${userData.displayName} has delete file from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                }));
             const deleteFileTask = async (token) => {
                 try {
                     const resultAction = await dispatch(updateAttachmentByIdFileThunk({ accesstoken: token, attachmentId: fileId, updateData: fileData }));
@@ -135,6 +156,7 @@ const FileManagementDialog = ({ fileManagement, taskId, isClickable = true }) =>
                             task_id: taskId,
                         }
                     }))
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                     await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
                     handleClose();
                     toast.success("File delete successfully");

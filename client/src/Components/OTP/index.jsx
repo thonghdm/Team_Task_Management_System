@@ -52,7 +52,6 @@ const OTP = () => {
     const handleResend = (e) => {
         e.preventDefault(); // Prevent page reload
         resendOtp();
-        console.log('Resend OTP');
     };
 
     const handleUpdateEmail = () => {
@@ -61,7 +60,6 @@ const OTP = () => {
     const resendOtp = async () => {
         try {
             const response = await axios.post('http://localhost:5000/api/auth/resend-otp', {email});
-            console.log('Resend OTP response:', response.data);
             if (response.data.user) {
                 setResentMessageVisible(true);
             } else {
@@ -74,7 +72,6 @@ const OTP = () => {
     };
     const verifyOtp = async (enteredOtp) => {
         try {
-            console.log('Email:', email, 'OTP:', enteredOtp);
             const response = await axios.post('http://localhost:5000/api/auth/verify-email', {
                 email,
                 otp_code: enteredOtp,
