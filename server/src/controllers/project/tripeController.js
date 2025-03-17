@@ -2,7 +2,6 @@ const Stripe = require('stripe')
 import SubscriptionPlan from '~/models/SubscriptionPlanSchema.js'
 import Subscription from '~/models/SubscriptionSchema.js'
 // import User from '~/models/UserSchema.js'
-import mongoose from 'mongoose'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000'

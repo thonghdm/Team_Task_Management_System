@@ -23,11 +23,10 @@ const subscriptionRouter = require('~/routes/v1/project/subscriptionRouter')
 const chatAiRouter = require('~/routes/v1/AI/chatAiRoutes')
 const notificationRoutes = require('~/routes/v1/project/notificationRoutes')
 const socketManager = require('~/sockets/socketManager')
-
+const videoCallRouter = require('~/routes/v1/inbox/videoCallRouter')
 
 const http = require('http')
 const { Server } = require('socket.io')
-const { ExpressPeerServer } = require('peer')
 
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
@@ -49,11 +48,7 @@ app.use((req, res, next) => {
     next()
 })
 
-const peerServer = ExpressPeerServer(server, {
-    debug: true,
-});
 
-app.use('/peerjs', peerServer);
 app.use(cors({
     credentials: true,
     origin: process.env.URL_CLIENT
@@ -90,6 +85,7 @@ app.use('/api/subscription', subscriptionRouter)
 app.use('/api/chat-ai', chatAiRouter)
 app.use('/api/notifications', notificationRoutes)
 
+app.use('/api/calls', videoCallRouter)
 app.use(errorHandling)
 
 

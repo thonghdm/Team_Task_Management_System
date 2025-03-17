@@ -6,7 +6,7 @@ import './styles.css';
 import { useTheme } from '@mui/material/styles';
 
 const chatItems = [
-    { id: 1, name: "Hoang Dinh Minh Thong", message: "Last message preview", initials: "HT" },
+    { id: '67cd375fcc08037fa1c6e28', name: "Hoang Dinh Minh Thong", message: "Last message preview", initials: "HT" },
     { id: 2, name: "Dien", message: "Hello, how are you?", initials: "DL" },
     { id: 3, name: "Lonâg", message: "Meeting at 10AM", initials: "AL" },
     { id: 11, name: "Hoang Dinh Minh Thong", message: "Last message preview", initials: "HT" },

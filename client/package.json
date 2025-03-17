@@ -22,6 +22,7 @@
         "@mui/material": "^5.16.7",
         "@mui/x-date-pickers": "^7.21.0",
         "@reduxjs/toolkit": "^2.3.0",
+        "agora-rtc-sdk-ng": "^4.23.2",
         "axios": "^1.5.1",
         "crypto-js": "^4.2.0",
         "dayjs": "^1.11.13",
