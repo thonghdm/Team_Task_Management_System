@@ -17,6 +17,14 @@ const uploadController = require('~/routes/v1/project/uploadFileRouter')
 const memberTaskRouter = require('~/routes/v1/project/memberTaskRouter')
 const starredRouter = require('~/routes/v1/project/starredRouter')
 const auditLogRouter = require('~/routes/v1/project/auditLogRouter')
+const groupRoutes = require('~/routes/v1/chat/groupRouter')
+const conversationRoutes = require('~/routes/v1/chat/conversationRouter')
+const soketHandler = require('~/config/socketHandle')
+const socketIo = require('socket.io')
+const http = require('http')
+const server = http.createServer(app)
+const io = socketIo(server)
+
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
 
@@ -51,7 +59,9 @@ app.use('/api/file', uploadController)
 app.use('/api/member-task', memberTaskRouter)
 
 app.use('/api/starred', starredRouter) //////
-
+app.use('/api/conversations', conversationRoutes)
+app.use('/api/groups', groupRoutes)
+soketHandler(io)
 app.use(errorHandling)
 const port = process.env.PORT || 8888
 

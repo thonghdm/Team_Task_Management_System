@@ -13,7 +13,7 @@ const createNewRole = async (rolesArray) => {
                 throw new Error(`Project with ID ${projectId} not found`)
             }
 
-            if(!user_invite) {
+            if (!user_invite) {
                 throw new Error('User invite is required')
             }
 
