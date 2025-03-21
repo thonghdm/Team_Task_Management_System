@@ -72,7 +72,7 @@ const Header = ({ toggleDrawer }) => {
           minWidth: isSmallScreen ? '80px' : '100px',
         }}>
           <IconButton color="inherit" sx={{ marginRight: 4 }}>
-            {/* <NotificationPanel /> */}
+            <NotificationPanel />
           </IconButton>
           <UserAvatar />
         </div>

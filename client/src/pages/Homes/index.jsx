@@ -19,6 +19,9 @@ import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUs
 
 import ChangeList from '~/pages/Projects/Content/TaskBoard/ChangeList';
 
+import { getAllSubPlan } from '~/apis/Project/subscriptionPlan';
+import { createSubscriptionFree } from '~/apis/Project/subscriptionApi';
+
 const Homes = () => {
   const theme = useTheme();
   const dispatch = useDispatch()
@@ -172,21 +175,58 @@ const Homes = () => {
     handleNameClick(taskId)
   };
 
-    ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
 
 
-    //////////////////////////// openProjectDetail
-    const handleProjectClick = (projectId) => {
-      navigate(`/board/${projectId}/2/task-board`);
-    }
-    
+  //////////////////////////// openProjectDetail
+  const handleProjectClick = (projectId) => {
+    navigate(`/board/${projectId}/2/task-board`);
+  }
+
+
   const dataStatics = transformData(success, period);
 
   const displayName = data?.displayName ? data.displayName.match(/^\S+/)[0] : 'User';
+
+  ///////////////////////
+
+  const [subPlan, setSubPlan] = useState(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getAllSubPlan(accesstoken);
+        setSubPlan(data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+    fetchUser();
+  }, [accesstoken])
+
+
+  const IdfreePlan = subPlan?.plans?.find(plan => plan.subscription_type === "Free");
+
+  useEffect(() => {
+    let data = {
+      userId: userData?._id,
+      planId: IdfreePlan,
+    }
+    const fetchUser = async () => {
+      try {
+        await createSubscriptionFree(accesstoken, data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+    fetchUser();
+  }, [accesstoken, userData])
+
+  // ///
+
+
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: theme.palette.grey[50], minHeight: '100vh' }}>
       <Typography variant="h4" sx={{ color: theme.palette.text.primary, mb: 2 }}>Home</Typography>
-
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>{formattedDate}</Typography>
         <Typography variant="h3" sx={{ color: theme.palette.text.primary }}>Good {getTimeOfDay()}, {displayName}</Typography>

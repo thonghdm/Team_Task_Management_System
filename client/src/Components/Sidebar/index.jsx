@@ -16,6 +16,7 @@ import {
   Folder as PortfoliosIcon,
   Flag as GoalsIcon,
   Add as AddIcon,
+  Chat as ChatIcon,
 } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import SidebarList from '../SidebarList';
@@ -26,6 +27,9 @@ import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 
 import { getStarredThunks } from '~/redux/project/starred-slice';
+
+import UpgradePlan from '~/pages/UpgradePlan';
+import { getSubscriptionByUserThunks } from '~/redux/project/subscription-slice'
 
 
 const drawerWidth = 240;
@@ -107,14 +111,13 @@ const AddBillingButton = styled(Button)(({ theme }) => ({
   },
 }));
 const mainLinkData = [
-  { projectName: 'Home', _id: 'home', icon: <HomeIcon />,  main: 'Home'},
-  { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon />,  main: 'My tasks'},
-  { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon />,  main: 'Inbox'},
+  { projectName: 'Home', _id: 'home', icon: <HomeIcon />, main: 'Home' },
+  { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon />, main: 'My tasks' },
+  { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon />, main: 'Inbox' },
+  { projectName: 'ChatAI', _id: 'chat-ai', icon: <ChatIcon />, main: 'ChatAI' },
 ];
 
-const teamLinkData = [
-  { projectName: 'Team', _id: 'team', icon: <ReportingIcon /> ,team: 'Team'},
-];
+
 
 const Sidebar = ({ open }) => {
   const location = useLocation();
@@ -148,13 +151,13 @@ const Sidebar = ({ open }) => {
       console.error("Input B is not a valid array:", B);
       return [];
     }
-    
+
     // Duyệt qua từng phần tử của B và chuyển đổi dữ liệu
     return B.map(itemB => {
       if (!itemB || !itemB.projectId) {
         return null; // Bỏ qua phần tử không hợp lệ
       }
-  
+
       return {
         ...itemB.projectId, // Lấy dữ liệu từ projectId trong B
         _id: itemB.projectId?._id || null, // Kiểm tra nếu _id tồn tại
@@ -164,8 +167,63 @@ const Sidebar = ({ open }) => {
       };
     }).filter(item => item !== null); // Loại bỏ các phần tử null do dữ liệu không hợp lệ
   };
-  
 
+
+  /////
+  const [openUpgradePlan, setOpenUpgradePlan] = useState(false);
+  const handleOpenUpgradePlan = () => {
+    setOpenUpgradePlan(true);
+  };
+
+  const handleCloseUpgradePlan = () => {
+    setOpenUpgradePlan(false);
+  };
+  /////
+  const subscription = useSelector(state => state.subscription.subscription);
+  useEffect(() => {
+    const fetchUserSubscriptions = async () => {
+      try {
+        if (userData && userData._id) {
+          await dispatch(getSubscriptionByUserThunks({ accesstoken, userId: userData._id })).unwrap();
+        }
+      } catch (error) {
+        console.error("Error fetching subscription fetchUserSubscriptions:", error.message);
+      }
+    };
+
+    if (userData?._id) {
+      fetchUserSubscriptions();
+    }
+  }, [accesstoken, userData, dispatch]);
+
+  const [isCurrentPlan, setIsCurrentPlan] = useState(null);
+  const [isMainLinkData, setIsMainLinkData] = useState([]);
+
+  useEffect(() => {
+    if (subscription) {
+      setIsCurrentPlan(subscription?.data[0]?.plan_id.subscription_type);
+    }
+  }, [subscription]);
+
+  useEffect(() => {
+    if (isCurrentPlan === 'Free') {
+      const filteredData = mainLinkData.filter(item => item._id !== 'chat-ai');
+      setIsMainLinkData(filteredData);
+    } else {
+      setIsMainLinkData(mainLinkData);
+    }
+  }, [isCurrentPlan]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace(',', ' ---');
+  };
 
   return (
     <StyledDrawer variant="permanent" open={open}>
@@ -179,7 +237,7 @@ const Sidebar = ({ open }) => {
         }}
       >
         <Box sx={{ fontSize: '14px' }}>
-          <SidebarList linkData={mainLinkData} Id = {1}/>
+          <SidebarList linkData={isMainLinkData} Id={1} />
         </Box>
 
 
@@ -196,14 +254,14 @@ const Sidebar = ({ open }) => {
                 <AddIcon sx={{ width: 17, mt: "3px" }} />
               </IconButton>
             </Box>}
-            {projects?.projects && <SidebarList linkData={projects?.projects} isProject={true} open={open} Id = {2}/>}
+            {projects?.projects && <SidebarList linkData={projects?.projects} isProject={true} open={open} Id={2} />}
           </Box>
 
           <Box>
             <Box display="flex" alignItems="center" justifyContent="space-between">
               {starred?.data.length > 0 && <SectionTitle>STARRED</SectionTitle>}
             </Box>
-            {starred?.data && <SidebarList linkData={convertBtoA(starred?.data)} isProject={true} open={open} Id = {3}/>  }
+            {starred?.data && <SidebarList linkData={convertBtoA(starred?.data)} isProject={true} open={open} Id={3} />}
           </Box>
 
           {/* <Box>
@@ -213,7 +271,7 @@ const Sidebar = ({ open }) => {
         </ScrollableSection>
 
 
-        {/* <Box sx={{ marginTop: 'auto' }}>
+        <Box sx={{ marginTop: 'auto' }}>
           <TrialInfo>
             <Box display="flex" alignItems="center" mb={1}>
               <Box
@@ -225,12 +283,38 @@ const Sidebar = ({ open }) => {
                   marginRight: 1,
                 }}
               />
-              <Typography>Advanced free trial</Typography>
+              <Typography>{isCurrentPlan} Feature</Typography>
             </Box>
-            <Typography variant="body2" mb={1}>30 days left</Typography>
-            <AddBillingButton fullWidth variant="contained">
-              Add billing info
-            </AddBillingButton>
+
+            {isCurrentPlan === 'Free' ? (
+              <>
+                <Typography variant="body2" mb={1} ml={1}>Greater access to the best</Typography>
+                <AddBillingButton fullWidth variant="contained" onClick={handleOpenUpgradePlan}>
+                  Upgrade plan
+                </AddBillingButton>
+              </>
+            ) : (
+              <>
+                <Typography variant="body2" mb={1} ml={-1}>You're in! Experience the best</Typography>
+                <Typography
+                  sx={{
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    color: theme.palette.success.main,
+                    backgroundColor: theme.palette.background.default,
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    display: 'inline-block'
+                  }}
+                  ml={1}
+                >
+                    {subscription?.data[0]?.end_date ? formatDate(subscription.data[0].end_date) : ''}
+                </Typography>
+              </>
+            )}
+
+
+            <UpgradePlan open={openUpgradePlan} onClose={handleCloseUpgradePlan} />
           </TrialInfo>
           <Box textAlign="center" mb={2}>
             <Typography
@@ -241,7 +325,7 @@ const Sidebar = ({ open }) => {
             >
             </Typography>
           </Box>
-        </Box> */}
+        </Box>
       </Box>
     </StyledDrawer>
   );

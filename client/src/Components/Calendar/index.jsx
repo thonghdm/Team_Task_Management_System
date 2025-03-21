@@ -50,7 +50,6 @@ function Calendario({duLieuDuAn}) {
     };
 
     const handleEventClick = (evento) => {
-        console.log(evento); // Placeholder for event click handler
         handleNameClick(evento.id);
     };
 

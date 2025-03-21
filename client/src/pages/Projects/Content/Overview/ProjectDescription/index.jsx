@@ -19,7 +19,10 @@ import { createAuditLog } from '~/redux/project/auditLog-slice';
 
 import { updateAll } from '~/apis/User/userService'
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
-const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true, context, taskId = null, commentID = "" }) => {
+import { addNotification } from '~/redux/project/notifications-slice/index';
+
+
+const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true, context, taskId = null, commentID = "", members = [], task = [], projectName = "" }) => {
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(initialContent);
@@ -71,6 +74,24 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
             user_id: userData._id,
             content: tempContent,
           }
+
+          const notificationData = task?.assigned_to_id
+            .filter(member =>
+              member.memberId._id !== userData._id &&
+              members.members.some(m =>
+                m.memberId._id === member.memberId._id &&
+                m.is_active === true
+              )
+            )
+            .map(member => ({
+              senderId: userData._id,
+              receiverId: member.memberId._id,
+              projectId: projectId,
+              taskId: taskId,
+              type: 'task_update',
+              message: `${userData.displayName} has comment from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+            }));
+
           const createComments = async (token) => {
             try {
               const resultAction = await dispatch(createComment({ accesstoken: token, data: commentData }));
@@ -103,6 +124,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                   task_id: taskId,
                 }
               }))
+              await dispatch(addNotification({ accesstoken: token, data: notificationData }));
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               setIsEditing(false);
             } catch (error) {
@@ -126,14 +148,17 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 }
                 throw new Error('Comment edit failed');
               }
-              await dispatch(createAuditLog({ 
-                accesstoken: token, 
-                data: { task_id: taskId, 
-                        action:'Update', 
-                        entity:'Comment', 
-                        old_value: content,
-                        new_value: tempContent,
-                        user_id:userData?._id} }));
+              await dispatch(createAuditLog({
+                accesstoken: token,
+                data: {
+                  task_id: taskId,
+                  action: 'Update',
+                  entity: 'Comment',
+                  old_value: content,
+                  new_value: tempContent,
+                  user_id: userData?._id
+                }
+              }));
               await dispatch(fetchTaskById({ accesstoken: token, taskId }));
               await dispatch(createAuditLog_project({
                 accesstoken: token,
@@ -143,7 +168,8 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                   entity: 'Task',
                   user_id: userData?._id,
                   task_id: taskId,
-                }}))
+                }
+              }))
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               setContent(tempContent);
               setIsEditing(false);
@@ -165,6 +191,23 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
           const dataSave = {
             description: tempContent
           };
+          const notificationData = task?.assigned_to_id
+            .filter(member =>
+              member.memberId._id !== userData._id &&
+              members.members.some(m =>
+                m.memberId._id === member.memberId._id &&
+                m.is_active === true
+              )
+            )
+            .map(member => ({
+              senderId: userData._id,
+              receiverId: member.memberId._id,
+              projectId: projectId,
+              taskId: taskId,
+              type: 'task_update',
+              message: `${userData.displayName} has update description from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+            }));
+
           const handleSuccess = () => {
             toast.success('Update description task successfully!');
             setContent(tempContent);
@@ -184,13 +227,16 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 }
                 throw new Error('Update description task failed');
               }
-              await dispatch(createAuditLog({ 
-                accesstoken: token, 
-                data: { task_id: taskId, 
-                        action:'Update', 
-                        entity:'Description', 
-                        old_value: content,
-                        user_id:userData?._id} }));
+              await dispatch(createAuditLog({
+                accesstoken: token,
+                data: {
+                  task_id: taskId,
+                  action: 'Update',
+                  entity: 'Description',
+                  old_value: content,
+                  user_id: userData?._id
+                }
+              }));
               await dispatch(fetchTaskById({ accesstoken: token, taskId }));
               await dispatch(createAuditLog_project({
                 accesstoken: token,
@@ -200,7 +246,9 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                   entity: 'Task',
                   user_id: userData?._id,
                   task_id: taskId,
-                }}))
+                }
+              }))
+              await dispatch(addNotification({ accesstoken: token, data: notificationData }));
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
               handleSuccess();
             } catch (error) {
@@ -234,6 +282,15 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 projectId: projectId,
                 projectData: dataSave
               }));
+              const notificationData = members.members
+                .filter(member => member.memberId._id !== userData._id && member.is_active === true)
+                .map(member => ({
+                  senderId: userData._id,
+                  receiverId: member.memberId._id,
+                  projectId: projectId,
+                  type: 'project_update',
+                  message: `${userData?.displayName || 'User'} update description in project "${projectName || 'Untitled Project'}"`
+                }))
               if (updateProjectThunk.rejected.match(resultAction)) {
                 if (resultAction.payload?.err === 2) {
                   const newToken = await refreshToken();
@@ -248,8 +305,10 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                   action: 'Update',
                   entity: 'Description',
                   user_id: userData?._id,
-                }}))
+                }
+              }))
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+              await dispatch(addNotification({ accesstoken: token, data: notificationData }))
               handleSuccess();
             } catch (error) {
               throw error;
@@ -285,7 +344,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 type: actionTypes.USER_UPDATE_SUCCESS,
                 data: { userData: response.data.response },
               });
-              
+
             } catch (error) {
               if (error.response?.status === 401) {
                 const newToken = await refreshToken();

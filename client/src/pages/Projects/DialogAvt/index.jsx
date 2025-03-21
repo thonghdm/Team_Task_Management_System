@@ -34,7 +34,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { fetchDeleteMember, fetchUpdateMemberRole, fetchLeaveProjectAdmin } from '~/redux/project/projectRole-slice/index';
 import { useNavigate } from 'react-router-dom';
-import {fetchProjectsByMemberId} from '~/redux/project/projectArray-slice';
+import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
+import { addNotification } from '~/redux/project/notifications-slice/index';
 
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
@@ -107,26 +108,36 @@ const DialogAvt = ({ open, onClose, projectName }) => {
 
 
     const refreshToken = useRefreshToken();
-
+    const [tempID, setTempID] = useState();
     const handleRoleChange = (newRole, roleId, memberID) => {
         if (newRole === "KickMember") {
             setIsAlertOpenDelete(true);
             setRoleId(memberID);
+            setTempID(roleId);
         } else {
             setIsAlertOpenRole(true);
             setTaskCollaborators(newRole);
             setRoleId(roleId);
         }
     };
-
     const confirmRoleChange = async () => {
         const dataUpdate = {
             isRole: taskCollaborators,
         };
+        const notificationData = members.members
+            .filter(member => member.memberId._id !== userData._id && member.is_active === true)
+            .map(member => ({
+                senderId: userData._id,
+                receiverId: member.memberId._id,
+                projectId: projectId,
+                type: 'change_role',
+                message: `${userData.displayName} has changed ${members.members.find(m => m._id === roleId)?.memberId?.displayName}'s role to ${taskCollaborators} in project ${projectData?.project?.projectName}`
+            }))
         const updateRole = async (token) => {
             try {
                 await dispatch(fetchUpdateMemberRole({ accesstoken: token, data: dataUpdate, roleId })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
+                await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                 toast.success(`Role updated to ${taskCollaborators}`);
                 handleCloseAlertRole();
             } catch (error) {
@@ -150,11 +161,21 @@ const DialogAvt = ({ open, onClose, projectName }) => {
             projectId,
             memberId: roleId
         };
+        const notificationData = members.members
+            .filter(member => member.memberId._id !== userData._id && member.is_active === true)
+            .map(member => ({
+                senderId: userData._id,
+                receiverId: member.memberId._id,
+                projectId: projectId,
+                type: 'delete_member',
+                message: `${userData.displayName} has removed ${members.members.find(m => m._id === tempID)?.memberId?.displayName} from project ${projectData?.project?.projectName}`
+            }))
         const deleteMember = async (token) => {
             try {
                 await dispatch(fetchDeleteMember({ accesstoken: token, data: dataDelete })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
                 await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                 toast.success('Member deleted successfully');
                 handleCloseAlertDelete();
             } catch (error) {
@@ -196,12 +217,23 @@ const DialogAvt = ({ open, onClose, projectName }) => {
             return;
         }
 
+        const notificationData = members.members
+            .filter(member => member.memberId._id !== userData._id && member.is_active === true)
+            .map(member => ({
+                senderId: userData._id,
+                receiverId: member.memberId._id,
+                projectId: projectId,
+                type: 'leave_project',
+                message: `${userData.displayName} has left project ${projectData?.project?.projectName}`
+            }))
+
         const leaveProjectAdmin = async (token) => {
             try {
                 await dispatch(fetchLeaveProjectAdmin({ accesstoken: token, data: dataDelete })).unwrap();
                 await dispatch(fetchMemberProject({ accesstoken: token, projectId })); // Ensure token is passed
                 await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                 await dispatch(fetchProjectsByMemberId({ accesstoken: token, memberId: userData._id }));
+                await dispatch(addNotification({ accesstoken: token, data: notificationData }));
                 handleLeaveProject();
                 navigate('/board/tasks/1/mytask');
 

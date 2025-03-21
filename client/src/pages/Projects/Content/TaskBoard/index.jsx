@@ -269,7 +269,7 @@ const TaskBoard = () => {
                               cursor: 'pointer',
                             }}
                           /> */}
-                          <ExpandTask taskId={task.id} />
+                          <ExpandTask taskId={task.id} taskName={task.task_name} projectName={projectData?.project?.projectName}/>
                         </IconButton>
                       </Tooltip>
                     )}

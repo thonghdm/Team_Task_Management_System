@@ -28,9 +28,10 @@ import { fetchTaskById } from '~/redux/project/task-slice';
 
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
+import { addNotification } from '~/redux/project/notifications-slice/index';
 
 
-const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = true }) => {
+const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = true, members, task }) => {
   const [link, setLink] = useState('');
   const [displayText, setDisplayText] = useState('');
   const [file, setFile] = useState(null);
@@ -38,7 +39,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
-    console.log(event.target.files[0]);
+    // console.log(event.target.files[0]);
   };
   ////////////////////////////////
   const refreshToken = useRefreshToken();
@@ -61,6 +62,22 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
         entityType: entityType,
         uploadedBy: userData?._id
       };
+      const notificationData = task?.assigned_to_id
+        .filter(member =>
+          member.memberId._id !== userData._id &&
+          members.members.some(m =>
+            m.memberId._id === member.memberId._id &&
+            m.is_active === true
+          )
+        )
+        .map(member => ({
+          senderId: userData._id,
+          receiverId: member.memberId._id,
+          projectId: projectId,
+          taskId: taskId,
+          type: 'task_update',
+          message: `${userData.displayName} has update file from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+        }));
       const uploadFileTask = async (token) => {
         try {
           const resultAction = await dispatch(updateFileByIdTaskThunk({ accesstoken: token, file: fileData }));
@@ -94,6 +111,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
             }
           }))
           if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+          await dispatch(addNotification({ accesstoken: token, data: notificationData }));
           toast.success("File upload successfully");
           setLink('');
           setDisplayText('');

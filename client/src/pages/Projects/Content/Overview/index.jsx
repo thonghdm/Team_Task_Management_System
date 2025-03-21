@@ -90,7 +90,7 @@ const Overview = () => {
         <Typography variant="h5" gutterBottom>
           Project description
         </Typography>
-        <ProjectDescription isEditable={isViewer ? false : true} initialContent={projectData?.project?.description} context={"descriptionProject"} />
+        <ProjectDescription isEditable={isViewer ? false : true} initialContent={projectData?.project?.description} context={"descriptionProject"} members={members} projectName={projectData?.project?.projectName}/>
       </Paper>
       <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
