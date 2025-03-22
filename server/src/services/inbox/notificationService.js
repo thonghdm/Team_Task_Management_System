@@ -2,19 +2,27 @@ const notificationService = {
     /**
      * Notify users about an incoming call
      */
+    // Enhanced notifyIncomingCall function
     notifyIncomingCall: (io, onlineUsers, call, recipientIds) => {
         recipientIds.forEach(recipientId => {
             const recipientSocketId = onlineUsers.get(recipientId.toString());
-            console.log(`Sending call notification to ${recipientId}, socketId: ${recipientSocketId}`);
-
             if (recipientSocketId) {
-                io.to(recipientSocketId).emit('incoming_call', {
-                    call,
+                // Send a well-structured notification
+                const notificationData = {
+                    call: {
+                        _id: call._id,
+                        groupId: call.group // Include group ID if available
+                    },
                     caller: call.caller
-                });
-            }else {
+                };
+
+                io.to(recipientSocketId).emit('incoming_call', notificationData);
+
+                // Send a test event to verify the socket is working
+                io.to(recipientSocketId).emit('test_event', { message: 'This is a test notification' });
+            } else {
                 console.log(`User ${recipientId} is offline or not found in onlineUsers map`);
-            }   
+            }
         });
     },
 

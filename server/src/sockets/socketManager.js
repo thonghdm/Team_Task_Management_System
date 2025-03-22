@@ -8,7 +8,7 @@ module.exports = (socketIo) => {
     io = socketIo
 
     io.on('connection', async (socket) => {
-        console.log(`User connected: ${socket.id}`)
+        // console.log(`User connected: ${socket.id}`)
 
         /**
          * Xác thực người dùng khi kết nối socket
@@ -16,28 +16,41 @@ module.exports = (socketIo) => {
         socket.on('authenticate', async (data) => {
             try {
                 const { userId } = data
-                console.log('User: authenticate', userId)
                 if (userId) {
                     // Cập nhật trạng thái online trong DB
                     await User.findByIdAndUpdate(userId, { isOnline: true })
 
                     // Gán userId vào socket và lưu vào Map
-                    onlineUsers.set(userId, socket.id)
                     socket.userId = userId
-
-                    console.log(`User ${userId} authenticated with socket ${socket.id}`)
+                    onlineUsers.set(userId, socket.id)
+                    // console.log(`User ${userId} authenticated with socket ${socket.id}`)
 
                     // Tham gia vào room cá nhân để nhận thông báo
-                    // socket.join(userId)
+                    socket.join(userId)
+                    socket.emit('authenticated', { success: true });
 
                     // Phát sự kiện trạng thái online
-                    socket.broadcast.emit('user_status_changed', { userId, isOnline: true })
+                    // socket.broadcast.emit('user_status_changed', { userId, isOnline: true })
                 }
             } catch (error) {
                 console.error('Authentication error:', error)
+                socket.emit('authenticated', { success: false, error: 'No userId provided' });
             }
         })
 
+        // Handle ping events (keep-alive)
+        socket.on('ping', (data) => {
+            if (data.userId) {
+                // Update the socket mapping if needed
+                if (onlineUsers.get(data.userId) !== socket.id) {
+                    console.log(`Updating socket for user ${data.userId}: ${socket.id}`);
+                    onlineUsers.set(data.userId, socket.id);
+                }
+
+                // Send a pong to confirm connection
+                socket.emit('pong', { timestamp: Date.now() });
+            }
+        });
         /**
          * Xử lý gọi điện video (callHandlers)
          */
