@@ -38,8 +38,9 @@ const ChatHeader = ({ toggleSidebar }) => {
         // Use the context function to emit socket event
         startCall(response.videoCall._id, participantIds, group._id);
 
+        console.log("Start call response:", response);
         // Navigate to video call page
-        const url = `/call-video/${group._id}`;
+        const url = `/call-video/${response.videoCall._id}`;
         window.open(url, "_blank", "width=900,height=600,noopener,noreferrer");
       } else {
         throw new Error("Cannot start call");

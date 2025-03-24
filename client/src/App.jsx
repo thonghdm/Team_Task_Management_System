@@ -32,7 +32,7 @@ import ImportProject from './pages/Projects/AddProjects/ImportProject'
 import Admin from '~/pages/Admin'
 
 import TransactionHistory from '~/pages/TransactionHistory'
-// import CallVideo from './pages/Inbox/Call-video'
+import CallVideo from './pages/Inbox/Call-video'
 import CallNotification from './pages/Inbox/Call-video/CallNotification'
 
 
@@ -68,7 +68,7 @@ function App() {
           <Route path='/transaction-history/*' element={<TransactionHistory />} />
 
 
-          <Route path="/call-video/:callId" element={<CallNotification />} />
+          <Route path="/call-video/:callId" element={< CallVideo/>} />
 
         </Routes>
       </CallProvider>

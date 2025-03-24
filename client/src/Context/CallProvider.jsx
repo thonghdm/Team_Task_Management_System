@@ -173,7 +173,7 @@ export const CallProvider = ({ children }) => {
       });
 
       // Open the call in a new window
-      const url = `/call-video/${incomingCall.groupId || incomingCall.callId}`;
+      const url = `/call-video/${incomingCall.callId || incomingCall.groupId}`;
       window.open(url, "_blank", "width=900,height=600,noopener,noreferrer");
 
       // Clear the incoming call state

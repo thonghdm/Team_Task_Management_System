@@ -22,7 +22,7 @@ import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import ChatIcon from '@mui/icons-material/Chat';
 import videoCallService from "~/apis/inbox/videoCallService";
-// import './styles.css'; // Tạo file CSS riêng
+import './styles.css'; // Tạo file CSS riêng
 
 // Khởi tạo client Agora
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
@@ -84,11 +84,9 @@ const VideoCall = () => {
 
         // Lấy thông tin cuộc gọi
         const response = await videoCallService.getCallById(accesstoken, callId);
-        console.log("Call info:", response);
 
         if (response && response.success) {
           setCallInfo(response.call);
-          console.log("Call agoraData:", response.agoraData);
           // Tham gia kênh Agora
           await joinCall(response.agoraData);
         } else {
@@ -121,94 +119,89 @@ const VideoCall = () => {
       setError("Không có thông tin kết nối agoraData");
       return;
     }
-
+  
     try {
+      // Clear existing state
+      setRemoteUsers([]);
+      setLocalStream(null);
+  
       if (!agoraData.channelName || !agoraData.token) {
         throw new Error("Thông tin kết nối không đầy đủ");
       }
-      console.log("Đã tham gia kênh Agora", agoraData);
+  
+      // Join channel first
       await client.join(
         AppID,
         agoraData.channelName,
         agoraData.token,
         generateNumericUid(agoraData.uid)
       );
-      showToast("Đã tham gia cuộc gọi thành công!", "success"); // Thông báo thành công
-
-      console.log("Đã tham gia kênh Agora");
-
-      // Tạo và publish local tracks
+  
+      // Set up event listeners before creating tracks
+      setupEventListeners();
+  
+      // Create tracks
       const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
       const videoTrack = await AgoraRTC.createCameraVideoTrack();
-
-      // Lưu local stream
+  
+      // Set local stream state
       setLocalStream({
         audioTrack,
         videoTrack
       });
-
-      // Hiển thị local video
-      if (localVideoRef.current) {
+  
+      // Play local video immediately
+      setTimeout(() => {
+      if (videoTrack && localVideoRef.current) {
         videoTrack.play(localVideoRef.current);
-      }
-
+      }}, 200);
+  
       // Publish tracks
       await client.publish([audioTrack, videoTrack]);
-      console.log("Local tracks published");
-
-      // Đăng ký các sự kiện
-      setupEventListeners();
-
+      
+      showToast("Đã tham gia cuộc gọi thành công!", "success");
+  
     } catch (err) {
       console.error("Lỗi tham gia cuộc gọi:", err);
       setError(`Không thể tham gia cuộc gọi: ${err.message}`);
     }
   };
 
+  
   // Thiết lập các sự kiện Agora
   // Thiết lập các sự kiện Agora
   const setupEventListeners = () => {
-    // Sự kiện khi user khác publish stream
+    // Remove existing listeners
+    client.removeAllListeners();
+  
     client.on("user-published", async (user, mediaType) => {
-      // Subscribe to remote user
-      await client.subscribe(user, mediaType);
-      console.log("Đã subscribe đến user:", user.uid, mediaType);
-
-      // Hiển thị thông báo người dùng tham gia
-      showToast(`Người dùng mới đã tham gia cuộc gọi`, "info");
-
-      // Cập nhật số người tham gia
-      setParticipantCount(prev => prev + 1);
-
-      // Nếu là video, hiển thị
-      if (mediaType === "video") {
-        // Thêm user vào danh sách remote users
-        setRemoteUsers((prevUsers) => {
-          // Nếu user đã tồn tại, cập nhật thông tin
-          if (prevUsers.some((u) => u.uid === user.uid)) {
-            return prevUsers.map((u) => {
-              if (u.uid === user.uid) {
-                return { ...u, videoTrack: user.videoTrack };
-              }
-              return u;
-            });
-          }
-          // Nếu chưa có, thêm mới
-          return [...prevUsers, { uid: user.uid, videoTrack: user.videoTrack }];
-        });
-      }
-
-      // Nếu là audio, play audio
-      if (mediaType === "audio") {
-        user.audioTrack?.play();
-        showToast(`Người dùng đã bật microphone`, "info");
+      try {
+        await client.subscribe(user, mediaType);
+        if (mediaType === "video") {
+          setRemoteUsers((prevUsers) => {
+            if (prevUsers.some((u) => u.uid === user.uid)) {
+              return prevUsers.map((u) => 
+                u.uid === user.uid ? { ...u, videoTrack: user.videoTrack } : u
+              );
+            }
+            return [...prevUsers, { uid: user.uid, videoTrack: user.videoTrack }];
+          });
+        }
+  
+        if (mediaType === "audio") {
+          user.audioTrack?.play();
+        }
+  
+        // Update participant count based on actual remote users
+        setParticipantCount(client.remoteUsers.length);
+      } catch (err) {
+        console.error("Error handling user-published event:", err);
       }
     });
 
+
     // Sự kiện khi user khác unpublish stream
     client.on("user-unpublished", (user, mediaType) => {
-      console.log("User unpublished:", user.uid, mediaType);
-
       if (mediaType === "video") {
         showToast(`Một người dùng đã tắt camera`, "warning");
         setRemoteUsers((prevUsers) => {
@@ -228,9 +221,7 @@ const VideoCall = () => {
 
     // Sự kiện khi user khác rời kênh
     client.on("user-left", (user) => {
-      console.log("User left:", user.uid);
       showToast(`Một người dùng đã rời khỏi cuộc gọi`, "error");
-
       // Cập nhật số người tham gia
       setParticipantCount(prev => Math.max(0, prev - 1));
 
@@ -239,22 +230,19 @@ const VideoCall = () => {
       });
     });
 
-    // Sự kiện khi kết nối thay đổi
-    client.on("connection-state-change", (curState, prevState) => {
-      console.log("Connection state changed from", prevState, "to", curState);
-
-      if (curState === "CONNECTED") {
-        showToast("Đã kết nối đến máy chủ Agora", "success");
-      } else if (curState === "DISCONNECTED") {
-        showToast("Mất kết nối với máy chủ, đang thử kết nối lại...", "error");
-      } else if (curState === "CONNECTING") {
-        showToast("Đang kết nối...", "info");
-      }
-    });
+    // // Sự kiện khi kết nối thay đổi
+    // client.on("connection-state-change", (curState, prevState) => {
+    //   if (curState === "CONNECTED") {
+    //     showToast("Đã kết nối đến máy chủ Agora", "success");
+    //   } else if (curState === "DISCONNECTED") {
+    //     showToast("Mất kết nối với máy chủ, đang thử kết nối lại...", "error");
+    //   } else if (curState === "CONNECTING") {
+    //     showToast("Đang kết nối...", "info");
+    //   }
+    // });
 
     // Sự kiện lỗi
     client.on("exception", (event) => {
-      console.log("Agora client exception:", event);
       showToast(`Lỗi: ${event.code}`, "error");
     });
   };
@@ -302,7 +290,6 @@ const VideoCall = () => {
 
       // Rời khỏi kênh
       await client.leave();
-      console.log("Đã rời khỏi kênh");
       showToast("Đã rời khỏi cuộc gọi", "info"); // Thông báo
 
       // Gọi API để cập nhật trạng thái cuộc gọi
@@ -390,7 +377,7 @@ const VideoCall = () => {
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Tooltip title="Số người tham gia">
-              <Badge badgeContent={1 + remoteUsers.length} color="primary" sx={{ mr: 2 }}>
+              <Badge badgeContent={client.remoteUsers.length + 1} color="primary" sx={{ mr: 2 }}>
                 <PeopleAltIcon />
               </Badge>
             </Tooltip>
@@ -400,7 +387,7 @@ const VideoCall = () => {
           </Box>
         </Box>
       </Paper>
-  
+
       {/* Video Grid */}
       <Box className="video-grid-container">
         {/* Remote Videos */}
@@ -425,16 +412,20 @@ const VideoCall = () => {
             </Grid>
           )}
         </Grid>
-  
+
         {/* Local Video */}
-        <Box className="local-video-container">
-          <div ref={localVideoRef} className="local-video"></div>
+        <Box className="local-video-container fade-in" sx={{ overflow: 'hidden' }}>
+          <div
+            ref={localVideoRef}
+            className="local-video"
+            style={{ width: '100%', height: '100%', backgroundColor: '#16213e' }}
+          ></div>
           <Typography className="local-video-label">
             Bạn {!micEnabled && "(Đã tắt mic)"} {!cameraEnabled && "(Đã tắt camera)"}
           </Typography>
         </Box>
       </Box>
-  
+
       {/* Controls */}
       <Box className="call-controls">
         <IconButton
@@ -444,7 +435,7 @@ const VideoCall = () => {
         >
           {micEnabled ? <MicIcon /> : <MicOffIcon />}
         </IconButton>
-        
+
         <IconButton
           className={cameraEnabled ? "control-button" : "control-button-off"}
           onClick={toggleCamera}
@@ -452,7 +443,7 @@ const VideoCall = () => {
         >
           {cameraEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
         </IconButton>
-        
+
         <IconButton
           className="end-call-button"
           onClick={handleEndCall}
@@ -461,7 +452,7 @@ const VideoCall = () => {
           <CallEndIcon />
         </IconButton>
       </Box>
-      
+
       {/* Thông báo */}
       <Snackbar
         open={showNotification}
@@ -469,8 +460,8 @@ const VideoCall = () => {
         onClose={handleCloseNotification}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={handleCloseNotification} 
+        <Alert
+          onClose={handleCloseNotification}
           severity={notification?.severity || "info"}
           variant="filled"
           sx={{ width: '100%' }}
