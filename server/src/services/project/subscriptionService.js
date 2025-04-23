@@ -48,6 +48,37 @@ const subscriptionService = {
         } catch (error) {
             throw new Error('Error fetching subscription items: ' + error.message)
         }
+    },
+    getUserBills: async (userId) => {
+        try {
+            if (!userId) {
+                throw new Error('User ID is required.')
+            }
+            const subscriptionItems = await Subscription.find({ user_id: userId })
+                .populate('plan_id') // Chỉ lấy 3 field từ plan_id
+                .lean()
+
+            if (!subscriptionItems) {
+                return []
+            }
+            return subscriptionItems
+        } catch (error) {
+            throw new Error('Error fetching subscription items: ' + error.message)
+        }
+    },
+    getAllBills: async () => {
+        try {
+            const subscriptionItems = await Subscription.find()
+                .populate('plan_id') // Chỉ lấy 3 field từ plan_id
+                .lean()
+
+            if (!subscriptionItems) {
+                return []
+            }
+            return subscriptionItems
+        } catch (error) {
+            throw new Error('Error fetching subscription items: ' + error.message)
+        }
     }
 }
 

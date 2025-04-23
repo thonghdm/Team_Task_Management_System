@@ -98,6 +98,7 @@ const UserAvatar = () => {
         type: actionTypes.LOGOUT,
       });
       navigate('/');
+      localStorage.removeItem('chatMessages');
     } catch (error) {
       handleClose();
     };

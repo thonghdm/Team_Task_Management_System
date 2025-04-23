@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
   Typography,
-  TextField,
   Button,
   Table,
   TableBody,
@@ -11,272 +10,201 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Grid
+  Card,
+  CardContent,
+  Grid,
+  IconButton
 } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import dayjs from 'dayjs';
-import 'dayjs/locale/vi';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useDispatch, useSelector } from 'react-redux';
+import { getSubscriptionByUserId } from '~/apis/Project/subscriptionApi';
 
-// Configure dayjs to use Vietnamese locale
+// Set locale to Vietnamese
 dayjs.locale('vi');
 
-// Create a custom theme with indigo primary color
+// Custom theme
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#303F9F', // indigo
+      main: '#303F9F',
     },
     secondary: {
       main: '#F50057',
     },
   },
   typography: {
-    fontFamily: [
-      'Roboto',
-      'Arial',
-      'sans-serif',
-    ].join(','),
+    fontFamily: ['Roboto', 'Arial', 'sans-serif'].join(','),
   },
 });
 
 const TransactionHistory = () => {
-  // Initial transaction data
-  const initialTransactions = [
-    {
-      id: 1,
-      date: '2025/02/23 17:06:19',
-      previousBalance: '41,000 VND',
-      amount: '-2,000 VND',
-      newBalance: '39,000 VND',
-      description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-    },
-    {
-      id: 233,
-      date: '2025/02/22 21:41:08',
-      previousBalance: '43,000 VND',
-      amount: '-2,000 VND',
-      newBalance: '41,000 VND',
-      description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-    }, {
-        id: 12,
-        date: '2025/02/23 17:06:19',
-        previousBalance: '41,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '39,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      },
-      {
-        id: 254,
-        date: '2025/02/22 21:41:08',
-        previousBalance: '43,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '41,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      }, {
-        id: 145,
-        date: '2025/02/23 17:06:19',
-        previousBalance: '41,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '39,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      },
-      {
-        id: 255,
-        date: '2025/02/22 21:41:08',
-        previousBalance: '43,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '41,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      }, {
-        id: 18,
-        date: '2025/02/23 17:06:19',
-        previousBalance: '41,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '39,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      },
-      {
-        id: 27,
-        date: '2025/02/22 21:41:08',
-        previousBalance: '43,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '41,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      }, {
-        id: 16,
-        date: '2025/02/23 17:06:19',
-        previousBalance: '41,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '39,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      },
-      {
-        id: 25,
-        date: '2025/02/22 21:41:08',
-        previousBalance: '43,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '41,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      }, {
-        id: 13,
-        date: '2025/02/23 17:06:19',
-        previousBalance: '41,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '39,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      },
-      {
-        id: 21,
-        date: '2025/02/22 21:41:08',
-        previousBalance: '43,000 VND',
-        amount: '-2,000 VND',
-        newBalance: '41,000 VND',
-        description: 'Mua 1 key 1 Giờ dùng trong 1 giờ'
-      }
-  ];
+  const { accesstoken, userData } = useSelector(state => state.auth);
 
-  // State for search and filters
-  const [transactions] = useState(initialTransactions);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [startDate, setStartDate] = useState(dayjs('2025-02-19'));
-  const [endDate, setEndDate] = useState(dayjs('2025-02-26'));
-  const [transactionType, setTransactionType] = useState('all');
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [startDate, setStartDate] = useState(dayjs().subtract(7, 'day'));
+  const [endDate, setEndDate] = useState(dayjs());
+  const [transactions, setTransactions] = useState([]);
 
-  // Handle search function
+  useEffect(() => {
+    if (accesstoken && userData?._id) {
+      fetchTransactions();
+    }
+  }, [accesstoken, userData]);
+
+  // Add a new state for original data
+  const [allTransactions, setAllTransactions] = useState([]);
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await getSubscriptionByUserId(accesstoken, userData._id);
+      const fetchedTransactions = response?.data?.filter(transaction => 
+       transaction.plan_id.price !== 0
+      );
+      console.log('Fetched transactions:', fetchedTransactions); // Debugging line
+      setAllTransactions(fetchedTransactions);
+      setTransactions(fetchedTransactions); 
+    } catch (error) {
+      console.error('Failed to fetch subscriptions:', error);
+    }
+  };
+
   const handleSearch = () => {
-    console.log('Searching with params:', {
-      query: searchQuery,
-      startDate: startDate.format('YYYY-MM-DD'),
-      endDate: endDate.format('YYYY-MM-DD'),
-      transactionType,
-      itemsPerPage
+    const filteredTransactions = allTransactions.filter(transaction => {
+      const transactionDate = dayjs(transaction.createdAt);
+      return (
+        (transactionDate.isAfter(startDate, 'day') || transactionDate.isSame(startDate, 'day')) &&
+        (transactionDate.isBefore(endDate, 'day') || transactionDate.isSame(endDate, 'day'))
+      );
     });
-    // In a real app, this would filter the transactions based on search criteria
+
+    setTransactions(filteredTransactions);
+  };
+
+  const resetFilters = () => {
+    setStartDate(dayjs().subtract(7, 'day'));
+    setEndDate(dayjs());
+    setTransactions(allTransactions);
+  };
+
+  const handleBack = () => {
+    window.history.back();
   };
 
   return (
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center" color="primary" fontWeight="bold">
-            Lịch Sử Giao Dịch
-          </Typography>
-          
-          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-            <Grid container spacing={2} alignItems="flex-end">
-              <Grid item xs={12} sm={6} md={3}>
-                <TextField
-                  fullWidth
-                  label="Tìm kiếm"
-                  placeholder="Nội dung giao dịch..."
-                  variant="outlined"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={2}>
-                <DatePicker
-                  label="Từ"
-                  value={startDate}
-                  onChange={(newValue) => setStartDate(newValue)}
-                  slotProps={{ textField: { fullWidth: true } }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={2}>
-                <DatePicker
-                  label="Đến"
-                  value={endDate}
-                  onChange={(newValue) => setEndDate(newValue)}
-                  slotProps={{ textField: { fullWidth: true } }}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth>
-                  <InputLabel>Loại giao dịch</InputLabel>
-                  <Select
-                    value={transactionType}
-                    label="Loại giao dịch"
-                    onChange={(e) => setTransactionType(e.target.value)}
-                  >
-                    <MenuItem value="all">Tất cả</MenuItem>
-                    <MenuItem value="deposit">Nạp tiền</MenuItem>
-                    <MenuItem value="expense">Chi tiêu</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl fullWidth>
-                  <InputLabel>Hiển thị</InputLabel>
-                  <Select
-                    value={itemsPerPage}
-                    label="Hiển thị"
-                    onChange={(e) => setItemsPerPage(e.target.value)}
-                  >
-                    <MenuItem value={10}>10 / trang</MenuItem>
-                    <MenuItem value={20}>20 / trang</MenuItem>
-                    <MenuItem value={50}>50 / trang</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12} sm={6} md={1}>
-                <Button 
-                  variant="contained" 
-                  fullWidth 
-                  onClick={handleSearch}
-                  sx={{ height: '56px' }}
-                >
-                  Tìm kiếm
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
-          
-          <TableContainer component={Paper} elevation={2}>
-            <Table sx={{ minWidth: 650 }}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: 'rgba(0, 0, 0, 0.04)' }}>
-                  <TableCell>#</TableCell>
-                  <TableCell>Thời gian giao dịch</TableCell>
-                  <TableCell>Số dư trước</TableCell>
-                  <TableCell>Lượng thay đổi</TableCell>
-                  <TableCell>Số dư sau</TableCell>
-                  <TableCell>Mô tả</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id} hover>
-                    <TableCell>{transaction.id}</TableCell>
-                    <TableCell>{transaction.date}</TableCell>
-                    <TableCell>{transaction.previousBalance}</TableCell>
-                    <TableCell sx={{ color: 'error.main' }}>{transaction.amount}</TableCell>
-                    <TableCell>{transaction.newBalance}</TableCell>
-                    <TableCell>{transaction.description}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          
-          <Box sx={{ mt: 2, textAlign: 'center', color: 'text.secondary' }}>
-            <Typography variant="body2">
-              Hiển thị 1-2 trong tổng số 2 giao dịch
+          <Box display="flex" alignItems="center" mb={3}>
+            <IconButton onClick={handleBack} color="primary" sx={{ mr: 1 }}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h4" fontWeight="bold" color="primary">
+              Transaction History
             </Typography>
           </Box>
+
+          <Card elevation={2} sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Grid container spacing={3} alignItems="center">
+                <Grid item xs={12} md={4}>
+                  <DatePicker
+                    label="From Date"
+                    value={startDate}
+                    onChange={(newVal) => setStartDate(newVal)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined"
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <DatePicker
+                    label="To Date"
+                    value={endDate}
+                    onChange={(newVal) => setEndDate(newVal)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined"
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={2}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSearch}
+                    sx={{
+                      height: '56px',
+                      borderRadius: 1,
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Filter
+                  </Button>
+                </Grid>
+                <Grid item xs={12} md={2}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    color="secondary"
+                    onClick={resetFilters}
+                    sx={{
+                      height: '56px',
+                      borderRadius: 1,
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Reset
+                  </Button>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Transactions table */}
+          <Card elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: 'rgba(48, 63, 159, 0.08)' }}>
+                    <TableCell sx={{ fontWeight: 'bold' }}>#</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Amount</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {transactions && transactions.length > 0 ? (
+                    transactions.map((item, index) => (
+                      <TableRow key={item._id} hover>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{new Date(item.createdAt).toLocaleString('vi-VN')}</TableCell>
+                        <TableCell sx={{ color: 'error.main', fontWeight: 500 }}>
+                          {`- ${item.plan_id.price.toLocaleString()} $`}
+                        </TableCell>
+                        <TableCell>{`Subscribed to ${item.plan_id.subscription_type} plan`}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                        <Typography color="text.secondary">No transaction records found</Typography>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
         </Container>
       </LocalizationProvider>
     </ThemeProvider>
