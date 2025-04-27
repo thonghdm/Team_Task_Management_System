@@ -184,7 +184,7 @@ const Projects = () => {
     member => member?.memberId?._id === userData?._id
   )?.isRole;
   const isViewer = currentUserRole === 'Viewer';
-  const isAdmin = currentUserRole === 'Admin';
+  const isAdmin = currentUserRole === 'ProjectManager';
 
   return (
     <Box sx={{ flexGrow: 1, p: 3, mt: '64px', backgroundColor: 'grey.50', minHeight: 'calc(100vh - 64px)' }}>

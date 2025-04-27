@@ -27,6 +27,8 @@ import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectD
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { addNotification } from '~/redux/project/notifications-slice/index';
 
+import rolesData from '~/apis/roleData';
+
 // Custom styles for Autocomplete
 
 const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
@@ -213,13 +215,11 @@ const UserSearchInput = ({
     );
 };
 const roles = [
-    { value: 'Admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
-    { value: 'Member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
-    { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
+    ...rolesData,
 ];
 const UserSearch = ({ isClickable = false }) => {
     const [selectedUsers, setSelectedUsers] = useState([]);
-    const [inviteRole, setInviteRole] = useState('Member');
+    const [inviteRole, setInviteRole] = useState('Developer');
     const { accesstoken, userData } = useSelector(state => state.auth);
     const [error, setError] = useState(null);
     const { projectId } = useParams();
@@ -270,7 +270,7 @@ const UserSearch = ({ isClickable = false }) => {
 
         const resetFormState = () => {
             setSelectedUsers([]);
-            setInviteRole('Member');
+            setInviteRole('Developer');
             setError(null);
         };
 
