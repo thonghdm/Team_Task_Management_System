@@ -20,7 +20,7 @@ const createNew = async (reqBody) => {
             projectId: createdProject._id,
             memberId: createdProject.ownerId,
             user_invite: createdProject.ownerId,
-            isRole: 'Admin'
+            isRole: 'ProjectManager'
         }
 
         const newRole = new ProjectRole(newRoleData)

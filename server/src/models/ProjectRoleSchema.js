@@ -4,8 +4,8 @@ const mongoose = require('mongoose')
 const userSchema = new mongoose.Schema({
     isRole: {
         type: String,
-        enum: ['Admin', 'Member', 'Viewer'],
-        default: 'Member'
+        // enum: ['Admin', 'Member', 'Viewer'],
+        // default: 'Member'
     },
     memberId: {
         type: mongoose.Schema.Types.ObjectId,

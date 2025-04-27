@@ -25,6 +25,30 @@ const subscriptionController = {
         } catch (error) {
             next(error)
         }
+    },
+
+    getUserBills: async (req, res, next) => {
+        try {
+            const { userId } = req.params
+            const bills = await subscriptionService.getUserBills(userId)
+            res.status(StatusCodes.OK).json({
+                message: 'User bills retrieved successfully!',
+                data: bills
+            })
+        } catch (error) {
+            next(error)
+        }
+    },
+    getAllBills: async (req, res, next) => {
+        try {
+            const bills = await subscriptionService.getAllBills()
+            res.status(StatusCodes.OK).json({
+                message: 'All bills retrieved successfully!',
+                data: bills
+            })
+        } catch (error) {
+            next(error)
+        }
     }
 }
 
