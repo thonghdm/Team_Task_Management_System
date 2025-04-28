@@ -44,12 +44,11 @@ const useSocket = (userId, accesstoken) => {
             });
 
             // Join user's personal room
+            socketRef.current.emit("authenticate", { userId:userId });
             socketRef.current.emit("join", userId);
-            console.log(`Joined room for user: ${userId}`);
 
             // Listen for notifications from server
             socketRef.current.on("newNotification", (notification) => {
-                console.log("New notification received:", notification);
                 setNotifications((prev) => [notification, ...prev]);
                 setUnreadCount(prev => prev + 1);
             });

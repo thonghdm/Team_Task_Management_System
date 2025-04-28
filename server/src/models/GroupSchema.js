@@ -14,6 +14,10 @@ const GroupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Message'
     }],
+    videoCall: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'VideoCall'
+    }],
     createdAt: {
         type: Date,
         default: Date.now
@@ -21,15 +25,11 @@ const GroupSchema = new mongoose.Schema({
     createBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    },
-    lastMessage: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Message' 
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now
     }
+    // timestamp: {
+    //     type: Date,
+    //     default: Date.now
+    // }
 }, { timestamps: true })
 
 const Group = mongoose.model('Group', GroupSchema)
