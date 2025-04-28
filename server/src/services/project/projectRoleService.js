@@ -89,12 +89,12 @@ const leaveAdminProject = async (projectId, memberId) => {
         // Check if there is at least one Admin role remaining after deletion
         const adminRoles = await ProjectRole.find({
             projectId,
-            isRole: 'Admin',
+            isRole: 'ProjectManager',
             is_active: true,
             memberId: { $ne: memberId }
         })
         if (adminRoles.length === 0) {
-            throw new Error('The project must have at least one active Admin.')
+            throw new Error('The project must have at least one active ProjectManager.')
         }
         const leaveProject = await ProjectRole.findOneAndUpdate(
             { projectId, memberId },

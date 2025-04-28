@@ -8,4 +8,11 @@ Router.route('/add-free')
 Router.route('/get-subscription/:userId')
     .get(subscriptionController.getAllByUser)
 
+Router.route('/user-bills/:userId')
+    .get(subscriptionController.getUserBills)
+
+Router.route('/user-bills')
+    .get(subscriptionController.getAllBills)
+
+
 module.exports = Router

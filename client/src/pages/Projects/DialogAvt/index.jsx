@@ -38,6 +38,9 @@ import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
 import { addNotification } from '~/redux/project/notifications-slice/index';
 
 
+import rolesData from '~/apis/roleData';
+
+
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     color: theme.palette.text.primary,
     '&:hover': {
@@ -58,11 +61,12 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 }));
 
 const roles = [
-    { value: 'Admin', label: 'Admin', description: 'Full access to change settings, modify, or delete the project.' },
-    { value: 'Member', label: 'Member', description: 'Members are part of the team, and can add, edit, and collaborate on all work.' },
-    { value: 'Viewer', label: 'Viewer', description: "Viewers can search through, view, and comment on your team's work, but not much else." },
-    { value: 'KickMember', label: 'KickMember', description: "KickMember" },
+    ...rolesData,
+    { value: 'KickMember', label: 'Kick Member', description: "Remove this member from the project" },
 ];
+
+
+
 const DialogAvt = ({ open, onClose, projectName }) => {
     const [accessSetting, setAccessSetting] = useState('private');
     const { accesstoken, userData } = useSelector(state => state.auth)
@@ -102,7 +106,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
     const currentUserRole = members?.members?.find(
         member => member?.memberId?._id === userData?._id
     )?.isRole;
-    const isAdmin = currentUserRole === 'Admin';
+    const isAdmin = currentUserRole === 'ProjectManager';
     const isViewer = currentUserRole === 'Viewer';
 
 
@@ -209,11 +213,11 @@ const DialogAvt = ({ open, onClose, projectName }) => {
         }
 
         const adminMembers = currentProjectMembers?.filter(
-            member => member?.isRole === 'Admin'
+            member => member?.isRole === 'ProjectManager'
         );
 
         if (adminMembers?.length <= 1 && isAdmin) {
-            toast.error('The project must have at least one active Admin.');
+            toast.error('The project must have at least one active ProjectManager.');
             return;
         }
 
@@ -341,7 +345,7 @@ const DialogAvt = ({ open, onClose, projectName }) => {
                                         <ListItemAvatar>
                                             <Avatar
                                                 src={member?.memberId?.image}
-                                                sx={member.isRole === 'Admin' ? { bgcolor: 'warning.main' } : {}}
+                                                sx={member.isRole === 'ProjectManager' ? { bgcolor: 'warning.main' } : {}}
                                             >
                                                 {member?.memberId?.image}
                                             </Avatar>

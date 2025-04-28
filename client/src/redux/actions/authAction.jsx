@@ -122,7 +122,7 @@ export const resetPassword = (email) => async (dispatch) => {
 export const logout = () => async (dispatch) =>{
     try{
         dispatch({ type: actionTypes.LOGOUT });
-        const response = await apiLogOut();
+        await apiLogOut();
     }
     catch(error){
         console.error('Logout error:', error.response?.data || error.message);

@@ -41,3 +41,31 @@ export const getSubscriptionByUser = async (accesstoken, userId) => {
         throw error;
     }
 }
+
+export const getSubscriptionByUserId = async (accesstoken, userId) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/subscription/user-bills/${userId}`, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const getAllSubscription = async (accesstoken) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/subscription/user-bills`, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
