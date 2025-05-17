@@ -1,6 +1,7 @@
 const callHandlers = require('./callHandlers')
 const User = require('~/models/user') // Mongoose user model
-
+const conversationService = require('~/services/chat/conversationService')
+const Conversation = require('~/models/ConversationSchema')
 let io
 let onlineUsers = new Map()
 
@@ -23,7 +24,7 @@ module.exports = (socketIo) => {
                     // Gán userId vào socket và lưu vào Map
                     socket.userId = userId
                     onlineUsers.set(userId, socket.id)
-                    // console.log(`User ${userId} authenticated with socket ${socket.id}`)
+                    console.log(`User ${userId} authenticated with socket ${socket.id}`)
 
                     // Tham gia vào room cá nhân để nhận thông báo
                     socket.join(userId)
@@ -55,6 +56,57 @@ module.exports = (socketIo) => {
          * Xử lý gọi điện video (callHandlers)
          */
         callHandlers(io, socket, onlineUsers)
+
+        /**
+         * Tham gia vào cuộc trò chuyện
+         */
+        socket.on('join conversation', (conversationId) => {
+            socket.join(conversationId)
+            console.log(`User joined conversation ${conversationId}`)
+        })
+
+        /**
+         * Rời khỏi cuộc trò chuyện
+         */
+        socket.on('leave conversation', (conversationId) => {
+            socket.leave(conversationId)
+            console.log(`User left conversation ${conversationId}`)
+        })
+
+        /**
+         * Gửi tin nhắn trong cuộc trò chuyện
+         */
+        socket.on('send message', async ({ senderId, conversationId, messageData }) => {
+            try {
+                const message = await conversationService.sendMessage(senderId, conversationId, messageData)
+                io.to(conversationId).emit('new message', message)
+                
+                const conversation = await Conversation.findById(conversationId).populate('participants', 'displayName image')
+                conversation.participants.forEach(participant => {
+                    if (participant._id.toString() !== senderId.toString()) {
+                        const socketId = onlineUsers.get(participant._id.toString())
+                        if (socketId) {
+                            io.to(socketId).emit('conversation updated', conversation)
+                        }
+                    }
+                })
+            } catch (error) {
+                console.error('Error sending message:', error.message)
+                socket.emit('messageSent', { status: 'error', message: error.message })
+            }
+        })
+
+        /**
+         * Đánh dấu tin nhắn đã xem
+         */
+        socket.on('mark message as seen', async ({messageId, userId}) => {
+            try {
+                const message = await conversationService.markMessageAsSeen(messageId, userId)
+                io.to(message.conversation.toString()).emit('message seen', { messageId, userId })
+            } catch (error) {
+                console.error('Error marking message as seen:', error)
+            }
+        })
 
         /**
          * Người dùng tham gia phòng cá nhân (nhận thông báo)

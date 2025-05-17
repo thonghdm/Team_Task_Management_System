@@ -30,7 +30,7 @@ const { Server } = require('socket.io')
 
 const groupRoutes = require('~/routes/v1/chat/groupRouter')
 const conversationRoutes = require('~/routes/v1/chat/conversationRouter')
-const soketHandler = require('~/config/socketHandle')
+
 
 
 require('~/utils/passport')
@@ -93,7 +93,7 @@ app.use('/api/notifications', notificationRoutes)
 
 app.use('/api/conversations', conversationRoutes)
 app.use('/api/groups', groupRoutes)
-soketHandler(io)
+
 
 app.use('/api/calls', videoCallRouter)
 

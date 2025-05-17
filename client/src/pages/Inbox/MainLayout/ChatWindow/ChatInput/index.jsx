@@ -1,72 +1,62 @@
 import React, { useState } from 'react';
-import { Box, TextField, IconButton } from '@mui/material';
-import EmojiEmotionsOutlinedIcon from '@mui/icons-material/EmojiEmotionsOutlined';
-import MicNoneOutlinedIcon from '@mui/icons-material/MicNoneOutlined';
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
-import SendIcon from '@mui/icons-material/Send';
-import { useTheme } from '@mui/material/styles';
+import { Box, IconButton, InputBase, Paper } from '@mui/material';
+import { Send as SendIcon, AttachFile as AttachFileIcon } from '@mui/icons-material';
+import { useChat } from '~/Context/ChatProvider';
 
 const ChatInput = () => {
-    const [inputValue, setInputValue] = useState('');
-    const theme = useTheme();
+    const [message, setMessage] = useState('');
+    const { sendMessage, currentConversation } = useChat();
 
-    const handleInputChange = (event) => {
-        setInputValue(event.target.value);
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!message.trim() || !currentConversation) return;
+
+        sendMessage(currentConversation, {
+            messageType: 'text',
+            content: message.trim()
+        });
+
+        setMessage('');
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            handleSubmit(e);
+        }
     };
 
     return (
-        <Box
-            sx={{
-                p: 2,
-                borderBottom: '1px solid #ddd',
-                borderTop: '1px solid #ddd',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                backgroundColor: theme.palette.background.default,
-            }}
-        >
-            <IconButton size="small">
-                <EmojiEmotionsOutlinedIcon fontSize="medium" />
-            </IconButton>
-
-            <TextField
-                variant="outlined"
-                placeholder="Message..."
-                fullWidth
-                size="small"
-                value={inputValue}
-                onChange={handleInputChange}
-                multiline
-                maxRows={4}
+        <Box sx={{ p: 2, backgroundColor: 'background.default' }}>
+            <Paper
+                component="form"
+                onSubmit={handleSubmit}
                 sx={{
-                    backgroundColor: theme.palette.background.default,
-                    '& .MuiOutlinedInput-root': {
-                        borderRadius: '20px',
-                    },
+                    p: '2px 4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    borderRadius: 2
                 }}
-            />
-
-            {inputValue === '' ? (
-                <>
-                    <IconButton size="small">
-                        <MicNoneOutlinedIcon fontSize="medium" />
-                    </IconButton>
-
-                    <IconButton size="small">
-                        <ImageOutlinedIcon fontSize="medium" />
-                    </IconButton>
-
-                    <IconButton size="small">
-                        <FavoriteBorderOutlinedIcon fontSize="medium" />
-                    </IconButton>
-                </>
-            ) : (
-                <IconButton size="small">
-                    <SendIcon fontSize="medium" />
+            >
+                <IconButton sx={{ p: '10px' }}>
+                    <AttachFileIcon />
                 </IconButton>
-            )}
+                <InputBase
+                    sx={{ ml: 1, flex: 1 }}
+                    placeholder="Type a message"
+                    multiline
+                    maxRows={4}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                />
+                <IconButton 
+                    type="submit" 
+                    sx={{ p: '10px' }}
+                    disabled={!message.trim()}
+                >
+                    <SendIcon />
+                </IconButton>
+            </Paper>
         </Box>
     );
 };

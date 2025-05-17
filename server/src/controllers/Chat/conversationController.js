@@ -43,6 +43,27 @@ const conversationService = {
         catch (error) {
             res.status(500).json({ error: error.message })
         }
+    },
+    getConversation: async (req, res) => {
+        try {
+            const { userId, otherUserId } = req.query;
+            const conversation = await conservationService.findConversationBetweenUsers(userId, otherUserId);
+            if (!conversation) {
+                return res.status(404).json({ message: 'Conversation not found' });
+            }
+            res.status(200).json(conversation);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+    createConversation: async (req, res) => {
+        try {
+            const { userId, otherUserId } = req.body;
+            const conversation = await conservationService.createConversationBetweenUsers(userId, otherUserId);
+            res.status(201).json(conversation);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     }
 }
 

@@ -1,26 +1,35 @@
 const Message = require('~/models/MessageSchema')
 const Conversation = require('~/models/ConversationSchema')
 
-const getOrCreateConversationBetweenUsers = async (userId, otherUserId) => {
-    let conversation = await conversation.findOne({
-        participants: {
-            $all: [userId, otherUserId]
-        },
+const findConversationBetweenUsers = async (userId, otherUserId) => {
+    const conversation = await Conversation.findOne({
+        participants: { $all: [userId, otherUserId] },
         isGroup: false
-    })
+    }).populate('participants', 'displayName image');
+    return conversation;
+}
+
+const createConversationBetweenUsers = async (userId, otherUserId) => {
+    let conversation = await Conversation.findOne({
+        participants: { $all: [userId, otherUserId] },
+        isGroup: false
+    });
     if (!conversation) {
-        conversation =new Conversation({
+        conversation = new Conversation({
             participants: [userId, otherUserId],
             isGroup: false,
             unreadCounts: [
                 { user: userId, count: 0 },
                 { user: otherUserId, count: 0 }
             ]
-        })
-        await conversation.save()
+        });
+        await conversation.save();
     }
-    return conversation
+    // Populate participants before returning
+    return await Conversation.findById(conversation._id)
+        .populate('participants', 'displayName image');
 }
+
 const createGroupConversation = async (groupName, participantIds, creatorId) => {
     const conversation = new Conversation({
         participants: participantIds,
@@ -103,7 +112,8 @@ const markConversationAsRead = async (conversationId, userId) => {
 }
 
 module.exports = {
-    getOrCreateConversationBetweenUsers,
+    findConversationBetweenUsers,
+    createConversationBetweenUsers,
     createGroupConversation,
     getConversationMessages,
     getConversationList,
