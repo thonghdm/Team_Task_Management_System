@@ -23,10 +23,15 @@ const subscriptionRouter = require('~/routes/v1/project/subscriptionRouter')
 const chatAiRouter = require('~/routes/v1/AI/chatAiRoutes')
 const notificationRoutes = require('~/routes/v1/project/notificationRoutes')
 const socketManager = require('~/sockets/socketManager')
-
+const videoCallRouter = require('~/routes/v1/inbox/videoCallRouter')
 
 const http = require('http')
 const { Server } = require('socket.io')
+
+const groupRoutes = require('~/routes/v1/chat/groupRouter')
+const conversationRoutes = require('~/routes/v1/chat/conversationRouter')
+
+
 
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
@@ -47,6 +52,7 @@ app.use((req, res, next) => {
     req.io = socketIoInstance
     next()
 })
+
 
 app.use(cors({
     credentials: true,
@@ -83,6 +89,13 @@ app.use('/api/subscription-plan', subscriptionplanRouter)
 app.use('/api/subscription', subscriptionRouter)
 app.use('/api/chat-ai', chatAiRouter)
 app.use('/api/notifications', notificationRoutes)
+
+
+app.use('/api/conversations', conversationRoutes)
+app.use('/api/groups', groupRoutes)
+
+
+app.use('/api/calls', videoCallRouter)
 
 app.use(errorHandling)
 

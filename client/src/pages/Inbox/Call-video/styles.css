@@ -1,0 +1,266 @@
+/* styles.css for VideoCall component */
+
+/* Main container */
+.video-call-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #1a1a2e;
+    color: #f0f0f0;
+    overflow: hidden;
+  }
+  
+  /* Header styles */
+  .call-header {
+    padding: 12px 20px;
+    background-color: rgba(30, 30, 50, 0.9) !important;
+    color: white !important;
+    backdrop-filter: blur(5px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+  }
+  
+  /* Video grid container */
+  .video-grid-container {
+    flex: 1;
+    position: relative;
+    padding: 16px;
+    overflow: hidden;
+    background-color: #0f0f1a;
+  }
+  
+  /* Remote videos grid */
+  .remote-videos-grid {
+    height: 100%;
+    width: 100%;
+    padding: 8px !important;
+  }
+  
+  /* Individual remote video container */
+  .remote-video-container {
+    width: 100%;
+    height: 100%;
+    min-height: 260px;
+    background-color: #16213e;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .remote-video-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Text when video is off */
+  .no-video-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #e2e2e2;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 16px;
+    border-radius: 20px;
+  }
+  
+  /* Waiting container */
+  .waiting-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 350px;
+    background-color: #16213e;
+    border-radius: 10px;
+    color: #e2e2e2;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+  }
+  
+  /* Local video container */
+  .local-video-container {
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    width: 220px;
+    height: 165px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 5;
+    transition: all 0.3s ease;
+  }
+  
+  .local-video-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Local video */
+  .local-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: #16213e;
+  }
+  
+  /* Local video label */
+  .local-video-label {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    backdrop-filter: blur(2px);
+  }
+  
+  /* Call controls */
+  .call-controls {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    background-color: rgba(30, 30, 50, 1);
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+    gap: 16px;
+    z-index: 10;
+  }
+  
+  /* Control buttons */
+  .control-button {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    width: 50px !important;
+    height: 50px !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .control-button:hover {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    transform: scale(1.1);
+  }
+  
+  .control-button-off {
+    background-color: rgba(255, 80, 80, 0.6) !important;
+    color: white !important;
+    width: 50px !important;
+    height: 50px !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .control-button-off:hover {
+    background-color: rgba(255, 80, 80, 0.8) !important;
+    transform: scale(1.1);
+  }
+  
+  .end-call-button {
+    background-color: #f44336 !important;
+    color: white !important;
+    width: 50px !important;
+    height: 50px !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .end-call-button:hover {
+    background-color: #d32f2f !important;
+    transform: scale(1.1);
+  }
+  
+  /* Loading container */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1a1a2e;
+    color: white;
+  }
+  
+  /* Error container */
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1a1a2e;
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 600px) {
+    .local-video-container {
+      width: 120px;
+      height: 90px;
+      bottom: 90px;
+      right: 16px;
+    }
+    
+    .call-controls {
+      padding: 12px 8px;
+      gap: 12px;
+    }
+    
+    .control-button, .control-button-off, .end-call-button {
+      width: 45px !important;
+      height: 45px !important;
+    }
+  }
+  
+  /* Video grid items for different remote user counts */
+  .remote-grid-1 {
+    height: calc(100vh - 160px) !important;
+  }
+  
+  .remote-grid-2 {
+    height: calc(50vh - 100px) !important;
+  }
+  
+  .remote-grid-3, .remote-grid-4 {
+    height: calc(50vh - 100px) !important;
+  }
+  
+  /* Animations for smoother UI */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+  
+  /* Toast/notification styles */
+  .MuiAlert-filledInfo {
+    background-color: #2196f3 !important;
+  }
+  
+  .MuiAlert-filledSuccess {
+    background-color: #4caf50 !important;
+  }
+  
+  .MuiAlert-filledWarning {
+    background-color: #ff9800 !important;
+  }
+  
+  .MuiAlert-filledError {
+    background-color: #f44336 !important;
+  }

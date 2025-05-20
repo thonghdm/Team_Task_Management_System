@@ -1,88 +1,172 @@
 import React, { useEffect, useRef } from 'react';
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography, Avatar } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-// import {useMessageScroll} from '~/hooks/useMessageScroll';
-const messages = [
-  { text: 'Hi, how are you?', time: '11:00', sender: 'other' },
-  { text: "I'm good, thanks!", time: '12:00', sender: 'self' },
-  { text: 'Hi, how are you?', time: '11:00', sender: 'other' },
-  { text: "I'm good, thanks!", time: '12:00', sender: 'self' },
-  {
-    text: 'Hi, how are you?'.repeat(10),
-    time: '11:00',
-    sender: 'other'
-  },
-  {
-    text: "I'm good, thanks!".repeat(10),
-    time: '12:00',
-    sender: 'self'
-  },
-  {
-    text: "I'm good, thanks!".repeat(10),
-    time: '12:00',
-    sender: 'self'
-  },
-  {
-    text: "I'm good, thanks!".repeat(10),
-    time: '12:00',
-    sender: 'self'
-  },
-  { text: "I'm good, thanks!", time: '12:00', sender: 'self' },
-  { text: "I'm good, thanks!", time: '12:00', sender: 'self' },
-];
+import { useSelector } from 'react-redux';
+import moment from 'moment';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import { useChat } from '~/Context/ChatProvider';
+import socket from '~/utils/socket';
 
 const ChatMessages = () => {
-  const theme = useTheme();
-//   const chatContainerRef = useRef(null);
+    const theme = useTheme();
+    const messagesEndRef = useRef(null);
+    const { messages, loading, error, currentConversation, fetchMessages, addMessage } = useChat();
+    const { userData } = useSelector((state) => state.auth);
+    // Lấy tin nhắn khi đổi cuộc hội thoại (nếu useChat không tự fetch)
+    useEffect(() => {
+        if (currentConversation && fetchMessages) {
+            fetchMessages(currentConversation._id);
+        }
+    }, [currentConversation]);
 
-//   useEffect(() => {
-//     if (chatContainerRef.current) {
-//       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-//     }
-//   }, [messages.length]);
+    // Lắng nghe socket để nhận tin nhắn mới
+    useEffect(() => {
+        if (!currentConversation) return;
+        const handleNewMessage = (message) => {
+            // Nếu message thuộc cuộc hội thoại hiện tại thì thêm vào
+            if (message.conversation === currentConversation._id) {
+                if (addMessage) {
+                    addMessage(message);
+                }
+            }
+        };
+        socket.on('new message', handleNewMessage);
+        return () => {
+            socket.off('new message', handleNewMessage);
+        };
+    }, [currentConversation, addMessage]);
 
-  return (
-    <Box
-      className="scrollable"
-      sx={{
-        flexGrow: 1,
-        p: 2,
-        overflowY: 'auto',
-        backgroundColor: theme.palette.background.default
-      }}
-      // ref={chatContainerRef}
-    >
-      {messages.map((message, index) => (
+    // Cuộn xuống tin nhắn mới nhất
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <Typography>Loading messages...</Typography>
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <Typography color="error">{error}</Typography>
+            </Box>
+        );
+    }
+
+    if (!messages || messages.length === 0) {
+        return (
+            <Box
+                sx={{
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: theme.palette.background.default,
+                    flexDirection: 'column',
+                    gap: 2
+                }}
+            >
+                <ChatBubbleOutlineIcon
+                    sx={{
+                        fontSize: 80,
+                        color: theme.palette.text.secondary,
+                    }}
+                />
+                <Typography
+                    variant="h5"
+                    sx={{
+                        color: theme.palette.text.primary,
+                    }}
+                >
+                    You have no messages yet.
+                </Typography>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        color: theme.palette.text.secondary,
+                        textAlign: 'center',
+                        maxWidth: 400
+                    }}
+                >
+                    Please create a new conversation to start chatting with others
+                </Typography>
+            </Box>
+        );
+    }
+
+    return (
         <Box
-          key={index}
-          sx={{
-            mb: 2,
-            display: 'flex',
-            justifyContent: message.sender === 'self' ? 'flex-end' : 'flex-start'
-          }}
-        >
-          <Paper
             sx={{
-              p: 1,
-              maxWidth: '70%',
-              mb: 1,
-              borderRadius: 2,
-              backgroundColor:
-                message.sender === 'self'
-                  ? theme.palette.primary.main
-                  : theme.palette.background.paper,
-              wordBreak: 'break-word'
+                flexGrow: 1,
+                p: 2,
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                backgroundColor: theme.palette.background.default
             }}
-          >
-            <Typography variant="body1">{message.text}</Typography>
-            <Typography sx={{ fontSize: '12px' }} color="textSecondary">
-              {message.time}
-            </Typography>
-          </Paper>
+        >
+            {messages.map((message, index) => {
+                const isOwnMessage = message.sender._id === userData._id;
+                const showAvatar = !isOwnMessage && (!messages[index - 1] || messages[index - 1].sender._id !== message.sender._id);
+
+                return (
+                    <Box
+                        key={message._id}
+                        sx={{
+                            display: 'flex',
+                            justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
+                            alignItems: 'flex-end',
+                            gap: 1
+                        }}
+                    >
+                        {!isOwnMessage && showAvatar && (
+                            <Avatar
+                                src={message.sender.image}
+                                alt={message.sender.displayName}
+                                sx={{ width: 32, height: 32 }}
+                            />
+                        )}
+                        {!isOwnMessage && !showAvatar && <Box sx={{ width: 32 }} />}
+                        <Box sx={{ maxWidth: '70%' }}>
+                            {!isOwnMessage && showAvatar && (
+                                <Typography variant="caption" sx={{ ml: 1, mb: 0.5 }}>
+                                    {message.sender.displayName}
+                                </Typography>
+                            )}
+                            <Paper
+                                sx={{
+                                    p: 1.5,
+                                    backgroundColor: isOwnMessage ? theme.palette.primary.main : theme.palette.background.paper,
+                                    color: isOwnMessage ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                                    borderRadius: 2,
+                                }}
+                            >
+                                <Typography variant="body1">{message.content}</Typography>
+                            </Paper>
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    mt: 0.5,
+                                    display: 'block',
+                                    textAlign: isOwnMessage ? 'right' : 'left',
+                                    color: theme.palette.text.secondary
+                                }}
+                            >
+                                {moment(message.createdAt).format('HH:mm')}
+                                {isOwnMessage && message.seenBy && message.seenBy.length > 0 && ' ✓✓'}
+                            </Typography>
+                        </Box>
+                    </Box>
+                );
+            })}
+            <div ref={messagesEndRef} />
         </Box>
-      ))}
-    </Box>
-  );
+    );
 };
 
 export default ChatMessages;
