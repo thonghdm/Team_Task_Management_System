@@ -12,12 +12,12 @@ const socketHandler = (io) => {
         })
 
         socket.on('join conversation', (conversationId) => {
-            socket.join(conversationId)
-            console.log(`User joined conversation ${conversationId}`)
+            socket.join(conversationId._id)
+            console.log(`User joined conversationnnn ${conversationId}`)
         })
 
         socket.on('leave conversation', (conversationId) => {
-            socket.leave(conversationId)
+            socket.leave(conversationId._id)
             console.log(`User left conversation ${conversationId}`)
         })
 

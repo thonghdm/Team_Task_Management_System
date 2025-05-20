@@ -49,7 +49,7 @@ module.exports = (socketIo) => {
                 }
 
                 // Send a pong to confirm connection
-                socket.emit('pong', { timestamp: Date.now() });
+                socket.emit('ping', { timestamp: Date.now() });
             }
         });
         /**
@@ -61,16 +61,16 @@ module.exports = (socketIo) => {
          * Tham gia vào cuộc trò chuyện
          */
         socket.on('join conversation', (conversationId) => {
-            socket.join(conversationId)
-            console.log(`User joined conversation ${conversationId}`)
+            socket.join(conversationId._id)
+            console.log(`User joined conversation`, conversationId._id)
         })
 
         /**
          * Rời khỏi cuộc trò chuyện
          */
         socket.on('leave conversation', (conversationId) => {
-            socket.leave(conversationId)
-            console.log(`User left conversation ${conversationId}`)
+            socket.leave(conversationId._id)
+            console.log(`User left conversation`, conversationId._id)
         })
 
         /**
@@ -78,17 +78,25 @@ module.exports = (socketIo) => {
          */
         socket.on('send message', async ({ senderId, conversationId, messageData }) => {
             try {
-                const message = await conversationService.sendMessage(senderId, conversationId, messageData)
-                io.to(conversationId).emit('new message', message)
+                const message = await conversationService.sendMessage(senderId, conversationId._id, messageData)  
+                io.to(conversationId._id).emit('new message', message)
                 
-                const conversation = await Conversation.findById(conversationId).populate('participants', 'displayName image')
-                conversation.participants.forEach(participant => {
-                    if (participant._id.toString() !== senderId.toString()) {
+                // Populate sender trong lastMessage trước khi emit
+                const conversation = await Conversation.findById(conversationId)
+                    .populate('participants', 'displayName image')
+                    .populate({
+                        path: 'lastMessage',
+                        populate: { path: 'sender', select: 'displayName image' }
+                    });
+
+                conversation.participants.forEach(participant => { 
+                        console.log("participant", participant._id.toString());
                         const socketId = onlineUsers.get(participant._id.toString())
-                        if (socketId) {
+                        console.log("socketId", socketId);
+                        console.log("conversation", conversation);
+                        if (socketId) {                              
                             io.to(socketId).emit('conversation updated', conversation)
                         }
-                    }
                 })
             } catch (error) {
                 console.error('Error sending message:', error.message)

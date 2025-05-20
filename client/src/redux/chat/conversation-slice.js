@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import messageApi from '~/apis/chat/messageApi';
+import messageApi from '~/apis/chat/messageApi.js';
 
 export const fetchConversationList = createAsyncThunk(
   'conversation/fetchConversationList',
@@ -37,11 +37,24 @@ export const createConversation = createAsyncThunk(
   }
 );
 
+export const fetchMessages = createAsyncThunk(
+  'conversation/fetchMessages',
+  async ({ accessToken, conversationId }, thunkAPI) => {
+    try {
+      const data = await messageApi.getMessages(accessToken, conversationId);
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const conversationSlice = createSlice({
   name: 'conversation',
   initialState: {
     conversations: [],
     currentConversation: null,
+    messages: [],
     loading: false,
     error: null,
   },
@@ -49,6 +62,7 @@ const conversationSlice = createSlice({
     resetConversation: (state) => {
       state.conversations = [];
       state.currentConversation = null;
+      state.messages = [];
       state.loading = false;
       state.error = null;
     },
@@ -94,6 +108,18 @@ const conversationSlice = createSlice({
         }
       })
       .addCase(createConversation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchMessages.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMessages.fulfilled, (state, action) => {
+        state.loading = false;
+        state.messages = action.payload;
+      })
+      .addCase(fetchMessages.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

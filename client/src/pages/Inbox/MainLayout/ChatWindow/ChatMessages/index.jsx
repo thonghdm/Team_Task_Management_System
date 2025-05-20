@@ -1,24 +1,44 @@
 import React, { useEffect, useRef } from 'react';
 import { Box, Paper, Typography, Avatar } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { useChat } from '~/Context/ChatProvider';
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import { useChat } from '~/Context/ChatProvider';
+import socket from '~/utils/socket';
 
 const ChatMessages = () => {
     const theme = useTheme();
     const messagesEndRef = useRef(null);
-    const { messages, loading, error } = useChat();
+    const { messages, loading, error, currentConversation, fetchMessages, addMessage } = useChat();
     const { userData } = useSelector((state) => state.auth);
+    // Lấy tin nhắn khi đổi cuộc hội thoại (nếu useChat không tự fetch)
+    useEffect(() => {
+        if (currentConversation && fetchMessages) {
+            fetchMessages(currentConversation._id);
+        }
+    }, [currentConversation]);
+
+    // Lắng nghe socket để nhận tin nhắn mới
+    useEffect(() => {
+        if (!currentConversation) return;
+        const handleNewMessage = (message) => {
+            // Nếu message thuộc cuộc hội thoại hiện tại thì thêm vào
+            if (message.conversation === currentConversation._id) {
+                if (addMessage) {
+                    addMessage(message);
+                }
+            }
+        };
+        socket.on('new message', handleNewMessage);
+        return () => {
+            socket.off('new message', handleNewMessage);
+        };
+    }, [currentConversation, addMessage]);
 
     // Cuộn xuống tin nhắn mới nhất
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
     useEffect(() => {
-        scrollToBottom();
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
     if (loading) {
@@ -72,7 +92,6 @@ const ChatMessages = () => {
                         maxWidth: 400
                     }}
                 >
-                    
                     Please create a new conversation to start chatting with others
                 </Typography>
             </Box>
@@ -139,7 +158,7 @@ const ChatMessages = () => {
                                 }}
                             >
                                 {moment(message.createdAt).format('HH:mm')}
-                                {isOwnMessage && message.seenBy.length > 0 && ' ✓✓'}
+                                {isOwnMessage && message.seenBy && message.seenBy.length > 0 && ' ✓✓'}
                             </Typography>
                         </Box>
                     </Box>

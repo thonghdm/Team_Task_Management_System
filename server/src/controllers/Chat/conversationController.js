@@ -3,11 +3,13 @@ const conservationService = require('~/services/chat/conversationService')
 const conversationService = {
     getConversationList: async (req, res) => {
         try {
-            const userId = req.user.id;
+            console.log('DEBUG /conversations/list req.user:', req.currentUser);
+            const userId = req.currentUser._id;
             const conversations = await conservationService.getConversationList(userId);
             res.status(200).json(conversations);
         }
         catch (error) {
+            console.error('getConversationList error:', error);
             res.status(500).json({ error: error.message })
         }
     },

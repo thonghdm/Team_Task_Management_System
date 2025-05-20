@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 import { useSelector } from 'react-redux';
 import socket from '~/utils/socket';
 import messageApi from '~/apis/chat/messageApi';
+import { useRefreshToken } from '~/utils/useRefreshToken'
 
 const ChatContext = createContext();
 
@@ -13,21 +14,36 @@ export const ChatProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [currentConversation, setCurrentConversation] = useState(null);
     const { userData, accessToken } = useSelector((state) => state.auth);
+    const refreshToken = useRefreshToken();
+    const refreshAccessToken = useRefreshToken();
 
     // Lấy tin nhắn của cuộc trò chuyện
-    const fetchMessages = useCallback(async (conversationId) => {
+    const fetchMessages = useCallback(async (conversationId, token = accessToken) => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            const data = await messageApi.getMessages(accessToken, conversationId);
+            const data = await messageApi.getMessages(token, conversationId);
+            console.log("data",data);
             setMessages(data);
             setCurrentConversation(conversationId);
         } catch (err) {
-            setError('Failed to fetch messages');
-            console.error(err);
+            // Nếu lỗi 401 hoặc hết hạn token
+            if ((err?.response?.status === 401 || err?.err === 2) && refreshToken) {
+                try {
+                    const newToken = await refreshAccessToken();
+                    // Gọi lại với accessToken mới
+                    const data = await messageApi.getMessages(newToken, conversationId);
+                    setMessages(data);
+                } catch (refreshErr) {
+                    setError('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!');
+                }
+            } else {
+                setError('Không thể tải tin nhắn!');
+            }
         } finally {
             setLoading(false);
         }
-    }, [accessToken]);
+    }, [accessToken, refreshToken, refreshAccessToken]);
 
     // Gửi tin nhắn mới
     const sendMessage = useCallback((conversationId, messageData) => {

@@ -60,7 +60,10 @@ const getConversationList = async (userId) => {
     const conversations = await Conversation.find({
         participants: userId })
         .populate('participants', 'displayName image')
-        .populate('lastMessage')
+        .populate({
+            path: 'lastMessage',
+            populate: { path: 'sender', select: 'displayName image' }
+        })
         .sort({ updateAt: -1 })
     return conversations
 }

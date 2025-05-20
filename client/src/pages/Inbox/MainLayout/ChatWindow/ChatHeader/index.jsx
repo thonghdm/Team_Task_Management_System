@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Box, Avatar, Typography, IconButton } from "@mui/material";
 import CallIcon from "@mui/icons-material/Call";
@@ -9,12 +8,14 @@ import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import videoCallService from "~/apis/inbox/videoCallService";
 import { useCallContext } from "~/Context/CallProvider";
+import { useChat } from '~/Context/ChatProvider';
 
 const ChatHeader = ({ toggleSidebar }) => {
   const { chatId } = useParams();
   const [isStartingCall, setIsStartingCall] = useState(false);
   const { accesstoken, userData } = useSelector((state) => state.auth);
   const { startCall } = useCallContext();
+  const { currentConversation } = useChat();
 
   const group = {
     _id: "67d59fac2c71b42fb0197ff7",
@@ -23,6 +24,12 @@ const ChatHeader = ({ toggleSidebar }) => {
   };
 
   const theme = useTheme();
+
+  // Lấy thông tin user đối thoại
+  let otherUser = null;
+  if (currentConversation && currentConversation.participants) {
+    otherUser = currentConversation.participants.find(u => u._id !== userData._id);
+  }
 
   const handleVideoCall = async () => {
     try {
@@ -65,8 +72,12 @@ const ChatHeader = ({ toggleSidebar }) => {
       }}
     >
       <Box display="flex" alignItems="center">
-        <Avatar sx={{ mr: 2 }}>D</Avatar>
-        <Typography variant="h6">{chatId}</Typography>
+        <Avatar sx={{ mr: 2 }} src={otherUser?.image}>
+          {otherUser?.displayName ? otherUser.displayName[0] : 'D'}
+        </Avatar>
+        <Typography variant="h6">
+          {otherUser?.displayName || chatId}
+        </Typography>
       </Box>
       <Box>
         <IconButton
