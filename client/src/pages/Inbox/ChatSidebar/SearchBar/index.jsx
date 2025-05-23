@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Paper, IconButton, InputBase, List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography, Box } from '@mui/material';
+import { Paper, IconButton, InputBase, List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography, Box, Divider } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import GroupIcon from '@mui/icons-material/Group';
 import { useTheme } from '@mui/material/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchAllMembers } from '~/redux/member/member-slice';
 
-const SearchBar = ({ onUserSelect, placeholder = 'Search user...' }) => {
+const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search users or groups...' }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [options, setOptions] = useState([]);
+    const [userOptions, setUserOptions] = useState([]);
+    const [groupOptions, setGroupOptions] = useState([]);
     const [showResults, setShowResults] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const theme = useTheme();
     const dispatch = useDispatch();
     const { accesstoken, userData } = useSelector(state => state.auth);
     const memberData = useSelector(state => state.allMember.memberData);
+    const conversationState = useSelector(state => state.conversation);
+    const conversations = conversationState?.conversations || [];
 
     // Fetch all members if not loaded
     useEffect(() => {
@@ -22,25 +26,47 @@ const SearchBar = ({ onUserSelect, placeholder = 'Search user...' }) => {
         }
     }, [memberData, accesstoken, dispatch]);
 
-    // Filter users locally
+    // Filter users and groups locally
     useEffect(() => {
-        if (!searchTerm.trim() || !memberData?.users) {
-            setOptions([]);
+        if (!searchTerm.trim()) {
+            setUserOptions([]);
+            setGroupOptions([]);
             setShowResults(false);
             return;
         }
+        
         setIsSearching(true);
         const search = searchTerm.toLowerCase();
-        const filtered = memberData.users.filter(user =>
+        
+        // Filter users
+        const filteredUsers = memberData?.users?.filter(user =>
             user._id !== userData?._id &&
             (user.displayName?.toLowerCase().includes(search) ||
                 user.email?.toLowerCase().includes(search) ||
                 user.username?.toLowerCase().includes(search))
-        );
-        setOptions(filtered);
-        setShowResults(true);
+        ) || [];
+        
+        // Filter groups from conversations
+        const filteredGroups = conversations
+            .filter(conv => 
+                conv.isGroup && 
+                conv.groupInfo && 
+                conv.groupInfo.name && 
+                conv.groupInfo.name.toLowerCase().includes(search)
+            )
+            .map(conv => ({
+                _id: conv._id,
+                name: conv.groupInfo.name,
+                avatar: conv.groupInfo.avatar,
+                isGroup: true,
+                conversation: conv
+            }));
+        
+        setUserOptions(filteredUsers);
+        setGroupOptions(filteredGroups);
+        setShowResults(filteredUsers.length > 0 || filteredGroups.length > 0);
         setIsSearching(false);
-    }, [searchTerm, memberData, userData]);
+    }, [searchTerm, memberData, userData, conversations]);
 
     // Hide dropdown when click outside
     useEffect(() => {
@@ -62,13 +88,24 @@ const SearchBar = ({ onUserSelect, placeholder = 'Search user...' }) => {
 
     const handleUserClick = (user) => {
         setSearchTerm('');
-        setOptions([]);
+        setUserOptions([]);
+        setGroupOptions([]);
         setShowResults(false);
         if (onUserSelect) onUserSelect(user);
     };
 
+    const handleGroupClick = (group) => {
+        setSearchTerm('');
+        setUserOptions([]);
+        setGroupOptions([]);
+        setShowResults(false);
+        if (onGroupSelect) onGroupSelect(group);
+    };
+
+    const hasResults = userOptions.length > 0 || groupOptions.length > 0;
+
     return (
-        <Box sx={{ position: 'relative', width: '90%', margin: '10px auto', zIndex: 2 }}>
+        <Box sx={{ position: 'relative', width: '100%', zIndex: 2 }}>
             <Paper
                 component="form"
                 sx={{
@@ -88,13 +125,13 @@ const SearchBar = ({ onUserSelect, placeholder = 'Search user...' }) => {
                     value={searchTerm}
                     onChange={handleSearchChange}
                     inputProps={{ 'aria-label': 'search' }}
-                    onFocus={() => { if (options.length > 0) setShowResults(true); }}
+                    onFocus={() => { if (hasResults) setShowResults(true); }}
                 />
                 <IconButton sx={{ p: '10px', color: '#9e9e9e' }} aria-label="search">
                     <SearchIcon />
                 </IconButton>
             </Paper>
-            {showResults && options.length > 0 && (
+            {showResults && hasResults && (
                 <List
                     className="searchbar-dropdown"
                     sx={{
@@ -110,20 +147,53 @@ const SearchBar = ({ onUserSelect, placeholder = 'Search user...' }) => {
                         zIndex: 10,
                     }}
                 >
-                    {options.map(user => (
-                        <ListItem button key={user._id} onClick={() => handleUserClick(user)}>
-                            <ListItemAvatar>
-                                <Avatar src={user.image}>{user.displayName?.[0]}</Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                                primary={<Typography variant="subtitle2">{user.displayName}</Typography>}
-                                secondary={<Typography variant="caption" component="span">{user.email}</Typography>}
-                            />
-                        </ListItem>
-                    ))}
+                    {groupOptions.length > 0 && (
+                        <>
+                            <ListItem sx={{ py: 0 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Groups
+                                </Typography>
+                            </ListItem>
+                            {groupOptions.map(group => (
+                                <ListItem button key={`group-${group._id}`} onClick={() => handleGroupClick(group)}>
+                                    <ListItemAvatar>
+                                        <Avatar src={group.avatar} sx={{ bgcolor: 'primary.main' }}>
+                                            <GroupIcon />
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={<Typography variant="subtitle2">{group.name}</Typography>}
+                                        secondary={<Typography variant="caption" component="span">Group</Typography>}
+                                    />
+                                </ListItem>
+                            ))}
+                            {userOptions.length > 0 && <Divider sx={{ my: 1 }} />}
+                        </>
+                    )}
+                    
+                    {userOptions.length > 0 && (
+                        <>
+                            <ListItem sx={{ py: 0 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Users
+                                </Typography>
+                            </ListItem>
+                            {userOptions.map(user => (
+                                <ListItem button key={`user-${user._id}`} onClick={() => handleUserClick(user)}>
+                                    <ListItemAvatar>
+                                        <Avatar src={user.image}>{user.displayName?.[0]}</Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={<Typography variant="subtitle2">{user.displayName}</Typography>}
+                                        secondary={<Typography variant="caption" component="span">{user.email}</Typography>}
+                                    />
+                                </ListItem>
+                            ))}
+                        </>
+                    )}
                 </List>
             )}
-            {showResults && searchTerm.trim() && options.length === 0 && (
+            {showResults && searchTerm.trim() && !hasResults && (
                 <Paper
                     sx={{
                         position: 'absolute',
@@ -138,7 +208,7 @@ const SearchBar = ({ onUserSelect, placeholder = 'Search user...' }) => {
                     }}
                 >
                     <Typography variant="body2" color="textSecondary" align="center">
-                        {isSearching ? 'Đang tìm kiếm...' : 'Không tìm thấy người dùng'}
+                        {isSearching ? 'Đang tìm kiếm...' : 'Không tìm thấy người dùng hoặc nhóm'}
                     </Typography>
                 </Paper>
             )}
