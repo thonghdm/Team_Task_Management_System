@@ -36,7 +36,7 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
     const theme = useTheme();
     const { userData, accesstoken } = useSelector(state => state.auth);
     const dispatch = useDispatch();
-    const { setCurrentConversation } = useChat();
+    const { setCurrentConversation, currentConversation } = useChat();
     const [conversationsLocal, setConversationsLocal] = useState([]);
     const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
     const [avatarErrors, setAvatarErrors] = useState({});
@@ -56,6 +56,17 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
         fetchList();
     }, [accesstoken]);
 
+    // Cập nhật conversationsLocal khi currentConversation thay đổi (ví dụ: khi avatar được cập nhật)
+    useEffect(() => {
+        if (currentConversation && currentConversation._id) {
+            setConversationsLocal(prev => {
+                return prev.map(conv => 
+                    conv._id === currentConversation._id ? currentConversation : conv
+                );
+            });
+        }
+    }, [currentConversation]);
+
     // Lắng nghe socket để cập nhật chatItem khi có conversation updated
     useEffect(() => {
         const handleConversationUpdated = (updatedConversation) => {
@@ -64,7 +75,11 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
                 if (exists) {
                     return prev.map(conv =>
                         conv._id.toString() === updatedConversation._id.toString()
-                            ? { ...conv, lastMessage: updatedConversation.lastMessage }
+                            ? { 
+                                ...conv, 
+                                lastMessage: updatedConversation.lastMessage,
+                                groupInfo: updatedConversation.isGroup ? updatedConversation.groupInfo : conv.groupInfo
+                            }
                             : conv
                     );
                 } else {
