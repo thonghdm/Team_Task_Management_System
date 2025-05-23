@@ -29,17 +29,22 @@ const MainLayout = ({ setSelectedUserIdRef }) => {
         setIsSidebarVisible((prev) => !prev);
     };
 
+    const closeSidebar = () => {
+        setIsSidebarVisible(false);
+    };
+
     return (
         <Box sx={{ display: 'flex', height: '100%' }}>
             <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <ChatWindow selectedUserId={selectedUserId} />
+                <ChatWindow toggleSidebar={toggleSidebar} selectedUserId={selectedUserId} />
             </Box>
             {isSidebarVisible && (
                 <Box sx={{
-                    flex: '0 0 30%', borderLeft: `1px solid "#ddd"`
-                    , overflowY: 'auto'
+                    flex: '0 0 30%', 
+                    borderLeft: `1px solid ${theme.palette.divider}`,
+                    overflowY: 'auto'
                 }}>
-                    <SidebarRight setSelectedUserId={setSelectedUserId} />
+                    <SidebarRight setSelectedUserId={setSelectedUserId} onClose={closeSidebar} />
                 </Box>
             )}
         </Box>

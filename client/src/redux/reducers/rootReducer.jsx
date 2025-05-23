@@ -24,6 +24,8 @@ import taskInviteUserSlice from '~/redux/project/task-slice/task-inviteUser-slic
 import subscriptionSlice from '~/redux/project/subscription-slice/index';
 
 import notificationSlice from '~/redux/project/notifications-slice/index';
+import conversationSlice from '~/redux/chat/conversation-slice';
+
 // Cấu hình cho persist
 const commonConfig = {
     storage,
@@ -134,6 +136,13 @@ const notificationConfig = {
     whitelist: ['notifications', 'loading', 'error'],
 };
 
+// Cấu hình cho persist conversation
+const conversationConfig = {
+    ...commonConfig,
+    key: 'conversation',
+    whitelist: ['conversations', 'currentConversation', 'messages', 'loading', 'error'],
+};
+
 const rootReducer = combineReducers({
     auth: persistReducer(authConfig, authReducer),
     projects: persistReducer(projectsConfig, projectsSlice),
@@ -154,6 +163,7 @@ const rootReducer = combineReducers({
     taskInviteUser: persistReducer(taskInviteUserSliceConfig, taskInviteUserSlice),
     subscription: persistReducer(subscriptionConfig, subscriptionSlice),
     notification: persistReducer(notificationConfig, notificationSlice),
+    conversation: persistReducer(conversationConfig, conversationSlice),
 })
 
 
