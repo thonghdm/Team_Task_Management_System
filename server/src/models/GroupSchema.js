@@ -25,6 +25,10 @@ const GroupSchema = new mongoose.Schema({
     createBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    avatar: {
+        type: String,
+        default: 'https://via.placeholder.com/150'
     }
     // timestamp: {
     //     type: Date,

@@ -2,9 +2,10 @@ const groupService = require('~/services/chat/groupService')
 const groupController = {
     createGroup: async (req, res) => {
         try {
-            const { name, description, memberIds } = req.body
-            const creatorId = req.user.id
-            const { group, conversation } = await groupService.createGroup(name, description, creatorId, memberIds)
+            const { name, description, memberIds, avatar } = req.body
+            console.log('req group', req.user);
+            const creatorId = req.currentUser._id
+            const { group, conversation } = await groupService.createGroup(name, description, creatorId, memberIds, avatar)
             res.json({ group, conversation })
         } catch (error) {
             res.status(500).json({ message: error.message })
