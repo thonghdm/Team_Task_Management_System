@@ -1,6 +1,6 @@
 const Group = require('~/models/GroupSchema')
 const Conversation = require('~/models/ConversationSchema')
-const createGroup = async (name, description, creatorId, memberIds) => {
+const createGroup = async (name, description, creatorId, memberIds, avatar = null) => {
     const group = new Group({
         name,
         description,
@@ -15,6 +15,8 @@ const createGroup = async (name, description, creatorId, memberIds) => {
         isGroup: true,
         groupInfo: {
             name: group.name,
+            avatar: avatar,
+            description: description,
             admins: [creatorId]
         },
         unreadCounts: group.members.map(id => ({ user: id, count: 0 }))
