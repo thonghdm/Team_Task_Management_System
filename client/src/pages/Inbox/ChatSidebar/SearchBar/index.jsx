@@ -6,12 +6,40 @@ import { useTheme } from '@mui/material/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchAllMembers } from '~/redux/member/member-slice';
 
+// Hàm tạo avatar tự động từ tên nhóm
+const generateAvatarColor = (name) => {
+    if (!name) return 'hsl(200, 70%, 60%)';
+    
+    // Tạo màu ngẫu nhiên dựa trên tên nhóm
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    const hue = Math.abs(hash % 360);
+    return `hsl(${hue}, 70%, 60%)`;
+};
+
+// Tạo URL avatar dựa trên tên nhóm (dự phòng)
+const generateFallbackAvatarUrl = (name) => {
+    if (!name) return '';
+    
+    const initials = name.split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+    
+    return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=${encodeURIComponent(generateAvatarColor(name).replace('#', ''))}&chars=${initials}`;
+};
+
 const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search users or groups...' }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [userOptions, setUserOptions] = useState([]);
     const [groupOptions, setGroupOptions] = useState([]);
     const [showResults, setShowResults] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+    const [avatarErrors, setAvatarErrors] = useState({});
     const theme = useTheme();
     const dispatch = useDispatch();
     const { accesstoken, userData } = useSelector(state => state.auth);
@@ -58,6 +86,7 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search users or
                 _id: conv._id,
                 name: conv.groupInfo.name,
                 avatar: conv.groupInfo.avatar,
+                avatarColor: generateAvatarColor(conv.groupInfo.name),
                 isGroup: true,
                 conversation: conv
             }));
@@ -81,6 +110,14 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search users or
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Xử lý lỗi khi avatar không tải được
+    const handleAvatarError = (groupId) => {
+        setAvatarErrors(prev => ({
+            ...prev,
+            [groupId]: true
+        }));
+    };
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
@@ -154,19 +191,30 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search users or
                                     Groups
                                 </Typography>
                             </ListItem>
-                            {groupOptions.map(group => (
-                                <ListItem button key={`group-${group._id}`} onClick={() => handleGroupClick(group)}>
-                                    <ListItemAvatar>
-                                        <Avatar src={group.avatar} sx={{ bgcolor: 'primary.main' }}>
-                                            <GroupIcon />
-                                        </Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText
-                                        primary={<Typography variant="subtitle2">{group.name}</Typography>}
-                                        secondary={<Typography variant="caption" component="span">Group</Typography>}
-                                    />
-                                </ListItem>
-                            ))}
+                            {groupOptions.map(group => {
+                                const hasAvatarError = avatarErrors[group._id];
+                                const avatarSrc = hasAvatarError || !group.avatar
+                                    ? generateFallbackAvatarUrl(group.name)
+                                    : group.avatar;
+                                    
+                                return (
+                                    <ListItem button key={`group-${group._id}`} onClick={() => handleGroupClick(group)}>
+                                        <ListItemAvatar>
+                                            <Avatar 
+                                                src={avatarSrc} 
+                                                sx={{ bgcolor: group.avatarColor }}
+                                                onError={() => handleAvatarError(group._id)}
+                                            >
+                                                <GroupIcon />
+                                            </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={<Typography variant="subtitle2">{group.name}</Typography>}
+                                            secondary={<Typography variant="caption" component="span">Group</Typography>}
+                                        />
+                                    </ListItem>
+                                );
+                            })}
                             {userOptions.length > 0 && <Divider sx={{ my: 1 }} />}
                         </>
                     )}

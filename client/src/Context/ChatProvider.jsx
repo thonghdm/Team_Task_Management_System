@@ -80,6 +80,18 @@ export const ChatProvider = ({ children }) => {
         ));
     }, []);
 
+    // Cập nhật thông tin conversation hiện tại
+    const updateCurrentConversation = useCallback((updatedConversation) => {
+        if (!updatedConversation) return;
+        
+        setCurrentConversation(updatedConversation);
+        
+        // Thông báo cho server về sự thay đổi (nếu cần)
+        if (updatedConversation._id) {
+            socket.emit('conversation updated', updatedConversation);
+        }
+    }, []);
+
     // Thiết lập socket listeners
     useEffect(() => {
         if (!userData?._id) return;
@@ -118,7 +130,8 @@ export const ChatProvider = ({ children }) => {
         sendMessage,
         markMessageAsSeen,
         fetchMessages,
-        setCurrentConversation
+        setCurrentConversation,
+        updateCurrentConversation
     };
 
     return (

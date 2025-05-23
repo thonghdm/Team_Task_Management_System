@@ -73,6 +73,34 @@ const groupApi = {
             console.error('Error making user admin:', error);
             throw error;
         }
+    },
+    
+    // Update group avatar
+    updateGroupAvatar: async (accessToken, groupId, avatarFile) => {
+        try {
+            const formData = new FormData();
+            formData.append('groupId', groupId);
+            
+            if (avatarFile) {
+                formData.append('avatar', avatarFile);
+            }
+            
+            const response = await axios.put(
+                `${API_URL}/groups/update-avatar`,
+                formData,
+                {
+                    headers: { 
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    withCredentials: true,
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error updating group avatar:', error);
+            throw error;
+        }
     }
 };
 

@@ -102,10 +102,34 @@ const makeGroupAdmin = async (groupId, newAdminId, currentAdminId) => {
     return group
 }
 
+const updateGroupAvatar = async (groupId, avatarUrl, userId) => {
+    // Tìm conversation dựa vào groupId
+    const conversation = await Conversation.findById(groupId);
+    if (!conversation) {
+        throw new Error('Conversation not found');
+    }
+
+    // Kiểm tra xem đây có phải là nhóm không
+    if (!conversation.isGroup) {
+        throw new Error('This is not a group conversation');
+    }
+
+    // Kiểm tra xem người dùng có phải là thành viên của nhóm
+    if (!conversation.participants.includes(userId)) {
+        throw new Error('You are not a member of this group');
+    }
+
+    // Cập nhật avatar trong groupInfo
+    conversation.groupInfo.avatar = avatarUrl;
+    await conversation.save();
+
+    return conversation;
+}
 
 module.exports = {
     createGroup,
     addMemberToGroup,
     removeMemberFromGroup,
-    makeGroupAdmin
+    makeGroupAdmin,
+    updateGroupAvatar
 }
