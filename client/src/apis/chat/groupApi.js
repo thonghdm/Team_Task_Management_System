@@ -11,13 +11,11 @@ const groupApi = {
                 { name, description, memberIds, avatar },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
-                    withCredentials: true,
                 }
             );
             return response.data;
         } catch (error) {
-            console.error('Error creating group:', error);
-            throw error;
+            throw error.response?.data || error;
         }
     },
 
@@ -29,13 +27,11 @@ const groupApi = {
                 { groupId, newMemberId },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
-                    withCredentials: true,
                 }
             );
             return response.data;
         } catch (error) {
-            console.error('Error adding member to group:', error);
-            throw error;
+            throw error.response?.data || error;
         }
     },
 
@@ -47,13 +43,11 @@ const groupApi = {
                 { groupId, memberId },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
-                    withCredentials: true,
                 }
             );
             return response.data;
         } catch (error) {
-            console.error('Error removing member from group:', error);
-            throw error;
+            throw error.response?.data || error;
         }
     },
 
@@ -65,13 +59,27 @@ const groupApi = {
                 { groupId, newAdminId },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
-                    withCredentials: true,
                 }
             );
             return response.data;
         } catch (error) {
-            console.error('Error making user admin:', error);
-            throw error;
+            throw error.response?.data || error;
+        }
+    },
+
+    // Remove a group admin
+    removeGroupAdmin: async (accessToken, groupId, adminId) => {
+        try {
+            const response = await axios.post(
+                `${API_URL}/groups/remove-admin`,
+                { groupId, adminId },
+                {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
         }
     },
     
@@ -79,6 +87,7 @@ const groupApi = {
     updateGroupAvatar: async (accessToken, groupId, avatarFile) => {
         try {
             const formData = new FormData();
+            formData.append('avatar', avatarFile);
             formData.append('groupId', groupId);
             
             if (avatarFile) {
@@ -91,15 +100,13 @@ const groupApi = {
                 {
                     headers: { 
                         Authorization: `Bearer ${accessToken}`,
-                        'Content-Type': 'multipart/form-data'
+                        'Content-Type': 'multipart/form-data',
                     },
-                    withCredentials: true,
                 }
             );
             return response.data;
         } catch (error) {
-            console.error('Error updating group avatar:', error);
-            throw error;
+            throw error.response?.data || error;
         }
     }
 };

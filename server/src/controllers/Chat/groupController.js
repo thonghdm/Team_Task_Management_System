@@ -47,33 +47,44 @@ const groupController = {
     addMemberToGroup: async (req, res) => {
         try {
             const { groupId, newMemberId } = req.body
-            const adminId = req.user.id
+            const adminId = req.currentUser._id
             const updatedGroup = await groupService.addMemberToGroup(groupId, newMemberId, adminId)
-            res.json(updatedGroup)
+            res.json({ success: true, group: updatedGroup })
         } catch (error) {
-            res.status(500).json({ message: error.message })
+            res.status(500).json({ success: false, message: error.message })
         }
     },
 
     removeMemberFromGroup: async (req, res) => {
         try {
             const { groupId, memberId } = req.body
-            const adminId = req.user.id
-            const updatedGroup = await groupService.removeMemberFromGroup(groupId, memberId, adminId)
-            res.json(updatedGroup)
+            const adminId = req.currentUser._id
+            const updatedConversation = await groupService.removeMemberFromGroup(groupId, memberId, adminId)
+            res.json({ success: true, conversation: updatedConversation })
         } catch (error) {
-            res.status(500).json({ message: error.message })
+            res.status(500).json({ success: false, message: error.message })
         }
     },
 
     makeGroupAdmin: async (req, res) => {
         try {
             const { groupId, newAdminId } = req.body
-            const currentAdminId = req.user.id
-            const updatedGroup = await groupService.makeGroupAdmin(groupId, newAdminId, currentAdminId)
-            res.json(updatedGroup)
+            const currentAdminId = req.currentUser._id
+            const updatedConversation = await groupService.makeGroupAdmin(groupId, newAdminId, currentAdminId)
+            res.json({ success: true, conversation: updatedConversation })
         } catch (error) {
-            res.status(500).json({ message: error.message })
+            res.status(500).json({ success: false, message: error.message })
+        }
+    },
+
+    removeGroupAdmin: async (req, res) => {
+        try {
+            const { groupId, adminId } = req.body
+            const currentAdminId = req.currentUser._id
+            const updatedConversation = await groupService.removeGroupAdmin(groupId, adminId, currentAdminId)
+            res.json({ success: true, conversation: updatedConversation })
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message })
         }
     },
 

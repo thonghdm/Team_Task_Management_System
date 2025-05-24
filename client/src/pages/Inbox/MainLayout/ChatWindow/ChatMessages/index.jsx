@@ -104,67 +104,76 @@ const ChatMessages = () => {
                 flexGrow: 1,
                 p: 2,
                 overflowY: 'auto',
+                backgroundColor: theme.palette.background.default,
                 display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                backgroundColor: theme.palette.background.default
+                flexDirection: 'column'
             }}
         >
-            {messages.map((message, index) => {
-                const isOwnMessage = message.sender._id === userData._id;
-                const showAvatar = !isOwnMessage && (!messages[index - 1] || messages[index - 1].sender._id !== message.sender._id);
+            <Box sx={{ flex: 1 }} /> {/* Spacer để đẩy tin nhắn xuống dưới */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                    minHeight: 'auto'
+                }}
+            >
+                {messages.map((message, index) => {
+                    const isOwnMessage = message.sender._id === userData._id;
+                    const showAvatar = !isOwnMessage && (!messages[index - 1] || messages[index - 1].sender._id !== message.sender._id);
 
-                return (
-                    <Box
-                        key={message._id}
-                        sx={{
-                            display: 'flex',
-                            justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
-                            alignItems: 'flex-end',
-                            gap: 1
-                        }}
-                    >
-                        {!isOwnMessage && showAvatar && (
-                            <Avatar
-                                src={message.sender.image}
-                                alt={message.sender.displayName}
-                                sx={{ width: 32, height: 32 }}
-                            />
-                        )}
-                        {!isOwnMessage && !showAvatar && <Box sx={{ width: 32 }} />}
-                        <Box sx={{ maxWidth: '70%' }}>
+                    return (
+                        <Box
+                            key={message._id}
+                            sx={{
+                                display: 'flex',
+                                justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
+                                alignItems: 'flex-end',
+                                gap: 1
+                            }}
+                        >
                             {!isOwnMessage && showAvatar && (
-                                <Typography variant="caption" sx={{ ml: 1, mb: 0.5 }}>
-                                    {message.sender.displayName}
-                                </Typography>
+                                <Avatar
+                                    src={message.sender.image}
+                                    alt={message.sender.displayName}
+                                    sx={{ width: 32, height: 32 }}
+                                />
                             )}
-                            <Paper
-                                sx={{
-                                    p: 1.5,
-                                    backgroundColor: isOwnMessage ? theme.palette.primary.main : theme.palette.background.paper,
-                                    color: isOwnMessage ? theme.palette.primary.contrastText : theme.palette.text.primary,
-                                    borderRadius: 2,
-                                }}
-                            >
-                                <Typography variant="body1">{message.content}</Typography>
-                            </Paper>
-                            <Typography
-                                variant="caption"
-                                sx={{
-                                    mt: 0.5,
-                                    display: 'block',
-                                    textAlign: isOwnMessage ? 'right' : 'left',
-                                    color: theme.palette.text.secondary
-                                }}
-                            >
-                                {moment(message.createdAt).format('HH:mm')}
-                                {isOwnMessage && message.seenBy && message.seenBy.length > 0 && ' ✓✓'}
-                            </Typography>
+                            {!isOwnMessage && !showAvatar && <Box sx={{ width: 32 }} />}
+                            <Box sx={{ maxWidth: '70%' }}>
+                                {!isOwnMessage && showAvatar && (
+                                    <Typography variant="caption" sx={{ ml: 1, mb: 0.5 }}>
+                                        {message.sender.displayName}
+                                    </Typography>
+                                )}
+                                <Paper
+                                    sx={{
+                                        p: 1.5,
+                                        backgroundColor: isOwnMessage ? theme.palette.primary.main : theme.palette.background.paper,
+                                        color: isOwnMessage ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Typography variant="body1">{message.content}</Typography>
+                                </Paper>
+                                <Typography
+                                    variant="caption"
+                                    sx={{
+                                        mt: 0.5,
+                                        display: 'block',
+                                        textAlign: isOwnMessage ? 'right' : 'left',
+                                        color: theme.palette.text.secondary
+                                    }}
+                                >
+                                    {moment(message.createdAt).format('HH:mm')}
+                                    {isOwnMessage && message.seenBy && message.seenBy.length > 0 && ' ✓✓'}
+                                </Typography>
+                            </Box>
                         </Box>
-                    </Box>
-                );
-            })}
-            <div ref={messagesEndRef} />
+                    );
+                })}
+                <div ref={messagesEndRef} />
+            </Box>
         </Box>
     );
 };

@@ -33,7 +33,7 @@ const generateFallbackAvatarUrl = (name) => {
     return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=${encodeURIComponent(generateAvatarColor(name).replace('#', ''))}&chars=${initials}`;
 };
 
-const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search users or groups...' }) => {
+const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name, email or groups...' }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [userOptions, setUserOptions] = useState([]);
     const [groupOptions, setGroupOptions] = useState([]);
