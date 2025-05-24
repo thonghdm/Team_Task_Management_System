@@ -33,7 +33,10 @@ import { useRefreshToken } from '~/utils/useRefreshToken'
 import { useParams } from 'react-router-dom';
 import { updateProjectThunk } from '~/redux/project/project-slice/index';
 import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
+import { updateStarredThunks ,getStarredThunks} from '~/redux/project/starred-slice/index';
 import { useNavigate } from 'react-router-dom';
+
+import AIAssistant from '../AIAssistant';
 
 
 // Styled components
@@ -107,7 +110,12 @@ const ProjectMenu = ({ isClickable = false }) => {
             const dataDelete = {
                 isActive: false
             };
-            if(!isClickable){
+            const data = {
+                projectId: projectId,
+                userId: userData._id,
+                isStarred: false
+            }
+            if (!isClickable) {
                 toast.error('You do not have permission to delete this project!');
                 return;
             }
@@ -131,6 +139,12 @@ const ProjectMenu = ({ isClickable = false }) => {
                         throw new Error('Delete project failed');
                     }
                     await dispatch(fetchProjectsByMemberId({ accesstoken: token, memberId: userData._id }));
+                    await dispatch(updateStarredThunks({
+                        accesstoken: token,
+                        data: data
+                    }));
+                    await dispatch(getStarredThunks({ accesstoken: token, memberId: userData._id }));
+                    
                     navigate('/board/tasks/1/mytask');
                     handleSuccess();
                 } catch (error) {
@@ -144,6 +158,10 @@ const ProjectMenu = ({ isClickable = false }) => {
             throw error;
         }
     };
+
+    ////////////////////////////////
+    const [AIAssistantOpen, setAIAssistantOpen] = useState(false);
+
 
     return (
         <div>
@@ -233,6 +251,15 @@ const ProjectMenu = ({ isClickable = false }) => {
                 </StyledMenuItem> */}
 
                 {/* <StyledDivider /> */}
+                <StyledMenuItem onClick={() => {
+                    setAIAssistantOpen(true);
+                    handleClose();
+                }}>
+                    <ListItemIcon>
+                        <Archive fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>AI Assistant</ListItemText>
+                </StyledMenuItem>
 
                 <DeleteMenuItem onClick={() => setIsAlertOpen(true)}>
                     <ListItemIcon>
@@ -247,7 +274,10 @@ const ProjectMenu = ({ isClickable = false }) => {
                 onClose={() => setOpenDialog(false)}
             />
 
-
+            <AIAssistant
+                open={AIAssistantOpen}
+                onClose={() => setAIAssistantOpen(false)}
+            />
 
             <AlertLeave
                 open={isAlertOpen}

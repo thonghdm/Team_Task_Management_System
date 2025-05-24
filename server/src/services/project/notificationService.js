@@ -15,15 +15,21 @@ const createNotification = async (notifications, io) => {
     }
 
     try {
-        // Validate each notification object
-        notifications.forEach(notification => {
+        // Validate each notification object and filter out self-notifications
+        const validNotifications = notifications.filter(notification => {
             const { senderId, receiverId, projectId, message } = notification
             if (!senderId || !receiverId || !message || !projectId) {
                 throw new Error('Missing required fields in one of the notifications')
             }
+            // Skip notifications where receiverId equals senderId._id
+            return receiverId !== senderId._id
         })
 
-        const notificationDocs = notifications.map(notification => ({
+        if (validNotifications.length === 0) {
+            return [] // Return empty array if all notifications were filtered out
+        }
+
+        const notificationDocs = validNotifications.map(notification => ({
             ...notification,
             read: false,
             createdAt: new Date()
