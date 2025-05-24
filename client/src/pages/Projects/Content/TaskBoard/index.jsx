@@ -179,7 +179,11 @@ const TaskBoard = () => {
     );
   };
 
-
+  const shortenId = (id) => {
+    if (!id) return '';
+    if (id.length <= 8) return id;
+    return `${id.slice(0, 2)}...${id.slice(-5)}`;
+};
 
   return (
     <>
@@ -273,7 +277,7 @@ const TaskBoard = () => {
                         </IconButton>
                       </Tooltip>
                     )}
-                    {index + 1} {/* Display the sequence number instead of task.id */}
+                    {shortenId(task.id)} {/* Display the sequence number instead of task.id */}
                   </TableCell>
                   {renderTableCell(
                     <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>

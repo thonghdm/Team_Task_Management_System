@@ -10,7 +10,7 @@ export const transformDataTaskDetails = (data) => {
 
     data?.forEach(list => {
         list.tasks.forEach(task => {
-            const month = monthMap[task.start_date.split('-')[1]];
+            const month = monthMap[task?.start_date?.split('-')[1]];
             let monthData = taskProgressData.find(data => data.month === month);
 
             if (!monthData) {
