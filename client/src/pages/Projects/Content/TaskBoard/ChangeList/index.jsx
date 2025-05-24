@@ -219,6 +219,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     await dispatch(fetchTaskById({ accesstoken: token, taskId }));
                     await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
                     await dispatch(addNotification({ accesstoken: token, data: notificationData }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
                 } catch (error) {
                     throw error;

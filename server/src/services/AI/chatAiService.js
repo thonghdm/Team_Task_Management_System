@@ -109,7 +109,8 @@ async function aiTaskAssignment(userPrompt, tasks, members) {
                        "memberId": "string",
                        "displayName": "string",
                        "username": "string",
-                       "image": "string"
+                       "image": "string",
+                       "email": "string"
                    }
                ]
            }
@@ -157,6 +158,7 @@ async function aiTaskAssignment(userPrompt, tasks, members) {
                     memberId: member.memberId,
                     displayName: member.displayName,
                     username: member.username,
+                    email: member.email,
                     image: member.image
                 }))
             }
