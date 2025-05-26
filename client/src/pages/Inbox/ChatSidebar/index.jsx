@@ -70,10 +70,12 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
     // Lắng nghe socket để cập nhật chatItem khi có conversation updated
     useEffect(() => {
         const handleConversationUpdated = (updatedConversation) => {
+
+            
             setConversationsLocal(prev => {
                 const exists = prev.some(conv => conv._id.toString() === updatedConversation._id.toString());
                 if (exists) {
-                    return prev.map(conv =>
+                    const updated = prev.map(conv =>
                         conv._id.toString() === updatedConversation._id.toString()
                             ? { 
                                 ...conv, 
@@ -82,13 +84,14 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
                             }
                             : conv
                     );
+                    return updated;
                 } else {
                     // Thêm mới vào đầu danh sách
                     return [updatedConversation, ...prev];
                 }
             });
         };
-        socket.on('conversation updated', handleConversationUpdated);
+        socket.on('conversation updated', handleConversationUpdated);      
         return () => {
             socket.off('conversation updated', handleConversationUpdated);
         };
@@ -163,6 +166,32 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
 
     // Tạo chatItems từ conversationsLocal
     const chatItems = (conversationsLocal || []).map(conversation => {
+        const other = conversation.participants?.find(u => u._id !== userData?._id);
+        const lastMsg = conversation.lastMessage;
+        console.log('lastMsg::::dấdad:', lastMsg)
+        console.log('conversation::::dấdad:', conversation)
+        let lastMsgPrefix = '';
+        let lastMsgContent = '';
+        if (lastMsg) {
+            const isSender = lastMsg.sender && lastMsg.sender._id?.toString() === userData?._id;
+        
+            if (lastMsg) {
+                const isSender = lastMsg.sender && lastMsg.sender._id?.toString() === userData?._id;
+            
+                if (lastMsg.file) {
+                    if (isSender) {
+                        lastMsgPrefix = 'You';
+                        lastMsgContent = ' have sent a file';
+                    } else {
+                        lastMsgPrefix = lastMsg.sender?.displayName || 'Someone';
+                        lastMsgContent = ' has sent a file';
+                    }
+                } else {
+                    lastMsgPrefix = isSender ? 'You: ' : `${lastMsg.sender?.displayName || 'Someone'}: `;
+                    lastMsgContent = lastMsg.content || '';
+                }
+            }
+        }
         // For group conversations
         if (conversation.isGroup && conversation.groupInfo) {
             const groupName = conversation.groupInfo.name || 'Group';
@@ -174,8 +203,7 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
             return {
                 id: conversation._id,
                 name: groupName,
-                message: conversation.lastMessage ? 
-                    `${conversation.lastMessage.sender?.displayName || 'Someone'}: ${conversation.lastMessage.content || ''}` : '',
+                message: lastMsg ? (lastMsgPrefix + lastMsgContent) : ''    ,
                 initials: groupName.charAt(0).toUpperCase(),
                 avatar: avatarSrc,
                 avatarColor: generateAvatarColor(groupName),
@@ -185,18 +213,7 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
         }
         
         // For direct conversations
-        const other = conversation.participants?.find(u => u._id !== userData?._id);
-        const lastMsg = conversation.lastMessage;
-        let lastMsgPrefix = '';
-        let lastMsgContent = '';
-        if (lastMsg) {
-            if (lastMsg.sender && lastMsg.sender._id && lastMsg.sender._id.toString() === userData?._id) {
-                lastMsgPrefix = 'Tôi: ';
-            } else if (lastMsg.sender && lastMsg.sender.displayName) {
-                lastMsgPrefix = `${lastMsg.sender.displayName}: `;
-            }
-            lastMsgContent = lastMsg.content || '';
-        }
+
         return {
             id: conversation._id,
             name: other?.displayName || '',

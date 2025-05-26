@@ -30,8 +30,7 @@ const { Server } = require('socket.io')
 
 const groupRoutes = require('~/routes/v1/chat/groupRouter')
 const conversationRoutes = require('~/routes/v1/chat/conversationRouter')
-
-
+const chatFileRoutes = require('~/routes/v1/chat/chatFileRouter')
 
 require('~/utils/passport')
 const { errorHandling } = require('~/middlewares/errorHandling')
@@ -68,6 +67,9 @@ app.use(express.urlencoded({ extended: true }))
 const uploadsPath = path.join(__dirname, 'uploads/projects')
 app.use('/uploads/projects', express.static(uploadsPath))
 
+const chatUploadsPath = path.join(__dirname, 'uploads/chat')
+app.use('/uploads/chat', express.static(chatUploadsPath))
+
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
 app.use('/api/project', projectRouter)
@@ -93,6 +95,7 @@ app.use('/api/notifications', notificationRoutes)
 
 app.use('/api/conversations', conversationRoutes)
 app.use('/api/groups', groupRoutes)
+app.use('/api/chat-files', chatFileRoutes)
 
 
 app.use('/api/calls', videoCallRouter)
