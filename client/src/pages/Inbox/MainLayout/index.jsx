@@ -14,7 +14,7 @@ const MainLayout = ({ setSelectedUserIdRef }) => {
     const theme = useTheme();
 
     useEffect(() => {
-        if (chatId) {
+        if (chatId && fetchMessages) {
             fetchMessages(chatId);
         }
     }, [chatId, fetchMessages]);

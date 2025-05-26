@@ -56,6 +56,29 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
         fetchList();
     }, [accesstoken]);
 
+    // Auto-select first conversation when conversations are loaded and no current conversation
+    useEffect(() => {
+        const currentPath = location.pathname;
+        const isInboxRoot = currentPath === '/inbox' || currentPath === '/inbox/';
+        const hasNoConversationSelected = !path || path === '';
+        
+        if (conversationsLocal.length > 0 && !currentConversation && (isInboxRoot || hasNoConversationSelected)) {
+            const firstConversation = conversationsLocal[0];
+            setCurrentConversation(firstConversation);
+            
+            // Navigate to first conversation
+            navigate(`${firstConversation._id}`);
+            
+            // Set selected user if it's a direct conversation
+            if (!firstConversation.isGroup && setSelectedUserId) {
+                const otherUser = firstConversation.participants?.find(u => u._id !== userData?._id);
+                if (otherUser) {
+                    setSelectedUserId(otherUser._id);
+                }
+            }
+        }
+    }, [conversationsLocal, currentConversation, location.pathname, path, navigate, setCurrentConversation, setSelectedUserId, userData]);
+
     // Cập nhật conversationsLocal khi currentConversation thay đổi (ví dụ: khi avatar được cập nhật)
     useEffect(() => {
         if (currentConversation && currentConversation._id) {
