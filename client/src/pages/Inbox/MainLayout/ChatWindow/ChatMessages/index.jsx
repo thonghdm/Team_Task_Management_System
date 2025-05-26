@@ -281,6 +281,47 @@ const ChatMessages = () => {
         );
     }
 
+    if (!currentConversation) {
+        return (
+            <Box
+                sx={{
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: theme.palette.background.default,
+                    flexDirection: 'column',
+                    gap: 2
+                }}
+            >
+                <ChatBubbleOutlineIcon
+                    sx={{
+                        fontSize: 80,
+                        color: theme.palette.text.secondary,
+                    }}
+                />
+                <Typography
+                    variant="h5"
+                    sx={{
+                        color: theme.palette.text.primary,
+                    }}
+                >
+                    Welcome to Inbox
+                </Typography>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        color: theme.palette.text.secondary,
+                        textAlign: 'center',
+                        maxWidth: 400
+                    }}
+                >
+                    Select a conversation from the sidebar or create a new one to start chatting
+                </Typography>
+            </Box>
+        );
+    }
+
     if (!messages || messages.length === 0) {
         return (
             <Box
@@ -316,7 +357,7 @@ const ChatMessages = () => {
                         maxWidth: 400
                     }}
                 >
-                    Please create a new conversation to start chatting with others
+                    Start the conversation by sending a message
                 </Typography>
             </Box>
         );

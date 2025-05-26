@@ -15,11 +15,15 @@ const ChatWindow = ({ toggleSidebar, selectedUserId }) => {
         const other = currentConversation.participants.find(u => u._id !== userData._id);
         if (other) otherUserId = other._id;
     }
+
+    // Check if there's a current conversation to show header and input
+    const hasConversation = currentConversation && currentConversation._id;
+
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <ChatHeader toggleSidebar={toggleSidebar} />
+            {hasConversation && <ChatHeader toggleSidebar={toggleSidebar} />}
             <ChatMessages />
-            <ChatInput otherUserId={otherUserId} />
+            {hasConversation && <ChatInput otherUserId={otherUserId} />}
         </Box>
     );
 }
