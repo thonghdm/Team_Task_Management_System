@@ -56,22 +56,43 @@ const ChatMessages = () => {
             const response = await fetch(fileUrl);
             if (!response.ok) throw new Error("Download failed");
 
+            // Get the blob from the response
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+            
+            // Create a new blob with the original filename
+            const newBlob = new Blob([blob], { type: blob.type });
+            
+            // Create object URL from the blob
+            const url = window.URL.createObjectURL(newBlob);
+            
+            // Create download link
             const a = document.createElement("a");
+            a.style.display = 'none';
             a.href = url;
-            a.download = fileName;
+            
+            // Handle Vietnamese filename
+            const encodedFileName = encodeURIComponent(fileName);
+            a.setAttribute('download', encodedFileName);
+            
+            // Append to body, click and remove
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
+            
+            // Clean up
             window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
         } catch (error) {
             console.error("Download error:", error);
-            // Fallback to simple link download
+            // Fallback to direct download
             const link = document.createElement('a');
             link.href = fileUrl;
-            link.download = fileName;
+            
+            // Handle Vietnamese filename in fallback
+            const encodedFileName = encodeURIComponent(fileName);
+            link.setAttribute('download', encodedFileName);
+            
             link.target = '_blank';
+            link.style.display = 'none';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -182,7 +203,7 @@ const ChatMessages = () => {
                 </Paper>
             );
         } else {
-            // Render non-image files (existing code)
+            // Render non-image files
             const fileIcon = getFileIcon(fileData.mimeType, fileData.originalName);
             
             return (

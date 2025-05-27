@@ -5,9 +5,9 @@ const { uploadChatFileChat } = require('~/middlewares/uploadFile')
 const verifyToken = require('~/middlewares/verifyToken')
 
 router.route('/upload')
-    .post(verifyToken, uploadChatFileChat.single('file'), chatFileController.uploadChatFile)
+    .post(verifyToken, uploadChatFileChat, chatFileController.uploadChatFile)
 
-router.route('/conversation/:conversationId/files')
+router.route('/:conversationId/files')
     .get(verifyToken, chatFileController.getFilesByConversationId)
 
 module.exports = router 

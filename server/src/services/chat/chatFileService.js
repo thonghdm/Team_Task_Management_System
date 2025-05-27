@@ -1,6 +1,5 @@
 const Message = require('~/models/MessageSchema')
 const Conversation = require('~/models/ConversationSchema')
-const { generateChatFileUrl } = require('~/utils/generateFileUrl')
 
 const chatFileService = {
     createFileMessage: async (fileData, io = null) => {
@@ -13,13 +12,13 @@ const chatFileService = {
                 throw new Error('Conversation not found!')
             }
 
-            // Create file message with proper URL
+            // Create file message with proper URL and original name
             const message = new Message({
                 messageType: 'file',
                 file: JSON.stringify({
-                    originalName: fileData.originalName,
+                    originalName: fileData.originalName, // Keep original file name
                     fileName: fileData.fileName,
-                    url: generateChatFileUrl(fileData.fileName),
+                    url: fileData.url, // Use the Google Cloud Storage URL directly
                     mimeType: fileData.mimeType,
                     size: fileData.size
                 }),
@@ -58,12 +57,19 @@ const chatFileService = {
                 messageType: 'file'
             }).populate('sender', 'displayName image').sort({ createdAt: -1 })
 
-            return fileMessages.map(msg => ({
-                _id: msg._id,
-                ...JSON.parse(msg.file),
-                sender: msg.sender,
-                createdAt: msg.createdAt
-            }))
+            return fileMessages.map(msg => {
+                const fileData = JSON.parse(msg.file);
+                return {
+                    _id: msg._id,
+                    originalName: fileData.originalName, // Keep original file name
+                    fileName: fileData.fileName,
+                    url: fileData.url,
+                    mimeType: fileData.mimeType,
+                    size: fileData.size,
+                    sender: msg.sender,
+                    createdAt: msg.createdAt
+                }
+            });
         } catch (error) {
             throw error
         }

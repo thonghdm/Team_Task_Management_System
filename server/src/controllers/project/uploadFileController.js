@@ -1,8 +1,7 @@
 // controllers/uploadFileController.js
 const uploadFileService = require('~/services/project/uploadFileService')
 const { StatusCodes } = require('http-status-codes')
-const fs = require('fs')
-const { getRelativeSrcPath } = require('~/utils/getRelativeSrcPath')
+const { uploadToGCS, deleteFromGCS } = require('~/utils/googleCloudStorage')
 
 const uploadFileController = {
     uploadFile: async (req, res, next) => {
@@ -12,19 +11,32 @@ const uploadFileController = {
                     message: 'No file uploaded!'
                 })
             }
-            // Extract relative path from "src" onward
-            const relativeSrcPath = getRelativeSrcPath(req.file.path)
+
+            // Generate a unique filename for Google Cloud Storage
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
+            const destination = `project-files/${req.body.entityId}/${uniqueSuffix}-${req.file.originalname}`
+
+            console.log('Attempting to upload file to GCS:', {
+                destination,
+                fileSize: req.file.size,
+                mimetype: req.file.mimetype
+            });
+
+            // Upload to Google Cloud Storage
+            const fileUrl = await uploadToGCS(req.file, destination)
 
             const fileData = {
                 originalName: req.file.originalname,
-                fileName: req.file.filename,
+                fileName: destination,
                 mimeType: req.file.mimetype,
                 size: req.file.size,
                 uploadedBy: req.body.uploadedBy,
                 entityId: req.body.entityId,
                 entityType: req.body.entityType,
-                url: relativeSrcPath
+                url: fileUrl
             }
+
+            console.log('File uploaded successfully, creating file record with data:', fileData);
 
             const createFile = await uploadFileService.uploadFile(fileData)
 
@@ -33,12 +45,12 @@ const uploadFileController = {
                 file: createFile
             })
         } catch (error) {
-            if (req.file) {
-                fs.unlink(req.file.path, (err) => {
-                    if (err) next(err)
-                })
-            }
-            next(error)
+            console.error('Upload file error:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Error uploading file',
+                error: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            });
         }
     },
     getFilesByTaskId: async (req, res) => {
@@ -47,7 +59,11 @@ const uploadFileController = {
             const files = await uploadFileService.getFilesByTaskId(taskId)
             res.status(StatusCodes.OK).json(files)
         } catch (error) {
-            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message })
+            console.error('Error getting files:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+                message: 'Error retrieving files',
+                error: error.message 
+            })
         }
     },
     updateAttachment: async (req, res) => {
@@ -61,10 +77,44 @@ const uploadFileController = {
                 data: updatedAttachment
             })
         } catch (error) {
+            console.error('Error updating attachment:', error);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 message: error.message
             })
+        }
+    },
+    deleteFile: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { fileUrl } = req.body;
+
+            if (!fileUrl) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    message: 'File URL is required'
+                });
+            }
+
+            // Extract filename from URL
+            const urlParts = fileUrl.split('/');
+            const filename = urlParts[urlParts.length - 1];
+
+            // Delete file from Google Cloud Storage
+            const deletedFile = await deleteFromGCS(filename);
+            console.log('File deleted from GCSSSSSSSSSSSSSSSSSSS:', deletedFile);
+            // Delete attachment from database
+            const deletedAttachment = await uploadFileService.deleteAttachment(id);
+            
+            res.status(StatusCodes.OK).json({
+                message: 'File deleted successfully',
+                data: deletedAttachment
+            });
+        } catch (error) {
+            console.error('Error deleting file:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Error deleting file',
+                error: error.message
+            });
         }
     }
 }
