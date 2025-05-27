@@ -111,34 +111,6 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    // Helper function to handle file download
-    const handleFileDownload = async (fileUrl, fileName) => {
-        try {
-            const response = await fetch(fileUrl);
-            if (!response.ok) throw new Error("Download failed");
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error("Download error:", error);
-            // Fallback to simple link download
-            const link = document.createElement('a');
-            link.href = fileUrl;
-            link.download = fileName;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    };
-
     // Fetch files when conversation changes
     useEffect(() => {
         const conversationId = typeof currentConversation === 'object' && currentConversation?._id 
@@ -185,6 +157,7 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
         const handleNewMessage = (message) => {
             // If it's a file message for current conversation, refresh files
             if (message.conversation === conversationId && message.messageType === 'file') {
+                console.log('New file message received, refreshing files...');
                 if (accesstoken) {
                     dispatch(fetchChatFilesByConversationId({
                         accessToken: accesstoken,
@@ -200,6 +173,55 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
             socket.off('new message', handleNewMessage);
         };
     }, [currentConversation?._id, accesstoken]);
+
+    // Handle file download
+    const handleFileDownload = async (fileUrl, fileName) => {
+        try {
+            const response = await fetch(fileUrl);
+            if (!response.ok) throw new Error("Download failed");
+
+            // Get the blob from the response
+            const blob = await response.blob();
+            
+            // Create a new blob with the original filename
+            const newBlob = new Blob([blob], { type: blob.type });
+            
+            // Create object URL from the blob
+            const url = window.URL.createObjectURL(newBlob);
+            
+            // Create download link
+            const a = document.createElement("a");
+            a.style.display = 'none';
+            a.href = url;
+            
+            // Handle Vietnamese filename
+            const encodedFileName = encodeURIComponent(fileName);
+            a.setAttribute('download', encodedFileName);
+            
+            // Append to body, click and remove
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error("Download error:", error);
+            // Fallback to direct download
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            
+            // Handle Vietnamese filename in fallback
+            const encodedFileName = encodeURIComponent(fileName);
+            link.setAttribute('download', encodedFileName);
+            
+            link.target = '_blank';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
 
     const handleReport = () => {
         // Handle report action
@@ -439,6 +461,84 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
         }
     };
 
+    // Render files section
+    const renderFiles = () => {
+        if (filesLoading) {
+            return (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                        Loading files...
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                        {loadingRef.current ? 'Fetching from server...' : 'Processing...'}
+                    </Typography>
+                </Box>
+            );
+        }
+
+        if (chatFiles.length === 0) {
+            return (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                        No files shared yet
+                    </Typography>
+                </Box>
+            );
+        }
+
+        return chatFiles.map((file, index) => {
+            const isImage = file.mimeType?.startsWith('image/');
+            return (
+                <Box 
+                    key={file._id} 
+                    sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        p: 1.5,
+                        borderBottom: index < chatFiles.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
+                        '&:hover': {
+                            backgroundColor: theme.palette.action.hover
+                        },
+                        transition: 'background-color 0.2s',
+                        cursor: 'pointer'
+                    }}
+                    onClick={() => handleFileDownload(file.url, file.originalName)}
+                >
+                    <Box sx={{ mr: 1.5 }}>
+                        {isImage ? (
+                            <ImageIcon color="primary" />
+                        ) : (
+                            <FileIcon color="primary" />
+                        )}
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography 
+                            variant="body2" 
+                            sx={{ 
+                                fontWeight: 500,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                            }}
+                        >
+                            {file.originalName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            {formatFileSize(file.size)}
+                        </Typography>
+                    </Box>
+                    <DownloadIcon 
+                        fontSize="small" 
+                        sx={{ 
+                            color: theme.palette.primary.main,
+                            opacity: 0.7
+                        }} 
+                    />
+                </Box>
+            );
+        });
+    };
+
     return (
         <Box sx={{
             p: 2, 
@@ -526,8 +626,6 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
                         )}
                     </Box>
                 )}
-
-
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="h6">
@@ -660,119 +758,7 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
                         minHeight: 200
                     }}
                 >
-                    {filesLoading ? (
-                        <Box sx={{ p: 2, textAlign: 'center' }}>
-                            <Typography variant="body2" color="text.secondary">
-                                Loading files...
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                {loadingRef.current ? 'Fetching from server...' : 'Processing...'}
-                            </Typography>
-                        </Box>
-                    ) : chatFiles.length === 0 ? (
-                        <Box sx={{ p: 2, textAlign: 'center' }}>
-                            <Typography variant="body2" color="text.secondary">
-                                No files shared yet
-                            </Typography>
-                        </Box>
-                    ) : (
-                        (() => {
-                            try {
-                                return chatFiles.map((file, index) => {
-                                    const isImage = file.mimeType?.startsWith('image/');
-                                    return (
-                                        <Box key={file._id} sx={{ 
-                                            display: 'flex', 
-                                            alignItems: 'center', 
-                                            p: 1.5,
-                                            borderBottom: index < chatFiles.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
-                                            '&:hover': {
-                                                backgroundColor: theme.palette.action.hover
-                                            },
-                                            transition: 'background-color 0.2s',
-                                            
-                                        }}>
-                                            <Box sx={{ mr: 1.5, display: 'flex', alignItems: 'center', minWidth: 40, minHeight: 40  }}>
-                                                {isImage ? (
-                                                    <Box
-                                                        component="img"
-                                                        src={file.url}
-                                                        alt={file.originalName}
-                                                        sx={{ 
-                                                            height: 40, 
-                                                            width: 40, 
-                                                            borderRadius: 1,
-                                                            objectFit: 'cover',
-                                                            border: `1px solid ${theme.palette.divider}`
-                                                        }}
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none';
-                                                            e.target.nextSibling.style.display = 'flex';
-                                                        }}
-                                                    />
-                                                ) : null}
-                                                <Box sx={{ 
-                                                    display: isImage ? 'none' : 'flex',
-                                                    color: theme.palette.primary.main,
-                                                    width: 40,
-                                                    height: 40,
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
-                                                    bgcolor: theme.palette.primary.main + '15',
-                                                    borderRadius: 1
-                                                }}>
-                                                    {getFileIcon(file.mimeType, file.originalName)}
-                                                </Box>
-                                            </Box>
-                                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                <Typography 
-                                                    variant="body2" 
-                                                    sx={{ 
-                                                        fontWeight: 500,
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        whiteSpace: 'nowrap',
-                                                        mb: 0.5
-                                                    }}
-                                                >
-                                                    {file.originalName}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ 
-                                                    opacity: 0.7,
-                                                    display: 'block'
-                                                }}>
-                                                    {formatFileSize(file.size)} • {file.sender?.displayName}
-                                                </Typography>
-                                            </Box>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => handleFileDownload(file.url, file.originalName)}
-                                                sx={{ 
-                                                    color: theme.palette.primary.main,
-                                                    ml: 1,
-                                                    '&:hover': {
-                                                        backgroundColor: theme.palette.primary.main + '15'
-                                                    }
-                                                }}
-                                                title="Download file"
-                                            >
-                                                <DownloadIcon fontSize="small" />
-                                            </IconButton>
-                                        </Box>
-                                    );
-                                });
-                            } catch (error) {
-                                console.error('Error rendering files:', error);
-                                return (
-                                    <Box sx={{ p: 2, textAlign: 'center' }}>
-                                        <Typography variant="body2" color="error">
-                                            Error loading files. Please try refreshing.
-                                        </Typography>
-                                    </Box>
-                                );
-                            }
-                        })()
-                    )}
+                    {renderFiles()}
                 </Box>
             </Box>
 

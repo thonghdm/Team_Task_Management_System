@@ -17,54 +17,50 @@ if (!fs.existsSync(chatUploadDir)) {
     fs.mkdirSync(chatUploadDir, { recursive: true })
 }
 
-// Cấu hình storage cho multer  (lưu trữ file project)
-const chatFileStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir)
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
-    }
-})
+// Configure multer to use memory storage
+const storage = multer.memoryStorage();
 
-// Cấu hình storage cho chat files
-const chatFileStorageChat = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, chatUploadDir)
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
-    }
-})
+// File filter function
+const fileFilter = (req, file, cb) => {
+  // Accept images, documents, and other common file types
+  const allowedTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/zip',
+    'application/x-rar-compressed',
+    'text/plain',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  ];
 
-// File filter
-const chatFileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|xls|xlsx|zip|rar|txt|pptx/
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase())
-    if (extname) {
-        return cb(null, true)
-    }
-    cb(new Error('Error: File type not allowed! Allowed types: images, documents, archives'))
-}
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only images, documents, and common file types are allowed.'), false);
+  }
+};
 
-// Cấu hình multer cho project files
-const uploadChatFile = multer({
-    storage: chatFileStorage,
-    limits: {
-        fileSize: 25 * 1024 * 1024 // 25MB
-    },
-    fileFilter: chatFileFilter
+// Configure multer upload
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
 });
 
-// Cấu hình multer cho chat files  
-const uploadChatFileChat = multer({
-    storage: chatFileStorageChat,
-    limits: {
-        fileSize: 25 * 1024 * 1024 // 25MB
-    },
-    fileFilter: chatFileFilter
-});
+// Create middleware instances
+const uploadChatFile = upload.single('file');
+const uploadChatFileChat = upload.single('file');
 
-export { uploadChatFile, uploadChatFileChat }
+// Export configured upload middleware
+module.exports = {
+  uploadChatFile,
+  uploadChatFileChat
+};

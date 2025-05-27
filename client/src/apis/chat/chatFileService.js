@@ -26,7 +26,7 @@ export const uploadChatFile = async (accessToken, fileData) => {
 export const getChatFilesByConversationId = async (accessToken, conversationId) => {
     console.log('API: getChatFilesByConversationId called with:', { accessToken: !!accessToken, conversationId });
     try {
-        const url = `${API_URL}/chat-files/conversation/${conversationId}/files`;
+        const url = `${API_URL}/chat-files/${conversationId}/files`;
         console.log('API: Making request to:', url);
         
         const response = await axios.get(url, {
