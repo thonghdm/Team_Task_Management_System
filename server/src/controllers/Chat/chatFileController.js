@@ -1,6 +1,6 @@
 const chatFileService = require('~/services/chat/chatFileService')
 const { StatusCodes } = require('http-status-codes')
-const { uploadToGCS, downloadFromGCS } = require('~/utils/googleCloudStorage')
+const { uploadChatToGCS, downloadFromGCS } = require('~/utils/googleCloudStorage')
 const Conversation = require('~/models/ConversationSchema')
 
 const chatFileController = {
@@ -32,7 +32,7 @@ const chatFileController = {
             });
 
             // Upload to Google Cloud Storage
-            const fileUrl = await uploadToGCS(req.file, destination)
+            const fileUrl = await uploadChatToGCS(req.file, destination)
 
             const fileData = {
                 originalName: req.file.originalname, // Keep original name for display and download
