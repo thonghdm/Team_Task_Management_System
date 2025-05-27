@@ -24,6 +24,9 @@ router.get('/history', videoCallController.getCallHistory)
 // Get active call for current user
 router.get('/active', videoCallController.getActiveCall)
 
+// Get active group call
+router.get('/group/:groupId/active', videoCallController.getActiveGroupCall)
+
 // Get call details by ID
 router.get('/:callId', videoCallController.getCallById)
 

@@ -149,10 +149,42 @@ const videoCallController = {
             }
             next(error)
         }
+    },
+
+    /**
+     * Lấy cuộc gọi nhóm đang hoạt động
+     */
+    getActiveGroupCall: async (req, res, next) => {
+        try {
+            const { groupId } = req.params
+            if (!req.currentUser || !req.currentUser._id) {
+                return res.status(401).json({
+                    err: 3,
+                    msg: 'User not authenticated'
+                })
+            }
+
+            // Kiểm tra quyền truy cập nhóm
+            // await videoCallService.validateGroupAccess(groupId, req.currentUser._id)
+
+            const activeCall = await videoCallService.getActiveGroupCall(groupId)
+
+            res.status(200).json({
+                success: true,
+                videoCall: activeCall,
+                agoraData: generateAgoraToken(activeCall._id, req.currentUser._id)
+            })
+        } catch (error) {
+            if (error.message === 'No active group call found') {
+                return res.status(404).json({ success: false, message: error.message })
+            }
+            if (error.message === 'Group not found' || error.message === 'You are not a member of this group') {
+                return res.status(403).json({ success: false, message: error.message })
+            }
+            next(error)
+        }
     }
 }
-
-// Hàm tạo token Agora
 // Hàm tạo token Agora
 const generateAgoraToken = (callId, userId) => {
     console.log('Generating Agora token for callId:', callId, 'userId:', userId);

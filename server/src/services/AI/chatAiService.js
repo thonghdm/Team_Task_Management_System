@@ -15,12 +15,13 @@ require('dotenv').config()
 const client = new OpenAI({
     baseURL: 'https://api.x.ai/v1',
     // apiKey: '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',
-    apiKey: 'xai-mxbwjt64Fr90DyPS5nlnyTEesfyO65RARMLEwy9gWPd64SnrStSt37D9yhNQccd0w4Hg1PdxeenGvUjZ   ',
+    apiKey: process.env.AI_API_KEY,
     defaultHeaders: {
         'HTTP-Referer': 'http://localhost:3000',
         'X-Title': 'Local Development'
     }
 })
+
 
 async function chatAiService(prompt) {
     try {

@@ -158,6 +158,25 @@ const VideoCallService = {
         }
 
         return call
+    },
+
+    /**
+     * Get active group call if exists
+     */
+    getActiveGroupCall: async (groupId) => {
+        const activeCall = await VideoCall.findOne({
+            group: groupId,
+            status: { $in: ['ringing', 'accepted'] }
+        })
+        // .populate('caller', 'username avatar')
+        // .populate('participants', 'username avatar')
+        // .populate('group', 'name avatar')
+
+        if (!activeCall) {
+            throw new Error('No active group call found')
+        }
+
+        return activeCall
     }
 }
 

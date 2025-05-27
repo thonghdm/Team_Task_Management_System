@@ -41,7 +41,6 @@ const VideoCall = () => {
   const { callId } = useParams();
   const navigate = useNavigate();
   const { accesstoken, userData } = useSelector(state => state.auth);
-
   // Trạng thái
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -84,7 +83,6 @@ const VideoCall = () => {
 
         // Lấy thông tin cuộc gọi
         const response = await videoCallService.getCallById(accesstoken, callId);
-
         if (response && response.success) {
           setCallInfo(response.call);
           // Tham gia kênh Agora
@@ -111,7 +109,6 @@ const VideoCall = () => {
       leaveCall();
     };
   }, [accesstoken, callId]);
-
 
   // Tham gia cuộc gọi
   const joinCall = async (agoraData) => {
@@ -291,9 +288,8 @@ const VideoCall = () => {
       // Rời khỏi kênh
       await client.leave();
       showToast("Đã rời khỏi cuộc gọi", "info"); // Thông báo
-
       // Gọi API để cập nhật trạng thái cuộc gọi
-      if (callId) {
+      if (callId && userData?._id === callInfo?.caller) {
         await videoCallService.endCall(accesstoken, callId);
       }
 
@@ -366,14 +362,13 @@ const VideoCall = () => {
       </div>
     );
   };
-
   return (
     <Box className="video-call-container">
       {/* Header */}
       <Paper elevation={1} className="call-header">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6">
-            {callInfo?.group ? `Cuộc gọi nhóm: ${callInfo.group.name}` : 'Cuộc gọi video'}
+            {callInfo?.group ? `Cuộc gọi nhóm` : 'Cuộc gọi video'}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Tooltip title="Số người tham gia">

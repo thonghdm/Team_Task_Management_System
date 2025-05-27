@@ -125,6 +125,23 @@ const videoCallService = {
       throw error;
     }
   },
+
+  // Get active group call if exists
+  getActiveGroupCall: async (accesstoken, groupId) => {
+    try {
+      const response = await axios.get(`${API_URL}/calls/group/${groupId}/active`, {
+        headers: { Authorization: `Bearer ${accesstoken}` },
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        return { success: false, message: 'No active group call' };
+      }
+      console.error('Error getting active group call:', error);
+      throw error;
+    }
+  },
 };
 
 export default videoCallService;
