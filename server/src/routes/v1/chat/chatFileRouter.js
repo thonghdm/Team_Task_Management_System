@@ -10,4 +10,7 @@ router.route('/upload')
 router.route('/:conversationId/files')
     .get(verifyToken, chatFileController.getFilesByConversationId)
 
+router.route('/files/:messageId/download')
+    .get(verifyToken, chatFileController.downloadChatFile)
+
 module.exports = router 

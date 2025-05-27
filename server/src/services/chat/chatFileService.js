@@ -73,6 +73,20 @@ const chatFileService = {
         } catch (error) {
             throw error
         }
+    },
+
+    getMessageById: async (messageId) => {
+        try {
+            console.log('Getting message by ID:', messageId);
+            const message = await Message.findById(messageId);
+            if (!message) {
+                throw new Error('Message not found');
+            }
+            return message;
+        } catch (error) {
+            console.error('Error in getMessageById:', error);
+            throw error;
+        }
     }
 }
 

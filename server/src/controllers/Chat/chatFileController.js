@@ -1,6 +1,6 @@
 const chatFileService = require('~/services/chat/chatFileService')
 const { StatusCodes } = require('http-status-codes')
-const { uploadToGCS } = require('~/utils/googleCloudStorage')
+const { uploadToGCS, downloadFromGCS } = require('~/utils/googleCloudStorage')
 const Conversation = require('~/models/ConversationSchema')
 
 const chatFileController = {
@@ -95,6 +95,41 @@ const chatFileController = {
                 message: 'Error retrieving files',
                 error: error.message 
             })
+        }
+    },
+
+    downloadChatFile: async (req, res) => {
+        try {
+            const { messageId } = req.params;
+            console.log('Downloading chat file for message:', messageId);
+
+            const message = await chatFileService.getMessageById(messageId);
+            if (!message) {
+                return res.status(StatusCodes.NOT_FOUND).json({
+                    message: 'Message not found'
+                });
+            }
+
+            const fileData = JSON.parse(message.file);
+            console.log('File data:', fileData);
+
+            // Download file from GCS
+            const { buffer, metadata } = await downloadFromGCS(fileData.fileName);
+            console.log('File downloaded from GCS, size:', buffer.length);
+
+            // Set appropriate headers
+            res.setHeader('Content-Type', fileData.mimeType);
+            res.setHeader('Content-Disposition', `attachment; filename="${fileData.originalName}"`);
+            res.setHeader('Content-Length', buffer.length);
+
+            // Send file buffer
+            res.send(buffer);
+        } catch (error) {
+            console.error('Error downloading chat file:', error);
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: 'Error downloading file',
+                error: error.message
+            });
         }
     }
 }

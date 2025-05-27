@@ -51,47 +51,45 @@ const uploadFileService = {
         }
     },
 
-    getFilesByTaskId: async (taskId) => {
+    getFileById: async (fileId) => {
         try {
-            if (!taskId) {
-                return []
+            console.log('Getting file by ID:', fileId);
+            const file = await Attachments.findById(fileId);
+            if (!file) {
+                throw new Error('File not found');
             }
-            const attachments = await Attachments.find({
-                entityId: taskId,
-                entityType: 'Task',
-                is_active: true
-            }).populate('uploadedBy', 'displayName image').sort({ createdAt: -1 })
-
-            return attachments.map(attachment => ({
-                _id: attachment._id,
-                originalName: attachment.originalName,
-                fileName: attachment.fileName,
-                url: attachment.url,
-                mimeType: attachment.mimeType,
-                size: attachment.size,
-                uploadedBy: attachment.uploadedBy,
-                createdAt: attachment.createdAt
-            }));
+            return file;
         } catch (error) {
-            throw error
+            console.error('Error in getFileById:', error);
+            throw error;
         }
+    },
+
+    getFilesByTaskId: async (taskId) => {
+        if (!taskId) {
+            return []
+        }
+        const attachments = await Attachments.find({
+            entityId: taskId,
+            entityType: 'Task',
+            is_active: true
+        })
+        if (attachments.length === 0) {
+            return []
+        }
+        return attachments
     },
 
     updateAttachment: async (id, updateData) => {
         try {
             const attachment = await Attachments.findByIdAndUpdate(
                 id,
-                updateData,
+                { $set: updateData },
                 { new: true }
-            ).populate('uploadedBy', 'displayName image')
-
+            )
             if (!attachment) {
                 throw new Error('Attachment not found')
             }
-
-            // Update task attachments if needed
-            await deleteAttachmentToTask(attachment)
-
             return attachment
         } catch (error) {
             throw error
@@ -100,23 +98,16 @@ const uploadFileService = {
 
     deleteAttachment: async (id) => {
         try {
-            const attachment = await Attachments.findById(id)
+            const attachment = await Attachments.findByIdAndUpdate(
+                id,
+                { $set: { is_active: false } },
+                { new: true }
+            )
             if (!attachment) {
                 throw new Error('Attachment not found')
             }
-
-            // Remove attachment from task
-            await Task.findByIdAndUpdate(
-                attachment.entityId,
-                { $pull: { attachments_id: attachment._id } }
-            )
-
-            // Delete the attachment
-            await attachment.deleteOne()
-
             return attachment
         } catch (error) {
-            console.error('Error in deleteAttachment:', error)
             throw error
         }
     }

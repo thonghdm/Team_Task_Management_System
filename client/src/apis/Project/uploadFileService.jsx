@@ -14,6 +14,21 @@ export const getFileByIdTask = async (accesstoken, taskId) => {
     }
 }
 
+export const downloadFile = async (accesstoken, fileId) => {
+    try {
+        const response = await axios.get(`http://localhost:5000/api/file/files/${fileId}/download`, {
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            responseType: 'blob',
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 export const updateFileByIdTask = async (accesstoken, fileData) => {
     try {
         const formData = new FormData();
