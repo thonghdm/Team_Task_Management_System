@@ -10,11 +10,14 @@ import {
     Close as CloseIcon
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import moment from 'moment';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { useChat } from '~/Context/ChatProvider';
 import socket from '~/utils/socket';
+import { downloadChatFile } from '~/apis/chat/chatFileService';
+import { useRefreshToken } from '~/utils/useRefreshToken';
+import { toast } from 'react-toastify';
 
 const ChatMessages = () => {
     const theme = useTheme();
@@ -23,6 +26,7 @@ const ChatMessages = () => {
     const { userData } = useSelector((state) => state.auth);
     const [openImageModal, setOpenImageModal] = useState(false);
     const [imageUrl, setImageUrl] = useState('');
+    const refreshToken = useRefreshToken();
 
     // Helper function to get file icon based on mime type
     const getFileIcon = (mimeType, fileName) => {
@@ -50,52 +54,57 @@ const ChatMessages = () => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    // Helper function to handle file download
-    const handleFileDownload = async (fileUrl, fileName) => {
+    // Handle file download
+    const handleFileDownload = async (messageId, fileName) => {
         try {
-            const response = await fetch(fileUrl);
-            if (!response.ok) throw new Error("Download failed");
+            let blob;
+            try {
+                const response = await downloadChatFile(userData.accesstoken, messageId);
+                if (!response || !(response instanceof Blob)) {
+                    throw new Error('Dữ liệu file không hợp lệ');
+                }
+                blob = response;
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    // Token expired, try to refresh
+                    const newToken = await refreshToken();
+                    if (!newToken) {
+                        throw new Error('Không thể làm mới token');
+                    }
+                    const response = await downloadChatFile(newToken, messageId);
+                    if (!response || !(response instanceof Blob)) {
+                        throw new Error('Dữ liệu file không hợp lệ');
+                    }
+                    blob = response;
+                } else {
+                    throw error;
+                }
+            }
 
-            // Get the blob from the response
-            const blob = await response.blob();
-            
-            // Create a new blob with the original filename
-            const newBlob = new Blob([blob], { type: blob.type });
-            
-            // Create object URL from the blob
-            const url = window.URL.createObjectURL(newBlob);
-            
-            // Create download link
-            const a = document.createElement("a");
-            a.style.display = 'none';
+            // Kiểm tra kích thước file
+            if (blob.size === 0) {
+                throw new Error('File trống');
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
             a.href = url;
-            
-            // Handle Vietnamese filename
-            const encodedFileName = encodeURIComponent(fileName);
-            a.setAttribute('download', encodedFileName);
-            
-            // Append to body, click and remove
+            a.download = fileName;
             document.body.appendChild(a);
             a.click();
-            
-            // Clean up
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
         } catch (error) {
-            console.error("Download error:", error);
-            // Fallback to direct download
-            const link = document.createElement('a');
-            link.href = fileUrl;
-            
-            // Handle Vietnamese filename in fallback
-            const encodedFileName = encodeURIComponent(fileName);
-            link.setAttribute('download', encodedFileName);
-            
-            link.target = '_blank';
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            console.error('Error downloading file:', error);
+            if (error.message === 'Không thể làm mới token') {
+                toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            } else if (error.message === 'Dữ liệu file không hợp lệ') {
+                toast.error('Không thể đọc file. File có thể đã bị hỏng.');
+            } else if (error.message === 'File trống') {
+                toast.error('File trống hoặc không có dữ liệu.');
+            } else {
+                toast.error('Không thể tải file. Vui lòng thử lại sau.');
+            }
         }
     };
 
@@ -148,35 +157,9 @@ const ChatMessages = () => {
                                 color: theme.palette.text.secondary
                             }}
                         >
-                            <ImageIcon />
-                            <Typography variant="caption" sx={{ ml: 1 }}>
-                                Image not available
-                            </Typography>
+                            <Typography variant="caption">Image not available</Typography>
                         </Box>
-                        
-                        {/* Download overlay button */}
-                        <IconButton
-                            size="small"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleFileDownload(fileData.url, fileData.originalName);
-                            }}
-                            sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                backgroundColor: 'rgba(0,0,0,0.5)',
-                                color: 'white',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(0,0,0,0.7)'
-                                }
-                            }}
-                        >
-                            <DownloadIcon fontSize="small" />
-                        </IconButton>
                     </Box>
-                    
-                    {/* Image info */}
                     <Box sx={{ p: 1 }}>
                         <Typography
                             variant="caption"
@@ -239,7 +222,7 @@ const ChatMessages = () => {
                         </Box>
                         <IconButton
                             size="small"
-                            onClick={() => handleFileDownload(fileData.url, fileData.originalName)}
+                            onClick={() => handleFileDownload(message._id, fileData.originalName)}
                             sx={{ 
                                 color: isOwnMessage ? 'inherit' : theme.palette.primary.main,
                                 '&:hover': {

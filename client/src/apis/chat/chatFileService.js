@@ -23,6 +23,21 @@ export const uploadChatFile = async (accessToken, fileData) => {
     }
 };
 
+export const downloadChatFile = async (accessToken, messageId) => {
+    try {
+        const response = await axios.get(`${API_URL}/chat-files/files/${messageId}/download`, {
+            headers: {
+                authorization: `Bearer ${accessToken}`
+            },
+            responseType: 'blob',
+            withCredentials: true
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const getChatFilesByConversationId = async (accessToken, conversationId) => {
     console.log('API: getChatFilesByConversationId called with:', { accessToken: !!accessToken, conversationId });
     try {

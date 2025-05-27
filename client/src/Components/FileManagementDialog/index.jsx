@@ -24,6 +24,7 @@ import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { addNotification } from '~/redux/project/notifications-slice/index';
+import { downloadFile } from '~/apis/Project/uploadFileService';
 
 
 // Styled components
@@ -72,20 +73,22 @@ const FileManagementDialog = ({ fileManagement, taskId, isClickable = true, memb
     const handleFileDownload = async (file) => {
         try {
             handleClose();
-            const fileUrl = `src/uploads/projects/${file}`;
-            const response = await fetch(fileUrl);
-            if (!response.ok) throw new Error("Download failed");
+            if (!isClickable) {
+                toast.error("You don't have permission to download file");
+                return;
+            }
 
-            const blob = await response.blob();
+            const blob = await downloadFile(accesstoken, file._id);
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = fileUrl.split("/").pop();
+            a.download = file.originalName;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         } catch (error) {
+            console.error('Error downloading file:', error);
             toast.error("Failed to download file");
         }
     };
@@ -183,7 +186,7 @@ const FileManagementDialog = ({ fileManagement, taskId, isClickable = true, memb
                 open={open}
                 onClose={handleClose}
             >
-                <StyledMenuItem onClick={() => handleFileDownload(fileManagement?.originalName)}>
+                <StyledMenuItem onClick={() => handleFileDownload(fileManagement)}>
                     <ListItemIcon>
                         <Download fontSize="small" />
                     </ListItemIcon>

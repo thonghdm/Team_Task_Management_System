@@ -17,7 +17,8 @@ const uploadToGCS = async (file, destination) => {
       originalName: file.originalname,
       destination,
       mimetype: file.mimetype,
-      size: file.size
+      size: file.size,
+      buffer: file.buffer ? 'Buffer exists' : 'No buffer'
     });
 
     // Check if bucket exists
@@ -47,23 +48,71 @@ const uploadToGCS = async (file, destination) => {
 
       blobStream.on('finish', async () => {
         try {
-          // Make the file public
-          await blob.makePublic();
+          // Generate signed URL instead of making public
+          const [url] = await blob.getSignedUrl({
+            action: 'read',
+            expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+          });
           
-          // Get the public URL
-          const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination}`;
-          console.log('File uploaded successfully:', publicUrl);
-          resolve(publicUrl);
+          console.log('File uploaded successfully:', url);
+          resolve(url);
         } catch (error) {
-          console.error('Error making file public:', error);
+          console.error('Error generating signed URL:', error);
           reject(error);
         }
       });
 
-      blobStream.end(file.buffer);
+      // Ensure file.buffer is a proper Buffer
+      if (!file.buffer) {
+        reject(new Error('No file buffer provided'));
+        return;
+      }
+
+      const buffer = Buffer.isBuffer(file.buffer) ? file.buffer : Buffer.from(file.buffer);
+      blobStream.end(buffer);
     });
   } catch (error) {
     console.error('Error in uploadToGCS:', error);
+    throw error;
+  }
+};
+
+// Function to download file from Google Cloud Storage
+const downloadFromGCS = async (filename) => {
+  try {
+    console.log('Attempting to download file from GCS:', filename);
+    
+    const file = bucket.file(filename);
+    
+    // Check if file exists
+    const [exists] = await file.exists();
+    if (!exists) {
+      throw new Error('File not found');
+    }
+
+    // Get file metadata
+    const [metadata] = await file.getMetadata();
+    console.log('File metadata:', metadata);
+    
+    // Download file buffer
+    const [buffer] = await file.download();
+    console.log('File downloaded, buffer size:', buffer.length);
+
+    // Ensure buffer is valid
+    if (!buffer || buffer.length === 0) {
+      throw new Error('Downloaded file is empty');
+    }
+    
+    return {
+      buffer,
+      metadata: {
+        contentType: metadata.contentType || 'application/octet-stream',
+        size: metadata.size || buffer.length,
+        name: filename.split('/').pop()
+      }
+    };
+  } catch (error) {
+    console.error('Error downloading from GCS:', error);
     throw error;
   }
 };
@@ -79,8 +128,24 @@ const deleteFromGCS = async (filename) => {
   }
 };
 
+// Function to generate signed URL for file access
+const generateSignedUrl = async (filename) => {
+  try {
+    const [url] = await bucket.file(filename).getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    });
+    return url;
+  } catch (error) {
+    console.error('Error generating signed URL:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   uploadToGCS,
   deleteFromGCS,
+  downloadFromGCS,
+  generateSignedUrl,
   bucket
 }; 
