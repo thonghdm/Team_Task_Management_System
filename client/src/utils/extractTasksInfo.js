@@ -18,8 +18,10 @@ export function extractTasksInfo(project) {
                 members: task?.assigneds?.length
                     ? task?.assigneds.flatMap(assigned =>
                         assigned?.userInfo?.map(member => ({
+                            _id: member._id,
                             name: member.displayName,
-                            avatar: member.image
+                            avatar: member.image,
+                            is_active: member.is_active
                         }))
                     )
                     : [],

@@ -205,7 +205,8 @@ const getDetailsProject = async (projectId) => {
                                             'userInfo._id': 1,
                                             'userInfo.image': 1,
                                             'userInfo.displayName': 1,
-                                            'userInfo.username': 1
+                                            'userInfo.username': 1,
+                                            'userInfo.is_active': 1
                                         }
                                     }
                                 ],
