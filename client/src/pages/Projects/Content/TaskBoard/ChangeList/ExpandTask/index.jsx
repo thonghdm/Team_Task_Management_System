@@ -16,7 +16,7 @@ import { DensityMedium as DensityMediumIcon } from '@mui/icons-material';
 import AlertLeave from '~/pages/Projects/DialogAvt/AlertLeave';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
-
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { updateTaskThunks } from '~/redux/project/task-slice';
 import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
@@ -112,7 +112,18 @@ const ExpandTask = ({ taskId, taskName, projectName }) => {
                             return deleteTask(newToken);
                         }
                         throw new Error('Delete task failed');
+                        
                     }
+                    await dispatch(createAuditLog_project({
+                        accesstoken,
+                        data: {
+                          project_id: projectId,
+                          task_id: taskId,
+                          action: 'Delete',
+                          entity: 'Task',
+                          user_id: userData?._id
+                        }
+                      }));
                     await dispatch(addNotification({ accesstoken: token, data: notificationData }))
                     await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
                     handleSuccess();
