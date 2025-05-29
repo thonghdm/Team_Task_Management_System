@@ -107,9 +107,9 @@ const UserSearchInput = ({
                 const filtered = members?.members?.filter(member =>
                     member?.is_active === true &&
                     (
-                        member?.memberId?.displayName.toLowerCase().includes(inputValue.toLowerCase()) ||
-                        member?.memberId?.email.toLowerCase().includes(inputValue.toLowerCase()) ||
-                        member?.memberId?.username.toLowerCase().includes(inputValue.toLowerCase())
+                        member?.memberId?.displayName?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                        member?.memberId?.email?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                        member?.memberId?.username?.toLowerCase().includes(inputValue.toLowerCase())
                     ) &&
                     !value.find(selected => selected?._id === member?.memberId?._id)
                 ).map(member => member?.memberId);
@@ -230,6 +230,14 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true, taskData }
     const { projectId } = useParams();
     const dispatch = useDispatch();
 
+    // Reset form when dialog opens with different task or when dialog closes
+    useEffect(() => {
+        if (!open) {
+            setSelectedUsers([]);
+            setError(null);
+        }
+    }, [open, taskId]);
+
     const handleChange = (newValue) => {
         setSelectedUsers(newValue);
         setError(newValue.length === 0 ? 'Please select at least one user' : null);
@@ -245,8 +253,6 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true, taskData }
         }
         return false;
     }
-
-    const { task } = useSelector(state => state.task);
 
     const refreshToken = useRefreshToken();
 
@@ -271,9 +277,14 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true, taskData }
                 user_name: user.username,
                 user_email: user.email
             }));
+            console.log(userInvite);
+            console.log(taskData?.assigned_to_id);
             // Check existing members
-            if (checkMemberIdExists(userInvite, task?.assigned_to_id)) {
-                toast.error('One or more users already exist');
+            
+            if (checkMemberIdExists(userInvite, (taskData?.assigned_to_id)? taskData?.assigned_to_id :  taskData?.members)) {
+                toast.error('One or more users alreadyyy exist');
+                setSelectedUsers([]);
+                setError(null);
                 return;
             }
 

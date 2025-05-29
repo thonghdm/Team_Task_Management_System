@@ -219,9 +219,9 @@ const Projects = () => {
 
     const query = searchQuery.toLowerCase();
     return projects.filter(project =>
-      project?.projectName.toLowerCase().includes(query) ||
-      project?.ownerId?.displayName.toLowerCase().includes(query) ||
-      project?.visibility.toLowerCase().includes(query)
+      project?.projectName?.toLowerCase().includes(query) ||
+      project?.ownerId?.displayName?.toLowerCase().includes(query) ||
+      project?.visibility?.toLowerCase().includes(query)
     );
   };
 
