@@ -22,7 +22,8 @@ import {
     FormControl,
     InputLabel,
     Chip,
-    Avatar
+    Avatar,
+    Backdrop
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -59,6 +60,7 @@ const checkMemberIdExists = (newInvites, existingMembers) => {
 const AIAssistant = ({ open, onClose }) => {
     const [prompt, setPrompt] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [assignments, setAssignments] = useState({ tasks: [] });
     const [editingCell, setEditingCell] = useState(null);
     const [getTasksInfo, setTasksInfo] = useState([]);
@@ -238,6 +240,7 @@ const AIAssistant = ({ open, onClose }) => {
 
     const handleSave = async () => {
         try {
+            setIsSaving(true);
             // Validation
             if (!assignments.tasks || assignments.tasks.length === 0) {
                 toast.error('No tasks to save');
@@ -407,12 +410,16 @@ const AIAssistant = ({ open, onClose }) => {
                 } catch (error) {
                     toast.error(`Failed to save assignments: ${error.message || 'Unknown error'}`);
                     throw error;
+                } finally {
+                    setIsSaving(false);
                 }
             };
 
             await processTasks(accesstoken);
         } catch (error) {
             toast.error(`An error occurred while saving assignments: ${error.message || 'Unknown error'}`);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -431,7 +438,7 @@ const AIAssistant = ({ open, onClose }) => {
     return (
         <Dialog
             open={open}
-            onClose={handleClose}
+            onClose={isLoading || isSaving ? undefined : handleClose}
             maxWidth="lg"
             fullWidth
         >
@@ -440,6 +447,7 @@ const AIAssistant = ({ open, onClose }) => {
                 <IconButton
                     aria-label="close"
                     onClick={handleClose}
+                    disabled={isLoading || isSaving}
                     sx={{
                         position: 'absolute',
                         right: 8,
@@ -450,6 +458,42 @@ const AIAssistant = ({ open, onClose }) => {
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
+            
+            {/* AI Loading Overlay */}
+            {(isLoading || isSaving) && (
+                <Backdrop
+                    sx={{
+                        color: '#fff',
+                        zIndex: (theme) => theme.zIndex.drawer + 1,
+                        position: 'absolute',
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        borderRadius: 1,
+                    }}
+                    open={isLoading || isSaving}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 2,
+                            color: 'primary.main'
+                        }}
+                    >
+                        <CircularProgress size={60} thickness={4} />
+                        <Typography variant="h6" color="primary.main">
+                            {isLoading 
+                                ? "AI is analyzing tasks and assigning members..." 
+                                : "Saving task assignments..."
+                            }
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            This may take a few moments
+                        </Typography>
+                    </Box>
+                </Backdrop>
+            )}
+
             <DialogContent dividers>
                 <Box sx={{ mb: 3 }}>
                     <Typography variant="body1" gutterBottom>
@@ -464,12 +508,13 @@ const AIAssistant = ({ open, onClose }) => {
                             value={prompt}
                             onChange={handlePromptChange}
                             placeholder="E.g., Assign tasks based on team members' expertise and current workload"
+                            disabled={isLoading || isSaving}
                             sx={{ mr: 2 }}
                         />
                         <Button
                             variant="contained"
                             onClick={handleSubmit}
-                            disabled={isLoading || !prompt.trim()}
+                            disabled={isLoading || isSaving || !prompt.trim()}
                             sx={{ mr: 1 }}
                         >
                             {isLoading ? <CircularProgress size={24} /> : "Get AI Suggestions"}
@@ -481,15 +526,17 @@ const AIAssistant = ({ open, onClose }) => {
                                     color="success"
                                     onClick={handleSave}
                                     startIcon={<SaveIcon />}
+                                    disabled={isLoading || isSaving}
                                     sx={{ mr: 1 }}
                                 >
-                                    Save Changes
+                                    {isSaving ? <CircularProgress size={20} /> : "Save Changes"}
                                 </Button>
                                 <Button
                                     variant="outlined"
                                     color="error"
                                     onClick={handleClearData}
                                     startIcon={<DeleteIcon />}
+                                    disabled={isLoading || isSaving}
                                 >
                                     Clear
                                 </Button>
@@ -526,7 +573,7 @@ const AIAssistant = ({ open, onClose }) => {
                                                         key={member.memberId}
                                                         label={member.displayName + " (" + (member.username || "NU") + ")"}
                                                         avatar={<Avatar src={member.image} />}
-                                                        onDelete={() => handleRemoveMember(task.task_id, member.memberId)}
+                                                        onDelete={isSaving ? undefined : () => handleRemoveMember(task.task_id, member.memberId)}
                                                         sx={{
                                                             m: 0.5,
                                                             '& .MuiChip-avatar': {
@@ -543,6 +590,7 @@ const AIAssistant = ({ open, onClose }) => {
                                                             value=""
                                                             onChange={(e) => handleCellSave(task.task_id, null, e.target.value)}
                                                             displayEmpty
+                                                            disabled={isSaving}
                                                         >
                                                             <MenuItem value="" disabled>Select Member</MenuItem>
                                                             {member.filter(m =>
@@ -570,6 +618,7 @@ const AIAssistant = ({ open, onClose }) => {
                                                         size="small"
                                                         startIcon={<EditIcon />}
                                                         onClick={() => handleCellEdit(task.task_id, null, true)}
+                                                        disabled={isSaving}
                                                     >
                                                         Add
                                                     </Button>
@@ -590,10 +639,11 @@ const AIAssistant = ({ open, onClose }) => {
                 )}
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleClose} color="primary">
+                <Button onClick={handleClose} color="primary" disabled={isLoading || isSaving}>
                     Close
                 </Button>
             </DialogActions>
+            <ToastContainer />
         </Dialog>
     );
 };

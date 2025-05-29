@@ -21,6 +21,7 @@ import {
   DialogActions,
   Button,
   TextField,
+  CircularProgress
 } from '@mui/material';
 import { MoreVert as MoreVertIcon, Add as AddIcon, QuestionAnswer as QuestionAnswerIcon, ExpandMore as ExpandMoreIcon, DensityMedium as DensityMediumIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
@@ -69,6 +70,7 @@ const TaskBoard = () => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [openColorPicker, setOpenColorPicker] = useState(false);
   const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     const getProjectDetail = async (token) => {
       try {
@@ -179,10 +181,16 @@ const TaskBoard = () => {
     setEditDialog({ open: false, type: '', taskId: null, value: '' });
   };
 
+  const handleCloseAddmemberDialog = () => {
+    setOpenAddMemberDialog(false);
+    setAddMemberDialog({ open: false, taskId: null, value: '' });
+  };
+
   const handleSaveEdit = async () => {
     const { type, taskId, value } = editDialog;
     console.log("editDialog", editDialog, selectedStatus);
     try {
+      setIsLoading(true);
       let updateData = {};
       // let notificationData = [];
       let notificationData = [];
@@ -312,6 +320,8 @@ const TaskBoard = () => {
       }
     } catch (error) {
       toast.error('Error updating taskk');
+    } finally {
+      setIsLoading(false);
     }
     handleCloseEditDialog();
   };
@@ -321,40 +331,48 @@ const TaskBoard = () => {
     const currentTask = updatedTasks.find(task => task.id === taskId);
 
     return (
-      <Dialog open={editDialog.open} onClose={handleCloseEditDialog}>
+      <Dialog open={editDialog.open} onClose={handleCloseEditDialog} >
+                {isLoading ? (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 100, mt: 2, mb: 2 , width: 100}}>
+        <CircularProgress />
+      </Box>
+          ) : (
+            <>
         <DialogTitle>Edit {type.replace('_', ' ')}</DialogTitle>
         <DialogContent>
-          {type === 'task_name' && (
-            <TextField
-              fullWidth
-              value={value}
-              onChange={(e) => setEditDialog({ ...editDialog, value: e.target.value })}
-              margin="normal"
-              label="Task Name"
-              placeholder="Enter task name"
-            />
-          )}
-          {type === 'priority' && (
-            <Box sx={{ mt: 2 }}>
-              <PrioritySelector
-                value={selectedPriority}
-                onChange={setSelectedPriority}
-              />
-            </Box>
-          )}
-          {type === 'status' && (
-            <Box sx={{ mt: 2 }}>
-              <StatusSelector
-                value={selectedStatus}
-                onChange={setSelectedStatus}
-              />
-            </Box>
-          )}
+                {type === 'task_name' && (
+                  <TextField
+                    fullWidth
+                    value={value}
+                    onChange={(e) => setEditDialog({ ...editDialog, value: e.target.value })}
+                    margin="normal"
+                    label="Task Name"
+                    placeholder="Enter task name"
+                  />
+                )}
+                {type === 'priority' && (
+                  <Box sx={{ mt: 2 }}>
+                    <PrioritySelector
+                      value={selectedPriority}
+                      onChange={setSelectedPriority}
+                    />
+                  </Box>
+                )}
+                {type === 'status' && (
+                  <Box sx={{ mt: 2 }}>
+                    <StatusSelector
+                      value={selectedStatus}
+                      onChange={setSelectedStatus}
+                    />
+                  </Box>
+                )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseEditDialog}>Cancel</Button>
           <Button onClick={handleSaveEdit} variant="contained">Save</Button>
         </DialogActions>
+        </>           
+        )}
       </Dialog>
     );
   };
@@ -582,7 +600,7 @@ const TaskBoard = () => {
                             marginRight: 1,
                             backgroundColor: task?.priority === 'Low'
                             ? '#4CD2C0'
-                            : task?.task_id?.priority === 'High'
+                            : task?.priority === 'High'
                               ? '#E587FF'
                               : '#FFB84D'
   
@@ -703,7 +721,7 @@ const TaskBoard = () => {
       />
       <AddMemberDialog
         open={openAddMemberDialog}
-        onClose={() => setOpenAddMemberDialog(false)}
+        onClose={handleCloseAddmemberDialog }
         taskId={addMemberDialog.taskId}
         taskData={addMemberDialog.value}
       />

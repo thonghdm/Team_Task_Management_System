@@ -101,8 +101,8 @@ const Users = () => {
 
   const filteredUsers =
     tabValue === 0
-      ? activeUsers?.filter((user) => user?.displayName.toLowerCase().includes(searchQuery.toLowerCase()))
-      : deletedUsers?.filter((user) => user?.displayName.toLowerCase().includes(searchQuery.toLowerCase()));
+      ? activeUsers?.filter((user) => user?.displayName?.toLowerCase().includes(searchQuery.toLowerCase()))
+      : deletedUsers?.filter((user) => user?.displayName?.toLowerCase().includes(searchQuery.toLowerCase()));
 
 
   const handleAddUser = () => {

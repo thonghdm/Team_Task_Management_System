@@ -68,7 +68,7 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
         
         // Filter users
         const filteredUsers = memberData?.users?.filter(user =>
-            user._id !== userData?._id &&
+            user._id !== userData?._id && user.is_active &&
             (user.displayName?.toLowerCase().includes(search) ||
                 user.email?.toLowerCase().includes(search) ||
                 user.username?.toLowerCase().includes(search))
@@ -80,7 +80,7 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
                 conv.isGroup && 
                 conv.groupInfo && 
                 conv.groupInfo.name && 
-                conv.groupInfo.name.toLowerCase().includes(search)
+                conv.groupInfo.name?.toLowerCase().includes(search)
             )
             .map(conv => ({
                 _id: conv._id,

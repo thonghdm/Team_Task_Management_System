@@ -101,11 +101,12 @@ const UserSearchInput = ({
                 await new Promise(resolve => setTimeout(resolve, 500));
                 const filtered = memberData?.users?.filter(user => {
                     const searchValue = inputValue.toLowerCase();
-                    const isMatch = user?.displayName.toLowerCase().includes(searchValue) ||
-                        user?.email.toLowerCase().includes(searchValue) ||
-                        user?.username.toLowerCase().includes(searchValue);
+                    const isMatch = user?.displayName?.toLowerCase().includes(searchValue) ||
+                        user?.email?.toLowerCase().includes(searchValue) ||
+                        user?.username?.toLowerCase().includes(searchValue);
                     const isSelected = value.some(selected => selected?._id === user?._id);
-                    return isMatch && !isSelected;
+                    
+                    return isMatch && !isSelected && user.is_active && user.isAdmin === false;
                 });
                 if (filtered) { setOptions(filtered); }
 
@@ -286,6 +287,7 @@ const UserSearch = ({ isClickable = false }) => {
         const handleSuccess = () => {
             toast.success('Member invite successfully!');
             resetFormState();
+            
         };
 
         const inviteMember = async (token) => {
@@ -356,6 +358,7 @@ const UserSearch = ({ isClickable = false }) => {
             <Button variant="contained" color="primary" onClick={handleInvite}>
                 Invite
             </Button>
+            <ToastContainer />
         </Box>
     );
 };
