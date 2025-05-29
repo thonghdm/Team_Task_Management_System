@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Divider, Button, TextField, IconButton, Avatar, Chip, Menu, MenuItem } from '@mui/material';
 import ReportIcon from '@mui/icons-material/Report';
 import BlockIcon from '@mui/icons-material/Block';
@@ -11,15 +11,26 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { 
+    InsertDriveFile as FileIcon,
+    Image as ImageIcon,
+    PictureAsPdf as PdfIcon,
+    Description as DocIcon,
+    Archive as ArchiveIcon,
+    Download as DownloadIcon,
+    Refresh as RefreshIcon
+} from '@mui/icons-material';
 import './styles.css';
 import { useTheme } from '@mui/material/styles';
 import { useChat } from '~/Context/ChatProvider';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import ChangeGroupAvatarModal from '~/components/ChangeGroupAvatarModal';
 import AddMemberModal from '~/components/AddMemberModal';
 import GroupsIcon from '@mui/icons-material/Groups';
 import groupApi from '~/apis/chat/groupApi';
 import { useRefreshToken } from '~/utils/useRefreshToken';
+import { fetchChatFilesByConversationId } from '~/redux/chat/chatFile-slice';
+import socket from '~/utils/socket';
 
 // Hàm tạo avatar tự động từ tên nhóm
 const generateAvatarColor = (name) => {
@@ -55,10 +66,13 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
     const [avatarError, setAvatarError] = useState(false);
     const [memberMenuAnchor, setMemberMenuAnchor] = useState(null);
     const [selectedMember, setSelectedMember] = useState(null);
+    const loadingRef = useRef(false); // Prevent duplicate requests
     const theme = useTheme();
     const { currentConversation, updateCurrentConversation } = useChat();
-    const { userData, accessToken } = useSelector(state => state.auth);
+    const { userData, accesstoken } = useSelector(state => state.auth);
+    const { files: chatFiles, loading: filesLoading } = useSelector(state => state.chatFile || { files: [], loading: false });
     const refreshToken = useRefreshToken();
+    const dispatch = useDispatch();
 
     // Kiểm tra xem đây có phải là cuộc trò chuyện nhóm không
     const isGroup = currentConversation?.isGroup;
@@ -71,18 +85,143 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
     const isCurrentUserAdmin = isGroup && groupInfo?.admins?.includes(userData?._id);
     const isAdmin = (userId) => groupInfo?.admins?.includes(userId);
 
-    const sentFilesAndLinks = [
-        { name: 'Image.png', url: 'https://www.cityguide-dubai.com/fileadmin/_processed_/3/3/csm_img-worlds-of-adventures-teaser_40e4184da1.jpg', isImage: true },
-        { name: 'Website link', url: 'https://example.com', isImage: false },
-        { name: 'Image.png', url: 'https://www.cityguide-dubai.com/fileadmin/_processed_/3/3/csm_img-worlds-of-adventures-teaser_40e4184da1.jpg', isImage: true },
-        { name: 'Website link', url: 'https://example.com', isImage: false },
-        { name: 'Image.png', url: 'https://www.cityguide-dubai.com/fileadmin/_processed_/3/3/csm_img-worlds-of-adventures-teaser_40e4184da1.jpg', isImage: true },
-        { name: 'Website link', url: 'https://example.com', isImage: false },
-        { name: 'Image.png', url: 'https://www.cityguide-dubai.com/fileadmin/_processed_/3/3/csm_img-worlds-of-adventures-teaser_40e4184da1.jpg', isImage: true },
-        { name: 'Website link', url: 'https://example.com', isImage: false },
-        { name: 'Image.png', url: 'https://www.cityguide-dubai.com/fileadmin/_processed_/3/3/csm_img-worlds-of-adventures-teaser_40e4184da1.jpg', isImage: true },
-        { name: 'Website link', url: 'https://example.com', isImage: false },
-    ];
+    // Helper function to get file icon based on mime type
+    const getFileIcon = (mimeType, fileName) => {
+        if (mimeType?.startsWith('image/')) {
+            return <ImageIcon sx={{ fontSize: 20 }} />;
+        }
+        if (mimeType === 'application/pdf') {
+            return <PdfIcon sx={{ fontSize: 20 }} />;
+        }
+        if (mimeType?.includes('document') || mimeType?.includes('word') || fileName?.endsWith('.doc') || fileName?.endsWith('.docx')) {
+            return <DocIcon sx={{ fontSize: 20 }} />;
+        }
+        if (mimeType?.includes('zip') || mimeType?.includes('rar') || fileName?.endsWith('.zip') || fileName?.endsWith('.rar')) {
+            return <ArchiveIcon sx={{ fontSize: 20 }} />;
+        }
+        return <FileIcon sx={{ fontSize: 20 }} />;
+    };
+
+    // Helper function to format file size
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    // Fetch files when conversation changes
+    useEffect(() => {
+        const conversationId = typeof currentConversation === 'object' && currentConversation?._id 
+            ? currentConversation._id 
+            : currentConversation;
+            
+        if (conversationId && accesstoken && !loadingRef.current) {
+            loadingRef.current = true;
+            
+            const fetchFiles = async (token) => {
+                try {
+                    await dispatch(fetchChatFilesByConversationId({
+                        accessToken: token,
+                        conversationId: conversationId
+                    }));
+                } catch (error) {
+                    console.error('Error fetching files:', error);
+                    if (error.err === 2) {
+                        const newToken = await refreshToken();
+                        if (newToken) {
+                            await dispatch(fetchChatFilesByConversationId({
+                                accessToken: newToken,
+                                conversationId: conversationId
+                            }));
+                        }
+                    }
+                } finally {
+                    loadingRef.current = false;
+                }
+            };
+            
+            fetchFiles(accesstoken);
+        }
+    }, [currentConversation?._id, accesstoken]);
+
+    // Listen for new file messages via socket
+    useEffect(() => {
+        const conversationId = typeof currentConversation === 'object' && currentConversation?._id 
+            ? currentConversation._id 
+            : currentConversation;
+            
+        if (!conversationId) return;
+
+        const handleNewMessage = (message) => {
+            // If it's a file message for current conversation, refresh files
+            if (message.conversation === conversationId && message.messageType === 'file') {
+                console.log('New file message received, refreshing files...');
+                if (accesstoken) {
+                    dispatch(fetchChatFilesByConversationId({
+                        accessToken: accesstoken,
+                        conversationId: conversationId
+                    }));
+                }
+            }
+        };
+
+        socket.on('new message', handleNewMessage);
+        
+        return () => {
+            socket.off('new message', handleNewMessage);
+        };
+    }, [currentConversation?._id, accesstoken]);
+
+    // Handle file download
+    const handleFileDownload = async (fileUrl, fileName) => {
+        try {
+            const response = await fetch(fileUrl);
+            if (!response.ok) throw new Error("Download failed");
+
+            // Get the blob from the response
+            const blob = await response.blob();
+            
+            // Create a new blob with the original filename
+            const newBlob = new Blob([blob], { type: blob.type });
+            
+            // Create object URL from the blob
+            const url = window.URL.createObjectURL(newBlob);
+            
+            // Create download link
+            const a = document.createElement("a");
+            a.style.display = 'none';
+            a.href = url;
+            
+            // Handle Vietnamese filename
+            const encodedFileName = encodeURIComponent(fileName);
+            a.setAttribute('download', encodedFileName);
+            
+            // Append to body, click and remove
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error("Download error:", error);
+            // Fallback to direct download
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            
+            // Handle Vietnamese filename in fallback
+            const encodedFileName = encodeURIComponent(fileName);
+            link.setAttribute('download', encodedFileName);
+            
+            link.target = '_blank';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
 
     const handleReport = () => {
         // Handle report action
@@ -168,7 +307,7 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
         
         try {
             const response = await groupApi.removeMemberFromGroup(
-                accessToken, 
+                accesstoken, 
                 currentConversation._id, 
                 selectedMember._id
             );
@@ -217,7 +356,7 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
         
         try {
             const response = await groupApi.makeGroupAdmin(
-                accessToken, 
+                accesstoken, 
                 currentConversation._id, 
                 selectedMember._id
             );
@@ -272,7 +411,7 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
         
         try {
             const response = await groupApi.removeGroupAdmin(
-                accessToken, 
+                accesstoken, 
                 currentConversation._id, 
                 selectedMember._id
             );
@@ -320,6 +459,84 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
                 alert('Lỗi khi xóa admin: ' + (error.message || 'Unknown error'));
             }
         }
+    };
+
+    // Render files section
+    const renderFiles = () => {
+        if (filesLoading) {
+            return (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                        Loading files...
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                        {loadingRef.current ? 'Fetching from server...' : 'Processing...'}
+                    </Typography>
+                </Box>
+            );
+        }
+
+        if (chatFiles.length === 0) {
+            return (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                        No files shared yet
+                    </Typography>
+                </Box>
+            );
+        }
+
+        return chatFiles.map((file, index) => {
+            const isImage = file.mimeType?.startsWith('image/');
+            return (
+                <Box 
+                    key={file._id} 
+                    sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        p: 1.5,
+                        borderBottom: index < chatFiles.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
+                        '&:hover': {
+                            backgroundColor: theme.palette.action.hover
+                        },
+                        transition: 'background-color 0.2s',
+                        cursor: 'pointer'
+                    }}
+                    onClick={() => handleFileDownload(file.url, file.originalName)}
+                >
+                    <Box sx={{ mr: 1.5 }}>
+                        {isImage ? (
+                            <ImageIcon color="primary" />
+                        ) : (
+                            <FileIcon color="primary" />
+                        )}
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography 
+                            variant="body2" 
+                            sx={{ 
+                                fontWeight: 500,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                            }}
+                        >
+                            {file.originalName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            {formatFileSize(file.size)}
+                        </Typography>
+                    </Box>
+                    <DownloadIcon 
+                        fontSize="small" 
+                        sx={{ 
+                            color: theme.palette.primary.main,
+                            opacity: 0.7
+                        }} 
+                    />
+                </Box>
+            );
+        });
     };
 
     return (
@@ -409,22 +626,6 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
                         )}
                     </Box>
                 )}
-
-                <Divider sx={{ mb: 2 }} />
-                <TextField
-                    variant="outlined"
-                    placeholder="Search messages..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    fullWidth
-                    sx={{
-                        mb: 2,
-                        '& .MuiOutlinedInput-root': {
-                            backgroundColor: theme.palette.background.paper,
-                        },
-                    }}
-                />
-                <Divider sx={{ mb: 2 }} />
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="h6">
@@ -521,61 +722,43 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
 
                 <Divider sx={{ mb: 2 }} />
 
-                <Typography variant="h6" gutterBottom>
-                    Files and Links
-                </Typography>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        mb: 2
-                    }}
-                >
-                    {sentFilesAndLinks.map((item, index) => (
-                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            {item.isImage ? (
-                                <Box
-                                    component="img"
-                                    src={item.url}
-                                    alt={item.name}
-                                    sx={{ height: 40, width: 40, borderRadius: 1, mr: 1 }}
-                                />
-                            ) : (
-                                <ContentCopyIcon sx={{ mr: 1 }} />
-                            )}
-                            <Typography variant="body1">
-                                <a href={item.url} target="_blank" rel="noopener noreferrer">
-                                    {item.name}
-                                </a>
-                            </Typography>
-                        </Box>
-                    ))}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="h6" gutterBottom>
+                        Files and Links ({chatFiles.length})
+                    </Typography>
+                    <IconButton 
+                        size="small" 
+                        onClick={() => {
+                            const conversationId = typeof currentConversation === 'object' && currentConversation?._id 
+                                ? currentConversation._id 
+                                : currentConversation;
+                            if (conversationId && accesstoken) {
+                                dispatch(fetchChatFilesByConversationId({
+                                    accessToken: accesstoken,
+                                    conversationId: conversationId
+                                }));
+                            }
+                        }}
+                        sx={{ opacity: 0.7, '&:hover': { opacity: 1 }  }}
+                    >
+                        <RefreshIcon fontSize="small" />
+                    </IconButton>
                 </Box>
 
-                <Divider sx={{ mb: 2 }} />
-
                 <Box
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'flex-start',
+                        mb: 2,
+                        maxHeight: 300,
+                        overflowY: 'auto',
+                        border: chatFiles.length > 0 ? `1px solid ${theme.palette.divider}` : 'none',
+                        borderRadius: 1,
+                        bgcolor: chatFiles.length > 0 ? theme.palette.background.paper : 'transparent',
+                        minHeight: 200
                     }}
                 >
-                    <Button
-                        startIcon={<ReportIcon />}
-                        onClick={handleReport}
-                        sx={{ mb: 1, color: theme.palette.error.main }}
-                    >
-                        Report
-                    </Button>
-                    <Button
-                        startIcon={<DeleteIcon />}
-                        onClick={handleDelete}
-                        sx={{ mb: 1, color: theme.palette.error.main }}
-                    >
-                        Delete chat
-                    </Button>
+                    {renderFiles()}
                 </Box>
             </Box>
 

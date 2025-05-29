@@ -13,6 +13,7 @@ import {
   ListItemText,
   IconButton,
   Box,
+  CircularProgress
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { toast } from 'react-toastify';
@@ -36,9 +37,11 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
   const [displayText, setDisplayText] = useState('');
   const [file, setFile] = useState(null);
   const { projectId } = useParams();
-
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
+    setIsDisabled(false);
     // console.log(event.target.files[0]);
   };
   ////////////////////////////////
@@ -48,6 +51,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
 
   const handleInsert = () => {
     try {
+      
       if (!file) {
         toast.error("File is required");
         return;
@@ -79,7 +83,10 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
           message: `${userData.displayName} has update file from task ${task?.task_name} in project ${task?.project_id?.projectName}`
         }));
       const uploadFileTask = async (token) => {
+        
         try {
+          setIsUploading(true);
+          setIsDisabled(true);
           const resultAction = await dispatch(updateFileByIdTaskThunk({ accesstoken: token, file: fileData }));
           if (updateFileByIdTaskThunk.rejected.match(resultAction)) {
             if (resultAction.payload?.err === 2) {
@@ -117,14 +124,19 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
           setDisplayText('');
           setFile(null);
           onClose();
+          
         } catch (error) {
           throw error; // Rethrow error nếu không phải error code 2
+        }
+        finally {
+          setIsUploading(false);
+          setIsDisabled(false);
         }
       };
       uploadFileTask(accesstoken);
     } catch (error) {
       throw error;
-    }
+    } 
   };
 
   return (
@@ -135,6 +147,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
           aria-label="close"
           onClick={onClose}
           sx={{ position: 'absolute', right: 8, top: 8 }}
+          disabled={isUploading}
         >
           <Close />
         </IconButton>
@@ -152,9 +165,10 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
           component="label"
           fullWidth
           sx={{ mt: 1, mb: 2, bgcolor: 'action.selected', color: 'text.primary' }}
+          disabled={isUploading}
         >
           Choose a file
-          <input type="file" hidden onChange={handleFileChange} />
+          <input type="file" hidden onChange={handleFileChange}  />
         </Button>
         {file && <Typography sx={{ mb: 2 }} variant="body2" gutterBottom>
           {file?.name}
@@ -177,9 +191,10 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
         /> */}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleInsert} variant="contained" color="primary">
-          Insert
+        <Button onClick={onClose} disabled={isUploading}>Cancel </Button>
+        <Button onClick={handleInsert} variant="contained" color="primary" disabled={isDisabled}>
+            {isUploading ? 'Uploading...' : 'Insert'}
+            {isUploading && <CircularProgress size={20} />}
         </Button>
       </DialogActions>
     </Dialog>

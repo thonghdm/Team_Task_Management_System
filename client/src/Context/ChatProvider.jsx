@@ -82,7 +82,10 @@ export const ChatProvider = ({ children }) => {
 
     // Cập nhật thông tin conversation hiện tại
     const updateCurrentConversation = useCallback((updatedConversation) => {
-        if (!updatedConversation) return;
+        if (!updatedConversation) {
+            setCurrentConversation(null);
+            return;
+        }
         
         setCurrentConversation(updatedConversation);
         
@@ -122,6 +125,12 @@ export const ChatProvider = ({ children }) => {
         };
     }, [currentConversation]);
 
+    // Clear current conversation
+    const clearCurrentConversation = useCallback(() => {
+        setCurrentConversation(null);
+        setMessages([]);
+    }, []);
+
     const value = {
         messages,
         loading,
@@ -131,7 +140,8 @@ export const ChatProvider = ({ children }) => {
         markMessageAsSeen,
         fetchMessages,
         setCurrentConversation,
-        updateCurrentConversation
+        updateCurrentConversation,
+        clearCurrentConversation
     };
 
     return (

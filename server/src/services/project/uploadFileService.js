@@ -4,14 +4,15 @@ const Task = require('~/models/TaskSchema')
 
 const uploadFileService = {
     uploadFile: async (fileData) => {
-        // eslint-disable-next-line no-useless-catch
         try {
+            console.log('Creating project file with data:', fileData);
+            
             // Validate entity exists based on type
             let entityModel
             switch (fileData.entityType) {
-            case 'Task':
-                entityModel = Task
-                break
+                case 'Task':
+                    entityModel = Task
+                    break
             }
 
             if (entityModel) {
@@ -25,24 +26,45 @@ const uploadFileService = {
             const attachment = new Attachments({
                 originalName: fileData.originalName,
                 fileName: fileData.fileName,
-                url: process.env.URL_SERVER + fileData.url.replace('src', ''),
+                url: fileData.url, // Use the Google Cloud Storage URL directly
                 mimeType: fileData.mimeType,
                 size: fileData.size,
+                uploadedBy: fileData.uploadedBy,
                 entityId: fileData.entityId,
                 entityType: fileData.entityType,
-                uploadedBy: fileData.uploadedBy
+                is_active: true
             })
-            await attachment.save()
 
+            await attachment.save()
+            console.log('Project file saved:', attachment._id);
+
+            // Add attachment to task
             const getNewAttachment = await Attachments.findById(attachment._id)
             if (getNewAttachment) {
                 await addAttachmentToTask(getNewAttachment)
             }
+
             return getNewAttachment
         } catch (error) {
+            console.error('Error in uploadFile:', error);
             throw error
         }
     },
+
+    getFileById: async (fileId) => {
+        try {
+            console.log('Getting file by ID:', fileId);
+            const file = await Attachments.findById(fileId);
+            if (!file) {
+                throw new Error('File not found');
+            }
+            return file;
+        } catch (error) {
+            console.error('Error in getFileById:', error);
+            throw error;
+        }
+    },
+
     getFilesByTaskId: async (taskId) => {
         if (!taskId) {
             return []
@@ -57,23 +79,36 @@ const uploadFileService = {
         }
         return attachments
     },
-    updateAttachment: async (attachmentId, updateData) => {
+
+    updateAttachment: async (id, updateData) => {
         try {
-            // Tìm và cập nhật attachment theo ID, trả về attachment sau khi cập nhật
-            const updatedAttachment = await Attachments.findByIdAndUpdate(
-                attachmentId,
-                updateData,
-                { new: true } // Trả về document sau khi cập nhật
+            const attachment = await Attachments.findByIdAndUpdate(
+                id,
+                { $set: updateData },
+                { new: true }
             )
-            if (!updatedAttachment) {
-                return []
+            if (!attachment) {
+                throw new Error('Attachment not found')
             }
-            else {
-                await deleteAttachmentToTask(updatedAttachment)
-            }
-            return updatedAttachment
+            return attachment
         } catch (error) {
-            throw new Error(`Failed to update attachment: ${error.message}`)
+            throw error
+        }
+    },
+
+    deleteAttachment: async (id) => {
+        try {
+            const attachment = await Attachments.findByIdAndUpdate(
+                id,
+                { $set: { is_active: false } },
+                { new: true }
+            )
+            if (!attachment) {
+                throw new Error('Attachment not found')
+            }
+            return attachment
+        } catch (error) {
+            throw error
         }
     }
 }
@@ -100,7 +135,7 @@ const deleteAttachmentToTask = async (attachment) => {
         )
         return updatedDocument
     } catch (error) {
-        throw new Error(`Error adding attachment to task: ${error.message}`)
+        throw new Error(`Error removing attachment from task: ${error.message}`)
     }
 }
 

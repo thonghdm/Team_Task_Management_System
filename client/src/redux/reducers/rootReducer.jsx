@@ -25,6 +25,7 @@ import subscriptionSlice from '~/redux/project/subscription-slice/index';
 
 import notificationSlice from '~/redux/project/notifications-slice/index';
 import conversationSlice from '~/redux/chat/conversation-slice';
+import chatFileSlice from '~/redux/chat/chatFile-slice';
 
 // Cấu hình cho persist
 const commonConfig = {
@@ -143,6 +144,13 @@ const conversationConfig = {
     whitelist: ['conversations', 'currentConversation', 'messages', 'loading', 'error'],
 };
 
+// Cấu hình cho persist chat files
+const chatFileConfig = {
+    ...commonConfig,
+    key: 'chatFile',
+    whitelist: ['files', 'loading', 'error'],
+};
+
 const rootReducer = combineReducers({
     auth: persistReducer(authConfig, authReducer),
     projects: persistReducer(projectsConfig, projectsSlice),
@@ -164,6 +172,7 @@ const rootReducer = combineReducers({
     subscription: persistReducer(subscriptionConfig, subscriptionSlice),
     notification: persistReducer(notificationConfig, notificationSlice),
     conversation: persistReducer(conversationConfig, conversationSlice),
+    chatFile: persistReducer(chatFileConfig, chatFileSlice),
 })
 
 

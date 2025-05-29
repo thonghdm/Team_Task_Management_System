@@ -14,7 +14,13 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Tooltip
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
 } from '@mui/material';
 import { MoreVert as MoreVertIcon, Add as AddIcon, QuestionAnswer as QuestionAnswerIcon, ExpandMore as ExpandMoreIcon, DensityMedium as DensityMediumIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
@@ -22,16 +28,22 @@ import './styles.css';
 import ChangeList from './ChangeList';
 import ButtonAdd from './ChangeList/ButtonAdd';
 import { extractTasksInfo } from '~/utils/extractTasksInfo';
-import { formatDate } from '~/utils/formattedDate';
 import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
-
+import { updateTaskThunks } from '~/redux/project/task-slice';
+import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
+import { ToastContainer, toast } from 'react-toastify';
+import PrioritySelector from './ChangeList/PrioritySelector';
+import StatusSelector from './ChangeList/StatusSelector';
+import { addNotification } from '~/redux/project/notifications-slice/index';
+import {getTaskByMemberIDThunk} from '~/redux/project/task-slice/task-inviteUser-slice/index';
 import ExpandTask from './ChangeList/ExpandTask';
 import { formatDateRange } from '~/utils/formatDateRange'
-import { ToastContainer, toast } from 'react-toastify';
-
+import ColorPickerDialog from '~/Components/ColorPickerDialog';
+import AddMemberDialog from '~/Components/AddMemberDialog';
 
 const TaskBoard = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -42,13 +54,21 @@ const TaskBoard = () => {
   const theme = useTheme();
 
   ////
-  const { accesstoken } = useSelector(state => state.auth)
+  const { accesstoken, userData } = useSelector(state => state.auth)
   const dispatch = useDispatch();
   const { projectData } = useSelector((state) => state.projectDetail);
   const { projectId } = useParams();
   const [getTasksInfo, setTasksInfo] = useState([]);
-
+  
+  const { members } = useSelector((state) => state.memberProject);
   const refreshToken = useRefreshToken();
+  const [editDialog, setEditDialog] = useState({ open: false, type: '', taskId: null, value: '' });
+  const [addLabelDialog, setAddLabelDialog] = useState({ open: false, taskId: null, value: '' });
+  const [addMemberDialog, setAddMemberDialog] = useState({ open: false, taskId: null, value: '' });
+  const [selectedPriority, setSelectedPriority] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [openColorPicker, setOpenColorPicker] = useState(false);
+  const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false);
   useEffect(() => {
     const getProjectDetail = async (token) => {
       try {
@@ -83,7 +103,7 @@ const TaskBoard = () => {
     list: task.list || '.',
     labels: task.labels.length === 0 ? ['.'] : task.labels,
     comments: task.comments.length === 0 ? 0 : task.comments.length,
-    members: task.members.length === 0 ? [{ name: '.', avatar: '' }] : task.members,
+    members: task.members.length === 0 ? [{_id: '.', name: '.', avatar: '', is_active: false }] : task.members,
     dueDate: task.end_date || '.',
   }));
 
@@ -121,22 +141,242 @@ const TaskBoard = () => {
   const handleNameClick = (taskId, cellId) => {
     handleOpenNameMenu(taskId);
   };
+  const handleCloseColorPicker = (color, title) => {
+        setOpenColorPicker(false);
+        setAddLabelDialog({ open: false, taskId: null, value: '' });
+  };
+  const handleEditClick = (type, taskId, value) => {
+    // Tìm task hiện tại từ updatedTasks
+    const currentTask = updatedTasks.find(task => task.id === taskId);
+    
+    // Set giá trị ban đầu dựa trên loại chỉnh sửa
+    switch (type) {
+      case 'task_name':
+        setEditDialog({ open: true, type, taskId, value: currentTask.task_name });
+        break;
+      case 'priority':
+        setSelectedPriority(currentTask.priority);
+        setEditDialog({ open: true, type, taskId, value: currentTask.priority });
+        break;
+      case 'status':
+        setSelectedStatus(currentTask.status);
+        setEditDialog({ open: true, type, taskId, value: currentTask.status });
+        break;
+      case 'labels':
+        setAddLabelDialog({ open: true, taskId, value: currentTask.labels });
+        setOpenColorPicker(true);
+        break;
+      case 'members':
+        setAddMemberDialog({ open: true, taskId, value: currentTask });
+        setOpenAddMemberDialog(true);
+        break;
+      default:
+        setEditDialog({ open: true, type, taskId, value });
+    }
+  };
 
+  const handleCloseEditDialog = () => {
+    setEditDialog({ open: false, type: '', taskId: null, value: '' });
+  };
+
+  const handleSaveEdit = async () => {
+    const { type, taskId, value } = editDialog;
+    console.log("editDialog", editDialog, selectedStatus);
+    try {
+      let updateData = {};
+      // let notificationData = [];
+      let notificationData = [];
+      // Tìm task hiện tại
+      const currentTask = updatedTasks.find(task => task.id === taskId);
+      
+
+      switch (type) {
+        // case 'task_name':
+        //   updateData = { task_name: value };
+        //   notificationData = currentTask?.assigned_to_id
+        //     ?.filter(member =>
+        //       member.memberId._id !== userData._id &&
+        //       members.members.some(m =>
+        //         m.memberId._id === member.memberId._id &&
+        //         m.is_active === true
+        //       )
+        //     )
+        //     .map(member => ({
+        //       senderId: userData._id,
+        //       receiverId: member.memberId._id,
+        //       projectId: projectId,
+        //       taskId: taskId,
+        //       type: 'task_update',
+        //       message: `${userData.displayName} has updated task name to "${value}" in task ${currentTask?.task_name} in project ${currentTask?.project_id?.projectName}`
+        //     }));
+        //   break;
+
+        case 'priority':
+          updateData = { priority: selectedPriority };
+          notificationData = currentTask?.members
+          ?.filter(member =>
+              member._id !== userData._id &&
+              currentTask?.members?.some(m =>
+                m._id === member._id &&
+                m.is_active === true
+              )
+            )
+            .map(member => ({
+              senderId: userData._id,
+              receiverId: member._id,
+              projectId: projectId,
+              taskId: taskId,
+              type: 'task_update',
+              message: `${userData.displayName} has updated priority to "${selectedPriority}" in task ${currentTask?.task_name} in project ${currentTask?.project_id?.projectName}`
+            }));
+          break;
+
+        case 'status':
+          updateData = { status: selectedStatus };
+          
+          if (selectedStatus === 'Completed') {
+            updateData = { ...updateData, done_date: new Date().toISOString() };
+          } else {
+            updateData = { ...updateData, done_date: '1000-10-10T00:00:00.000+00:00' };
+          }
+          console.log("currentTask.members:", updateData);
+          notificationData = currentTask?.members
+          ?.filter(member =>
+              member._id !== userData._id &&
+              currentTask?.members?.some(m =>
+                m._id === member._id &&
+                m.is_active === true
+              )
+            )
+            .map(member => ({
+              senderId: userData._id,
+              receiverId: member._id,
+              projectId: projectId,
+              taskId: taskId,
+              type: 'task_update',
+              message: `${userData.displayName} has updated status to "${selectedStatus}" in task ${currentTask?.task_name} in project ${currentTask?.project_id?.projectName}`
+            }));
+            console.log("updateData", notificationData);
+            break;
+        default:
+          return;
+      }
+
+      const resultAction = await dispatch(updateTaskThunks({
+        accesstoken,
+        taskId,
+        taskData: updateData
+      }));
+      console.log("resultAction", resultAction);
+
+      if (updateTaskThunks.fulfilled.match(resultAction)) {
+        //Tạo audit log
+        await dispatch(createAuditLog({
+          accesstoken,
+          data: {
+            task_id: taskId,
+            action: 'Update',
+            entity: type.charAt(0).toUpperCase() + type.slice(1),
+            old_value: currentTask[type],
+            new_value: type === 'status' ? selectedStatus : type === 'priority' ? selectedPriority : value ,
+            user_id: userData?._id
+          }
+        }));
+
+        console.log("Tạo project audit log");
+        const resultActions = await dispatch(createAuditLog_project({
+          accesstoken,
+          data: {
+              project_id: projectId,
+              task_id: taskId,
+              action: 'Update',
+              entity: 'Task',
+              user_id: userData?._id
+          }
+         }));
+         console.log("resultActionssssssssss", resultActions);
+        //Refresh data
+        await dispatch(fetchProjectDetail({ accesstoken, projectId }));
+        await dispatch(getTaskByMemberIDThunk({ accesstoken: accesstoken, memberID: userData?._id }));
+       
+        
+
+        // Gửi thông báo
+        if (notificationData.length > 0) {
+          await dispatch(addNotification({ accesstoken, data: notificationData }));
+        }
+
+        toast.success('Task updated successfully!');
+      } else {
+        toast.error('Failed to update task');
+      }
+    } catch (error) {
+      toast.error('Error updating taskk');
+    }
+    handleCloseEditDialog();
+  };
+
+  const renderEditDialog = () => {
+    const { type, value, taskId } = editDialog;
+    const currentTask = updatedTasks.find(task => task.id === taskId);
+
+    return (
+      <Dialog open={editDialog.open} onClose={handleCloseEditDialog}>
+        <DialogTitle>Edit {type.replace('_', ' ')}</DialogTitle>
+        <DialogContent>
+          {type === 'task_name' && (
+            <TextField
+              fullWidth
+              value={value}
+              onChange={(e) => setEditDialog({ ...editDialog, value: e.target.value })}
+              margin="normal"
+              label="Task Name"
+              placeholder="Enter task name"
+            />
+          )}
+          {type === 'priority' && (
+            <Box sx={{ mt: 2 }}>
+              <PrioritySelector
+                value={selectedPriority}
+                onChange={setSelectedPriority}
+              />
+            </Box>
+          )}
+          {type === 'status' && (
+            <Box sx={{ mt: 2 }}>
+              <StatusSelector
+                value={selectedStatus}
+                onChange={setSelectedStatus}
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEditDialog}>Cancel</Button>
+          <Button onClick={handleSaveEdit} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
+    );
+  };
 
   const renderTableCell = (content, taskId, cellId, isEmpty) => {
-    const isTrulyEmpty = !!isEmpty || (typeof content === 'string' && content.trim() === '.');
+    const isTrulyEmpty = !!isEmpty || (typeof content === 'string' && content.trim() === '.')||cellId === 'labels'||cellId === 'members';
     const handleClick = () => {
-      console.log(cellId);
       switch (cellId) {
         case 'task_name':
+        case 'list_name':
+        case 'end_date':
+        case 'members':
+        case 'priority':
+        case 'status':
+        case 'labels':
+        case 'comments':
           handleNameClick(taskId, cellId);
-          // navigate(`${taskId}`);
           break;
         default:
           console.log(`Unknown column type: ${cellId}`);
       }
     };
-
 
     return (
       <TableCell
@@ -148,16 +388,16 @@ const TaskBoard = () => {
         }}
         onMouseEnter={() => handleCellHover(`${taskId}-${cellId}`)}
         onMouseLeave={() => handleCellHover(null)}
-        onClick={handleClick} // Use handleClick function here
+        onClick={handleClick}
       >
         {content}
-        {hoveredCell === `${taskId}-${cellId}` && (
+        {hoveredCell === `${taskId}-${cellId}` && cellId !== 'end_date' && cellId !== 'list_name'&& cellId !== 'comments' && (
           <Tooltip title={isTrulyEmpty ? "Add" : "Expand"}>
             <IconButton
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                handleAddClick(taskId);
+                handleEditClick(cellId, taskId, content);
               }}
               sx={{
                 position: 'absolute',
@@ -174,7 +414,6 @@ const TaskBoard = () => {
             </IconButton>
           </Tooltip>
         )}
-
       </TableCell>
     );
   };
@@ -192,10 +431,11 @@ const TaskBoard = () => {
           <Table stickyHeader aria-label="sticky table" sx={{ borderColor: theme.palette.divider }}>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold', textAlign: 'center' }}>ID</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold', textAlign: 'center' }}>No.</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Task</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>List</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>State</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Status</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Priority</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Labels</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Members</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Comment</TableCell>
@@ -277,7 +517,7 @@ const TaskBoard = () => {
                         </IconButton>
                       </Tooltip>
                     )}
-                    {shortenId(task.id)} {/* Display the sequence number instead of task.id */}
+                    {index + 1} {/* Display the sequence number instead of task.id */}
                   </TableCell>
                   {renderTableCell(
                     <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
@@ -329,6 +569,43 @@ const TaskBoard = () => {
                     task.id,
                     'status',
                     !task.status || task.status === '.'
+                  )}
+                  {renderTableCell(
+                    <Box sx={{ display: 'flex' }}>
+                      {task.priority && task.priority !== '.' ? (
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            mt: '4px',
+                            borderRadius: '50%',
+                            marginRight: 1,
+                            backgroundColor: task?.priority === 'Low'
+                            ? '#4CD2C0'
+                            : task?.task_id?.priority === 'High'
+                              ? '#E587FF'
+                              : '#FFB84D'
+  
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            mt: '4px',
+                            borderRadius: '50%',
+                            marginRight: 1,
+                            backgroundColor: 'transparent'
+                            
+                          }}
+                        />
+                      )}
+                      {task.priority || '.'}
+                    </Box>,
+                    task.id,
+                    'priority',
+                    !task.priority || task.priority === '.'
                   )}
 
                   {renderTableCell(
@@ -387,7 +664,7 @@ const TaskBoard = () => {
                     task.members.length === 0 || (task.members.length === 1 && task.members[0].name === '.')
                   )}
 
-                  <TableCell
+                  {/* <TableCell
                     component="th"
                     scope="row"
                     sx={{
@@ -395,12 +672,13 @@ const TaskBoard = () => {
                       '&:hover': { backgroundColor: theme.palette.action.hover },
                       maxHeight: '100px' // Add maxHeight
                     }}
-                  >
+                  > */}
+                  {renderTableCell(
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <QuestionAnswerIcon sx={{ marginRight: 1, fontSize: 'small' }} />
                       {task.comments}
-                    </Box>
-                  </TableCell>
+                    </Box>, task.id, 'comments', !task.comments || task.comments === '.')}
+                  {/* </TableCell> */}
 
                   {renderTableCell(formatDateRange(task.start_date, task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
 
@@ -416,6 +694,20 @@ const TaskBoard = () => {
 
       <ButtonAdd />
 
+      {renderEditDialog()}
+      <ColorPickerDialog
+        open={openColorPicker}
+        onClose={handleCloseColorPicker}
+        taskId={addLabelDialog.taskId}
+        userData={userData}
+      />
+      <AddMemberDialog
+        open={openAddMemberDialog}
+        onClose={() => setOpenAddMemberDialog(false)}
+        taskId={addMemberDialog.taskId}
+        taskData={addMemberDialog.value}
+      />
+      <ToastContainer />
     </>
   );
 };
