@@ -244,6 +244,7 @@ const ImportProject = () => {
             if (successUsers.length > 0) {
                 const uniqueUsers = [...new Set(successUsers.map(c => c))];
                 toast.success(`${uniqueUsers.length} task added successfully`);
+                setSuccessUsers([]);
             }
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { 
   Dialog, 
   DialogTitle, 
@@ -12,6 +12,8 @@ import {
 } from '@mui/material';
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
+// Import âm thanh trực tiếp
+import ringtone from '../../../../assets/telephone_electronic_42654_V1.mp3';
 
 const CallNotification = ({ 
   open = false, 
@@ -22,7 +24,63 @@ const CallNotification = ({
 }) => {
   // If the component is called without an explicit open prop, default to false
   const isOpen = open === true;
-  
+  const audioRef = useRef(null);
+
+  // Xử lý âm thanh thông báo và tự động đóng
+  useEffect(() => {
+    if (isOpen) {
+      // Tạo và phát âm thanh khi có cuộc gọi đến
+      audioRef.current = new Audio(ringtone);
+      audioRef.current.volume = 0.5; // Đặt âm lượng 50%
+      audioRef.current.loop = true; // Lặp lại âm thanh
+      
+      // Thêm xử lý lỗi chi tiết hơn
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('Âm thanh đang phát');
+          })
+          .catch(error => {
+            console.error('Lỗi phát âm thanh:', error);
+            // Thử phát lại nếu bị lỗi
+            setTimeout(() => {
+              if (audioRef.current) {
+                audioRef.current.play().catch(err => console.error('Lỗi phát âm thanh lần 2:', err));
+              }
+            }, 1000);
+          });
+      }
+
+      // Tự động dừng âm thanh và đóng dialog sau 20 giây
+      const timeoutId = setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        // Tự động từ chối cuộc gọi sau 20 giây
+        onDecline();
+      }, 20000);
+
+      // Cleanup function
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [isOpen, onDecline]); // Thêm onDecline vào dependencies
+
+  // Dừng âm thanh khi đóng dialog
+  useEffect(() => {
+    if (!isOpen && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [isOpen]);
+
   return (
     <Dialog
       open={isOpen}

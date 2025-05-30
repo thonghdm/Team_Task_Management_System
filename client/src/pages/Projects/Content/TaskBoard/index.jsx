@@ -582,7 +582,7 @@ const TaskBoard = () => {
                             marginRight: 1,
                             backgroundColor: task?.priority === 'Low'
                             ? '#4CD2C0'
-                            : task?.task_id?.priority === 'High'
+                            : task?.priority === 'High'
                               ? '#E587FF'
                               : '#FFB84D'
   
