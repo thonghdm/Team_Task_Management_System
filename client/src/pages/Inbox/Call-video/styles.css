@@ -264,3 +264,22 @@
   .MuiAlert-filledError {
     background-color: #f44336 !important;
   }
+  
+  /* Screen sharing specific styles */
+  .remote-video-container.screen-share {
+    border: 2px solid #4caf50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+  }
+  
+  .remote-video-container.screen-share::before {
+    content: 'Screen Sharing';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1;
+  }

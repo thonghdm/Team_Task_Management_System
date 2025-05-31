@@ -26,6 +26,8 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import ScreenShareIcon from '@mui/icons-material/ScreenShare';
+import StopScreenShareIcon from '@mui/icons-material/StopScreenShare';
 import { useChat } from '~/Context/ChatProvider';
 import videoCallService from "~/apis/inbox/videoCallService";
 import { getMemberById } from '~/apis/User/userService'
@@ -61,6 +63,8 @@ const VideoCall = () => {
   const [userAvatars, setUserAvatars] = useState({});
   const [showEndCallDialog, setShowEndCallDialog] = useState(false);
   const [endCallMessage, setEndCallMessage] = useState("");
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [screenTrack, setScreenTrack] = useState(null);
 
 
   // Hàm hiển thị thông báo
@@ -356,6 +360,83 @@ const VideoCall = () => {
       setCameraEnabled(!cameraEnabled);
     }
   };
+
+  // Thêm hàm xử lý screen sharing
+  const toggleScreenShare = async () => {
+    try {
+      if (!isScreenSharing) {
+        // Bắt đầu chia sẻ màn hình
+        const screenTrack = await AgoraRTC.createScreenVideoTrack({
+          encoderConfig: {
+            width: 1920,
+            height: 1080
+          },
+        });
+        
+        // Lưu track để có thể dừng sau này
+        setScreenTrack(screenTrack);
+        
+        // Unpublish video track hiện tại trước
+        if (localStream?.videoTrack) {
+          await client.unpublish(localStream.videoTrack);
+          await localStream.videoTrack.setEnabled(false);
+        }
+        
+        // Publish screen track
+        await client.publish(screenTrack);
+        
+        // Hiển thị màn hình chia sẻ trong local video
+        screenTrack.play(localVideoRef.current);
+        
+        setIsScreenSharing(true);
+        showToast("Started screen sharing", "success");
+      } else {
+        // Dừng chia sẻ màn hình
+        if (screenTrack) {
+          await client.unpublish(screenTrack);
+          screenTrack.close();
+          setScreenTrack(null);
+        }
+        
+        // Publish lại video track
+        if (localStream?.videoTrack) {
+          await localStream.videoTrack.setEnabled(true);
+          await client.publish(localStream.videoTrack);
+          localStream.videoTrack.play(localVideoRef.current);
+        }
+        
+        setIsScreenSharing(false);
+        showToast("Stopped screen sharing", "info");
+      }
+    } catch (error) {
+      console.error("Screen sharing error:", error);
+      showToast(`Screen sharing error: ${error.message}`, "error");
+      
+      // Reset state nếu có lỗi
+      setIsScreenSharing(false);
+      if (screenTrack) {
+        screenTrack.close();
+        setScreenTrack(null);
+      }
+      
+      // Đảm bảo camera được publish lại
+      if (localStream?.videoTrack) {
+        await localStream.videoTrack.setEnabled(true);
+        await client.publish(localStream.videoTrack);
+        localStream.videoTrack.play(localVideoRef.current);
+      }
+    }
+  };
+
+  // Thêm cleanup cho screen sharing khi component unmount
+  useEffect(() => {
+    return () => {
+      if (screenTrack) {
+        screenTrack.close();
+      }
+    };
+  }, [screenTrack]);
+
   const { sendMessage, currentConversation, setCurrentConversation } = useChat();
 
   // Rời khỏi cuộc gọi
@@ -689,6 +770,14 @@ const VideoCall = () => {
           size="large"
         >
           {cameraEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
+        </IconButton>
+
+        <IconButton
+          className={isScreenSharing ? "control-button-off" : "control-button"}
+          onClick={toggleScreenShare}
+          size="large"
+        >
+          {isScreenSharing ? <StopScreenShareIcon /> : <ScreenShareIcon />}
         </IconButton>
 
         <IconButton
