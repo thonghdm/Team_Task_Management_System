@@ -35,7 +35,7 @@ const ChatHeader = ({ toggleSidebar }) => {
 
   // Kiểm tra xem đây có phải là cuộc trò chuyện nhóm không
   const isGroup = currentConversation?.isGroup;
-
+  console.log(accesstoken)
   // Lấy thông tin user đối thoại hoặc thông tin nhóm
   let otherUser = null;
   let groupInfo = null;

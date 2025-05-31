@@ -145,11 +145,28 @@ const updateUserByID = async (userId, updateData) => {
     }
 }
 
+const getMemberById = async (id) => {
+    try {
+        const member = await User.findById(id)
+            .select('_id email username displayName image isAdmin is_active createdAt phoneNumber company location jobTitle department')
+            .lean();
+        
+        if (!member) {
+            throw new Error('Member not found');
+        }
+        
+        return member;
+    } catch (error) {
+        throw new Error(`Error fetching member: ${error.message}`);
+    }
+};
+
 module.exports = {
     updateService,
     getOneService,
     searchUsers,
     getAllMembers,
+    getMemberById,
     updateUserByID,
     changePasswordService,
     changePasswordProfileService
