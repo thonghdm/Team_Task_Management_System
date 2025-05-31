@@ -68,7 +68,7 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
         
         // Filter users
         const filteredUsers = memberData?.users?.filter(user =>
-            user._id !== userData?._id && user.is_active &&
+            user._id !== userData?._id && user.is_active && !user.isAdmin &&
             (user.displayName?.toLowerCase().includes(search) ||
                 user.email?.toLowerCase().includes(search) ||
                 user.username?.toLowerCase().includes(search))
