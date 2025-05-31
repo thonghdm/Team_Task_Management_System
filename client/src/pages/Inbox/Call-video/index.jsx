@@ -26,7 +26,7 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import ChatIcon from '@mui/icons-material/Chat';
+import { useChat } from '~/Context/ChatProvider';
 import videoCallService from "~/apis/inbox/videoCallService";
 import { getMemberById } from '~/apis/User/userService'
 import './styles.css'; // Tạo file CSS riêng
@@ -158,7 +158,7 @@ const VideoCall = () => {
         const timeDiff = (now - callStartTime) / 1000; // Chuyển đổi sang giây
 
         if (timeDiff >= 22) {
-          setEndCallMessage("No one answered the call after 22 seconds. The call will end.");
+          setEndCallMessage("No one answered the call. The call will end.");
           setShowEndCallDialog(true);
           clearInterval(timer);
         }
@@ -356,6 +356,7 @@ const VideoCall = () => {
       setCameraEnabled(!cameraEnabled);
     }
   };
+  const { sendMessage, currentConversation, setCurrentConversation } = useChat();
 
   // Rời khỏi cuộc gọi
   const leaveCall = async () => {
@@ -389,6 +390,8 @@ const VideoCall = () => {
       console.error("Error leaving call:", error);
     }
   };
+
+
 
   // Xử lý sự kiện khi người dùng rời khỏi cuộc gọi
   const handleEndCall = async () => {

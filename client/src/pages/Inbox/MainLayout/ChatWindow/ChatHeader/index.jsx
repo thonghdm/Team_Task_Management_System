@@ -74,7 +74,7 @@ const handleVideoCall = async () => {
     }
 
     const callContinueResponse = await videoCallService.getActiveGroupCall(accesstoken, currentConversation._id);
-    
+    console.log("Call continue response:", callContinueResponse);
     if (callContinueResponse.success && callContinueResponse.videoCall) {
       const url = `/call-video/${callContinueResponse.videoCall._id}`;
       window.open(url, "_blank", "width=900,height=600,noopener,noreferrer");

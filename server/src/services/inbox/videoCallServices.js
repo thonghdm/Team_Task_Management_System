@@ -8,20 +8,18 @@ const VideoCallService = {
                 caller: callerUserId,
                 participants: participantIds,
                 group: groupId,
-                startedAt: new Date(),
-            });
-            
-
+                startedAt: new Date()
+            })
             // Uncomment nếu bạn muốn populate dữ liệu
             // await videoCall.populate([
             //   { path: 'caller', select: 'username avatar' },
             //   { path: 'participants', select: 'username avatar isOnline' }
             // ]);
 
-            return videoCall;
+            return videoCall
         } catch (error) {
-            console.error('Error creating video call:', error);
-            throw error;
+            console.error('Error creating video call:', error)
+            throw error
         }
     },
 
@@ -101,7 +99,7 @@ const VideoCallService = {
         if (call.startedAt) {
             call.duration = Math.round((call.endedAt - call.startedAt) / 1000) // duration in seconds
         }
-        call.participants = [];
+        call.activeParticipants = []
         await call.save()
 
         return call
