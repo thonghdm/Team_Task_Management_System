@@ -191,8 +191,6 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
     const chatItems = (conversationsLocal || []).map(conversation => {
         const other = conversation.participants?.find(u => u._id !== userData?._id);
         const lastMsg = conversation.lastMessage;
-        console.log('lastMsg::::dấdad:', lastMsg)
-        console.log('conversation::::dấdad:', conversation)
         let lastMsgPrefix = '';
         let lastMsgContent = '';
         if (lastMsg) {

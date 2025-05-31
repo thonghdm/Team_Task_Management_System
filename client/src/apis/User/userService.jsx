@@ -112,4 +112,20 @@ export const apiResetPasswordfromAdmin = (accesstoken, email , password) => new 
     }
 });
 
+export const getMemberById = (accesstoken, id) => new Promise(async (resolve, reject) => {
+    try {
+        let response = await axios({
+            method: 'get',
+            url: `http://localhost:5000/api/user/member/${id}`,
+            headers: {
+                authorization: `Bearer ${accesstoken}`
+            },
+            withCredentials: true  // Set withCredentials here
+        })
+        resolve(response.data)
+
+    } catch (error) {
+        reject(error)
+    }
+})
 

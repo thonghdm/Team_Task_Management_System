@@ -8,19 +8,18 @@ const VideoCallService = {
                 caller: callerUserId,
                 participants: participantIds,
                 group: groupId,
-                startedAt: new Date(),
-            });
-
+                startedAt: new Date()
+            })
             // Uncomment nếu bạn muốn populate dữ liệu
             // await videoCall.populate([
             //   { path: 'caller', select: 'username avatar' },
             //   { path: 'participants', select: 'username avatar isOnline' }
             // ]);
 
-            return videoCall;
+            return videoCall
         } catch (error) {
-            console.error('Error creating video call:', error);
-            throw error;
+            console.error('Error creating video call:', error)
+            throw error
         }
     },
 
@@ -47,7 +46,10 @@ const VideoCallService = {
         if (!call.participants.includes(userId)) {
             throw new Error('You are not a participant in this call')
         }
-
+        if (!call.activeParticipants.includes(userId)) {
+            call.activeParticipants.push(userId)
+            await call.save()
+        }
         if (call.status === 'ringing') {
             call.status = 'accepted'
             if (!call.startedAt) {
@@ -97,7 +99,7 @@ const VideoCallService = {
         if (call.startedAt) {
             call.duration = Math.round((call.endedAt - call.startedAt) / 1000) // duration in seconds
         }
-
+        call.activeParticipants = []
         await call.save()
 
         return call
@@ -155,6 +157,52 @@ const VideoCallService = {
         if (call.caller._id.toString() !== userId &&
             !call.participants.some(p => p._id.toString() === userId)) {
             throw new Error('You are not authorized to view this call')
+        }
+
+        return call
+    },
+
+    /**
+     * Get active group call if exists
+     */
+    getActiveGroupCall: async (groupId) => {
+        const activeCall = await VideoCall.findOne({
+            group: groupId,
+            status: { $in: ['ringing', 'accepted'] }
+        })
+        // .populate('caller', 'username avatar')
+        // .populate('participants', 'username avatar')
+        // .populate('group', 'name avatar')
+
+        if (!activeCall) {
+            throw new Error('No active group call found')
+        }
+
+        return activeCall
+    },
+    /**
+     * Leave a video call
+     */
+    leaveCall: async (callId, userId) => {
+        const call = await VideoCall.findById(callId)
+        if (!call) {
+            throw new Error('Call not found')
+        }
+
+        // Remove user from active participants
+        call.activeParticipants = call.activeParticipants.filter(
+            id => id.toString() !== userId
+        )
+        await call.save()
+
+        // If no active participants left and caller left, end the call
+        if (call.activeParticipants.length === 0 && call.caller.toString() === userId) {
+            call.status = 'ended'
+            call.endedAt = new Date()
+            if (call.startedAt) {
+                call.duration = Math.round((call.endedAt - call.startedAt) / 1000)
+            }
+            await call.save()
         }
 
         return call
