@@ -183,6 +183,33 @@ const videoCallController = {
             }
             next(error)
         }
+    },
+
+    /**
+     * Leave a video call
+     */
+    leaveCall: async (req, res, next) => {
+        try {
+            const { callId } = req.params
+            if (!req.currentUser || !req.currentUser._id) {
+                return res.status(401).json({
+                    err: 3,
+                    msg: 'User not authenticated'
+                })
+            }
+
+            const call = await videoCallService.leaveCall(callId, req.currentUser._id)
+
+            res.status(200).json({
+                success: true,
+                call
+            })
+        } catch (error) {
+            if (error.message === 'Call not found') {
+                return res.status(404).json({ success: false, message: error.message })
+            }
+            next(error)
+        }
     }
 }
 // Hàm tạo token Agora

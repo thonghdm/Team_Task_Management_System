@@ -142,6 +142,21 @@ const videoCallService = {
       throw error;
     }
   },
+
+  // Leave a video call
+  leaveCall: async (accesstoken, callId) => {
+    try {
+      const response = await axios.put(`${API_URL}/calls/${callId}/leave`, {}, {
+        headers: { Authorization: `Bearer ${accesstoken}` },
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error leaving call:', error);
+      throw error;
+    }
+  }
+  
 };
 
 export default videoCallService;

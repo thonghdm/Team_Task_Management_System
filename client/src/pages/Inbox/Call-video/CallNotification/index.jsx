@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-// Import âm thanh trực tiếp
+// Import ringtone directly
 import ringtone from '../../../../assets/telephone_electronic_42654_V1.mp3';
 
 const CallNotification = ({ 
@@ -26,39 +26,39 @@ const CallNotification = ({
   const isOpen = open === true;
   const audioRef = useRef(null);
 
-  // Xử lý âm thanh thông báo và tự động đóng
+  // Handle ringtone and auto-close
   useEffect(() => {
     if (isOpen) {
-      // Tạo và phát âm thanh khi có cuộc gọi đến
+      // Create and play sound when receiving a call
       audioRef.current = new Audio(ringtone);
-      audioRef.current.volume = 0.5; // Đặt âm lượng 50%
-      audioRef.current.loop = true; // Lặp lại âm thanh
+      audioRef.current.volume = 0.5; // Set volume to 50%
+      audioRef.current.loop = true; // Loop the sound
       
-      // Thêm xử lý lỗi chi tiết hơn
+      // Add more detailed error handling
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            console.log('Âm thanh đang phát');
+            console.log('Ringtone is playing');
           })
           .catch(error => {
-            console.error('Lỗi phát âm thanh:', error);
-            // Thử phát lại nếu bị lỗi
+            console.error('Error playing ringtone:', error);
+            // Try playing again if there's an error
             setTimeout(() => {
               if (audioRef.current) {
-                audioRef.current.play().catch(err => console.error('Lỗi phát âm thanh lần 2:', err));
+                audioRef.current.play().catch(err => console.error('Error playing ringtone (retry):', err));
               }
             }, 1000);
           });
       }
 
-      // Tự động dừng âm thanh và đóng dialog sau 20 giây
+      // Auto stop sound and close dialog after 20 seconds
       const timeoutId = setTimeout(() => {
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
         }
-        // Tự động từ chối cuộc gọi sau 20 giây
+        // Auto decline call after 20 seconds
         onDecline();
       }, 20000);
 
@@ -71,9 +71,9 @@ const CallNotification = ({
         clearTimeout(timeoutId);
       };
     }
-  }, [isOpen, onDecline]); // Thêm onDecline vào dependencies
+  }, [isOpen, onDecline]); // Add onDecline to dependencies
 
-  // Dừng âm thanh khi đóng dialog
+  // Stop sound when dialog closes
   useEffect(() => {
     if (!isOpen && audioRef.current) {
       audioRef.current.pause();
@@ -93,7 +93,7 @@ const CallNotification = ({
       }}
     >
       <DialogTitle sx={{ textAlign: 'center' }}>
-        Cuộc gọi đến
+        Incoming Call
       </DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 2 }}>
         <Avatar 
@@ -106,7 +106,7 @@ const CallNotification = ({
           {caller?.displayName || 'Unknown User'}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          đang gọi cho bạn...
+          is calling you...
         </Typography>
       </DialogContent>
       <DialogActions sx={{ justifyContent: 'center', pb: 2, gap: 2 }}>
@@ -117,7 +117,7 @@ const CallNotification = ({
           onClick={onDecline}
           disabled={isProcessing}
         >
-          Từ chối
+          Decline
         </Button>
         <Button 
           variant="contained" 
@@ -129,7 +129,7 @@ const CallNotification = ({
           {isProcessing ? (
             <CircularProgress size={24} color="inherit" />
           ) : (
-            'Chấp nhận'
+            'Accept'
           )}
         </Button>
       </DialogActions>

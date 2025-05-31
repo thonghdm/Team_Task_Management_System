@@ -11,6 +11,7 @@ import videoCallService from "~/apis/inbox/videoCallService";
 import { useCallContext } from "~/Context/CallProvider";
 import { useChat } from '~/Context/ChatProvider';
 
+
 // Hàm tạo avatar tự động từ tên nhóm (dự phòng)
 const generateAvatarColor = (name) => {
   // Tạo màu ngẫu nhiên dựa trên tên nhóm
@@ -35,7 +36,7 @@ const ChatHeader = ({ toggleSidebar }) => {
 
   // Kiểm tra xem đây có phải là cuộc trò chuyện nhóm không
   const isGroup = currentConversation?.isGroup;
-  console.log(accesstoken)
+
   // Lấy thông tin user đối thoại hoặc thông tin nhóm
   let otherUser = null;
   let groupInfo = null;

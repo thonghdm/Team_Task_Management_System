@@ -11,7 +11,12 @@ import {
   Alert,
   Badge,
   Tooltip,
-  Avatar
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
 } from "@mui/material";
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -43,7 +48,8 @@ const VideoCall = () => {
   const [callInfo, setCallInfo] = useState(null);
   const [localStream, setLocalStream] = useState(null);
   const [remoteUsers, setRemoteUsers] = useState([]);
-
+  const [isCaller, setIsCaller] = useState(false); // Thêm state để kiểm tra người gọi
+  const [callStartTime, setCallStartTime] = useState(null); // Thêm state để lưu thời điểm bắt đầu cuộc gọi
 
   const [notification, setNotification] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
@@ -53,6 +59,8 @@ const VideoCall = () => {
   const [showParticipants, setShowParticipants] = useState(false);
   const [userNames, setUserNames] = useState({});
   const [userAvatars, setUserAvatars] = useState({});
+  const [showEndCallDialog, setShowEndCallDialog] = useState(false);
+  const [endCallMessage, setEndCallMessage] = useState("");
 
 
   // Hàm hiển thị thông báo
@@ -77,7 +85,7 @@ const VideoCall = () => {
         if (response && response.success) {
           setUserNames(prev => ({
             ...prev,
-            [userId]: response.member.displayName || 'Người dùng'
+            [userId]: response.member.displayName || 'User'
           }));
           setUserAvatars(prev => ({
             ...prev,
@@ -86,10 +94,10 @@ const VideoCall = () => {
           return response.member.displayName;
         }
       }
-      return userNames[userId] || 'Người dùng';
+      return userNames[userId] || 'User';
     } catch (error) {
       console.error('Error fetching user name:', error);
-      return 'Người dùng';
+      return 'User';
     }
   };
 
@@ -99,31 +107,32 @@ const VideoCall = () => {
       try {
         setLoading(true);
 
-        // Kiểm tra accesstoken và callId có hợp lệ hay không
         if (!accesstoken || !callId) {
-          throw new Error("Thông tin không hợp lệ. Vui lòng thử lại.");
+          throw new Error("Invalid information. Please try again.");
         }
 
-        // Lấy thông tin cuộc gọi
         const response = await videoCallService.getCallById(accesstoken, callId);
         if (response && response.success) {
           setCallInfo(response.call);
+          setIsCaller(userData._id === response.call.caller);
           
-          // Lấy tên người dùng local
+          if (userData._id === response.call.caller) {
+            setCallStartTime(new Date());
+          }
+          
           const localUserName = await fetchUserName(userData._id);
           setUserNames(prev => ({
             ...prev,
             [userData._id]: localUserName
           }));
 
-          // Tham gia kênh Agora
           await joinCall(response.agoraData);
         } else {
-          throw new Error("Không thể lấy thông tin cuộc gọi");
+          throw new Error("Unable to get call information");
         }
       } catch (error) {
-        console.error("Lỗi khởi tạo cuộc gọi:", error);
-        setError(`Lỗi: ${error.message || "Không thể kết nối đến cuộc gọi. Vui lòng thử lại."}`);
+        console.error("Call initialization error:", error);
+        setError(`Error: ${error.message || "Unable to connect to the call. Please try again."}`);
       } finally {
         setLoading(false);
       }
@@ -132,19 +141,41 @@ const VideoCall = () => {
     if (accesstoken && callId) {
       initialize();
     } else {
-      setError("Thông tin không hợp lệ. Vui lòng thử lại.");
+      setError("Invalid information. Please try again.");
     }
 
-    // Cleanup when unmounting
     return () => {
       leaveCall();
     };
   }, [accesstoken, callId]);
 
+  // Cập nhật useEffect để hiển thị dialog
+  useEffect(() => {
+    let timer;
+    if (isCaller && callStartTime && remoteUsers.length === 0) {
+      timer = setInterval(async () => {
+        const now = new Date();
+        const timeDiff = (now - callStartTime) / 1000; // Chuyển đổi sang giây
+
+        if (timeDiff >= 22) {
+          setEndCallMessage("No one answered the call after 22 seconds. The call will end.");
+          setShowEndCallDialog(true);
+          clearInterval(timer);
+        }
+      }, 1000); // Kiểm tra mỗi giây
+    }
+
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [isCaller, callStartTime, remoteUsers.length]);
+
   // Tham gia cuộc gọi
   const joinCall = async (agoraData) => {
     if (!agoraData) {
-      setError("Không có thông tin kết nối agoraData");
+      setError("No connection information available");
       return;
     }
   
@@ -154,7 +185,7 @@ const VideoCall = () => {
       setLocalStream(null);
   
       if (!agoraData.channelName || !agoraData.token) {
-        throw new Error("Thông tin kết nối không đầy đủ");
+        throw new Error("Incomplete connection information");
       }
   
       // Join channel first
@@ -187,11 +218,11 @@ const VideoCall = () => {
       // Publish tracks
       await client.publish([audioTrack, videoTrack]);
       
-      showToast("Đã tham gia cuộc gọi thành công!", "success");
+      showToast("Successfully joined the call!", "success");
   
     } catch (err) {
-      console.error("Lỗi tham gia cuộc gọi:", err);
-      setError(`Không thể tham gia cuộc gọi: ${err.message}`);
+      console.error("Error joining call:", err);
+      setError(`Unable to join call: ${err.message}`);
     }
   };
 
@@ -203,6 +234,11 @@ const VideoCall = () => {
     // Xử lý khi có người tham gia mới
     client.on("user-joined", async (user) => {
       try {
+        // Reset callStartTime khi có người tham gia
+        if (isCaller) {
+          setCallStartTime(null);
+        }
+        
         // Lấy tên người dùng ngay khi họ tham gia
         const userName = await fetchUserName(user.uid);
         setUserNames(prev => ({
@@ -224,14 +260,14 @@ const VideoCall = () => {
                 u.uid === user.uid ? { 
                   ...u, 
                   videoTrack: user.videoTrack,
-                  displayName: userNames[user.uid] || 'Người dùng'
+                  displayName: userNames[user.uid] || 'User'
                 } : u
               );
             }
             return [...prevUsers, { 
               uid: user.uid, 
               videoTrack: user.videoTrack,
-              displayName: userNames[user.uid] || 'Người dùng'
+              displayName: userNames[user.uid] || 'User'
             }];
           });
         }
@@ -249,7 +285,7 @@ const VideoCall = () => {
     // Sự kiện khi user khác unpublish stream
     client.on("user-unpublished", (user, mediaType) => {
       if (mediaType === "video") {
-        showToast(`Một người dùng đã tắt camera`, "warning");
+        showToast(`A user has turned off their camera`, "warning");
         setRemoteUsers((prevUsers) => {
           return prevUsers.map((u) => {
             if (u.uid === user.uid) {
@@ -261,13 +297,13 @@ const VideoCall = () => {
       }
 
       if (mediaType === "audio") {
-        showToast(`Một người dùng đã tắt microphone`, "warning");
+        showToast(`A user has muted their microphone`, "warning");
       }
     });
 
     // Sự kiện khi user khác rời kênh
     client.on("user-left", (user) => {
-      showToast(`Một người dùng đã rời khỏi cuộc gọi`, "error");
+      showToast(`A user has left the call`, "error");
       // Cập nhật số người tham gia
       setParticipantCount(prev => Math.max(0, prev - 1));
 
@@ -289,7 +325,7 @@ const VideoCall = () => {
 
     // Sự kiện lỗi
     client.on("exception", (event) => {
-      showToast(`Lỗi: ${event.code}`, "error");
+      showToast(`Error: ${event.code}`, "error");
     });
   };
 
@@ -298,10 +334,10 @@ const VideoCall = () => {
     if (localStream && localStream.audioTrack) {
       if (micEnabled) {
         await localStream.audioTrack.setEnabled(false);
-        showToast("Đã tắt microphone", "warning");
+        showToast("Microphone muted", "warning");
       } else {
         await localStream.audioTrack.setEnabled(true);
-        showToast("Đã bật microphone", "success");
+        showToast("Microphone unmuted", "success");
       }
       setMicEnabled(!micEnabled);
     }
@@ -312,10 +348,10 @@ const VideoCall = () => {
     if (localStream && localStream.videoTrack) {
       if (cameraEnabled) {
         await localStream.videoTrack.setEnabled(false);
-        showToast("Đã tắt camera", "warning");
+        showToast("Camera turned off", "warning");
       } else {
         await localStream.videoTrack.setEnabled(true);
-        showToast("Đã bật camera", "success");
+        showToast("Camera turned on", "success");
       }
       setCameraEnabled(!cameraEnabled);
     }
@@ -336,14 +372,21 @@ const VideoCall = () => {
 
       // Rời khỏi kênh
       await client.leave();
-      showToast("Đã rời khỏi cuộc gọi", "info"); // Thông báo
+      showToast("Left the call", "info"); // Thông báo
+
       // Gọi API để cập nhật trạng thái cuộc gọi
-      if (callId && userData?._id === callInfo?.caller) {
-        await videoCallService.endCall(accesstoken, callId);
+      if (callId) {
+        await videoCallService.leaveCall(accesstoken, callId);
       }
 
+      // Nếu là cuộc gọi nhóm và người dùng là người gọi, kết thúc cuộc gọi
+      if (callId && callInfo?.group && userData?._id === callInfo?.caller) {
+        await videoCallService.endCall(accesstoken, callId);
+      }
+      // Nếu là cuộc gọi 1-1, chỉ cần leave call là đủ
+
     } catch (error) {
-      console.error("Lỗi khi rời khỏi cuộc gọi:", error);
+      console.error("Error leaving call:", error);
     }
   };
 
@@ -353,22 +396,29 @@ const VideoCall = () => {
       await leaveCall();
       window.close(); // Đóng cửa sổ nếu là cửa sổ mới
     } catch (error) {
-      console.error("Lỗi khi kết thúc cuộc gọi:", error);
+      console.error("Error ending call:", error);
     }
   };
+
+  // Thêm hàm xử lý đóng dialog và kết thúc cuộc gọi
+  const handleDialogClose = async () => {
+    setShowEndCallDialog(false);
+    await handleEndCall();
+  };
+
   // Component hiển thị danh sách người tham gia
   const ParticipantsList = () => {
     const allParticipants = [
       { 
         uid: userData._id, 
         isLocal: true,
-        displayName: userNames[userData._id] || userData.displayName || 'Bạn',
+        displayName: userNames[userData._id] || userData.displayName || 'You',
         avatar: userAvatars[userData._id] || userData.image || ''
       },
       ...client.remoteUsers.map(user => ({ 
         uid: user.uid, 
         isLocal: false,
-        displayName: userNames[user.uid] || 'Người dùng',
+        displayName: userNames[user.uid] || 'User',
         avatar: userAvatars[user.uid] || ''
       }))
     ];
@@ -389,7 +439,7 @@ const VideoCall = () => {
         }}
       >
         <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-          Danh sách người tham gia ({allParticipants.length})
+          Participants ({allParticipants.length})
         </Typography>
         {allParticipants.map((participant) => (
           <Box 
@@ -447,7 +497,7 @@ const VideoCall = () => {
                     ml: 1
                   }}
                 >
-                  Bạn
+                  You
                 </Typography>
               )}
             </Box>
@@ -489,10 +539,10 @@ const VideoCall = () => {
               alt={userNames[user.uid]}
               sx={{ width: 80, height: 80, mb: 2 }}
             >
-              {!userAvatars[user.uid] && (userNames[user.uid] || 'Người dùng').charAt(0)}
+              {!userAvatars[user.uid] && (userNames[user.uid] || 'User').charAt(0)}
             </Avatar>
             <Typography className="no-video-text" sx={{ color: 'white' }}>
-              {userNames[user.uid] || 'Người dùng'} (Video bị tắt)
+              {userNames[user.uid] || 'User'} (Video bị tắt)
             </Typography>
           </Box>
         )}
@@ -517,9 +567,9 @@ const VideoCall = () => {
             alt={userNames[user.uid]}
             sx={{ width: 24, height: 24 }}
           >
-            {!userAvatars[user.uid] && (userNames[user.uid] || 'Người dùng').charAt(0)}
+            {!userAvatars[user.uid] && (userNames[user.uid] || 'User').charAt(0)}
           </Avatar>
-          {userNames[user.uid] || 'Người dùng'}
+          {userNames[user.uid] || 'User'}
         </Typography>
       </div>
     );
@@ -531,7 +581,7 @@ const VideoCall = () => {
       <Box className="video-call-container loading-container">
         <CircularProgress />
         <Typography variant="h6" sx={{ mt: 2 }}>
-          Đang kết nối...
+          Connecting...
         </Typography>
       </Box>
     );
@@ -549,7 +599,7 @@ const VideoCall = () => {
           onClick={() => window.close()}
           sx={{ mt: 2 }}
         >
-          Đóng
+          Close
         </IconButton>
       </Box>
     );
@@ -561,10 +611,10 @@ const VideoCall = () => {
       <Paper elevation={1} className="call-header">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6">
-            {callInfo?.group ? `Cuộc gọi nhóm` : 'Cuộc gọi video'}
+            {callInfo?.group ? `Group Call` : 'Video Call'}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", position: 'relative' }}>
-            <Tooltip title="Xem danh sách người tham gia">
+            <Tooltip title="View participants">
               <IconButton 
                 onClick={() => setShowParticipants(!showParticipants)}
                 sx={{ mr: 2 }}
@@ -601,7 +651,7 @@ const VideoCall = () => {
           ) : (
             <Grid item xs={12} className="waiting-container">
               <Typography variant="h6">
-                Đang chờ người khác tham gia...
+                Waiting for others to join...
               </Typography>
             </Grid>
           )}
@@ -615,7 +665,7 @@ const VideoCall = () => {
             style={{ width: '100%', height: '100%', backgroundColor: '#16213e' }}
           ></div>
           <Typography className="local-video-label">
-            Bạn {!micEnabled && "(Đã tắt mic)"} {!cameraEnabled && "(Đã tắt camera)"}
+            You {!micEnabled && "(Mic muted)"} {!cameraEnabled && "(Camera off)"}
           </Typography>
         </Box>
       </Box>
@@ -663,6 +713,58 @@ const VideoCall = () => {
           {notification?.message}
         </Alert>
       </Snackbar>
+
+      {/* Thêm Dialog component */}
+      <Dialog
+        open={showEndCallDialog}
+        onClose={handleDialogClose}
+        aria-labelledby="end-call-dialog-title"
+        aria-describedby="end-call-dialog-description"
+        PaperProps={{
+          sx: {
+            minWidth: '320px',
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+          }
+        }}
+      >
+        <DialogTitle 
+          id="end-call-dialog-title"
+          sx={{
+            bgcolor: 'warning.main',
+            color: 'white',
+            py: 2,
+            px: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}
+        >
+          <CallEndIcon />
+          Call Ended
+        </DialogTitle>
+        <DialogContent sx={{ py: 3, px: 3 }}>
+          <Typography id="end-call-dialog-description" variant="body1">
+            {endCallMessage}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button 
+            onClick={handleDialogClose}
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{
+              py: 1,
+              borderRadius: '8px',
+              textTransform: 'none',
+              fontSize: '1rem'
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

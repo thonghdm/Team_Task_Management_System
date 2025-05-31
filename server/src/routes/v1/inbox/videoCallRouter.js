@@ -18,6 +18,9 @@ router.put('/:callId/decline', videoCallController.declineCall)
 // End a video call
 router.put('/:callId/end', videoCallController.endCall)
 
+// Leave a video call
+router.put('/:callId/leave', videoCallController.leaveCall)
+
 // Get call history
 router.get('/history', videoCallController.getCallHistory)
 

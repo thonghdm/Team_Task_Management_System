@@ -10,6 +10,7 @@ const VideoCallService = {
                 group: groupId,
                 startedAt: new Date(),
             });
+            
 
             // Uncomment nếu bạn muốn populate dữ liệu
             // await videoCall.populate([
@@ -47,7 +48,10 @@ const VideoCallService = {
         if (!call.participants.includes(userId)) {
             throw new Error('You are not a participant in this call')
         }
-
+        if (!call.activeParticipants.includes(userId)) {
+            call.activeParticipants.push(userId)
+            await call.save()
+        }
         if (call.status === 'ringing') {
             call.status = 'accepted'
             if (!call.startedAt) {
@@ -97,7 +101,7 @@ const VideoCallService = {
         if (call.startedAt) {
             call.duration = Math.round((call.endedAt - call.startedAt) / 1000) // duration in seconds
         }
-
+        call.participants = [];
         await call.save()
 
         return call
@@ -177,6 +181,33 @@ const VideoCallService = {
         }
 
         return activeCall
+    },
+    /**
+     * Leave a video call
+     */
+    leaveCall: async (callId, userId) => {
+        const call = await VideoCall.findById(callId)
+        if (!call) {
+            throw new Error('Call not found')
+        }
+
+        // Remove user from active participants
+        call.activeParticipants = call.activeParticipants.filter(
+            id => id.toString() !== userId
+        )
+        await call.save()
+
+        // If no active participants left and caller left, end the call
+        if (call.activeParticipants.length === 0 && call.caller.toString() === userId) {
+            call.status = 'ended'
+            call.endedAt = new Date()
+            if (call.startedAt) {
+                call.duration = Math.round((call.endedAt - call.startedAt) / 1000)
+            }
+            await call.save()
+        }
+
+        return call
     }
 }
 
