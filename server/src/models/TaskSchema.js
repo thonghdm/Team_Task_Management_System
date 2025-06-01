@@ -15,6 +15,11 @@ const TaskSchema = new mongoose.Schema(
             enum: ['To Do', 'In Progress', 'Completed'],
             default: 'To Do'
         },
+        task_review_status: {
+            type: String,
+            enum: ['not requested', 'reject', 'pending', 'accept'],
+            default: 'not requested'
+        },
         priority: {
             type: String,
             enum: ['Low', 'Medium', 'High'],

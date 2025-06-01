@@ -76,19 +76,27 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
         
         // Filter groups from conversations
         const filteredGroups = conversations
-            .filter(conv => 
-                conv.isGroup && 
-                conv.groupInfo && 
-                conv.groupInfo.name && 
-                conv.groupInfo.name?.toLowerCase().includes(search)
-            )
+            .filter(conv => {
+                if (!conv.isGroup || !conv.groupInfo) return false;
+                
+                // Kiểm tra tên nhóm
+                const groupName = conv.groupInfo.name?.toLowerCase() || '';
+                if (groupName.includes(search)) return true;
+                
+                // Kiểm tra tên thành viên trong nhóm
+                const memberNames = conv.participants
+                    ?.map(p => p.displayName?.toLowerCase())
+                    .filter(Boolean) || [];
+                return memberNames.some(name => name.includes(search));
+            })
             .map(conv => ({
                 _id: conv._id,
                 name: conv.groupInfo.name,
                 avatar: conv.groupInfo.avatar,
                 avatarColor: generateAvatarColor(conv.groupInfo.name),
                 isGroup: true,
-                conversation: conv
+                conversation: conv,
+                participants: conv.participants
             }));
         
         setUserOptions(filteredUsers);
