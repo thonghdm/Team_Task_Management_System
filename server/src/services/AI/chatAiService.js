@@ -1,5 +1,8 @@
-const OpenAI = require('openai')
+const { GoogleGenerativeAI } = require('@google/generative-ai')
 require('dotenv').config()
+
+// Initialize Gemini API client
+const genAI = new GoogleGenerativeAI(process.env.AI_API_KEY)
 
 // const client = new OpenAI({
 //     baseURL: 'https://openrouter.ai/api/v1',
@@ -12,43 +15,33 @@ require('dotenv').config()
 // })
 
 
-const client = new OpenAI({
-    baseURL: 'https://api.x.ai/v1',
-    // apiKey: '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',
-    apiKey: process.env.AI_API_KEY,
-    defaultHeaders: {
-        'HTTP-Referer': 'http://localhost:3000',
-        'X-Title': 'Local Development'
-    }
-})
+// const client = new OpenAI({
+//     baseURL: 'https://api.x.ai/v1',
+//     // apiKey: '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',
+//     apiKey: process.env.AI_API_KEY,
+//     defaultHeaders: {
+//         'HTTP-Referer': 'http://localhost:3000',
+//         'X-Title': 'Local Development'
+//     }
+// })
 
 
 async function chatAiService(prompt) {
     try {
         if (!prompt) throw new Error('Prompt is required')
 
-        // const completion = await client.chat.completions.create({
-        //     model: 'google/gemini-2.0-flash-exp:free',
-        //     messages: [{ role: 'user', content: prompt }],
-        //     temperature: 0.7,
-        //     max_tokens: 2048,
-        //     stream: false,
-        //     fallbacks: ['thudm/glm-z1-32b:free', 'deepseek/deepseek-v3-base:free'] // Added fallback models
-        // })
- 
-        const completion = await client.chat.completions.create({
-            model : 'grok-3-fast',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            stream: false,
-        })
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
+        // Generate content
+        const result = await model.generateContent(prompt)
+        const response = await result.response
+        const text = response.text()
 
-        if (!completion?.choices?.[0]?.message?.content) {
+        if (!text) {
             throw new Error('Unexpected API response structure')
         }
 
-        return completion.choices[0].message.content
+        return text
     } catch (error) {
         throw new Error(error.message)
     }
@@ -175,4 +168,4 @@ async function aiTaskAssignment(userPrompt, tasks, members) {
 module.exports = {
     chatAiService,
     aiTaskAssignment
-};
+}

@@ -2,265 +2,363 @@
 
 /* Main container */
 .video-call-container {
+    background-color: #1a1a1a;
+    color: white;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    background-color: #1a1a2e;
-    color: #f0f0f0;
-    overflow: hidden;
-  }
-  
-  /* Header styles */
-  .call-header {
-    padding: 12px 20px;
-    background-color: rgba(30, 30, 50, 0.9) !important;
-    color: white !important;
-    backdrop-filter: blur(5px);
+    position: relative;
+}
+
+/* Header styles */
+.call-header {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 10;
-  }
-  
-  /* Video grid container */
-  .video-grid-container {
+}
+
+/* Video grid container */
+.video-grid-container {
     flex: 1;
-    position: relative;
-    padding: 16px;
-    overflow: hidden;
-    background-color: #0f0f1a;
-  }
-  
-  /* Remote videos grid */
-  .remote-videos-grid {
-    height: 100%;
-    width: 100%;
-    padding: 8px !important;
-  }
-  
-  /* Individual remote video container */
-  .remote-video-container {
-    width: 100%;
-    height: 100%;
-    min-height: 260px;
-    background-color: #16213e;
-    border-radius: 10px;
+    /* padding: 24px; */
+    padding: 0 24px 100px 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Remote videos grid */
+.remote-videos-grid {
+    flex: 1;
+    margin: 0 !important;
+    min-height: 0;
+}
+
+/* Remote video container */
+.remote-video-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    background-color: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-  }
-  
-  .remote-video-container:hover {
-    transform: scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-  }
-  
-  /* Text when video is off */
-  .no-video-text {
+}
+
+.remote-video-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Screen share overlay */
+.screen-share-overlay {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #e2e2e2;
-    font-weight: 500;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 8px 16px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    background-color: #000;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* When screen sharing is active */
+.remote-video-container.has-screen-share {
+    border: 2px solid #34c759;
+}
+
+.remote-video-container.has-screen-share .screen-share-overlay {
+    box-shadow: 0 0 0 2px #34c759;
+}
+
+/* Local video container */
+.local-video-container {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    width: 240px;
+    height: 180px;
+    background-color: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.local-video-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* When local user is screen sharing */
+.local-video-container.screen-sharing {
+    width: 320px;
+    height: 240px;
+    bottom: 120px;
+    right: 32px;
+    border: 2px solid #34c759;
+}
+
+.local-video-container.screen-sharing .local-video {
+    object-fit: contain;
+}
+
+/* Video labels */
+.user-info-label {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 6px 12px;
     border-radius: 20px;
-  }
-  
-  /* Waiting container */
-  .waiting-container {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 3;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.local-video-label {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 3;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* No video overlay */
+.no-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+    z-index: 1;
+}
+
+.no-video-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    margin-top: 12px;
+}
+
+/* Call controls */
+.call-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100%;
-    min-height: 350px;
-    background-color: #16213e;
-    border-radius: 10px;
-    color: #e2e2e2;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    animation: pulse 2s infinite;
-  }
-  
-  @keyframes pulse {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-  }
-  
-  /* Local video container */
-  .local-video-container {
-    position: absolute;
-    bottom: 80px;
-    right: 20px;
-    width: 220px;
-    height: 165px;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 2px solid #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    z-index: 5;
-    transition: all 0.3s ease;
-  }
-  
-  .local-video-container:hover {
+    gap: 16px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 100;
+}
+
+.control-button {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    width: 48px !important;
+    height: 48px !important;
+    transition: all 0.2s ease !important;
+}
+
+.control-button:hover {
+    background-color: rgba(255, 255, 255, 0.2) !important;
     transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-  }
-  
-  /* Local video */
-  .local-video {
+}
+
+.control-button-off {
+    background-color: rgba(255, 59, 48, 0.2) !important;
+    color: #ff3b30 !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+.control-button-active {
+    background-color: rgba(52, 199, 89, 0.2) !important;
+    color: #34c759 !important;
+    width: 48px !important;
+    height: 48px !important;
+}
+
+.end-call-button {
+    background-color: #ff3b30 !important;
+    color: white !important;
+    width: 48px !important;
+    height: 48px !important;
+    transition: all 0.2s ease !important;
+}
+
+.end-call-button:hover {
+    background-color: #ff2d20 !important;
+    transform: scale(1.05);
+}
+
+/* Loading and error states */
+.loading-container,
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .video-grid-container {
+        padding: 16px;
+    }
+
+    .local-video-container {
+        width: 160px;
+        height: 120px;
+        bottom: 80px;
+        right: 16px;
+    }
+
+    .local-video-container.screen-sharing {
+        width: 240px;
+        height: 180px;
+        bottom: 100px;
+        right: 24px;
+    }
+
+    .call-controls {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .control-button,
+    .control-button-off,
+    .control-button-active,
+    .end-call-button {
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Waiting container */
+.waiting-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background-color: #16213e;
-  }
-  
-  /* Local video label */
-  .local-video-label {
+}
+
+/* Screen sharing indicator */
+.screen-sharing-indicator {
     position: absolute;
-    bottom: 8px;
-    left: 8px;
-    background-color: rgba(0, 0, 0, 0.6);
+    top: 12px;
+    right: 12px;
+    background: rgba(52, 199, 89, 0.2);
+    color: #34c759;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 3;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+/* Video grid items for different remote user counts */
+.remote-grid-1 {
+    height: calc(100vh - 160px) !important;
+}
+
+.remote-grid-2 {
+    height: calc(50vh - 100px) !important;
+}
+
+.remote-grid-3, .remote-grid-4 {
+    height: calc(50vh - 100px) !important;
+}
+
+/* Toast/notification styles */
+.MuiAlert-filledInfo {
+    background-color: #2196f3 !important;
+}
+
+.MuiAlert-filledSuccess {
+    background-color: #4caf50 !important;
+}
+
+.MuiAlert-filledWarning {
+    background-color: #ff9800 !important;
+}
+
+.MuiAlert-filledError {
+    background-color: #f44336 !important;
+}
+
+/* Screen sharing specific styles */
+.remote-video-container.screen-share {
+    border: 2px solid #4caf50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+}
+
+.remote-video-container.screen-share::before {
+    content: 'Screen Sharing';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(76, 175, 80, 0.9);
     color: white;
-    padding: 3px 8px;
+    padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
-    backdrop-filter: blur(2px);
-  }
-  
-  /* Call controls */
-  .call-controls {
-    display: flex;
-    justify-content: center;
-    padding: 16px;
-    background-color: rgba(30, 30, 50, 1);
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
-    gap: 16px;
-    z-index: 10;
-  }
-  
-  /* Control buttons */
-  .control-button {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-    color: white !important;
-    width: 50px !important;
-    height: 50px !important;
-    transition: all 0.2s ease !important;
-  }
-  
-  .control-button:hover {
-    background-color: rgba(255, 255, 255, 0.25) !important;
-    transform: scale(1.1);
-  }
-  
-  .control-button-off {
-    background-color: rgba(255, 80, 80, 0.6) !important;
-    color: white !important;
-    width: 50px !important;
-    height: 50px !important;
-    transition: all 0.2s ease !important;
-  }
-  
-  .control-button-off:hover {
-    background-color: rgba(255, 80, 80, 0.8) !important;
-    transform: scale(1.1);
-  }
-  
-  .end-call-button {
-    background-color: #f44336 !important;
-    color: white !important;
-    width: 50px !important;
-    height: 50px !important;
-    transition: all 0.2s ease !important;
-  }
-  
-  .end-call-button:hover {
-    background-color: #d32f2f !important;
-    transform: scale(1.1);
-  }
-  
-  /* Loading container */
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #1a1a2e;
-    color: white;
-  }
-  
-  /* Error container */
-  .error-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #1a1a2e;
-    color: white;
-    padding: 20px;
-    text-align: center;
-  }
-  
-  /* Responsive styles */
-  @media (max-width: 600px) {
-    .local-video-container {
-      width: 120px;
-      height: 90px;
-      bottom: 90px;
-      right: 16px;
-    }
-    
-    .call-controls {
-      padding: 12px 8px;
-      gap: 12px;
-    }
-    
-    .control-button, .control-button-off, .end-call-button {
-      width: 45px !important;
-      height: 45px !important;
-    }
-  }
-  
-  /* Video grid items for different remote user counts */
-  .remote-grid-1 {
-    height: calc(100vh - 160px) !important;
-  }
-  
-  .remote-grid-2 {
-    height: calc(50vh - 100px) !important;
-  }
-  
-  .remote-grid-3, .remote-grid-4 {
-    height: calc(50vh - 100px) !important;
-  }
-  
-  /* Animations for smoother UI */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  .fade-in {
-    animation: fadeIn 0.3s ease-in;
-  }
-  
-  /* Toast/notification styles */
-  .MuiAlert-filledInfo {
-    background-color: #2196f3 !important;
-  }
-  
-  .MuiAlert-filledSuccess {
-    background-color: #4caf50 !important;
-  }
-  
-  .MuiAlert-filledWarning {
-    background-color: #ff9800 !important;
-  }
-  
-  .MuiAlert-filledError {
-    background-color: #f44336 !important;
-  }
+    z-index: 1;
+}
