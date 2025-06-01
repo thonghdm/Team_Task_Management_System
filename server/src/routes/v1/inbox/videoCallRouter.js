@@ -18,11 +18,17 @@ router.put('/:callId/decline', videoCallController.declineCall)
 // End a video call
 router.put('/:callId/end', videoCallController.endCall)
 
+// Leave a video call
+router.put('/:callId/leave', videoCallController.leaveCall)
+
 // Get call history
 router.get('/history', videoCallController.getCallHistory)
 
 // Get active call for current user
 router.get('/active', videoCallController.getActiveCall)
+
+// Get active group call
+router.get('/group/:groupId/active', videoCallController.getActiveGroupCall)
 
 // Get call details by ID
 router.get('/:callId', videoCallController.getCallById)

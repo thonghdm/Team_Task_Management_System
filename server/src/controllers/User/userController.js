@@ -161,12 +161,38 @@ const updateAll = async (req, res, next) => {
     }
 }
 
+const getMemberById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(StatusCodes.BAD_REQUEST).json({ 
+                success: false,
+                message: 'Member ID is required' 
+            });
+        }
+        const member = await userService.getMemberById(id);
+        if (!member) {
+            return res.status(StatusCodes.NOT_FOUND).json({ 
+                success: false,
+                message: 'Member not found' 
+            });
+        }
+        res.status(StatusCodes.OK).json({
+            success: true,
+            member,
+            message: 'Successfully retrieved member information.'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 module.exports = {
     getOne,
     updateUser,
     searchUsers,
     getAllMembers,
+    getMemberById,
     updateAll,
     changePassword,
     changePasswordProfile,

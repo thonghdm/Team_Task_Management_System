@@ -7,7 +7,6 @@ export const uploadChatFileThunk = createAsyncThunk(
   async ({ accessToken, fileData }, thunkAPI) => {
     try {
       const data = await uploadChatFile(accessToken, fileData);
-      console.log('accessTokennnnnn:', data);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
@@ -20,9 +19,7 @@ export const fetchChatFilesByConversationId = createAsyncThunk(
   'chatFile/fetchByConversationId',
   async ({ accessToken, conversationId }, thunkAPI) => {   
     try {
-      console.log("accessTokennnnnnnnnnnnnnnnnnnnnnnn", accessToken);
       const dataPromise = await getChatFilesByConversationId(accessToken, conversationId);
-      console.log("dataPromise", dataPromise);
       return dataPromise;
     } catch (error) {
       console.error('Error fetching chat files:', error);

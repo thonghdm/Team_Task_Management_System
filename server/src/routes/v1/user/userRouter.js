@@ -12,6 +12,9 @@ router.route('/search-member')
 router.route('/all-member')
     .get(userController.getAllMembers)
 
+router.route('/member/:id')
+    .get(userController.getMemberById)
+
 router.route('/update-all')
     .put(verifyToken, userController.updateAll)
 

@@ -11,6 +11,7 @@ import videoCallService from "~/apis/inbox/videoCallService";
 import { useCallContext } from "~/Context/CallProvider";
 import { useChat } from '~/Context/ChatProvider';
 
+
 // Hàm tạo avatar tự động từ tên nhóm (dự phòng)
 const generateAvatarColor = (name) => {
   // Tạo màu ngẫu nhiên dựa trên tên nhóm
@@ -43,7 +44,6 @@ const ChatHeader = ({ toggleSidebar }) => {
   if (currentConversation) {
     if (isGroup) {
       groupInfo = currentConversation.groupInfo;
-      console.log("Group info:", groupInfo); // Để debug
     } else if (currentConversation.participants) {
       otherUser = currentConversation.participants.find(u => u._id !== userData?._id);
     }
@@ -54,26 +54,32 @@ const ChatHeader = ({ toggleSidebar }) => {
     setAvatarError(false);
   }, [currentConversation]);
 
-  const handleVideoCall = async () => {
-    try {
-      setIsStartingCall(true);
+const handleVideoCall = async () => {
+  try {
+    setIsStartingCall(true);
 
-      // Lấy danh sách người tham gia (loại trừ người dùng hiện tại)
-      let participantIds = [];
-      
-      if (isGroup) {
-        participantIds = currentConversation.participants
-          .filter(participant => participant._id !== userData?._id)
-          .map(participant => participant._id);
-      } else if (otherUser) {
-        participantIds = [otherUser._id];
-      }
+    // Lấy danh sách người tham gia (loại trừ người dùng hiện tại)
+    let participantIds = [];
+    
+    if (isGroup) {
+      participantIds = currentConversation.participants
+        .filter(participant => participant._id !== userData?._id)
+        .map(participant => participant._id);
+    } else if (otherUser) {
+      participantIds = [otherUser._id];
+    }
 
-      if (participantIds.length === 0) {
-        throw new Error("No participants to call");
-      }
+    if (participantIds.length === 0) {
+      throw new Error("No participants to call");
+    }
 
-      // Call API to create a new call
+    const callContinueResponse = await videoCallService.getActiveGroupCall(accesstoken, currentConversation._id);
+    console.log("Call continue response:", callContinueResponse);
+    if (callContinueResponse.success && callContinueResponse.videoCall) {
+      const url = `/call-video/${callContinueResponse.videoCall._id}`;
+      window.open(url, "_blank", "width=900,height=600,noopener,noreferrer");
+    } else {
+      // If no active call exists, create a new one
       const response = await videoCallService.startCall(
         accesstoken, 
         participantIds, 
@@ -83,22 +89,19 @@ const ChatHeader = ({ toggleSidebar }) => {
       if (response.success && response.videoCall) {
         // Use the context function to emit socket event
         startCall(response.videoCall._id, participantIds, isGroup ? currentConversation._id : null);
-
-        console.log("Start call response:", response);
-        // Navigate to video call page
         const url = `/call-video/${response.videoCall._id}`;
         window.open(url, "_blank", "width=900,height=600,noopener,noreferrer");
       } else {
-        throw new Error("Cannot start call");
+        throw new Error("Failed to create new call");
       }
-    } catch (error) {
-      console.error("Error starting call:", error);
-      alert("Cannot start call. Please try again later.");
-    } finally {
-      setIsStartingCall(false);
     }
-  };
-
+  } catch (error) {
+    console.error("Error handling video call:", error);
+    alert("Cannot start or join call. Please try again later.");
+  } finally {
+    setIsStartingCall(false);
+  }
+};
   // Tạo URL avatar dựa trên tên nhóm (dự phòng)
   const generateFallbackAvatarUrl = (name) => {
     const initials = name.split(' ')
@@ -130,8 +133,6 @@ const ChatHeader = ({ toggleSidebar }) => {
             mr: 2,
             bgcolor: generateAvatarColor(groupName)
           }} 
-          src={avatarSrc}
-          alt={groupName}
           onError={handleAvatarError}
         >
           {groupName[0].toUpperCase()}
@@ -188,9 +189,9 @@ const ChatHeader = ({ toggleSidebar }) => {
         >
           <CallIcon />
         </IconButton>
-        <IconButton>
+        {/* <IconButton>
           <MissedVideoCallIcon />
-        </IconButton>
+        </IconButton> */}
         <IconButton onClick={toggleSidebar} title="Show conversation details">
           <InfoIcon />
         </IconButton>
