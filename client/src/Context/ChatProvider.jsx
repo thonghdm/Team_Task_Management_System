@@ -88,16 +88,14 @@ export const ChatProvider = ({ children }) => {
         }
         
         setCurrentConversation(updatedConversation);
-        
-        // Thông báo cho server về sự thay đổi (nếu cần)
-        if (updatedConversation._id) {
-            socket.emit('conversation updated', updatedConversation);
-        }
     }, []);
 
-    // Thiết lập socket listeners
+    // Authentication và thiết lập socket listeners
     useEffect(() => {
         if (!userData?._id) return;
+
+        // Authenticate với socket
+        socket.emit('authenticate', { userId: userData._id });
 
         // Xử lý tin nhắn mới
         socket.on('new message', handleNewMessage);

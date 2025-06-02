@@ -21,7 +21,8 @@ import {
   DialogActions,
   Button,
   TextField,
-  CircularProgress
+  CircularProgress,
+  Typography
 } from '@mui/material';
 import { MoreVert as MoreVertIcon, Add as AddIcon, QuestionAnswer as QuestionAnswerIcon, ExpandMore as ExpandMoreIcon, DensityMedium as DensityMediumIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
@@ -45,6 +46,8 @@ import ExpandTask from './ChangeList/ExpandTask';
 import { formatDateRange } from '~/utils/formatDateRange'
 import ColorPickerDialog from '~/Components/ColorPickerDialog';
 import AddMemberDialog from '~/Components/AddMemberDialog';
+import TaskReview from './TaskReview';
+import { fetchTaskById } from '~/redux/project/task-slice';
 
 const TaskBoard = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -71,6 +74,8 @@ const TaskBoard = () => {
   const [openColorPicker, setOpenColorPicker] = useState(false);
   const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [taskReview, setTaskReview] = useState({taskId: null, task_Review: null});
+  const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
   useEffect(() => {
     const getProjectDetail = async (token) => {
       try {
@@ -107,6 +112,7 @@ const TaskBoard = () => {
     comments: task.comments.length === 0 ? 0 : task.comments.length,
     members: task.members.length === 0 ? [{_id: '.', name: '.', avatar: '', is_active: false }] : task.members,
     dueDate: task.end_date || '.',
+    task_review_status: task.task_review_status || '.',
   }));
 
   const handleClick = (event) => {
@@ -150,7 +156,7 @@ const TaskBoard = () => {
   const handleEditClick = (type, taskId, value) => {
     // Tìm task hiện tại từ updatedTasks
     const currentTask = updatedTasks.find(task => task.id === taskId);
-    
+    console.log("currentTask", currentTask);
     // Set giá trị ban đầu dựa trên loại chỉnh sửa
     switch (type) {
       case 'task_name':
@@ -171,6 +177,8 @@ const TaskBoard = () => {
       case 'members':
         setAddMemberDialog({ open: true, taskId, value: currentTask });
         setOpenAddMemberDialog(true);
+        break;
+      case 'taskReview':
         break;
       default:
         setEditDialog({ open: true, type, taskId, value });
@@ -199,25 +207,25 @@ const TaskBoard = () => {
       
 
       switch (type) {
-        // case 'task_name':
-        //   updateData = { task_name: value };
-        //   notificationData = currentTask?.assigned_to_id
-        //     ?.filter(member =>
-        //       member.memberId._id !== userData._id &&
-        //       members.members.some(m =>
-        //         m.memberId._id === member.memberId._id &&
-        //         m.is_active === true
-        //       )
-        //     )
-        //     .map(member => ({
-        //       senderId: userData._id,
-        //       receiverId: member.memberId._id,
-        //       projectId: projectId,
-        //       taskId: taskId,
-        //       type: 'task_update',
-        //       message: `${userData.displayName} has updated task name to "${value}" in task ${currentTask?.task_name} in project ${currentTask?.project_id?.projectName}`
-        //     }));
-        //   break;
+        case 'task_name':
+          updateData = { task_name: value };
+                    notificationData = currentTask?.members
+          ?.filter(member =>
+              member._id !== userData._id &&
+              currentTask?.members?.some(m =>
+                m._id === member._id &&
+                m.is_active === true
+              )
+            )
+            .map(member => ({
+              senderId: userData._id,
+              receiverId: member._id,
+              projectId: projectId,
+              taskId: taskId,
+              type: 'task_update',
+              message: `${userData.displayName} has updated priority to "${selectedPriority}" in task ${currentTask?.task_name} in project ${currentTask?.project_id?.projectName}`
+            }));
+          break;
 
         case 'priority':
           updateData = { priority: selectedPriority };
@@ -243,11 +251,19 @@ const TaskBoard = () => {
           updateData = { status: selectedStatus };
           
           if (selectedStatus === 'Completed') {
-            updateData = { ...updateData, done_date: new Date().toISOString() };
+            updateData = { 
+              ...updateData, 
+              done_date: new Date().toISOString(),
+              task_review_status: 'pending'
+            };
           } else {
-            updateData = { ...updateData, done_date: '1000-10-10T00:00:00.000+00:00' };
+            updateData = { 
+              ...updateData, 
+              done_date: '1000-10-10T00:00:00.000+00:00',
+              task_review_status: 'not requested'
+            };
           }
-          console.log("currentTask.members:", updateData);
+          console.log("currentTask.members:", members);
           notificationData = currentTask?.members
           ?.filter(member =>
               member._id !== userData._id &&
@@ -275,7 +291,10 @@ const TaskBoard = () => {
         taskId,
         taskData: updateData
       }));
-      console.log("resultAction", resultAction);
+      console.log("resultAction",type
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ') );
 
       if (updateTaskThunks.fulfilled.match(resultAction)) {
         //Tạo audit log
@@ -284,13 +303,16 @@ const TaskBoard = () => {
           data: {
             task_id: taskId,
             action: 'Update',
-            entity: type.charAt(0).toUpperCase() + type.slice(1),
+            entity: type
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' '),
             old_value: currentTask[type],
-            new_value: type === 'status' ? selectedStatus : type === 'priority' ? selectedPriority : value ,
+            new_value: type === 'status' ? selectedStatus : type === 'priority' ? selectedPriority : type === 'task_name' ? value : currentTask[type],
             user_id: userData?._id
           }
         }));
-
+        await dispatch(fetchTaskById({ accesstoken: accesstoken, taskId }));
         console.log("Tạo project audit log");
         const resultActions = await dispatch(createAuditLog_project({
           accesstoken,
@@ -391,6 +413,9 @@ const TaskBoard = () => {
         case 'comments':
           handleNameClick(taskId, cellId);
           break;
+        case 'taskReview':
+          handleEditClick('taskReview', taskId, content);
+          break;
         default:
           console.log(`Unknown column type: ${cellId}`);
       }
@@ -409,7 +434,7 @@ const TaskBoard = () => {
         onClick={handleClick}
       >
         {content}
-        {hoveredCell === `${taskId}-${cellId}` && cellId !== 'end_date' && cellId !== 'list_name'&& cellId !== 'comments' && (
+        {hoveredCell === `${taskId}-${cellId}` && cellId !== 'end_date' && cellId !== 'list_name'&& cellId !== 'comments' && cellId !== 'taskReview' && (
           <Tooltip title={isTrulyEmpty ? "Add" : "Expand"}>
             <IconButton
               size="small"
@@ -436,11 +461,94 @@ const TaskBoard = () => {
     );
   };
 
-  const shortenId = (id) => {
-    if (!id) return '';
-    if (id.length <= 8) return id;
-    return `${id.slice(0, 2)}...${id.slice(-5)}`;
-};
+  const handleConfirmReviewTask = async (task_accept_status, taskId) => {
+    const currentTask = updatedTasks.find(task => task.id === taskId);
+    console.log('accept task?', task_accept_status, taskId);
+    try {
+        let notificationData = [];
+        let dataSave = {
+            task_review_status: task_accept_status
+        };
+        let message = '';
+        if (task_accept_status === 'accept') {
+            message = `${userData.displayName} has accepted task ${currentTask?.task_name} in project ${currentTask?.project_id?.projectName}`
+        } else {
+            message = `${userData.displayName} has rejected task ${currentTask?.task_name} in project ${currentTask?.project_id?.projectName}`
+            dataSave = { ...dataSave,  status: 'In Progress', done_date: '1000-10-10T00:00:00.000+00:00'};
+        }
+        notificationData = currentTask?.members
+        ?.filter(member =>
+            member._id !== userData._id &&
+            currentTask?.members?.some(m =>
+              m._id === member._id &&
+              m.is_active === true
+            )
+          )
+          .map(member => ({
+            senderId: userData._id,
+            receiverId: member._id,
+            projectId: projectId,
+            taskId: taskId,
+            type: 'task_update',
+            message: message
+          }));
+        console.log("notificationData", currentTask);
+        const handleSuccess = () => {};
+        const saveTaskReview = async (accesstoken) => {
+            try {
+                const resultAction = await dispatch(updateTaskThunks({
+                    accesstoken,
+                    taskId,
+                    taskData: dataSave
+                }));
+                if (updateTaskThunks.rejected.match(resultAction)) {
+                    if (resultAction.payload?.err === 2) {
+                        const newToken = await refreshToken();
+                        return saveTaskReview(newToken);
+                    }
+                    throw new Error('Delete status task failed');
+                }
+                await dispatch(createAuditLog({
+                    accesstoken: accesstoken,
+                    data: {
+                        task_id: taskId,
+                        action: 'Update',
+                        entity: 'Task Review',
+                        old_value: currentTask?.task_review_status,
+                        new_value: task_accept_status,
+                        user_id: userData?._id
+                    }
+                }));
+                await dispatch(fetchTaskById({ accesstoken: accesstoken, taskId }));
+                await dispatch(createAuditLog_project({
+                    accesstoken: accesstoken,
+                    data: {
+                        project_id: projectId,
+                        task_id: taskId,
+                        action: 'Update',
+                        entity: 'Task',
+                        user_id: userData?._id
+                    }
+                }));
+                if (projectId) await dispatch(fetchProjectDetail({ accesstoken: accesstoken, projectId }));
+                await dispatch(getTaskByMemberIDThunk({ accesstoken: accesstoken, memberID: userData?._id }));
+                await dispatch(addNotification({ accesstoken: accesstoken, data: notificationData }));
+                handleSuccess();
+                toast.success('Task updated successfully!');
+            } catch (error) {
+                toast.error('Error updating task');
+                throw error;
+            }
+        };
+        await saveTaskReview(accesstoken);
+    }
+    catch (error) {
+        throw error;
+    }
+}
+const currentUserRole = members?.members?.find(
+  member => member?.memberId?._id === userData?._id
+)?.isRole;
 
   return (
     <>
@@ -482,7 +590,11 @@ const TaskBoard = () => {
                     <MenuItem onClick={handleClose}>Sort ascending</MenuItem>
                     <MenuItem onClick={handleClose}>Sort descending</MenuItem>
                   </Menu> */}
+                </TableCell>  
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
+                Task Review
                 </TableCell>
+
               </TableRow>
             </TableHead>
             <TableBody>
@@ -672,7 +784,14 @@ const TaskBoard = () => {
                               sx={{ width: 24, height: 24 }}
                             />
                           ) : (
-                            <span key={index}>.</span>
+                            <span key={index}>
+                              <Avatar
+                              key={index}
+                              alt={member.name || '.'}
+                              src={defaultAvatar}
+                              sx={{ width: 24, height: 24 }}
+                            />
+                            </span>
                           )
                         ))
                       ) : null}
@@ -699,7 +818,18 @@ const TaskBoard = () => {
                   {/* </TableCell> */}
 
                   {renderTableCell(formatDateRange(task.start_date, task.end_date) || '.', task.id, 'end_date', !task.end_date || task.end_date === '.')}
-
+                  {renderTableCell(
+                    <TaskReview 
+                      role={currentUserRole}
+                      taskReview={task.task_review_status}
+                      status={task.status}
+                      onAccept={() => handleConfirmReviewTask('accept',task.id)}
+                      onReject={() => handleConfirmReviewTask('reject',task.id)}
+                    />,
+                    task.id,
+                    'taskReview',
+                    !task.task_review_status || task.task_review_status === '.'
+                  )}
                 </TableRow>
               ))}
               {showNameMenu && selectedTask && (

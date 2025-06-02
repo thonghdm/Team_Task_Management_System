@@ -23,7 +23,11 @@ const createGroup = async (name, description, creatorId, memberIds, avatar = nul
     })
     await conversation.save()
 
-    return { group, conversation }
+    // Populate participants before returning
+    const populatedConversation = await Conversation.findById(conversation._id)
+        .populate('participants', 'displayName image');
+
+    return { group, conversation: populatedConversation }
 }
 
 const addMemberToGroup = async (conversationId, newMemberId, adminId) => {

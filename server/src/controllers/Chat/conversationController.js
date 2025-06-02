@@ -27,11 +27,15 @@ const conversationService = {
     createGroupConversation: async (req, res) => {
         try {
             const { groupName, participantIds } = req.body
-            const creatorId = req.user.id
+            const creatorId = req.currentUser._id
             const conversation = await conservationService.createGroupConversation(groupName, participantIds, creatorId)
+            if (!conversation) {
+                return res.status(400).json({ error: 'Failed to create group conversation' })
+            }
             res.status(201).json(conversation)
         }
         catch (error) {
+            console.error('createGroupConversation error:', error)
             res.status(500).json({ error: error.message })
         }
     },

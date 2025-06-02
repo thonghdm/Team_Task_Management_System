@@ -29,6 +29,7 @@ export function extractTasksInfo(project) {
                 end_date: task?.end_date || "",
                 start_date: task?.start_date || "",
                 priority: task?.priority || "",
+                task_review_status: task?.task_review_status || "",
             });
         });
     });

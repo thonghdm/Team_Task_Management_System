@@ -21,7 +21,7 @@ const AuditLogSchema = new mongoose.Schema({
     entity: {
         type: String,
         enum: ['Task', 'Comment', 'Assignee', 'Label', 'Priority', 'Status', 'Start Date',
-            'Due Date', 'Attachment', 'Description', 'Member', 'List'],
+            'Due Date', 'Attachment', 'Description', 'Member', 'List', 'Task Review', 'Task Name'],
         required: true
     },
     old_value: {

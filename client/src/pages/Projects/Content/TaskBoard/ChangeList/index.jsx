@@ -42,11 +42,13 @@ import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_
 import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'
 import { addNotification } from '~/redux/project/notifications-slice/index';
 
+import TaskReview from '../TaskReview';
+
 const ChangeList = ({ open, onClose, taskId }) => {
     const theme = useTheme();
     const [cmt, setCMT] = useState("Write a comment");
     const dispatch = useDispatch();
-
+    const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
     // Show details
     const [showDetails, setShowDetails] = useState(false);
     const toggleDetails = () => {
@@ -85,17 +87,102 @@ const ChangeList = ({ open, onClose, taskId }) => {
         setIdMemberMember(userIdx);
         setOpenMember(true);
     };
-
+    const handleApproval = (taskId, status) => {
+        console.log(taskId, status);
+    }
     /// delete label
     const [openLabel, setOpenLabel] = useState(false);
     const [selectedLabel, setSelectedLabel] = useState(null);
     const [selectedLabelName, setSelectedLabelName] = useState(null);
+
     const handleDeleteLabelClick = (labelId, labelName) => {
         setSelectedLabel(labelId);
         setSelectedLabelName(labelName);
         setOpenLabel(true);
     }
 
+    //Accept task
+    const handleConfirmReviewTask = async (task_accept_status) => {
+        console.log('accept task?', task_accept_status, taskId);
+        try {
+            let dataSave = {
+                task_review_status: task_accept_status
+            };
+            let message = '';
+            if (task_accept_status === 'accept') {
+                message = `${userData.displayName} has accepted task ${task?.task_name} in project ${task?.project_id?.projectName}`
+            } else {
+                message = `${userData.displayName} has rejected task ${task?.task_name} in project ${task?.project_id?.projectName}`
+                dataSave = { ...dataSave,  status: 'In Progress', done_date: '1000-10-10T00:00:00.000+00:00'};
+            }
+            const notificationData = task?.assigned_to_id
+                .filter(member =>
+                    member.memberId._id !== userData._id &&
+                    members.members.some(m =>
+                        m.memberId._id === member.memberId._id &&
+                        m.is_active === true
+                    )
+                )
+                .map(member => ({
+                    senderId: userData._id,
+                    receiverId: member.memberId._id,
+                    projectId: projectId,
+                    taskId: taskId,
+                    type: 'task_update',
+                    message: message
+                }));
+
+            const handleSuccess = () => {};
+            const saveTaskReview = async (token) => {
+                try {
+                    const resultAction = await dispatch(updateTaskThunks({
+                        accesstoken: token,
+                        taskId: taskId,
+                        taskData: dataSave
+                    }));
+                    if (updateTaskThunks.rejected.match(resultAction)) {
+                        if (resultAction.payload?.err === 2) {
+                            const newToken = await refreshToken();
+                            return saveTaskReview(newToken);
+                        }
+                        throw new Error('Delete status task failed');
+                    }
+                    await dispatch(createAuditLog({
+                        accesstoken: token,
+                        data: {
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Task Review',
+                            old_value: task?.task_review_status,
+                            new_value: task_accept_status,
+                            user_id: userData?._id
+                        }
+                    }));
+                    await dispatch(fetchTaskById({ accesstoken: token, taskId }));
+                    await dispatch(createAuditLog_project({
+                        accesstoken: token,
+                        data: {
+                            project_id: projectId,
+                            task_id: taskId,
+                            action: 'Update',
+                            entity: 'Task',
+                            user_id: userData?._id
+                        }
+                    }));
+                    if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+                    await dispatch(getTaskByMemberIDThunk({ accesstoken: token, memberID: userData?._id }));
+                    await dispatch(addNotification({ accesstoken: token, data: notificationData }));
+                    handleSuccess();
+                } catch (error) {
+                    throw error;
+                }
+            };
+            await saveTaskReview(accesstoken);
+        }
+        catch (error) {
+            throw error;
+        }
+    }
     //
     const { accesstoken, userData } = useSelector(state => state.auth)
     const { task } = useSelector(state => state.task);
@@ -106,6 +193,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
         const getTaskDetail = async (token) => {
             try {
                 const resultAction = await dispatch(fetchTaskById({ accesstoken: token, taskId }))
+                console.log('resultAction', resultAction);
                 if (fetchTaskById.rejected.match(resultAction)) {
                     if (resultAction.payload?.err === 2) {
                         const newToken = await refreshToken();
@@ -494,9 +582,9 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 }));
 
             if (newStatus === 'Completed') {
-                dataSave = { ...dataSave, done_date: new Date().toISOString() };
+                dataSave = { ...dataSave, done_date: new Date().toISOString(), task_review_status: 'pending' };
             } else {
-                dataSave = { ...dataSave, done_date: '1000-10-10T00:00:00.000+00:00' };
+                dataSave = { ...dataSave, done_date: '1000-10-10T00:00:00.000+00:00', task_review_status: 'not requested' };
             }
 
 
@@ -824,6 +912,18 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     <Typography >
                         <EditableText isClickable={!isViewer} initialText={task?.task_name} onSave={handleSaveTitle} maxWidth="780px" titleColor="primary.main" />
                     </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                            Task Review:
+                        </Typography>
+                        <TaskReview 
+                            role={currentUserRole}
+                            taskReview={task.task_review_status}
+                            status={task.status}
+                            onAccept={() => handleConfirmReviewTask('accept')}
+                            onReject={() => handleConfirmReviewTask('reject')}
+                        />
+                    </Box>
                     <IconButton onClick={onClose} sx={{ color: theme.palette.text.primary }}>
                         <Close />
                     </IconButton>
@@ -1014,6 +1114,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     </Box>
 
                     <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} isClickable={!isViewer} taskData={task} />
+
                 </Box>
             </DialogContent>
 

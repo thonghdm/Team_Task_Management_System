@@ -23,7 +23,7 @@ const AddUserFile = () => {
     const fileInputRef = useRef(null);
     const [failedUsers, setFailedUsers] = useState([]);
     const [successUsers, setSuccessUsers] = useState([]);
-
+    const [loading, setLoading] = useState(false);
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
 
@@ -71,6 +71,7 @@ const AddUserFile = () => {
         const success = [];
 
         try {
+            setLoading(true);
             await Promise.all(
                 data.map(async (user, index) => {
                     try {
@@ -92,13 +93,21 @@ const AddUserFile = () => {
 
             setFailedUsers(failed);
             setSuccessUsers(success);
-
+            console.log(success,'sssss');
             if (success.length > 0) {
                 toast.success(`${success.length} users added successfully`);
             }
             if (failed.length > 0) {
                 toast.error(`${failed.length} users failed to register`);
             }
+            setData([]);
+            setColumns([]);
+            setFailedUsers([]);
+            setSuccessUsers([]);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            setLoading(false);
         } catch (error) {
             console.error("Bulk user registration error:", error);
             toast.error("Failed to process user registrations");
@@ -171,8 +180,9 @@ const AddUserFile = () => {
                                 variant="contained"
                                 color="primary"
                                 onClick={handleSubmit}
+                                disabled={loading}
                             >
-                                Insert
+                                {loading ? 'Inserting...' : 'Insert'}
                             </Button>
                         </Box>
                         {failedUsers.length > 0 && (

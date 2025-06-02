@@ -44,7 +44,11 @@ const createGroupConversation = async (groupName, participantIds, creatorId) => 
         }))
     })
     await conversation.save()
-    return conversation}
+    // Populate participants before returning
+    return await Conversation.findById(conversation._id)
+        .populate('participants', 'displayName image');
+}
+
 const getConversationMessages = async (conversationId, page = 1, limit = 50) => {
     const skip = (page - 1) * limit
     const messages = await Message.find({ conversation: conversationId })
@@ -56,6 +60,7 @@ const getConversationMessages = async (conversationId, page = 1, limit = 50) => 
         .lean()
     return messages.reverse()
 }
+
 const getConversationList = async (userId) => {
     const conversations = await Conversation.find({
         participants: userId })
@@ -91,6 +96,7 @@ const sendMessage = async (senderId, conversationId, messageData) => {
     await conversation.save()
     return message.populate('sender', 'displayName image')
 }
+
 const markMessageAsSeen = async (messageId, userId) => {
     const message = await Message.findById(messageId)
     if (!message) {
@@ -102,6 +108,7 @@ const markMessageAsSeen = async (messageId, userId) => {
     }
     return message
 }
+
 const markConversationAsRead = async (conversationId, userId) => {
     await Conversation.findByIdAndUpdate(
         conversationId,

@@ -282,7 +282,7 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true, taskData }
             // Check existing members
             
             if (checkMemberIdExists(userInvite, (taskData?.assigned_to_id)? taskData?.assigned_to_id :  taskData?.members)) {
-                toast.error('One or more users alreadyyy exist');
+                toast.error('One or more users already exist');
                 setSelectedUsers([]);
                 setError(null);
                 return;

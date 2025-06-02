@@ -29,6 +29,11 @@ import {
   KeyboardArrowRight,
   Send
 } from '@mui/icons-material';
+import { useChat } from '~/Context/ChatProvider';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import messageApi from '~/apis/chat/messageApi';
+
 // Custom styled components
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-paper': {
@@ -58,13 +63,53 @@ const ProfileDialog = ({ open, onClose, member }) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [inputValue, setInputValue] = React.useState('');
+  const { sendMessage, currentConversation, setCurrentConversation } = useChat();
+  const { userData, accesstoken } = useSelector((state) => state.auth);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
+
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+    
+    let conversationId = currentConversation;
+    
+    // Nếu chưa có conversation, tạo mới
+    if (!conversationId && member?.memberId?._id) {
+      try {
+        const res = await messageApi.createConversation(accesstoken, userData._id, member.memberId._id);
+        conversationId = res._id;
+        setCurrentConversation(conversationId);
+      } catch (err) {
+        toast.error('Không thể tạo cuộc trò chuyện');
+        return;
+      }
+    }
+
+    if (!conversationId) {
+      toast.error('Vui lòng chọn cuộc trò chuyện');
+      return;
+    }
+
+    sendMessage(conversationId, {
+      messageType: 'text',
+      content: inputValue.trim()
+    });
+    setInputValue('');
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   return (
     <StyledDialog
       open={open}
@@ -146,16 +191,15 @@ const ProfileDialog = ({ open, onClose, member }) => {
 
         {tabValue === 0 && (
           <Box sx={{ mt: 2 }}>
-            {/* Last Seen Section */}
-
             <Box sx={{ display: 'flex', mb: 1 }}>
               <TextField
                 variant="outlined"
-                placeholder="Send a quick mesage"
+                placeholder="Send a quick message"
                 fullWidth
                 size="small"
                 value={inputValue}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 multiline
                 maxRows={4}
                 sx={{
@@ -165,7 +209,11 @@ const ProfileDialog = ({ open, onClose, member }) => {
                   },
                 }}
               />
-              <IconButton size="small">
+              <IconButton 
+                size="small" 
+                onClick={handleSendMessage}
+                disabled={!inputValue.trim()}
+              >
                 <Send fontSize="medium" sx={{ color: theme.palette.secondary.contrastText, ml: 1 }} />
               </IconButton>
             </Box>
