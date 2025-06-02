@@ -26,42 +26,50 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import ScreenShareIcon from '@mui/icons-material/ScreenShare';
+import StopScreenShareIcon from '@mui/icons-material/StopScreenShare';
 import { useChat } from '~/Context/ChatProvider';
 import videoCallService from "~/apis/inbox/videoCallService";
 import { getMemberById } from '~/apis/User/userService'
-import './styles.css'; // Tạo file CSS riêng
+import './styles.css';
 
-
-// Khởi tạo client Agora
-const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+// Khởi tạo hai clients Agora
+const mainClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+const screenClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
 const AppID = '1bedaea2334b4daea7076508f65f51a4';
-
 
 const VideoCall = () => {
   const { callId } = useParams();
   const navigate = useNavigate();
   const { accesstoken, userData } = useSelector(state => state.auth);
+  
   // Trạng thái
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [callInfo, setCallInfo] = useState(null);
   const [localStream, setLocalStream] = useState(null);
   const [remoteUsers, setRemoteUsers] = useState([]);
-  const [isCaller, setIsCaller] = useState(false); // Thêm state để kiểm tra người gọi
-  const [callStartTime, setCallStartTime] = useState(null); // Thêm state để lưu thời điểm bắt đầu cuộc gọi
+  const [isCaller, setIsCaller] = useState(false);
+  const [callStartTime, setCallStartTime] = useState(null);
 
   const [notification, setNotification] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [micEnabled, setMicEnabled] = useState(true);
   const [cameraEnabled, setCameraEnabled] = useState(true);
-  const [participantCount, setParticipantCount] = useState(0);
   const [showParticipants, setShowParticipants] = useState(false);
   const [userNames, setUserNames] = useState({});
   const [userAvatars, setUserAvatars] = useState({});
   const [showEndCallDialog, setShowEndCallDialog] = useState(false);
   const [endCallMessage, setEndCallMessage] = useState("");
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [screenTrack, setScreenTrack] = useState(null);
+  
+  // New states for dual client management
+  const [screenClientJoined, setScreenClientJoined] = useState(false);
 
+  // Refs
+  const localVideoRef = useRef(null);
 
   // Hàm hiển thị thông báo
   const showToast = (message, severity = "info") => {
@@ -73,9 +81,6 @@ const VideoCall = () => {
   const handleCloseNotification = () => {
     setShowNotification(false);
   };
-
-  // Refs
-  const localVideoRef = useRef(null);
 
   // Hàm lấy thông tin người dùng
   const fetchUserName = async (userId) => {
@@ -149,20 +154,19 @@ const VideoCall = () => {
     };
   }, [accesstoken, callId]);
 
-  // Cập nhật useEffect để hiển thị dialog
   useEffect(() => {
     let timer;
     if (isCaller && callStartTime && remoteUsers.length === 0) {
       timer = setInterval(async () => {
         const now = new Date();
-        const timeDiff = (now - callStartTime) / 1000; // Chuyển đổi sang giây
+        const timeDiff = (now - callStartTime) / 1000;
 
         if (timeDiff >= 22) {
           setEndCallMessage("No one answered the call. The call will end.");
           setShowEndCallDialog(true);
           clearInterval(timer);
         }
-      }, 1000); // Kiểm tra mỗi giây
+      }, 1000);
     }
 
     return () => {
@@ -172,7 +176,7 @@ const VideoCall = () => {
     };
   }, [isCaller, callStartTime, remoteUsers.length]);
 
-  // Tham gia cuộc gọi
+  // Tham gia cuộc gọi với main client
   const joinCall = async (agoraData) => {
     if (!agoraData) {
       setError("No connection information available");
@@ -180,7 +184,6 @@ const VideoCall = () => {
     }
   
     try {
-      // Clear existing state
       setRemoteUsers([]);
       setLocalStream(null);
   
@@ -188,58 +191,54 @@ const VideoCall = () => {
         throw new Error("Incomplete connection information");
       }
   
-      // Join channel first
-      await client.join(
+      // Join main channel
+      await mainClient.join(
         AppID,
         agoraData.channelName,
         agoraData.token,
         userData._id
       );
   
-      // Set up event listeners before creating tracks
+      // Set up event listeners
       setupEventListeners();
   
       // Create tracks
       const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
       const videoTrack = await AgoraRTC.createCameraVideoTrack();
   
-      // Set local stream state
       setLocalStream({
         audioTrack,
         videoTrack
       });
   
-      // Play local video immediately
+      // Play local video
       setTimeout(() => {
-      if (videoTrack && localVideoRef.current) {
-        videoTrack.play(localVideoRef.current);
-      }}, 200);
+        if (videoTrack && localVideoRef.current) {
+          videoTrack.play(localVideoRef.current);
+        }
+      }, 200);
   
       // Publish tracks
-      await client.publish([audioTrack, videoTrack]);
-      
-      showToast("Successfully joined the call!", "success");
-  
+      await mainClient.publish([audioTrack, videoTrack]);
+        
     } catch (err) {
       console.error("Error joining call:", err);
       setError(`Unable to join call: ${err.message}`);
     }
   };
 
-  
-  // Thiết lập các sự kiện Agora
+  // Thiết lập các sự kiện cho main client
   const setupEventListeners = () => {
-    client.removeAllListeners();
+    mainClient.removeAllListeners();
+    screenClient.removeAllListeners();
   
-    // Xử lý khi có người tham gia mới
-    client.on("user-joined", async (user) => {
+    // Main client events
+    mainClient.on("user-joined", async (user) => {
       try {
-        // Reset callStartTime khi có người tham gia
         if (isCaller) {
           setCallStartTime(null);
         }
         
-        // Lấy tên người dùng ngay khi họ tham gia
         const userName = await fetchUserName(user.uid);
         setUserNames(prev => ({
           ...prev,
@@ -250,9 +249,9 @@ const VideoCall = () => {
       }
     });
 
-    client.on("user-published", async (user, mediaType) => {
+    mainClient.on("user-published", async (user, mediaType) => {
       try {
-        await client.subscribe(user, mediaType);
+        await mainClient.subscribe(user, mediaType);
         if (mediaType === "video") {
           setRemoteUsers((prevUsers) => {
             if (prevUsers.some((u) => u.uid === user.uid)) {
@@ -276,16 +275,13 @@ const VideoCall = () => {
           user.audioTrack?.play();
         }
   
-        setParticipantCount(client.remoteUsers.length);
       } catch (err) {
         console.error("Error handling user-published event:", err);
       }
     });
 
-    // Sự kiện khi user khác unpublish stream
-    client.on("user-unpublished", (user, mediaType) => {
+    mainClient.on("user-unpublished", (user, mediaType) => {
       if (mediaType === "video") {
-        showToast(`A user has turned off their camera`, "warning");
         setRemoteUsers((prevUsers) => {
           return prevUsers.map((u) => {
             if (u.uid === user.uid) {
@@ -295,37 +291,54 @@ const VideoCall = () => {
           });
         });
       }
+    });
 
-      if (mediaType === "audio") {
-        showToast(`A user has muted their microphone`, "warning");
+    mainClient.on("user-left", (user) => {
+        setRemoteUsers((prevUsers) => {
+          return prevUsers.filter((u) => u.uid !== user.uid);
+        });
+    });
+
+    // Screen client events
+    screenClient.on("user-published", async (user, mediaType) => {
+      try {
+        await screenClient.subscribe(user, mediaType);
+        if (mediaType === "video") {
+          // Handle screen share from other users
+          setRemoteUsers((prevUsers) => {
+            const existingUser = prevUsers.find(u => u.uid === user.uid);
+            if (existingUser) {
+              return prevUsers.map((u) => 
+                u.uid === user.uid ? { 
+                  ...u, 
+                  screenTrack: user.videoTrack,
+                  displayName: userNames[user.uid] || 'User'
+                } : u
+              );
+            }
+            return [...prevUsers, { 
+              uid: user.uid, 
+              screenTrack: user.videoTrack,
+              displayName: userNames[user.uid] || 'User'
+            }];
+          });
+        }
+      } catch (err) {
+        console.error("Error handling screen client user-published event:", err);
       }
     });
 
-    // Sự kiện khi user khác rời kênh
-    client.on("user-left", (user) => {
-      showToast(`A user has left the call`, "error");
-      // Cập nhật số người tham gia
-      setParticipantCount(prev => Math.max(0, prev - 1));
-
-      setRemoteUsers((prevUsers) => {
-        return prevUsers.filter((u) => u.uid !== user.uid);
-      });
-    });
-
-    // // Sự kiện khi kết nối thay đổi
-    // client.on("connection-state-change", (curState, prevState) => {
-    //   if (curState === "CONNECTED") {
-    //     showToast("Đã kết nối đến máy chủ Agora", "success");
-    //   } else if (curState === "DISCONNECTED") {
-    //     showToast("Mất kết nối với máy chủ, đang thử kết nối lại...", "error");
-    //   } else if (curState === "CONNECTING") {
-    //     showToast("Đang kết nối...", "info");
-    //   }
-    // });
-
-    // Sự kiện lỗi
-    client.on("exception", (event) => {
-      showToast(`Error: ${event.code}`, "error");
+    screenClient.on("user-unpublished", (user, mediaType) => {
+      if (mediaType === "video") {
+        setRemoteUsers((prevUsers) => {
+          return prevUsers.map((u) => {
+            if (u.uid === user.uid) {
+              return { ...u, screenTrack: undefined };
+            }
+            return u;
+          });
+        });
+      }
     });
   };
 
@@ -334,10 +347,8 @@ const VideoCall = () => {
     if (localStream && localStream.audioTrack) {
       if (micEnabled) {
         await localStream.audioTrack.setEnabled(false);
-        showToast("Microphone muted", "warning");
       } else {
         await localStream.audioTrack.setEnabled(true);
-        showToast("Microphone unmuted", "success");
       }
       setMicEnabled(!micEnabled);
     }
@@ -348,20 +359,127 @@ const VideoCall = () => {
     if (localStream && localStream.videoTrack) {
       if (cameraEnabled) {
         await localStream.videoTrack.setEnabled(false);
-        showToast("Camera turned off", "warning");
       } else {
         await localStream.videoTrack.setEnabled(true);
-        showToast("Camera turned on", "success");
       }
       setCameraEnabled(!cameraEnabled);
     }
   };
+
+  // Modified screen sharing function to use dual clients
+  const toggleScreenShare = async () => {
+    try {
+      if (!isScreenSharing) {
+        // Start screen sharing
+        const screenVideoTrack = await AgoraRTC.createScreenVideoTrack({
+          encoderConfig: {
+            width: 1920,
+            height: 1080
+          },
+        });
+        
+        setScreenTrack(screenVideoTrack);
+        
+        if (!screenClientJoined) {
+          const screenUserId = `${userData._id}_screen`;
+          const response = await videoCallService.getCallById(accesstoken, callId, screenUserId);
+          if (!response.success || !response.agoraData) {
+            throw new Error("Unable to get connection information for screen sharing");
+          }
+
+          const { channelName, token } = response.agoraData;
+          if (!channelName || !token) {
+            throw new Error("Missing channel information for screen sharing");
+          }
+
+          // Join with the screen-specific token
+          await screenClient.join(
+            AppID,
+            channelName,
+            token,
+            screenUserId
+          );
+          setScreenClientJoined(true);
+        }
+        
+        // Publish screen track via screen client
+        await screenClient.publish(screenVideoTrack);
+        
+        // Display screen share in local video
+        screenVideoTrack.play(localVideoRef.current);
+        
+        setIsScreenSharing(true);
+        showToast("Started screen sharing", "success");
+
+        setRemoteUsers(prevUsers =>
+          prevUsers.filter(u => !String(u.uid).includes('_screen'))
+        );
+      } else {
+        // Stop screen sharing
+        if (screenTrack) {
+          await screenClient.unpublish(screenTrack);
+          screenTrack.close();
+          setScreenTrack(null);
+        }
+        
+        // Leave screen client
+        if (screenClientJoined) {
+          await screenClient.leave();
+          setScreenClientJoined(false);
+          // Xóa user share screen khỏi remoteUsers
+          setRemoteUsers(prevUsers =>
+            prevUsers.filter(u => !String(u.uid).includes('_screen'))
+          );
+        }
+        
+        // Restore camera view
+        if (localStream?.videoTrack) {
+          localStream.videoTrack.play(localVideoRef.current);
+        }
+        
+        setIsScreenSharing(false);
+        showToast("Stopped screen sharing", "info");
+      }
+    } catch (error) {
+      console.error("Screen sharing error:", error);
+      // Reset state on error
+      setIsScreenSharing(false);
+      if (screenTrack) {
+        screenTrack.close();
+        setScreenTrack(null);
+      }
+      
+      if (screenClientJoined) {
+        try {
+          await screenClient.leave();
+        } catch (e) {
+          console.error("Error leaving screen client:", e);
+        }
+        setScreenClientJoined(false);
+      }
+
+      // Restore camera view
+      if (localStream?.videoTrack) {
+        localStream.videoTrack.play(localVideoRef.current);
+      }
+    }
+  };
+
+  // Cleanup screen sharing
+  useEffect(() => {
+    return () => {
+      if (screenTrack) {
+        screenTrack.close();
+      }
+    };
+  }, [screenTrack]);
+
   const { sendMessage, currentConversation, setCurrentConversation } = useChat();
 
-  // Rời khỏi cuộc gọi
+  // Modified leave call function for dual clients
   const leaveCall = async () => {
     try {
-      // Đóng local tracks
+      // Close local tracks
       if (localStream) {
         if (localStream.audioTrack) {
           localStream.audioTrack.close();
@@ -371,33 +489,37 @@ const VideoCall = () => {
         }
       }
 
-      // Rời khỏi kênh
-      await client.leave();
-      showToast("Left the call", "info"); // Thông báo
+      // Close screen track
+      if (screenTrack) {
+        screenTrack.close();
+      }
 
-      // Gọi API để cập nhật trạng thái cuộc gọi
+      // Leave both clients
+      await mainClient.leave();
+      
+      if (screenClientJoined) {
+        await screenClient.leave();
+        setScreenClientJoined(false);
+      }
+      // Call API to update call status
       if (callId) {
         await videoCallService.leaveCall(accesstoken, callId);
       }
 
-      // Nếu là cuộc gọi nhóm và người dùng là người gọi, kết thúc cuộc gọi
       if (callId && callInfo?.group && userData?._id === callInfo?.caller) {
         await videoCallService.endCall(accesstoken, callId);
       }
-      // Nếu là cuộc gọi 1-1, chỉ cần leave call là đủ
 
     } catch (error) {
       console.error("Error leaving call:", error);
     }
   };
 
-
-
   // Xử lý sự kiện khi người dùng rời khỏi cuộc gọi
   const handleEndCall = async () => {
     try {
       await leaveCall();
-      window.close(); // Đóng cửa sổ nếu là cửa sổ mới
+      window.close();
     } catch (error) {
       console.error("Error ending call:", error);
     }
@@ -418,7 +540,7 @@ const VideoCall = () => {
         displayName: userNames[userData._id] || userData.displayName || 'You',
         avatar: userAvatars[userData._id] || userData.image || ''
       },
-      ...client.remoteUsers.map(user => ({ 
+      ...mainClient.remoteUsers.map(user => ({ 
         uid: user.uid, 
         isLocal: false,
         displayName: userNames[user.uid] || 'User',
@@ -510,13 +632,14 @@ const VideoCall = () => {
     );
   };
 
-  // Component hiển thị video của người tham gia khác
+  // Update RemoteVideoView component
   const RemoteVideoView = ({ user }) => {
-    const containerRef = useRef(null);
+    const cameraContainerRef = useRef(null);
+    const screenContainerRef = useRef(null);
 
     useEffect(() => {
-      if (containerRef.current && user.videoTrack) {
-        user.videoTrack.play(containerRef.current);
+      if (cameraContainerRef.current && user.videoTrack) {
+        user.videoTrack.play(cameraContainerRef.current);
       }
 
       return () => {
@@ -526,49 +649,55 @@ const VideoCall = () => {
       };
     }, [user.videoTrack]);
 
+    useEffect(() => {
+      if (screenContainerRef.current && user.screenTrack) {
+        user.screenTrack.play(screenContainerRef.current);
+      }
+
+      return () => {
+        if (user.screenTrack) {
+          user.screenTrack.stop();
+        }
+      };
+    }, [user.screenTrack]);
+
     return (
-      <div className="remote-video-container" ref={containerRef}>
-        {!user.videoTrack && (
-          <Box className="no-video-overlay" sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            height: '100%',
-            bgcolor: 'rgba(0,0,0,0.7)'
-          }}>
-            <Avatar 
-              src={userAvatars[user.uid]}
-              alt={userNames[user.uid]}
-              sx={{ width: 80, height: 80, mb: 2 }}
-            >
-              {!userAvatars[user.uid] && (userNames[user.uid] || 'User').charAt(0)}
-            </Avatar>
-            <Typography className="no-video-text" sx={{ color: 'white' }}>
-              {userNames[user.uid] || 'User'} (Video bị tắt)
-            </Typography>
-          </Box>
-        )}
-        <Typography 
-          className="user-info-label" 
-          sx={{ 
-            position: 'absolute', 
-            bottom: 8, 
-            left: 8, 
-            background: 'rgba(0,0,0,0.5)', 
-            color: 'white',
-            padding: '4px 12px',
-            borderRadius: '4px',
-            fontSize: '0.9rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}
-        >
+      <div className={`remote-video-container ${user.screenTrack ? 'has-screen-share' : ''}`}>
+        {/* Camera video */}
+        <div ref={cameraContainerRef} style={{ width: '100%', height: '100%' }}>
+          {!user.videoTrack && (
+            <Box className="no-video-overlay">
+              <Avatar 
+                src={userAvatars[user.uid]}
+                alt={userNames[user.uid]}
+                sx={{ 
+                  width: 80, 
+                  height: 80, 
+                  mb: 2,
+                  border: '2px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                {!userAvatars[user.uid] && (userNames[user.uid] || 'User').charAt(0)}
+              </Avatar>
+              <Typography className="no-video-text">
+                {userNames[user.uid] || 'User'} (Camera off)
+              </Typography>
+            </Box>
+          )}
+        </div>
+        
+        
+        {/* User info label */}
+        <Typography className="user-info-label">
           <Avatar 
             src={userAvatars[user.uid]}
             alt={userNames[user.uid]}
-            sx={{ width: 24, height: 24 }}
+            sx={{ 
+              width: 24, 
+              height: 24,
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}
           >
             {!userAvatars[user.uid] && (userNames[user.uid] || 'User').charAt(0)}
           </Avatar>
@@ -578,7 +707,7 @@ const VideoCall = () => {
     );
   };
 
-  // Hiển thị loading
+  // Rest of the component remains the same...
   if (loading) {
     return (
       <Box className="video-call-container loading-container">
@@ -590,7 +719,6 @@ const VideoCall = () => {
     );
   }
 
-  // Hiển thị lỗi
   if (error) {
     return (
       <Box className="video-call-container error-container">
@@ -607,7 +735,8 @@ const VideoCall = () => {
       </Box>
     );
   }
-
+  const filteredRemoteUsers = remoteUsers.filter(user => user.uid !== userData._id)
+  const gridCols = filteredRemoteUsers.length > 3 ? 4 : (filteredRemoteUsers.length > 1 ? 6 : 12);
   return (
     <Box className="video-call-container">
       {/* Header */}
@@ -622,7 +751,7 @@ const VideoCall = () => {
                 onClick={() => setShowParticipants(!showParticipants)}
                 sx={{ mr: 2 }}
               >
-                <Badge badgeContent={client.remoteUsers.length + 1} color="primary">
+                <Badge badgeContent={mainClient.remoteUsers.length + 1} color="primary">
                   <PeopleAltIcon />
                 </Badge>
               </IconButton>
@@ -639,14 +768,14 @@ const VideoCall = () => {
       <Box className="video-grid-container">
         {/* Remote Videos */}
         <Grid container spacing={2} className="remote-videos-grid">
-          {remoteUsers.length > 0 ? (
-            remoteUsers.map((user) => (
+          {filteredRemoteUsers.length > 0 ? (
+            filteredRemoteUsers.map((user) => (
               <Grid
                 item
                 key={user.uid}
                 xs={12}
-                sm={remoteUsers.length > 1 ? 6 : 12}
-                md={remoteUsers.length > 3 ? 4 : (remoteUsers.length > 1 ? 6 : 12)}
+                sm={gridCols}
+                md={gridCols}
               >
                 <RemoteVideoView user={user} />
               </Grid>
@@ -661,15 +790,36 @@ const VideoCall = () => {
         </Grid>
 
         {/* Local Video */}
-        <Box className="local-video-container fade-in" sx={{ overflow: 'hidden' }}>
+        <Box className={`local-video-container fade-in ${isScreenSharing ? 'screen-sharing' : ''}`}>
           <div
             ref={localVideoRef}
             className="local-video"
-            style={{ width: '100%', height: '100%', backgroundColor: '#16213e' }}
-          ></div>
+            style={{ width: '100%', height: '100%' }}
+          />
           <Typography className="local-video-label">
-            You {!micEnabled && "(Mic muted)"} {!cameraEnabled && "(Camera off)"}
+            You
+            {!micEnabled && (
+              <Box component="span" sx={{ ml: 1, color: '#ff3b30' }}>
+                (Mic muted)
+              </Box>
+            )}
+            {!cameraEnabled && (
+              <Box component="span" sx={{ ml: 1, color: '#ff3b30' }}>
+                (Camera off)
+              </Box>
+            )}
+            {isScreenSharing && (
+              <Box component="span" sx={{ ml: 1, color: '#34c759' }}>
+                (Sharing screen)
+              </Box>
+            )}
           </Typography>
+          {isScreenSharing && (
+            <Box className="screen-sharing-indicator">
+              <ScreenShareIcon sx={{ fontSize: '0.9rem' }} />
+              Screen sharing
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -692,6 +842,14 @@ const VideoCall = () => {
         </IconButton>
 
         <IconButton
+          className={isScreenSharing ? "control-button-active" : "control-button"}
+          onClick={toggleScreenShare}
+          size="large"
+        >
+          {isScreenSharing ? <StopScreenShareIcon /> : <ScreenShareIcon />}
+        </IconButton>
+
+        <IconButton
           className="end-call-button"
           onClick={handleEndCall}
           size="large"
@@ -700,7 +858,7 @@ const VideoCall = () => {
         </IconButton>
       </Box>
 
-      {/* Thông báo */}
+      {/* Notifications */}
       <Snackbar
         open={showNotification}
         autoHideDuration={5000}
@@ -717,7 +875,7 @@ const VideoCall = () => {
         </Alert>
       </Snackbar>
 
-      {/* Thêm Dialog component */}
+      {/* End Call Dialog */}
       <Dialog
         open={showEndCallDialog}
         onClose={handleDialogClose}

@@ -113,12 +113,15 @@ const videoCallService = {
   },
 
   // Get call by ID
-  getCallById: async (accesstoken, callId) => {
+  getCallById: async (accesstoken, callId, customUid = null) => {
     try {
-      const response = await axios.get(`${API_URL}/calls/${callId}`, {
-        headers: { Authorization: `Bearer ${accesstoken}` },
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_URL}/calls/${callId}${customUid ? `?uid=${customUid}` : ''}`,
+        {
+          headers: { Authorization: `Bearer ${accesstoken}` },
+          withCredentials: true,
+        }
+      );
       return response.data;
     } catch (error) {
       console.error('Error getting call details:', error);

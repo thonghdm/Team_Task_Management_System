@@ -125,29 +125,34 @@ const videoCallController = {
      */
     getCallById: async (req, res, next) => {
         try {
-            const { callId } = req.params
-            console.log(req.currentUser._id)
+            const { callId } = req.params;
+            const customUid = req.query.uid; // Get custom UID if provided
+            
             if (!req.currentUser || !req.currentUser._id) {
                 return res.status(401).json({
                     err: 3,
                     msg: 'User not authenticated'
-                })
+                });
             }
-            const call = await videoCallService.getCallById(callId, req.currentUser._id)
+            
+            const call = await videoCallService.getCallById(callId, req.currentUser._id);
 
+            // Use custom UID for token generation if provided, otherwise use user ID
+            const uid = customUid || req.currentUser._id;
+            
             res.status(200).json({
                 success: true,
                 call,
-                agoraData: generateAgoraToken(callId, req.currentUser._id)
-            })
+                agoraData: generateAgoraToken(callId, uid)
+            });
         } catch (error) {
             if (error.message === 'Call not found') {
-                return res.status(404).json({ success: false, message: error.message })
+                return res.status(404).json({ success: false, message: error.message });
             }
             if (error.message === 'You are not authorized to view this call') {
-                return res.status(403).json({ success: false, message: error.message })
+                return res.status(403).json({ success: false, message: error.message });
             }
-            next(error)
+            next(error);
         }
     },
 
