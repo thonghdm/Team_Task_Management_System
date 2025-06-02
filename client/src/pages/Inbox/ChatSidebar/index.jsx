@@ -149,20 +149,25 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
 
     // Handle group selection from search
     const handleGroupSelect = (group) => {
-        if (group && group.conversation) {
+        if (group.conversation) {
             setCurrentConversation(group.conversation);
-            navigate(`${group._id}`);
+            if (setSelectedUserId) {
+                setSelectedUserId(null); // Clear selected user when selecting a group
+            }
         }
     };
 
     // Handle group creation
-    const handleGroupCreated = (result) => {
-        if (result && result.conversation) {
-            // Refresh conversation list
-            dispatch(fetchConversationList(accesstoken));
-            // Set it as current conversation
-            setCurrentConversation(result.conversation);
-            navigate(`${result.conversation._id}`);
+    const handleGroupCreated = (newConversation) => {
+        if (newConversation) {
+            // Add the new conversation to the list
+            const updatedConversations = [newConversation, ...conversationsLocal];
+            setConversationsLocal(updatedConversations);
+            // Set as current conversation
+            setCurrentConversation(newConversation);
+            if (setSelectedUserId) {
+                setSelectedUserId(null);
+            }
         }
     };
 

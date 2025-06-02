@@ -116,13 +116,14 @@ const CreateGroupModal = ({ open, onClose, onGroupCreated }) => {
             setSelectedMembers([]);
             setAvatarUrl('');
             
-            // Notify parent component about the new group
-            if (onGroupCreated) {
-                onGroupCreated(result);
+            // Notify parent component about the new group with populated data
+            if (onGroupCreated && result.conversation) {
+                onGroupCreated(result.conversation);
             }
             
             onClose();
         } catch (err) {
+            console.error('Error creating group:', err);
             setError(err.response?.data?.message || 'Failed to create group. Please try again.');
         } finally {
             setIsCreating(false);

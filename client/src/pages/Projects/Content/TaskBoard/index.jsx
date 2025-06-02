@@ -75,6 +75,7 @@ const TaskBoard = () => {
   const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [taskReview, setTaskReview] = useState({taskId: null, task_Review: null});
+  const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
   useEffect(() => {
     const getProjectDetail = async (token) => {
       try {
@@ -783,7 +784,14 @@ const currentUserRole = members?.members?.find(
                               sx={{ width: 24, height: 24 }}
                             />
                           ) : (
-                            <span key={index}>.</span>
+                            <span key={index}>
+                              <Avatar
+                              key={index}
+                              alt={member.name || '.'}
+                              src={defaultAvatar}
+                              sx={{ width: 24, height: 24 }}
+                            />
+                            </span>
                           )
                         ))
                       ) : null}

@@ -26,7 +26,7 @@ import { createNewTask } from '~/apis/Project/taskService'
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 const ImportProject = () => {
     const dispatch = useDispatch();
-
+    const [loading, setLoading] = useState(false);
 
     const [data, setData] = useState([]);
     const [columns, setColumns] = useState([]);
@@ -80,10 +80,14 @@ const ImportProject = () => {
             fileInputRef.current.value = "";
         }
     };
-    const excelDateToJSDate = (serial) => {
-        const daysSinceEpoch = serial - 25569; // Số ngày từ 01/01/1970 (Unix Epoch)
-        const milliseconds = daysSinceEpoch * 86400 * 1000; // Mỗi ngày có 86400 giây
-        return new Date(milliseconds);
+    const excelDateToJSDate = (value) => {
+        if (typeof value === 'number') {
+            const daysSinceEpoch = value - 25569;
+            return new Date(daysSinceEpoch * 86400 * 1000);
+        } else if (typeof value === 'string') {
+            return new Date(value); // fallback nếu đã là chuỗi ngày hợp lệ
+        }
+        return null;
     }
     const { accesstoken, userData } = useSelector(state => state.auth)
 
@@ -142,16 +146,16 @@ const ImportProject = () => {
                 }
             }));
             if (res) {
-                successUsers.push(index);
+                setSuccessUsers(prev => [...prev, index]);
             } else {
-                failedUsers.push(index);
+                setFailedUsers(prev => [...prev, index]);
             }
         } catch (error) {
             if (error.response?.status === 401) {
                 const newToken = await refreshToken();
                 return createList(newToken, list, index, projectId);
             }
-            failedUsers.push(index);
+            setFailedUsers(prev => [...prev, index]);
         }
     };
 
@@ -168,6 +172,8 @@ const ImportProject = () => {
                 list_id: listId, // Dùng list_id để gán cho task
                 start_date: excelDateToJSDate(taskData.start_date),
                 end_date: excelDateToJSDate(taskData.end_date),
+                priority: taskData.priority? taskData.priority : 'Medium',
+                status: taskData.status? taskData.status : 'To Do',
                 created_by_id: userData._id,
                 project_id: projectId,
                 color: getRandomColor(), // Hàm giả lập tạo màu ngẫu nhiên cho task
@@ -192,16 +198,16 @@ const ImportProject = () => {
             }
 
             if (res) {
-                successUsers.push(index); // Nếu tạo task thành công
+                setFailedUsers(prev => [...prev, index]); // Nếu tạo task thành công
             } else {
-                failedUsers.push(index); // Nếu thất bại
+                setFailedUsers(prev => [...prev, index]);// Nếu thất bại
             }
         } catch (error) {
             if (error.response?.status === 401) {
                 const newToken = await refreshToken();
                 return createTask(newToken, taskData, index, projectId); // Gọi lại hàm khi hết token
             }
-            throw error; // Ném lại lỗi
+            setFailedUsers(prev => [...prev, index]);
         }
     };
 
@@ -220,6 +226,7 @@ const ImportProject = () => {
     };
 
     const handleSubmit = async () => {
+  
         if (data.length === 0) {
             toast.error("No data to submit");
             return;
@@ -229,6 +236,7 @@ const ImportProject = () => {
             return;
         }
         try {
+            setLoading(true);
             const newIdProject = await insertProject(accesstoken); // Chờ insertProject hoàn thành
             if (!newIdProject) {
                 throw new Error('Failed to create project.');
@@ -251,7 +259,8 @@ const ImportProject = () => {
             }
             setData([]);
             setColumns([]);
-
+            setLoading(false);
+            console.log(successUsers,'successUsers');
         } catch (error) {
             toast.error("Failed to process user registrations");
         }
@@ -330,8 +339,9 @@ const ImportProject = () => {
                                     variant="contained"
                                     color="primary"
                                     onClick={handleSubmit}
+                                    disabled={loading}
                                 >
-                                    Insert
+                                     {loading ? 'Inserting...' : 'Insert'}
                                 </Button>
                             </Box>
                         </>
