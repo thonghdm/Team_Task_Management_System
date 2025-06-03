@@ -4,7 +4,7 @@ import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
 import { useTheme } from '@mui/material/styles';
 
-const defaultAvatar = 'https://i.pravatar.cc/300'
+const defaultAvatar = '/225-default-avatar.png'
 import {formatDateRange} from '~/utils/formatDateRange'
 
 const TaskTable = ({ tasks, onRowClick }) => {

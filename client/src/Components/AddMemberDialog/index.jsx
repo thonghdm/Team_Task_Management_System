@@ -27,6 +27,7 @@ import { useParams } from 'react-router-dom';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import socket from '~/utils/socket';
 
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { inviteUserTask } from '~/redux/project/task-slice/task-inviteUser-slice';
@@ -297,6 +298,8 @@ const AddMemberDialog = ({ open, onClose, taskId, isClickable = true, taskData }
             const handleSuccess = () => {
                 toast.success('Invite member successfully!');
                 resetFormState();
+                // Emit task update event
+                socket.emit('task_updated', { taskId, projectId });
             };
 
             const inviteMembers = async (token, taskData) => {

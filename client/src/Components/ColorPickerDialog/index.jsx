@@ -22,6 +22,8 @@ import { useRefreshToken } from '~/utils/useRefreshToken'
 import { useParams } from 'react-router-dom';
 import { createAuditLog } from '~/redux/project/auditLog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
+import socket from '~/utils/socket';
+
 const colors = [
   '#1a5fb4', '#26a269', '#e66100', '#a51d2d', '#613583',
   '#2ec27e', '#e5a50a', '#ff7800', '#f66151', '#9141ac',
@@ -102,6 +104,7 @@ const ColorPickerDialog = ({ open, onClose, taskId, isClickable = true }) => {
           }))
           await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
           await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+          socket.emit('task_updated', { taskId, projectId });
           toast.success("Label created successfully");
           handleClose();
         } catch (error) {

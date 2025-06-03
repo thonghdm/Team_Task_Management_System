@@ -43,12 +43,13 @@ import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUs
 import { addNotification } from '~/redux/project/notifications-slice/index';
 
 import TaskReview from '../TaskReview';
+import socket from '~/utils/socket';
 
 const ChangeList = ({ open, onClose, taskId }) => {
     const theme = useTheme();
     const [cmt, setCMT] = useState("Write a comment");
     const dispatch = useDispatch();
-    const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
+    const defaultAvatar = '/225-default-avatar.png';
     // Show details
     const [showDetails, setShowDetails] = useState(false);
     const toggleDetails = () => {
@@ -132,7 +133,11 @@ const ChangeList = ({ open, onClose, taskId }) => {
                     message: message
                 }));
 
-            const handleSuccess = () => {};
+            const handleSuccess = () => {
+                // Emit task review event
+                socket.emit('task_review', { taskId, projectId });
+                socket.emit('task_updated', { taskId, projectId });
+            };
             const saveTaskReview = async (token) => {
                 try {
                     const resultAction = await dispatch(updateTaskThunks({
@@ -270,6 +275,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 setOpenMember(false);
                 setSelectedMember(null);
                 setSelectedLabelName(null);
+                socket.emit('task_updated', { taskId, projectId });
             };
             const deleteMembers = async (token) => {
                 try {
@@ -360,6 +366,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 setOpenLabel(false);
                 setSelectedLabel(null);
                 setSelectedLabelName(null);
+                socket.emit('task_updated', { taskId, projectId });
             };
             const deleteLabel = async (token) => {
                 try {
@@ -442,6 +449,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
             const handleSuccess = () => {
                 // toast.success('Update title task successfully!');
+                socket.emit('task_updated', { taskId, projectId });
             };
             const saveTitleTask = async (token) => {
                 try {
@@ -501,6 +509,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
 
             const handleSuccess = () => {
                 // toast.success('Update priority task successfully!');
+                socket.emit('task_updated', { taskId, projectId });
             };
             const savePriorityTask = async (token) => {
                 try {
@@ -587,14 +596,12 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 dataSave = { ...dataSave, done_date: '1000-10-10T00:00:00.000+00:00', task_review_status: 'not requested' };
             }
 
-
             const handleSuccess = () => {
-                // toast.success('Update status task successfully!');
-                // if (newStatus === 'Completed') {
-                //     setShowAnimation(true);
-                //     setTimeout(() => setShowAnimation(false), 2000); // Hide animation after 2 seconds
-                //   }
+                console.log('Emitting task_updated event:', { taskId, projectId });
+                // Emit task update event
+                socket.emit('task_updated', { taskId, projectId });
             };
+
             const saveStatusTask = async (token) => {
                 try {
                     const resultAction = await dispatch(updateTaskThunks({
@@ -658,6 +665,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
             };
             const handleSuccess = () => {
                 // toast.success('Update start date task successfully!');
+                socket.emit('task_updated', { taskId, projectId });
             };
             const notificationData = task?.assigned_to_id
                 .filter(member =>
@@ -744,6 +752,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 }));
             const handleSuccess = () => {
                 // toast.success('Update due date task successfully!');
+                socket.emit('task_updated', { taskId, projectId });
             };
             const saveDueDateTask = async (token) => {
                 try {
@@ -824,6 +833,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 toast.success('Leave task successfully!');
                 setOpenLeaveMember(false);
                 setSelectedLeaveMember(null);
+                socket.emit('task_updated', { taskId, projectId });
             };
 
             const notificationData = task?.assigned_to_id
@@ -893,6 +903,62 @@ const ChangeList = ({ open, onClose, taskId }) => {
         setOpenLeaveMember(false);
         setSelectedLeaveMember(null);
     }
+
+    // Join project room when component mounts
+    useEffect(() => {
+        const joinRoom = () => {
+            if (projectId) {
+                console.log('ChangeList: Joining project room:', projectId);
+                socket.emit('join_project_room', { projectId });
+            }
+        };
+
+        const leaveRoom = () => {
+            if (projectId) {
+                console.log('ChangeList: Leaving project room:', projectId);
+                socket.emit('leave_project_room', { projectId });
+            }
+        };
+
+        // Listen for task review events
+        const handleTaskReviewed = ({ taskId: reviewedTaskId }) => {
+            if (reviewedTaskId === taskId) {
+                console.log('ChangeList: Task reviewed:', reviewedTaskId);
+                dispatch(fetchTaskById({ accesstoken, taskId }));
+                dispatch(getTaskByMemberIDThunk({ accesstoken, memberID: userData?._id }));
+            }
+        };
+
+        const handleTaskUpdated = ({ taskId: updatedTaskId }) => {
+            if (updatedTaskId === taskId) {
+                console.log('ChangeList: Task updated:', updatedTaskId);
+                dispatch(fetchTaskById({ accesstoken, taskId }));
+                dispatch(getTaskByMemberIDThunk({ accesstoken, memberID: userData?._id }));
+            }
+        };
+
+        // Join room immediately
+        joinRoom();
+
+        // Set up event listeners
+        socket.on('task_reviewed', handleTaskReviewed);
+        socket.on('task_updated', handleTaskUpdated);
+
+        // Cleanup function
+        return () => {
+            leaveRoom();
+            socket.off('task_reviewed', handleTaskReviewed);
+            socket.off('task_updated', handleTaskUpdated);
+        };
+    }, [taskId, projectId, accesstoken, userData?._id]);
+
+    // Add a new useEffect to handle dialog close
+    useEffect(() => {
+        if (!open && projectId) {
+            console.log('ChangeList: Dialog closed, rejoining project room:', projectId);
+            socket.emit('join_project_room', { projectId });
+        }
+    }, [open, projectId]);
 
     return (
         <Dialog

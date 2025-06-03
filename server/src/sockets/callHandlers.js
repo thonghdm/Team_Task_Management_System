@@ -114,6 +114,35 @@ module.exports = (io, socket, onlineUsers) => {
         }
     };
 
+    const taskSocketHandler = {
+        /**
+         * Xử lý khi task được review
+         */
+        handleTaskReview: ({ taskId, projectId }) => {
+            // Broadcast task review event to all users in the project room
+            io.to(`project_${projectId}`).emit('task_reviewed', { taskId });
+        },
+
+        /**
+         * Người dùng tham gia phòng project
+         */
+        joinProjectRoom: ({ projectId }) => {
+            socket.join(`project_${projectId}`);
+        },
+
+        /**
+         * Người dùng rời phòng project
+         */
+        leaveProjectRoom: ({ projectId }) => {
+            socket.leave(`project_${projectId}`);
+        },
+
+        handleTaskUpdated: ({ taskId, projectId }) => {
+            // Broadcast task update event to all users in the project room
+            io.to(`project_${projectId}`).emit('task_updated', { taskId });
+        }
+    };
+
     /**
      * Hàm xử lý lỗi chung
      */
@@ -130,4 +159,10 @@ module.exports = (io, socket, onlineUsers) => {
     socket.on('join_call_room', videoCallSocketHandler.joinCallRoom);
     socket.on('leave_call_room', videoCallSocketHandler.leaveCallRoom);
     socket.on('signal', videoCallSocketHandler.handleSignal);
+
+    // Đăng ký các sự kiện task
+    socket.on('task_review', taskSocketHandler.handleTaskReview);
+    socket.on('task_updated', taskSocketHandler.handleTaskUpdated);
+    socket.on('join_project_room', taskSocketHandler.joinProjectRoom);
+    socket.on('leave_project_room', taskSocketHandler.leaveProjectRoom);
 };
