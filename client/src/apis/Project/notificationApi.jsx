@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const getNotifications = async (accesstoken, userId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/notifications/user/${userId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/notifications/user/${userId}`, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },
@@ -16,7 +16,7 @@ export const getNotifications = async (accesstoken, userId) => {
 
 export const createNotification = async (accesstoken, data) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/notifications/create', data, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/notifications/create`, data, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },
@@ -30,7 +30,7 @@ export const createNotification = async (accesstoken, data) => {
 
 export const markAsReadNotification = async (accesstoken, notificationId) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/notifications/${notificationId}/read`, {}, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/notifications/${notificationId}/read`, {}, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },
@@ -44,7 +44,7 @@ export const markAsReadNotification = async (accesstoken, notificationId) => {
 
 export const markAllAsRead = async (accesstoken, userId) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/notifications/read-all/${userId}`, {}, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/notifications/read-all/${userId}`, {}, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },

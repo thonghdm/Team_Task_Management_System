@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const createCheckoutSession = async (accesstoken, data) => {
     try {
-        const response = await axios.post(`http://localhost:5000/api/stripe/create-checkout-session`, data, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/stripe/create-checkout-session`, data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -16,7 +16,7 @@ export const createCheckoutSession = async (accesstoken, data) => {
 
 export const createSubscriptionFree = async (accesstoken, data) => {
     try {
-        const response = await axios.post(`http://localhost:5000/api/subscription/add-free`, data, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/subscription/add-free`, data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -30,7 +30,7 @@ export const createSubscriptionFree = async (accesstoken, data) => {
 
 export const getSubscriptionByUser = async (accesstoken, userId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/subscription/get-subscription/${userId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/subscription/get-subscription/${userId}`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -44,7 +44,7 @@ export const getSubscriptionByUser = async (accesstoken, userId) => {
 
 export const getSubscriptionByUserId = async (accesstoken, userId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/subscription/user-bills/${userId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/subscription/user-bills/${userId}`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -58,7 +58,7 @@ export const getSubscriptionByUserId = async (accesstoken, userId) => {
 
 export const getAllSubscription = async (accesstoken) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/subscription/user-bills`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/subscription/user-bills`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },

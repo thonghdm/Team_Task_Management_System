@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
 
 const videoCallService = {
   // Start a new video call
@@ -12,7 +11,7 @@ const videoCallService = {
       }
 
       const response = await axios.post(
-        `${API_URL}/calls`,
+        `${import.meta.env.VITE_URL_SERVER}/api/calls`,
         { participantIds, groupId },
         {
           headers: { Authorization: `Bearer ${accesstoken}` },
@@ -30,7 +29,7 @@ const videoCallService = {
   acceptCall: async (accesstoken, callId) => {
     try {
       const response = await axios.put(
-        `${API_URL}/calls/${callId}/accept`,
+        `${import.meta.env.VITE_URL_SERVER}/api/calls/${callId}/accept`,
         {},
         {
           headers: { Authorization: `Bearer ${accesstoken}` },
@@ -48,7 +47,7 @@ const videoCallService = {
   declineCall: async (accesstoken, callId) => {
     try {
       const response = await axios.put(
-        `${API_URL}/calls/${callId}/decline`,
+        `${import.meta.env.VITE_URL_SERVER}/api/calls/${callId}/decline`,
         {},
         {
           headers: { Authorization: `Bearer ${accesstoken}` },
@@ -66,7 +65,7 @@ const videoCallService = {
   endCall: async (accesstoken, callId) => {
     try {
       const response = await axios.put(
-        `${API_URL}/calls/${callId}/end`,
+        `${import.meta.env.VITE_URL_SERVER}/api/calls/${callId}/end`,
         {},
         {
           headers: { Authorization: `Bearer ${accesstoken}` },
@@ -83,7 +82,7 @@ const videoCallService = {
   // Get active call if exists
   getActiveCall: async (accesstoken) => {
     try {
-      const response = await axios.get(`${API_URL}/calls/active`, {
+      const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/calls/active`, {
         headers: { Authorization: `Bearer ${accesstoken}` },
         withCredentials: true,
       });
@@ -101,7 +100,7 @@ const videoCallService = {
   getCallHistory: async (accesstoken) => {
     try {
       console.log(accesstoken);
-      const response = await axios.get(`${API_URL}/calls/history`, {
+      const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/calls/history`, {
         headers: { Authorization: `Bearer ${accesstoken}` },
         withCredentials: true,
       });
@@ -112,11 +111,11 @@ const videoCallService = {
     }
   },
 
-  // Get call by ID
+  // Get call by ID 
   getCallById: async (accesstoken, callId, customUid = null) => {
     try {
       const response = await axios.get(
-        `${API_URL}/calls/${callId}${customUid ? `?uid=${customUid}` : ''}`,
+        `${import.meta.env.VITE_URL_SERVER}/api/calls/${callId}${customUid ? `?uid=${customUid}` : ''}`,
         {
           headers: { Authorization: `Bearer ${accesstoken}` },
           withCredentials: true,
@@ -132,7 +131,7 @@ const videoCallService = {
   // Get active group call if exists
   getActiveGroupCall: async (accesstoken, groupId) => {
     try {
-      const response = await axios.get(`${API_URL}/calls/group/${groupId}/active`, {
+      const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/calls/group/${groupId}/active`, {
         headers: { Authorization: `Bearer ${accesstoken}` },
         withCredentials: true,
       });
@@ -143,13 +142,13 @@ const videoCallService = {
       }
       console.error('Error getting active group call:', error);
       throw error;
-    }
+    }   
   },
 
   // Leave a video call
   leaveCall: async (accesstoken, callId) => {
     try {
-      const response = await axios.put(`${API_URL}/calls/${callId}/leave`, {}, {
+      const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/calls/${callId}/leave`, {}, {
         headers: { Authorization: `Bearer ${accesstoken}` },
         withCredentials: true,
       });

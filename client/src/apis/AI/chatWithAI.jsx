@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export async function chatWithAI(prompt) {
     try {
-        const response = await axios.post('http://localhost:5000/api/chat-ai/chat', 
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/chat-ai/chat`, 
             { prompt }, 
             { headers: { 'Content-Type': 'application/json' } }
         );
@@ -16,7 +16,7 @@ export async function chatWithAI(prompt) {
 
 export async function AiAssignTasks(data) {
     try {
-        const response = await axios.post('http://localhost:5000/api/chat-ai/assign-tasks', 
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/chat-ai/assign-tasks`, 
             data, 
             { headers: { 'Content-Type': 'application/json' } }
         );

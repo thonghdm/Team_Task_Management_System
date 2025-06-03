@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const inviteMemberTask = async (accesstoken, data) => {
     try {     
-        const response = await axios.post('http://localhost:5000/api/task/members', data, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/task/members`, data, {
             headers: {
                 Authorization: `Bearer ${accesstoken}` // Chú ý viết hoa "Authorization"
             },
@@ -17,7 +17,7 @@ export const inviteMemberTask = async (accesstoken, data) => {
 };
 export const updateMemberTask = async (accesstoken, data) => {
     try {
-        const response = await axios.put('http://localhost:5000/api/member-task/delete-member', data, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/member-task/delete-member`, data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -31,7 +31,7 @@ export const updateMemberTask = async (accesstoken, data) => {
 
 export const getTaskByMemberID = async(accesstoken, memberID) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/member-task/tasks/${memberID}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/member-task/tasks/${memberID}`, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },

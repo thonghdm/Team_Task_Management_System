@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const getAllByOwnerId = async (accesstoken, ownerId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/project/by-owner?ownerId=${ownerId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/project/by-owner?ownerId=${ownerId}`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -18,7 +18,7 @@ export const getAllByOwnerId = async (accesstoken, ownerId) => {
 
 export const getAllByMemberId = async (accesstoken, memberId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/project/by-member?memberId=${memberId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/project/by-member?memberId=${memberId}`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -33,7 +33,7 @@ export const getAllByMemberId = async (accesstoken, memberId) => {
 
 export const getProjectDetal = async (accesstoken, projectId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/project/${projectId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/project/${projectId}`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -47,7 +47,7 @@ export const getProjectDetal = async (accesstoken, projectId) => {
 
 export const createNew = async (accesstoken, projectData) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/project/by-owner', projectData, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/project/by-owner`, projectData, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -61,7 +61,7 @@ export const createNew = async (accesstoken, projectData) => {
 
 export const updateProject = async (accesstoken, projectId, projectData) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/project/${projectId}`, projectData, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/project/${projectId}`, projectData, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -76,7 +76,7 @@ export const updateProject = async (accesstoken, projectId, projectData) => {
 
 export const moveCardTodifferentColumn = async (accesstoken, data) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/project/move-task`, data, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/project/move-task`, data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -91,7 +91,7 @@ export const moveCardTodifferentColumn = async (accesstoken, data) => {
 
 export const getAllProjects = async (accesstoken) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/project/all-projects`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/project/all-projects`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },

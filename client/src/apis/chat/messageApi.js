@@ -1,13 +1,11 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
-
 const messageApi = {
     // Lấy danh sách tin nhắn của một cuộc trò chuyện
     getMessages: async (accessToken, conversationId, page = 1, limit = 50) => {
         try {
             const response = await axios.get(
-                `${API_URL}/conversations/${conversationId}/messages?page=${page}&limit=${limit}`,
+                `${import.meta.env.VITE_URL_SERVER}/api/conversations/${conversationId}/messages?page=${page}&limit=${limit}`,
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
                     withCredentials: true,
@@ -24,7 +22,7 @@ const messageApi = {
     markMessageAsSeen: async (accessToken, messageId) => {
         try {
             const response = await axios.put(
-                `${API_URL}/messages/${messageId}/seen`,
+                `${import.meta.env.VITE_URL_SERVER}/api/messages/${messageId}/seen`,
                 {},
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
@@ -39,10 +37,10 @@ const messageApi = {
     },
 
     // Đánh dấu tất cả tin nhắn trong cuộc trò chuyện là đã xem
-    markConversationAsRead: async (accessToken, conversationId) => {
+    markConversationAsRead: async (accessToken, conversationId) => {        
         try {
             const response = await axios.put(
-                `${API_URL}/conversations/${conversationId}/read`,
+                `${import.meta.env.VITE_URL_SERVER}/conversations/${conversationId}/read`,
                 {},
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
@@ -60,7 +58,7 @@ const messageApi = {
     getConversationList: async (accessToken) => {
         try {
             const response = await axios.get(
-                `${API_URL}/conversations/list`,
+                `${import.meta.env.VITE_URL_SERVER}/api/conversations/list`,
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
                     withCredentials: true,
@@ -76,7 +74,7 @@ const messageApi = {
     getConversation: async (accessToken, userId, otherUserId) => {
         try {
             const response = await axios.get(
-                `${API_URL}/conversations/find?userId=${userId}&otherUserId=${otherUserId}`,
+                `${import.meta.env.VITE_URL_SERVER}/api/conversations/find?userId=${userId}&otherUserId=${otherUserId}`,
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
                     withCredentials: true,
@@ -92,7 +90,7 @@ const messageApi = {
     createConversation: async (accessToken, userId, otherUserId) => {
         try {
             const response = await axios.post(
-                `${API_URL}/conversations/create`,
+                `${import.meta.env.VITE_URL_SERVER}/api/conversations/create`,
                 { userId, otherUserId },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
