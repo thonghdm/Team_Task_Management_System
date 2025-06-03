@@ -110,7 +110,7 @@ const TaskBoard = () => {
     list: task.list || '.',
     labels: task.labels.length === 0 ? ['.'] : task.labels,
     comments: task.comments.length === 0 ? 0 : task.comments.length,
-    members: task.members.length === 0 ? [{_id: '.', name: '.', avatar: '', is_active: false }] : task.members,
+    members: task.members.length === 0 ? [] : task.members,
     dueDate: task.end_date || '.',
     task_review_status: task.task_review_status || '.',
   }));

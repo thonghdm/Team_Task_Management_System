@@ -115,9 +115,9 @@ const markConversationAsRead = async (conversationId, userId) => {
         { $set: { 'unreadCounts.$[elem].count': 0 } },
         { arrayFilters: [{ 'elem.user': userId }] }
     )
-    const messages = await Message.findOne({ conversation: conversationId })
+    const messages = await Message.find({ conversation: conversationId })
     for (let message of messages) {
-        await this.markMessageAsSeen(userId, message._id)
+        await markMessageAsSeen(message._id, userId)
     }
 }
 

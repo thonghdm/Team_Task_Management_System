@@ -37,7 +37,7 @@ const updateListById = async (listId, reqBody) => {
     try {
         const list = await List.findById(listId)
         if (!list) {
-            return null
+            throw new Error('List not found')
         }
 
         if (reqBody.is_active === false) {
