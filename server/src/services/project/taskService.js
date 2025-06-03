@@ -73,6 +73,9 @@ const getTaskById = async (taskId) => {
                     select: 'email _id image displayName'
                 }
             })
+        if (!task) {
+            throw new Error('Task not found')
+        }
         return task
     } catch (error) {
         throw new Error(`Error fetching task: ${error.message}`)

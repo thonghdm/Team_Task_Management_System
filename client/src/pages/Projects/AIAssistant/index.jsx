@@ -514,10 +514,11 @@ const AIAssistant = ({ open, onClose }) => {
                         <Button
                             variant="contained"
                             onClick={handleSubmit}
-                            disabled={isLoading || isSaving || !prompt.trim()}
+                            disabled={isLoading || isSaving || !prompt.trim()|| assignments.tasks?.length > 0}
                             sx={{ mr: 1 }}
+                            
                         >
-                            {isLoading ? <CircularProgress size={24} /> : "Get AI Suggestions"}
+                            {isLoading ? <CircularProgress size={24} /> : "Get Suggestions"}
                         </Button>
                         {assignments.tasks?.length > 0 && (
                             <>
