@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { getNotifications, markAsReadNotification, markAllAsRead as markAllNotificationsAsRead } from "../apis/Project/notificationApi";
 
-const SOCKET_SERVER_URL = "http://localhost:5000";
+const SOCKET_SERVER_URL = `${import.meta.env.VITE_URL_SERVER}`;
 
 const useSocket = (userId, accesstoken) => {
     const [notifications, setNotifications] = useState([]);

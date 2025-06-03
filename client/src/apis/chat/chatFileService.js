@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
-
 export const uploadChatFile = async (accessToken, fileData) => {
     console.log('accessTokenapi:', accessToken);
     try {
@@ -10,7 +8,7 @@ export const uploadChatFile = async (accessToken, fileData) => {
         formData.append('conversationId', fileData.conversationId);
         formData.append('uploadedBy', fileData.uploadedBy);
         
-        const response = await axios.post(`${API_URL}/chat-files/upload`, formData, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/chat-files/upload`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 authorization: `Bearer ${accessToken}`
@@ -25,7 +23,7 @@ export const uploadChatFile = async (accessToken, fileData) => {
 
 export const downloadChatFile = async (accessToken, messageId) => {
     try {
-        const response = await axios.get(`${API_URL}/chat-files/files/${messageId}/download`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/chat-files/files/${messageId}/download`, {
             headers: {
                 authorization: `Bearer ${accessToken}`
             },
@@ -39,10 +37,8 @@ export const downloadChatFile = async (accessToken, messageId) => {
 };
 
 export const getChatFilesByConversationId = async (accessToken, conversationId) => {
-    console.log('API: getChatFilesByConversationId called with:', { accessToken: !!accessToken, conversationId });
     try {
-        const url = `${API_URL}/chat-files/${conversationId}/files`;
-        console.log('API: Making request to:', url);
+        const url = `${import.meta.env.VITE_URL_SERVER}/api/chat-files/${conversationId}/files`;
         
         const response = await axios.get(url, {
             headers: {
@@ -51,11 +47,8 @@ export const getChatFilesByConversationId = async (accessToken, conversationId) 
             withCredentials: true
         });
         
-        console.log('API: Response received:', response.data);
         return response.data;
     } catch (error) {
-        console.error('API: Error in getChatFilesByConversationId:', error);
-        console.error('API: Error response:', error.response?.data);
         throw error;
     }
 }; 

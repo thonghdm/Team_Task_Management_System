@@ -5,7 +5,7 @@ export const apiLoginSuccess = (id, tokenLogin) => new Promise(async (resolve, r
     try {
         let response = await axios({
             method: 'post',
-            url: 'http://localhost:5000/api/auth/login-success',
+            url: `${import.meta.env.VITE_URL_SERVER}/api/auth/login-success`,
             data: { id, tokenLogin },
             withCredentials: true  // Set withCredentials here
         });
@@ -17,7 +17,7 @@ export const apiLoginSuccess = (id, tokenLogin) => new Promise(async (resolve, r
 
 export const apiLoginWithEmail = async (email, password) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/auth/email-login', {
+        const response = await axios.post( `${import.meta.env.VITE_URL_SERVER}/api/auth/email-login`, {
             email,
             password
         }, { withCredentials: true });
@@ -34,7 +34,7 @@ export const apiLoginWithEmail = async (email, password) => {
 
 export const apiRegisterWithEmail = async (name, email, password) => {
     try {   
-        const response = await axios.post('http://localhost:5000/api/auth/email-register', {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/auth/email-register`, {
             name,
             email,
             password
@@ -47,7 +47,7 @@ export const apiRegisterWithEmail = async (name, email, password) => {
 };
 export const apiResetPassword = async (email) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/auth/otp-reset-password', { email });
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/auth/otp-reset-password`, { email });
         return response;
     } catch (error) {
         console.error('Reset password error:', error.response?.data || error.message);
@@ -56,7 +56,7 @@ export const apiResetPassword = async (email) => {
 }
 export const apiLogOut = async () => {
     try {
-        const response = await axios.get('http://localhost:5000/api/auth/logout', { withCredentials: true });
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/auth/logout`, { withCredentials: true });
         return response;
     } catch (error) {
         console.error('Logout error:', error.response?.data || error.message);
@@ -65,7 +65,7 @@ export const apiLogOut = async () => {
 };
 export const apiRefreshToken = async () => {
     try {
-        const response = await axios.post('http://localhost:5000/api/auth/refresh', null, { withCredentials: true });
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/auth/refresh`, null, { withCredentials: true });
         return response;
     } catch (error) {
         console.error('Refresh token error:', error.response?.data || error.message);

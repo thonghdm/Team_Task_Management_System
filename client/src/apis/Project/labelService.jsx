@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const createNewLabel = async (accesstoken, data) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/label/labels', data, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/label/labels`, data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -16,7 +16,7 @@ export const createNewLabel = async (accesstoken, data) => {
 
 export const updateLabel = async (accesstoken, data) => {
     try {
-        const response = await axios.put('http://localhost:5000/api/label/labels', data, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/label/labels`, data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },

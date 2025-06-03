@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const getAuditLog = async (accesstoken, taskId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/auditLog/auditLogs/${taskId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/auditLog/auditLogs/${taskId}`, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },
@@ -15,7 +15,7 @@ export const getAuditLog = async (accesstoken, taskId) => {
 }
 export const createNewAuditLog = async (accesstoken, data) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/auditLog/auditLogs', data, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/auditLog/auditLogs`, data, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },
@@ -28,7 +28,7 @@ export const createNewAuditLog = async (accesstoken, data) => {
 };
 export const createNewAuditLog_project = async (accesstoken, data) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/auditLog/auditLogs_project', data, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/auditLog/auditLogs_project`, data, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },
@@ -41,7 +41,7 @@ export const createNewAuditLog_project = async (accesstoken, data) => {
 };
 export const getAuditLog_project = async (accesstoken, projectId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/auditLog/auditLogs_project/${projectId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/auditLog/auditLogs_project/${projectId}`, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const createNewComment = async (accesstoken, data) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/comment/comments', data, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/comment/comments`, data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -15,7 +15,7 @@ export const createNewComment = async (accesstoken, data) => {
 };
 export const getCommentById = async (accesstoken, taskId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/comment/comments${taskId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/comment/comments${taskId}`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -30,7 +30,7 @@ export const getCommentById = async (accesstoken, taskId) => {
 
 export const updateComment = async (accesstoken, updateData) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/comment/comments`, updateData, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/comment/comments`, updateData, {
             headers: {
                 Authorization: `Bearer ${accesstoken}`
             },

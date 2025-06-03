@@ -57,7 +57,7 @@ export default function SignIn() {
     };
     const resendOtp = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/resend-otp', { email });
+            const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/auth/resend-otp`, { email });
         }
         catch (error) {
             console.error('OTP resend error:', error);
@@ -90,8 +90,7 @@ export default function SignIn() {
     };
 
     const handleLogin = (type) => {
-        window.open(`http://localhost:5000/api/auth/${type}`, '_self')
-        console.log('Login with Google');
+        window.open(`${import.meta.env.VITE_URL_SERVER}/api/auth/${type}`, '_self')      
     }
 
 

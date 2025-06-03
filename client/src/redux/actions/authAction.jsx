@@ -117,8 +117,6 @@ export const resetPassword = (email) => async (dispatch) => {
     }
 };
 
-// http://localhost:5000/api/auth/login
-
 export const logout = () => async (dispatch) =>{
     try{
         dispatch({ type: actionTypes.LOGOUT });

@@ -4,7 +4,7 @@ export const apiChangePassword = (email, password) => new Promise(async (resolve
     try {
         let response = await axios({
             method: 'put',
-            url: 'http://localhost:5000/api/user/change-password',
+            url: `${import.meta.env.VITE_URL_SERVER}/api/user/change-password`,
             data: { email, password },
             withCredentials: true  // Set withCredentials here
         });
@@ -17,7 +17,7 @@ export const apiChangePasswordProfile = (email, password, newPassword) => new Pr
     try {
         let response = await axios({
             method: 'put',
-            url: 'http://localhost:5000/api/user/change-password-profile',
+            url: `${import.meta.env.VITE_URL_SERVER}/api/user/change-password-profile`,
             data: { email, password, newPassword },
             withCredentials: true  // Set withCredentials here
         });
@@ -30,7 +30,7 @@ export const apiGetOne = (accesstoken) => new Promise(async (resolve, reject) =>
     try {
         let response = await axios({
             method: 'get',
-            url: 'http://localhost:5000/api/user/get-one',
+            url: `${import.meta.env.VITE_URL_SERVER}/api/user/get-one`,
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -46,7 +46,7 @@ export const apiupdateUser= (accesstoken, data) => new Promise(async (resolve, r
     try {
         let response = await axios({
             method: 'put',
-            url: 'http://localhost:5000/api/user/update-user',
+            url: `${import.meta.env.VITE_URL_SERVER}/api/user/update-user`,
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -64,7 +64,7 @@ export const getAllMembers = (accesstoken) => new Promise(async (resolve, reject
     try {
         let response = await axios({
             method: 'get',
-            url: 'http://localhost:5000/api/user/all-member',
+            url: `${import.meta.env.VITE_URL_SERVER}/api/user/all-member`,
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -82,7 +82,7 @@ export const updateAll = (accesstoken, data) => new Promise(async (resolve, reje
     try {
         let response = await axios({
             method: 'put',
-            url: 'http://localhost:5000/api/user/update-all',
+            url: `${import.meta.env.VITE_URL_SERVER}/api/user/update-all`,
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -99,7 +99,7 @@ export const apiResetPasswordfromAdmin = (accesstoken, email , password) => new 
     try {
         let response = await axios({
             method: 'put',
-            url: 'http://localhost:5000/api/user/reset-password-admin',
+            url: `${import.meta.env.VITE_URL_SERVER}/api/user/reset-password-admin`,
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -116,7 +116,7 @@ export const getMemberById = (accesstoken, id) => new Promise(async (resolve, re
     try {
         let response = await axios({
             method: 'get',
-            url: `http://localhost:5000/api/user/member/${id}`,
+            url: `${import.meta.env.VITE_URL_SERVER}/api/user/member/${id}`,
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },

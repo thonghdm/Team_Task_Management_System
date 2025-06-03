@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const createNewList = async (accesstoken, listData) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/list/by-owner', listData, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/list/by-owner`, listData, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -18,7 +18,7 @@ export const createNewList = async (accesstoken, listData) => {
 
 export const updateList = async (accesstoken,listId, listData) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/list/lists/${listId}`, listData, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/list/lists/${listId}`, listData, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },

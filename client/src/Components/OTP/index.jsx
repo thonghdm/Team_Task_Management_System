@@ -59,7 +59,7 @@ const OTP = () => {
     };
     const resendOtp = async () => {
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/resend-otp', {email});
+            const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/auth/resend-otp`, {email});
             if (response.data.user) {
                 setResentMessageVisible(true);
             } else {
@@ -72,7 +72,7 @@ const OTP = () => {
     };
     const verifyOtp = async (enteredOtp) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/verify-email', {
+            const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/auth/verify-email`, {
                 email,
                 otp_code: enteredOtp,
             });

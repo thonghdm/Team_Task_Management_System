@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const getAllSubPlan = async (accesstoken) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/subscription-plan/all-plans`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/subscription-plan/all-plans`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },

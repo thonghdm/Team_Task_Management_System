@@ -1,13 +1,12 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
 
 const groupApi = {
     // Create a new group
     createGroup: async (accessToken, name, description, memberIds, avatar = null) => {
         try {
             const response = await axios.post(
-                `${API_URL}/groups/create`,
+                `${import.meta.env.VITE_URL_SERVER}/api/groups/create`,
                 { name, description, memberIds, avatar },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
@@ -23,7 +22,7 @@ const groupApi = {
     addMemberToGroup: async (accessToken, groupId, newMemberId) => {
         try {
             const response = await axios.post(
-                `${API_URL}/groups/add-member`,
+                `${import.meta.env.VITE_URL_SERVER}/api/groups/add-member`,
                 { groupId, newMemberId },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
@@ -39,7 +38,7 @@ const groupApi = {
     removeMemberFromGroup: async (accessToken, groupId, memberId) => {
         try {
             const response = await axios.post(
-                `${API_URL}/groups/remove-member`,
+                `${import.meta.env.VITE_URL_SERVER}/api/groups/remove-member`,
                 { groupId, memberId },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
@@ -55,7 +54,7 @@ const groupApi = {
     makeGroupAdmin: async (accessToken, groupId, newAdminId) => {
         try {
             const response = await axios.post(
-                `${API_URL}/groups/make-admin`,
+                `${import.meta.env.VITE_URL_SERVER}/api/groups/make-admin`,
                 { groupId, newAdminId },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
@@ -71,7 +70,7 @@ const groupApi = {
     removeGroupAdmin: async (accessToken, groupId, adminId) => {
         try {
             const response = await axios.post(
-                `${API_URL}/groups/remove-admin`,
+                `${import.meta.env.VITE_URL_SERVER}/api/groups/remove-admin`,
                 { groupId, adminId },
                 {
                     headers: { Authorization: `Bearer ${accessToken}` },
@@ -95,7 +94,7 @@ const groupApi = {
             }
             
             const response = await axios.put(
-                `${API_URL}/groups/update-avatar`,
+                `${import.meta.env.VITE_URL_SERVER}/api/groups/update-avatar`,
                 formData,
                 {
                     headers: { 

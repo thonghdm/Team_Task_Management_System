@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const createNewTask = async (accesstoken, taskData) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/task/by-owner', taskData, {
+        const response = await axios.post(`${import.meta.env.VITE_URL_SERVER}/api/task/by-owner`, taskData, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -16,7 +16,7 @@ export const createNewTask = async (accesstoken, taskData) => {
 
 export const getTasksById = async (accesstoken, taskId) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/task/tasks/${taskId}`, {
+        const response = await axios.get(`${import.meta.env.VITE_URL_SERVER}/api/task/tasks/${taskId}`, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -32,7 +32,7 @@ export const getTasksById = async (accesstoken, taskId) => {
 
 export const updateMemberTask = async (accesstoken, data) => {
     try {
-        const response = await axios.put('http://localhost:5000/api/task/members', data, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/task/members`, data, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
@@ -46,7 +46,7 @@ export const updateMemberTask = async (accesstoken, data) => {
 
 export const updateTask = async (accesstoken, taskId, taskData) => {
     try {
-        const response = await axios.put(`http://localhost:5000/api/task/tasks/${taskId}`, taskData, {
+        const response = await axios.put(`${import.meta.env.VITE_URL_SERVER}/api/task/tasks/${taskId}`, taskData, {
             headers: {
                 authorization: `Bearer ${accesstoken}`
             },
