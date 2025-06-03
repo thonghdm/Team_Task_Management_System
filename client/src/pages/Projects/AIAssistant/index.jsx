@@ -69,7 +69,7 @@ const AIAssistant = ({ open, onClose }) => {
     const { accesstoken, userData } = useSelector(state => state.auth);
     const dispatch = useDispatch();
     const { projectId } = useParams();
-
+    const defaultAvatar = "/225-default-avatar.png";
     // Add permission check
     const isClickable = React.useMemo(() => {
         if (!members?.members || !userData?._id) return false;
@@ -412,6 +412,7 @@ const AIAssistant = ({ open, onClose }) => {
                     throw error;
                 } finally {
                     setIsSaving(false);
+                    handleClearData();
                 }
             };
 
@@ -573,7 +574,7 @@ const AIAssistant = ({ open, onClose }) => {
                                                     <Chip
                                                         key={member.memberId}
                                                         label={member.displayName + " (" + (member.username || "NU") + ")"}
-                                                        avatar={<Avatar src={member.image} />}
+                                                        avatar={<Avatar src={member.image || defaultAvatar} />}
                                                         onDelete={isSaving ? undefined : () => handleRemoveMember(task.task_id, member.memberId)}
                                                         sx={{
                                                             m: 0.5,
@@ -595,6 +596,7 @@ const AIAssistant = ({ open, onClose }) => {
                                                         >
                                                             <MenuItem value="" disabled>Select Member</MenuItem>
                                                             {member.filter(m =>
+                                                                m.is_active === true &&
                                                                 !task.assigned_to.some(assigned => assigned.memberId === m.memberId._id)
                                                             ).map((m) => (
                                                                 <MenuItem key={m.memberId._id} value={m.memberId._id}>
@@ -614,7 +616,12 @@ const AIAssistant = ({ open, onClose }) => {
                                                             ))}
                                                         </Select>
                                                     </FormControl>
-                                                ) : (
+                                                ) :
+                                                member.some(m =>
+                                                    m.is_active &&
+                                                    !task.assigned_to.some(assigned => assigned.memberId === m.memberId._id)
+                                                  ) 
+                                                && (
                                                     <Button
                                                         size="small"
                                                         startIcon={<EditIcon />}

@@ -48,6 +48,7 @@ import ColorPickerDialog from '~/Components/ColorPickerDialog';
 import AddMemberDialog from '~/Components/AddMemberDialog';
 import TaskReview from './TaskReview';
 import { fetchTaskById } from '~/redux/project/task-slice';
+import socket from '~/utils/socket';
 
 const TaskBoard = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -75,7 +76,7 @@ const TaskBoard = () => {
   const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [taskReview, setTaskReview] = useState({taskId: null, task_Review: null});
-  const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
+  const defaultAvatar = "/225-default-avatar.png";
   useEffect(() => {
     const getProjectDetail = async (token) => {
       try {
@@ -103,6 +104,65 @@ const TaskBoard = () => {
     }
   }, [projectData]);
 
+  // Join project room when component mounts
+  useEffect(() => {
+    const joinRoom = () => {
+      if (projectId) {
+        console.log('TaskBoard: Joining project room:', projectId);
+        socket.emit('join_project_room', { projectId });
+      }
+    };
+
+    const leaveRoom = () => {
+      if (projectId) {
+        console.log('TaskBoard: Leaving project room:', projectId);
+        socket.emit('leave_project_room', { projectId });
+      }
+    };
+
+    // Listen for task review events
+    const handleTaskReviewed = ({ taskId: reviewedTaskId }) => {
+      console.log('TaskBoard: Task reviewed:', reviewedTaskId);
+      // Refresh project data to update task board
+      dispatch(fetchProjectDetail({ accesstoken, projectId }));
+    };
+
+    const handleTaskUpdated = ({ taskId: updatedTaskId }) => {
+      console.log('TaskBoard: Task updated:', updatedTaskId);
+      // Refresh project data to update task board
+      dispatch(fetchProjectDetail({ accesstoken, projectId }));
+    };
+
+    // Join room immediately
+    joinRoom();
+
+    // Set up event listeners
+    socket.on('task_reviewed', handleTaskReviewed);
+    socket.on('task_updated', handleTaskUpdated);
+
+    // Cleanup function
+    return () => {
+      leaveRoom();
+      socket.off('task_reviewed', handleTaskReviewed);
+      socket.off('task_updated', handleTaskUpdated);
+    };
+  }, [projectId, accesstoken, dispatch]);
+
+  // Add a new useEffect to handle visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && projectId) {
+        console.log('TaskBoard: Rejoining project room on visibility change:', projectId);
+        socket.emit('join_project_room', { projectId });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [projectId]);
 
   const updatedTasks = getTasksInfo.map(task => ({
     ...task,
@@ -323,19 +383,17 @@ const TaskBoard = () => {
               entity: 'Task',
               user_id: userData?._id
           }
-         }));
-         console.log("resultActionssssssssss", resultActions);
+         })
+        );
+         
         //Refresh data
         await dispatch(fetchProjectDetail({ accesstoken, projectId }));
         await dispatch(getTaskByMemberIDThunk({ accesstoken: accesstoken, memberID: userData?._id }));
-       
-        
-
         // Gửi thông báo
         if (notificationData.length > 0) {
           await dispatch(addNotification({ accesstoken, data: notificationData }));
         }
-
+        socket.emit('task_updated', { taskId, projectId });
         toast.success('Task updated successfully!');
       } else {
         toast.error('Failed to update task');
@@ -493,7 +551,10 @@ const TaskBoard = () => {
             message: message
           }));
         console.log("notificationData", currentTask);
-        const handleSuccess = () => {};
+        const handleSuccess = () => {
+          socket.emit('task_updated', { taskId, projectId });
+          socket.emit('task_reviewed', { taskId, projectId });
+        };
         const saveTaskReview = async (accesstoken) => {
             try {
                 const resultAction = await dispatch(updateTaskThunks({

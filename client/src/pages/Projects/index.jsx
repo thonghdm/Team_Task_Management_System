@@ -24,7 +24,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { createStarred, getStarredThunks, updateStarredThunks } from '~/redux/project/starred-slice';
 
-const defaultAvatar = 'https://www.codeproject.com/KB/GDI-plus/ImageProcessing2/img.jpg';
+const defaultAvatar = '/225-default-avatar.png';
 const Projects = () => {
   const { projectId } = useParams();
   const location = useLocation();
