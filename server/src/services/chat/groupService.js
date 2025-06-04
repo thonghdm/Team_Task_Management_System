@@ -14,6 +14,7 @@ const createGroup = async (name, description, creatorId, memberIds, avatar = nul
         participants: group.members,
         isGroup: true,
         groupInfo: {
+            _id: group._id,
             name: group.name,
             avatar: avatar,
             description: description,
@@ -33,10 +34,13 @@ const createGroup = async (name, description, creatorId, memberIds, avatar = nul
 const addMemberToGroup = async (conversationId, newMemberId, adminId) => {
     // Tìm conversation thay vì group
     const conversation = await Conversation.findById(conversationId)
+    const group = await Group.findById(conversation.groupInfo._id)
     if (!conversation) {
         throw new Error('Conversation not found')
     }
-
+    if (!group) {
+        throw new Error('Group not found')
+    }
     if (!conversation.isGroup) {
         throw new Error('This is not a group conversation')
     }
@@ -47,6 +51,13 @@ const addMemberToGroup = async (conversationId, newMemberId, adminId) => {
     }
 
     // Kiểm tra xem user đã là thành viên chưa
+    if (group.members.includes(newMemberId)) {
+        throw new Error('User is already a member of this group')
+    }
+    if (!group.members.includes(newMemberId)) {
+        group.members.push(newMemberId)
+        await group.save()
+    }
     if (!conversation.participants.includes(newMemberId)) {
         conversation.participants.push(newMemberId)
         conversation.unreadCounts.push({ user: newMemberId, count: 0 })
@@ -62,14 +73,17 @@ const addMemberToGroup = async (conversationId, newMemberId, adminId) => {
 const removeMemberFromGroup = async (conversationId, memberId, adminId) => {
     // Tìm conversation thay vì group
     const conversation = await Conversation.findById(conversationId)
+    const group = await Group.findById(conversation.groupInfo._id)
     if (!conversation) {
         throw new Error('Conversation not found')
     }
-
+    if (!group) {
+        throw new Error('Group not found')
+    }
     if (!conversation.isGroup) {
         throw new Error('This is not a group conversation')
     }
-
+    
     // Kiểm tra quyền admin
     if (!conversation.groupInfo.admins.includes(adminId)) {
         throw new Error('Only admins can remove members')
@@ -83,8 +97,12 @@ const removeMemberFromGroup = async (conversationId, memberId, adminId) => {
     
     // Remove từ unreadCounts
     conversation.unreadCounts = conversation.unreadCounts.filter(uc => uc.user.toString() !== memberId.toString())
-    
     await conversation.save()
+    if (group.members.includes(memberId)) {
+        group.members = group.members.filter(id => id.toString() !== memberId.toString())
+        await group.save()
+    }
+    
 
     // Populate để trả về thông tin đầy đủ
     await conversation.populate('participants', 'displayName email image')

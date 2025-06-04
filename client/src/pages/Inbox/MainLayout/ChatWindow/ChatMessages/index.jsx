@@ -61,7 +61,7 @@ const ChatMessages = () => {
             try {
                 const response = await downloadChatFile(userData.accesstoken, messageId);
                 if (!response || !(response instanceof Blob)) {
-                    throw new Error('Dữ liệu file không hợp lệ');
+                    throw new Error('Invalid file data');
                 }
                 blob = response;
             } catch (error) {
@@ -69,11 +69,11 @@ const ChatMessages = () => {
                     // Token expired, try to refresh
                     const newToken = await refreshToken();
                     if (!newToken) {
-                        throw new Error('Không thể làm mới token');
+                        throw new Error('Unable to refresh token');
                     }
                     const response = await downloadChatFile(newToken, messageId);
                     if (!response || !(response instanceof Blob)) {
-                        throw new Error('Dữ liệu file không hợp lệ');
+                        throw new Error('Invalid file data');
                     }
                     blob = response;
                 } else {
@@ -83,7 +83,7 @@ const ChatMessages = () => {
 
             // Kiểm tra kích thước file
             if (blob.size === 0) {
-                throw new Error('File trống');
+                throw new Error('The file is empty');
             }
 
             const url = window.URL.createObjectURL(blob);
@@ -96,14 +96,14 @@ const ChatMessages = () => {
             document.body.removeChild(a);
         } catch (error) {
             console.error('Error downloading file:', error);
-            if (error.message === 'Không thể làm mới token') {
-                toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-            } else if (error.message === 'Dữ liệu file không hợp lệ') {
-                toast.error('Không thể đọc file. File có thể đã bị hỏng.');
-            } else if (error.message === 'File trống') {
-                toast.error('File trống hoặc không có dữ liệu.');
+            if (error.message === 'Unable to refresh token') {
+                toast.error('Your session has expired, please log in again.');
+            } else if (error.message === 'Invalid file data') {
+                toast.error('Unable to read file. File may be corrupted..');
+            } else if (error.message === 'The file is empty') {
+                toast.error('File is empty or has no data.');
             } else {
-                toast.error('Không thể tải file. Vui lòng thử lại sau.');
+                toast.error('Unable to download file. Please try again later..');
             }
         }
     };

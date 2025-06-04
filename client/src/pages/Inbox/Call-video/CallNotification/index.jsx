@@ -13,7 +13,7 @@ import {
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 // Import ringtone directly
-import ringtone from '../../../../assets/telephone_electronic_42654_V1.mp3';
+const ringtone = 'https://storage.googleapis.com/team-task-management-files/%24RLSKBQ7.mp3'
 
 const CallNotification = ({ 
   open = false, 

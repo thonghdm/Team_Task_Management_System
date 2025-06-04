@@ -88,11 +88,6 @@ const groupApi = {
             const formData = new FormData();
             formData.append('avatar', avatarFile);
             formData.append('groupId', groupId);
-            
-            if (avatarFile) {
-                formData.append('avatar', avatarFile);
-            }
-            
             const response = await axios.put(
                 `${import.meta.env.VITE_URL_SERVER}/api/groups/update-avatar`,
                 formData,

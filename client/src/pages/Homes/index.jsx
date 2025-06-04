@@ -43,7 +43,7 @@ const Homes = () => {
           catch (error) {
             console.log("error", error);
             if (error.status === 403) {
-              alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+              alert("Your session has expired, please log in again.");
               dispatch({
                 type: actionTypes.LOGOUT,
               });
