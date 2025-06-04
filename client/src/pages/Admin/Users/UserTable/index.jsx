@@ -16,6 +16,11 @@ import {
   Box,
   Avatar,
   Typography,
+  Paper,
+  Chip,
+  Tooltip,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -25,6 +30,9 @@ import {
   Delete as DeleteIcon,
   RestoreFromTrash as RestoreIcon,
   DeleteForever as DeleteForeverIcon,
+  Star as StarIcon,
+  AccessTime as AccessTimeIcon,
+  AttachMoney as AttachMoneyIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,6 +51,8 @@ const UserTable = ({ users, activeTab }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { userData, accesstoken } = useSelector(state => state.auth)
+  const theme = useTheme();
+
   const generateStrongPassword= () => {
     const length = 8; // Độ dài mật khẩu
     const lowerCaseLetters = 'abcdefghijklmnopqrstuvwxyz';
@@ -165,44 +175,202 @@ const UserTable = ({ users, activeTab }) => {
 
   // Calculate the users to display based on the current page and rows per page
   const paginatedUsers = users.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  console.log(paginatedUsers);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return '$0';
+    return `$${price.toFixed(2)}`;
+  };
 
   return (
-    <Box>
-      <TableContainer>
-        <Table>
+    <Box sx={{ 
+      width: '100%',
+      '& .MuiTableContainer-root': {
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        overflow: 'hidden',
+      }
+    }}>
+      <TableContainer component={Paper} elevation={0}>
+        <Table sx={{
+          '& .MuiTableCell-root': {
+            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            py: 2,
+          },
+          '& .MuiTableHead-root .MuiTableCell-root': {
+            backgroundColor: alpha(theme.palette.primary.main, 0.04),
+            color: theme.palette.text.primary,
+            fontWeight: 600,
+            fontSize: '0.95rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          },
+          '& .MuiTableBody-root .MuiTableRow-root': {
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.02),
+              transform: 'translateY(-1px)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            },
+          },
+        }}>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Username</TableCell>
+              <TableCell>Plan</TableCell>
+              <TableCell>End Date</TableCell>
+              <TableCell>Price</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedUsers.map((user, index) => (
-              <TableRow key={index}>
-                <TableCell sx={{ display: 'flex' }}>
-                  <Avatar sx={{
-                    mr: 1, width: 30,
-                    height: 30,
-                    mt: "3px",
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)', // Adds a shadow effect
-                    border: '2px solid white' // Adds a border
-                  }}
-                    src={user?.image}
-                  />
-                  <Typography sx={{ mt: 1 }}>{user.displayName}</Typography>
-
+              <TableRow 
+                key={index}
+                sx={{
+                  animation: 'fadeIn 0.3s ease-in-out',
+                  '@keyframes fadeIn': {
+                    '0%': {
+                      opacity: 0,
+                      transform: 'translateY(10px)',
+                    },
+                    '100%': {
+                      opacity: 1,
+                      transform: 'translateY(0)',
+                    },
+                  },
+                  animationDelay: `${index * 0.05}s`,
+                }}
+              >
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Avatar 
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        border: '2px solid white',
+                        transition: 'transform 0.2s ease-in-out',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                        }
+                      }}
+                      src={user?.image}
+                    />
+                    <Box>
+                      <Typography 
+                        sx={{ 
+                          fontWeight: 600,
+                          color: theme.palette.text.primary,
+                        }}
+                      >
+                        {user.displayName}
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: theme.palette.text.secondary,
+                          display: 'block',
+                        }}
+                      >
+                        {user.role || 'User'}
+                      </Typography>
+                    </Box>
+                  </Box>
                 </TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.username}</TableCell>
-                <TableCell align="right">
-                  <IconButton
+                <TableCell>
+                  <Tooltip title={user.email}>
+                    <Typography 
+                      sx={{ 
+                        maxWidth: '200px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {user.email}
+                    </Typography>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Typography sx={{ fontWeight: 500 }}>
+                    {user.username}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    icon={user.subscription?.plan === 'Premium' ? <StarIcon /> : <AccessTimeIcon />}
+                    label={user.subscription?.plan || 'No Plan'}
                     size="small"
-                    onClick={(event) => handleMenuOpen(event, user)}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
+                    sx={{
+                      backgroundColor: user.subscription?.plan === 'Premium' 
+                        ? alpha(theme.palette.primary.main, 0.1)
+                        : alpha(theme.palette.grey[500], 0.1),
+                      color: user.subscription?.plan === 'Premium'
+                        ? theme.palette.primary.main
+                        : theme.palette.text.secondary,
+                      fontWeight: 600,
+                      '& .MuiChip-icon': {
+                        color: 'inherit',
+                      },
+                    }}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <AccessTimeIcon 
+                      sx={{ 
+                        fontSize: '1rem',
+                        color: theme.palette.text.secondary,
+                      }} 
+                    />
+                    <Typography>
+                      {formatDate(user.subscription?.endDate)}
+                    </Typography>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <AttachMoneyIcon 
+                      sx={{ 
+                        fontSize: '1rem',
+                        color: theme.palette.success.main,
+                      }} 
+                    />
+                    <Typography sx={{ fontWeight: 600, color: theme.palette.success.main }}>
+                      {formatPrice(user.subscription?.price)}
+                    </Typography>
+                  </Box>
+                </TableCell>
+                <TableCell align="right">
+                  <Tooltip title="Actions">
+                    <IconButton
+                      size="small"
+                      onClick={(event) => handleMenuOpen(event, user)}
+                      sx={{
+                        color: theme.palette.primary.main,
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                          transform: 'rotate(90deg)',
+                        },
+                      }}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
@@ -210,18 +378,27 @@ const UserTable = ({ users, activeTab }) => {
         </Table>
       </TableContainer>
 
-      {/* Pagination */}
       <TablePagination
         component="div"
-        count={users.length} // Total number of users
+        count={users.length}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]} // Options for rows per page
+        rowsPerPageOptions={[5, 10, 25]}
+        sx={{
+          '.MuiTablePagination-select': {
+            borderRadius: '8px',
+          },
+          '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+            margin: 0,
+          },
+          '.MuiTablePagination-actions': {
+            marginLeft: 2,
+          },
+        }}
       />
 
-      {/* Actions Menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -234,46 +411,74 @@ const UserTable = ({ users, activeTab }) => {
           vertical: 'top',
           horizontal: 'right',
         }}
+        PaperProps={{
+          elevation: 3,
+          sx: {
+            borderRadius: '12px',
+            mt: 1,
+            minWidth: '180px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            '& .MuiMenuItem-root': {
+              py: 1.5,
+              px: 2,
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              },
+            },
+          },
+        }}
       >
         {activeTab === 0 ? (
-          // Menu for Active Users
           <Box>
-            {/* <MenuItem onClick={() => handleEditUser(selectedUser._id)}>
-              <ListItemIcon>
-                <EditIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Edit</ListItemText>
-            </MenuItem> */}
-            <MenuItem onClick={() => handleResetPassword(selectedUser.email)} >
+            <MenuItem 
+              onClick={() => handleResetPassword(selectedUser.email)}
+              sx={{
+                '&:hover': {
+                  color: theme.palette.primary.main,
+                  '& .MuiListItemIcon-root': {
+                    color: theme.palette.primary.main,
+                  },
+                },
+              }}
+            >
               <ListItemIcon>
                 <LockIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Reset Password</ListItemText>
             </MenuItem>
-            <Divider />
-            <MenuItem onClick={() => handleDeleteActive(selectedUser._id, "Delete")} sx={{ color: 'error.main' }}>
+            <Divider sx={{ my: 1 }} />
+            <MenuItem 
+              onClick={() => handleDeleteActive(selectedUser._id, "Delete")}
+              sx={{
+                color: theme.palette.error.main,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.error.main, 0.08),
+                },
+              }}
+            >
               <ListItemIcon>
-                <DeleteIcon fontSize="small" sx={{ color: 'error.main' }} />
+                <DeleteIcon fontSize="small" sx={{ color: 'inherit' }} />
               </ListItemIcon>
               <ListItemText>Delete</ListItemText>
             </MenuItem>
           </Box>
         ) : (
-          // Menu for Deleted Users
           <Box>
-            <MenuItem onClick={() => handleDeleteActive(selectedUser._id, "Active")} sx={{ color: 'primary.main' }}>
+            <MenuItem 
+              onClick={() => handleDeleteActive(selectedUser._id, "Active")}
+              sx={{
+                color: theme.palette.primary.main,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                },
+              }}
+            >
               <ListItemIcon>
-                <RestoreIcon fontSize="small" sx={{ color: 'primary.main' }} />
+                <RestoreIcon fontSize="small" sx={{ color: 'inherit' }} />
               </ListItemIcon>
               <ListItemText>Restore</ListItemText>
             </MenuItem>
-            {/* <Divider /> */}
-            {/* <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
-              <ListItemIcon>
-                <DeleteForeverIcon fontSize="small" sx={{ color: 'error.main' }} />
-              </ListItemIcon>
-              <ListItemText>Delete Permanently</ListItemText>
-            </MenuItem> */}
           </Box>
         )}
       </Menu>

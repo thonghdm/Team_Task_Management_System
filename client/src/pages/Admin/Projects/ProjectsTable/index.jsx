@@ -18,6 +18,9 @@ import {
   TablePagination,
   Typography,
   Avatar,
+  Paper,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -27,6 +30,9 @@ import {
   Delete as DeleteIcon,
   Restore as RestoreIcon,
   Info as InfoIcon,
+  People as PeopleIcon,
+  Public as PublicIcon,
+  Lock as LockIcon,
 } from '@mui/icons-material';
 
 import ProjectDetailsDialog from '~/pages/Projects/ProjectMenu/ProjectDetailsDialog';
@@ -47,17 +53,38 @@ const ProjectsTable = ({ projects, isArchived }) => {
   const [page, setPage] = useState(0); // Current page
   const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
 
-  const getVisibilityColor = (visibility) => {
+  const theme = useTheme();
+
+  const getVisibilityIcon = (visibility) => {
     switch (visibility) {
       case 'Public':
-        return 'primary';
+        return <PublicIcon fontSize="small" />;
       case 'Member':
-        return 'warning';
+        return <LockIcon fontSize="small" />;
       default:
-        return 'default';
+        return <InfoIcon fontSize="small" />;
     }
   };
 
+  const getVisibilityColor = (visibility) => {
+    switch (visibility) {
+      case 'Public':
+        return {
+          bg: alpha(theme.palette.primary.main, 0.1),
+          color: theme.palette.primary.main,
+        };
+      case 'Member':
+        return {
+          bg: alpha(theme.palette.warning.main, 0.1),
+          color: theme.palette.warning.main,
+        };
+      default:
+        return {
+          bg: alpha(theme.palette.grey[500], 0.1),
+          color: theme.palette.text.secondary,
+        };
+    }
+  };
 
   const handleMenuOpen = (event, project) => {
     setAnchorEl(event.currentTarget);
@@ -69,8 +96,6 @@ const ProjectsTable = ({ projects, isArchived }) => {
     setSelectedProject(null);
   };
 
-
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -79,6 +104,7 @@ const ProjectsTable = ({ projects, isArchived }) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
   ///temp team data
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
@@ -91,8 +117,6 @@ const ProjectsTable = ({ projects, isArchived }) => {
     setOpenDialog(true);
     handleMenuClose();
   };
-
-
 
   const getTableColumns = () => {
     const baseColumns = [
@@ -125,7 +149,6 @@ const ProjectsTable = ({ projects, isArchived }) => {
     page * rowsPerPage + rowsPerPage
   );
 
-
   ////////////////////////////////
   const refreshToken = useRefreshToken();
   const dispatch = useDispatch();
@@ -143,7 +166,6 @@ const ProjectsTable = ({ projects, isArchived }) => {
       };
       const deleteActiveUser = async (token) => {
         try {
-
           if (check === "Delete") {
             data = {
               isActive: false,
@@ -173,11 +195,38 @@ const ProjectsTable = ({ projects, isArchived }) => {
     }
   };
 
-
   return (
-    <Box>
-      <TableContainer>
-        <Table>
+    <Box sx={{ 
+      width: '100%',
+      '& .MuiTableContainer-root': {
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        overflow: 'hidden',
+      }
+    }}>
+      <TableContainer component={Paper} elevation={0}>
+        <Table sx={{
+          '& .MuiTableCell-root': {
+            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            py: 2,
+          },
+          '& .MuiTableHead-root .MuiTableCell-root': {
+            backgroundColor: alpha(theme.palette.primary.main, 0.04),
+            color: theme.palette.text.primary,
+            fontWeight: 600,
+            fontSize: '0.95rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          },
+          '& .MuiTableBody-root .MuiTableRow-root': {
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: alpha(theme.palette.primary.main, 0.02),
+              transform: 'translateY(-1px)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            },
+          },
+        }}>
           <TableHead>
             <TableRow>
               {getTableColumns().map((column) => (
@@ -189,71 +238,158 @@ const ProjectsTable = ({ projects, isArchived }) => {
           </TableHead>
           <TableBody>
             {paginatedProjects?.map((project, index) => (
-              <TableRow key={index}>
-                {/* <TableCell>{project.projectName}</TableCell> */}
-
+              <TableRow 
+                key={index}
+                sx={{
+                  animation: 'fadeIn 0.3s ease-in-out',
+                  '@keyframes fadeIn': {
+                    '0%': {
+                      opacity: 0,
+                      transform: 'translateY(10px)',
+                    },
+                    '100%': {
+                      opacity: 1,
+                      transform: 'translateY(0)',
+                    },
+                  },
+                  animationDelay: `${index * 0.05}s`,
+                }}
+              >
                 <TableCell>
-                  <Box sx={{ display: 'flex' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Box
                       sx={{
-                        width: 20,
-                        height: 20,
-                        marginRight: 1,
-                        backgroundColor: project?.color,
-                        borderRadius: '50%', // Makes it a circle
-                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)', // Adds a shadow effect
-                        border: '2px solid white' // Adds a border
+                        width: 32,
+                        height: 32,
+                        backgroundColor: project?.color || theme.palette.primary.main,
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'transform 0.2s ease-in-out',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                        }
                       }}
-                    />
-                    <Typography variant="body2">{project.projectName}</Typography>
+                    >
+                      <Typography 
+                        variant="subtitle2" 
+                        sx={{ 
+                          color: '#fff',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        {project.projectName?.charAt(0)}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography 
+                        sx={{ 
+                          fontWeight: 600,
+                          color: theme.palette.text.primary,
+                        }}
+                      >
+                        {project.projectName}
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: theme.palette.text.secondary,
+                          display: 'block',
+                        }}
+                      >
+                        Created {new Date(project.createdAt).toLocaleDateString()}
+                      </Typography>
+                    </Box>
                   </Box>
-
                 </TableCell>
 
-                <TableCell sx={{ display: 'flex' }}>
-                  <Avatar sx={{
-                    mr: 1, width: 30,
-                    height: 30,
-                    mt: "3px",
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)', // Adds a shadow effect
-                    border: '2px solid white' // Adds a border
-                  }}
-                    src={project?.ownerId?.image}
-                  />
-                  <Typography sx={{ mt: 1 }}>{project?.ownerId?.displayName}</Typography>
-
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Avatar 
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        border: '2px solid white',
+                        transition: 'transform 0.2s ease-in-out',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                        }
+                      }}
+                      src={project?.ownerId?.image}
+                    />
+                    <Box>
+                      <Typography 
+                        sx={{ 
+                          fontWeight: 500,
+                          color: theme.palette.text.primary,
+                        }}
+                      >
+                        {project?.ownerId?.displayName}
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: theme.palette.text.secondary,
+                          display: 'block',
+                        }}
+                      >
+                        Project Owner
+                      </Typography>
+                    </Box>
+                  </Box>
                 </TableCell>
+
                 <TableCell>
                   <Chip
+                    icon={getVisibilityIcon(project.visibility)}
                     label={project.visibility}
-                    color={getVisibilityColor(project.visibility)}
                     size="small"
+                    sx={{
+                      backgroundColor: getVisibilityColor(project.visibility).bg,
+                      color: getVisibilityColor(project.visibility).color,
+                      fontWeight: 600,
+                      '& .MuiChip-icon': {
+                        color: 'inherit',
+                      },
+                    }}
                   />
                 </TableCell>
-                {/* <TableCell>{project.deadline}</TableCell> */}
-                <TableCell>{project.membersId.length} members</TableCell>
-                {/* {isArchived ? (
-                  <TableCell>{project.completedDate}</TableCell>
 
-                  <Box>
-                    <TableCell>
-                      <Tooltip title={project.archiveReason}>
-                        <IconButton size="small">
-                          <InfoIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                   </Box>
-                ) : (
-                  <TableCell>{project.startDate}</TableCell>
-                )} */}
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <PeopleIcon 
+                      sx={{ 
+                        fontSize: '1rem',
+                        color: theme.palette.primary.main,
+                      }} 
+                    />
+                    <Typography sx={{ fontWeight: 500 }}>
+                      {project.membersId.length} members
+                    </Typography>
+                  </Box>
+                </TableCell>
+
                 <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    onClick={(event) => handleMenuOpen(event, project)}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
+                  <Tooltip title="Actions">
+                    <IconButton
+                      size="small"
+                      onClick={(event) => handleMenuOpen(event, project)}
+                      sx={{
+                        color: theme.palette.primary.main,
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                          transform: 'rotate(90deg)',
+                        },
+                      }}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}
@@ -261,18 +397,27 @@ const ProjectsTable = ({ projects, isArchived }) => {
         </Table>
       </TableContainer>
 
-      {/* Pagination */}
       <TablePagination
-        rowsPerPageOptions={[5, 10, 15]}
         component="div"
         count={projects.length}
-        rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+        sx={{
+          '.MuiTablePagination-select': {
+            borderRadius: '8px',
+          },
+          '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+            margin: 0,
+          },
+          '.MuiTablePagination-actions': {
+            marginLeft: 2,
+          },
+        }}
       />
 
-      {/* Actions Menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -285,56 +430,57 @@ const ProjectsTable = ({ projects, isArchived }) => {
           vertical: 'top',
           horizontal: 'right',
         }}
+        PaperProps={{
+          elevation: 3,
+          sx: {
+            borderRadius: '12px',
+            mt: 1,
+            minWidth: '180px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+            '& .MuiMenuItem-root': {
+              py: 1.5,
+              px: 2,
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              },
+            },
+          },
+        }}
       >
         {!isArchived ? (
           <Box>
-            {/* <MenuItem onClick={handleEditProject}>
+            <MenuItem 
+              onClick={() => handleDeleteActive(selectedProject._id, "Delete")}
+              sx={{
+                color: theme.palette.error.main,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.error.main, 0.08),
+                },
+              }}
+            >
               <ListItemIcon>
-                <EditIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Edit Project</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleOpenShareDialog}>
-              <ListItemIcon>
-                <GroupsIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Manage Team</ListItemText>
-            </MenuItem> */}
-            {/* <MenuItem onClick={handleMenuClose}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Project Settings</ListItemText>
-            </MenuItem> */}
-            {/* <Divider /> */}
-            <MenuItem onClick={() => handleDeleteActive(selectedProject._id, "Delete")} sx={{ color: 'error.main' }}>
-              <ListItemIcon>
-                <DeleteIcon fontSize="small" sx={{ color: 'error.main' }} />
+                <DeleteIcon fontSize="small" sx={{ color: 'inherit' }} />
               </ListItemIcon>
               <ListItemText>Delete</ListItemText>
             </MenuItem>
           </Box>
         ) : (
           <Box>
-            <MenuItem onClick={() => handleDeleteActive(selectedProject._id, "Active")}>
+            <MenuItem 
+              onClick={() => handleDeleteActive(selectedProject._id, "Active")}
+              sx={{
+                color: theme.palette.primary.main,
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                },
+              }}
+            >
               <ListItemIcon>
-                <RestoreIcon fontSize="small" sx={{ color: '#27a6ab' }} />
+                <RestoreIcon fontSize="small" sx={{ color: 'inherit' }} />
               </ListItemIcon>
-              <ListItemText sx={{ color: '#27a6ab' }} >Restore</ListItemText>
+              <ListItemText>Restore</ListItemText>
             </MenuItem>
-            {/* <MenuItem onClick={handleMenuClose}>
-              <ListItemIcon>
-                <InfoIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>View Details</ListItemText>
-            </MenuItem> */}
-            {/* <Divider /> */}
-            {/* <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
-              <ListItemIcon>
-                <DeleteIcon fontSize="small" sx={{ color: 'error.main' }} />
-              </ListItemIcon>
-              <ListItemText>Delete Permanently</ListItemText>
-            </MenuItem> */}
           </Box>
         )}
       </Menu>

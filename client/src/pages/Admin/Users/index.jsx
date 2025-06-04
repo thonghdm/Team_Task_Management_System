@@ -24,37 +24,14 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { ToastContainer, toast } from 'react-toastify';
 
+import { getAllSubscription } from '~/apis/Project/subscriptionApi';
+
+
 
 const Users = () => {
   const [tabValue, setTabValue] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-
-  // Active users data
-  // const activeUsers = [
-  //   { _id: 1, name: 'Diệp Thảo Nguyễn Văn', email: 'diepthaonguyenvanbmt@gmail.com', username: 'Moderator', avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwbl_8kkN0-vMdzEdp1RRpWWp4zSKD8zsEag&s' },
-  //   { _id: 2, name: 'Thai Hoang Anh', email: 'zinmx205@gmail.com', username: 'Moderator', avatar: 'https://image.made-in-china.com/2f0j00TdmaOvFqLzrh/Avt-230cc-4X4-Motorcycles-Vehicle-Beach-Mini-Jeep-for-Sale-with-Ce.webp' },
-  //   { _id: 3, name: 'Thong Hoang', email: 'thongdzpro100@gmail.com', username: 'User' },
-  //   { _id: 4, name: 'Trần Anh', email: 'tran.anh@gmail.com', username: 'User' },
-  //   { _id: 5, name: 'Jane Doe', email: 'jane.doe@example.com', username: 'User' },
-  //   { _id: 11, name: 'Diệp Tqưehảo Nguyễn Văn', email: 'diepthaonguyenvanbmt@gmail.com', username: 'Moderator' },
-  //   { _id: 22, name: 'Thai Hqưeoang Anh', email: 'zinmx205@gmail.com', username: 'Moderator' },
-  //   { _id: 31, name: 'Thong Hqưeoang', email: 'thongdzpro100@gmail.com', username: 'User' },
-  //   { _id: 41, name: 'Trần Anqưeh', email: 'tran.anh@gmail.com', username: 'User' },
-  //   { _id: 54, name: 'Jane Doeqưe', email: 'jane.doe@example.com', username: 'User' },
-  //   { _id: 15, name: 'Diệp Thảqưeo Nguyễn Văn', email: 'diepthaonguyenvanbmt@gmail.com', username: 'Moderator' },
-  //   { _id: 25, name: 'Thai Hoqưeang Anh', email: 'zinmx205@gmail.com', username: 'Moderator' },
-  //   { _id: 352, name: 'Thong Hqưeoang', email: 'thongdzpro100@gmail.com', username: 'User' },
-  //   { _id: 413, name: 'Trầnqưe Anh', email: 'tran.anh@gmail.com', username: 'User' },
-  //   { _id: 5111, name: 'qưe Doe', email: 'jane.doe@example.com', username: 'User' },
-  // ];
-
-  // // Deleted users data
-  // const deletedUsers = [
-  //   { _id: 6, name: 'John Smith', email: 'john.smith@example.com', username: 'User' },
-  //   { _id: 7, name: 'Mary Johnson', email: 'mary.j@example.com', username: 'Moderator' },
-  // ];
-
   const { memberData } = useSelector((state) => state.allMember);
 
 
@@ -79,6 +56,20 @@ const Users = () => {
 
   }, [dispatch, accesstoken]);
 
+
+  const [userBills, setUserBills] = useState([]);
+  useEffect(() => {
+    const getUserBills = async () => {
+      const response = await getAllSubscription(accesstoken);
+      setUserBills(response.data);
+    }
+    getUserBills();
+  }, [accesstoken]);
+
+  console.log(userBills);
+  console.log(memberData);
+
+
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
@@ -91,9 +82,28 @@ const Users = () => {
     // Filter out users with isAdmin: true
     const nonAdminUsers = users?.filter(user => !user?.isAdmin);
 
+    // Merge subscription data with user data
+    const usersWithSubscription = nonAdminUsers?.map(user => {
+      // Find the latest active subscription for this user
+      const userSubscription = userBills?.find(bill => 
+        bill.user_id === user._id && bill.is_active
+      );
+
+      return {
+        ...user,
+        subscription: userSubscription ? {
+          plan: userSubscription.plan_id.subscription_type,
+          endDate: new Date(userSubscription.end_date).toLocaleDateString(),
+          maxProject: userSubscription.plan_id.max_project,
+          maxMember: userSubscription.plan_id.max_member,
+          price: userSubscription.plan_id.price
+        } : null
+      };
+    });
+
     // Separate users based on is_active status
-    const activeUsers = nonAdminUsers?.filter(user => user?.is_active);
-    const deletedUsers = nonAdminUsers?.filter(user => !user?.is_active);
+    const activeUsers = usersWithSubscription?.filter(user => user?.is_active);
+    const deletedUsers = usersWithSubscription?.filter(user => !user?.is_active);
 
     return { activeUsers, deletedUsers };
   };
