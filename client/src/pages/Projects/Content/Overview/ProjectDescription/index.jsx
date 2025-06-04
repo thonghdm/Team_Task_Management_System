@@ -15,7 +15,7 @@ import 'react-quill/dist/quill.snow.css';
 
 import { updateTaskThunks } from '~/redux/project/task-slice';
 import { updateProjectThunk } from '~/redux/project/project-slice';
-import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog } from '~/redux/project/auditlog-slice';
 
 import { updateAll } from '~/apis/User/userService'
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';

@@ -18,7 +18,7 @@ import fileSlice from '~/redux/project/uploadFile-slice/index';
 import projectThunkSlice from '~/redux/project/project-slice/index';
 import starredSlice from '~/redux/project/starred-slice/index';
 
-import auditLogSlice from '~/redux/project/auditLog-slice/index';
+import auditLogSlice from '~/redux/project/auditlog-slice/index';
 import taskInviteUserSlice from '~/redux/project/task-slice/task-inviteUser-slice/index';
 
 import subscriptionSlice from '~/redux/project/subscription-slice/index';
