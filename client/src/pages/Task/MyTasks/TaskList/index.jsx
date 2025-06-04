@@ -40,27 +40,34 @@ const TaskList = () => {
   // Task Filtering
   const todayTasks = Array.isArray(success) ? success.filter(task => {
     const taskEndDate = new Date(task?.task_id?.end_date);
-    return taskEndDate.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0);
+    return task?.task_id?.project_id?.isActive === true && 
+           taskEndDate.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0);
   }) : [];
 
   const nextWeekTasks = Array.isArray(success) ? success.filter(task => {
     const dueDate = new Date(task?.task_id?.end_date)
-    return dueDate.setHours(0, 0, 0, 0) > today.setHours(0, 0, 0, 0) && dueDate.setHours(0, 0, 0, 0) <= nextWeek.setHours(0, 0, 0, 0);
+    return task?.task_id?.project_id?.isActive === true && 
+           dueDate.setHours(0, 0, 0, 0) > today.setHours(0, 0, 0, 0) && 
+           dueDate.setHours(0, 0, 0, 0) <= nextWeek.setHours(0, 0, 0, 0);
   }) : [];
 
   const recentlyAssignedTasks = Array.isArray(success) ? success.filter(task => {
     const dueDate = new Date(task?.task_id?.end_date)
-    return dueDate.setHours(0, 0, 0, 0) > today.setHours(0, 0, 0, 0) && dueDate.setHours(0, 0, 0, 0) <= threeDaysLater.setHours(0, 0, 0, 0);
+    return task?.task_id?.project_id?.isActive === true && 
+           dueDate.setHours(0, 0, 0, 0) > today.setHours(0, 0, 0, 0) && 
+           dueDate.setHours(0, 0, 0, 0) <= threeDaysLater.setHours(0, 0, 0, 0);
   }) : [];
 
   const overdueTasks = Array.isArray(success) ? success.filter(task => {
     const dueDate = new Date(task?.task_id?.end_date)
-    return dueDate.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0)
+    return task?.task_id?.project_id?.isActive === true && 
+           dueDate.setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0)
   }) : [];
 
   const laterTasks = Array.isArray(success) ? success.filter(task => {
     const dueDate = new Date(task?.task_id?.end_date)
-    return dueDate.setHours(0, 0, 0, 0) > nextWeek.setHours(0, 0, 0, 0)
+    return task?.task_id?.project_id?.isActive === true && 
+           dueDate.setHours(0, 0, 0, 0) > nextWeek.setHours(0, 0, 0, 0)
   }) : [];
 
 ////////////////////////////////openTaskDetail
