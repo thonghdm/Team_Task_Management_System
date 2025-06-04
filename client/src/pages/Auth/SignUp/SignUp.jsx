@@ -113,7 +113,7 @@ export default function SignUp() {
     };
 
     const handleLogin = (type) => {
-        window.open(`http://localhost:5000/api/auth/${type}`, '_self');
+        window.open(`${import.meta.env.VITE_URL_SERVER}/api/auth/${type}`, '_self');
     };
 
     return (
