@@ -4,6 +4,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import GroupIcon from '@mui/icons-material/Group';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 const DashboardTabs = ({ value, onChange }) => {
   return (
@@ -16,6 +17,7 @@ const DashboardTabs = ({ value, onChange }) => {
       </Tabs> */}
       <Tabs value={value} onChange={onChange}>
         <Tab label="Overview" value="overview" />
+        <Tab label="Bill" value="bill" />
         {/* <Tab label="Projects" value="projects" />
         <Tab label="Team" value="team" />
         <Tab label="Reports" value="reports" /> */}
