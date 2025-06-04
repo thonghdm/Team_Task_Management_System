@@ -30,5 +30,7 @@ export default defineConfig({
     },
     define: {
         global: {}},
+    base: '/' // This ensures assets are referenced from root path
+
     
 })
