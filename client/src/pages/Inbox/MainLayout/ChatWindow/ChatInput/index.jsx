@@ -52,13 +52,13 @@ const ChatInput = ({ otherUserId }) => {
                 conversationId = res._id;
                 setCurrentConversation(conversationId);
             } catch (err) {
-                toast.error('Không thể tạo cuộc trò chuyện');
+                toast.error('Unable to create conversation');
                 return;
             }
         }
 
         if (!conversationId) {
-            toast.error('Vui lòng chọn cuộc trò chuyện');
+            toast.error('Please select a conversation');
             return;
         }
 
