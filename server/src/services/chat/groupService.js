@@ -6,6 +6,7 @@ const createGroup = async (name, description, creatorId, memberIds, avatar = nul
         description,
         creator: creatorId,
         members: [creatorId, ...memberIds],
+        avatar: avatar,
         admins: [creatorId]
     })
     await group.save()
@@ -146,6 +147,10 @@ const makeGroupAdmin = async (conversationId, newAdminId, currentAdminId) => {
 const updateGroupAvatar = async (groupId, avatarUrl, userId) => {
     // Tìm conversation dựa vào groupId
     const conversation = await Conversation.findById(groupId);
+    const group = await Group.findById(conversation.groupInfo._id);
+    if (!group) {
+        throw new Error('Group not found');
+    }
     if (!conversation) {
         throw new Error('Conversation not found');
     }
@@ -161,6 +166,8 @@ const updateGroupAvatar = async (groupId, avatarUrl, userId) => {
     }
 
     // Cập nhật avatar trong groupInfo
+    group.avatar = avatarUrl;
+    await group.save();
     conversation.groupInfo.avatar = avatarUrl;
     await conversation.save();
 
@@ -198,11 +205,38 @@ const removeGroupAdmin = async (conversationId, adminId, currentAdminId) => {
     return conversation
 }
 
+const leaveGroup = async (conversationId, memberId) => {
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) throw new Error('Conversation not found');
+    if (!conversation.isGroup) throw new Error('This is not a group conversation');
+    const group = await Group.findById(conversation.groupInfo._id);
+    if (!group) throw new Error('Group not found');
+
+    // Kiểm tra nếu là admin
+    const isAdmin = conversation.groupInfo.admins.some(id => id.toString() === memberId.toString());
+    if (isAdmin) {
+        if (conversation.groupInfo.admins.length === 1) {
+            throw new Error('The last admin cannot leave the group. Please transfer admin rights to someone else first!');
+        }
+        // Xóa khỏi danh sách admin
+        conversation.groupInfo.admins = conversation.groupInfo.admins.filter(id => id.toString() !== memberId.toString());
+    }
+    // Xóa khỏi participants/members
+    conversation.participants = conversation.participants.filter(id => id.toString() !== memberId.toString());
+    conversation.unreadCounts = conversation.unreadCounts.filter(uc => uc.user.toString() !== memberId.toString());
+    await conversation.save();
+    group.members = group.members.filter(id => id.toString() !== memberId.toString());
+    await group.save();
+    await conversation.populate('participants', 'displayName email image');
+    return conversation;
+}
+
 module.exports = {
     createGroup,
     addMemberToGroup,
     removeMemberFromGroup,
     makeGroupAdmin,
     removeGroupAdmin,
-    updateGroupAvatar
+    updateGroupAvatar,
+    leaveGroup
 }

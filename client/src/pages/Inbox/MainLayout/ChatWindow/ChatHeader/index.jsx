@@ -131,8 +131,9 @@ const handleVideoCall = async () => {
         <Avatar 
           sx={{ 
             mr: 2,
-            bgcolor: generateAvatarColor(groupName)
+            bgcolor: avatarSrc ?'transparent' : generateAvatarColor(groupName) 
           }} 
+          src={!avatarError ? avatarSrc : undefined}
           onError={handleAvatarError}
         >
           {groupName[0].toUpperCase()}
