@@ -102,6 +102,22 @@ const groupApi = {
         } catch (error) {
             throw error.response?.data || error;
         }
+    },
+
+    // Leave group
+    leaveGroup: async (accessToken, conversationId) => {
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_URL_SERVER}/api/groups/leave-group`,
+                { conversationId },
+                {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
     }
 };
 

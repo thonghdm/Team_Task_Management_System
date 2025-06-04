@@ -130,6 +130,17 @@ const groupController = {
                 res.status(500).json({ message: error.message });
             }
         });
+    },
+
+    leaveGroup: async (req, res) => {
+        try {
+            const { conversationId } = req.body;
+            const memberId = req.currentUser._id;
+            const updatedConversation = await groupService.leaveGroup(conversationId, memberId);
+            res.json({ success: true, conversation: updatedConversation });
+        } catch (error) {
+            res.status(400).json({ success: false, message: error.message });
+        }
     }
 }
 
