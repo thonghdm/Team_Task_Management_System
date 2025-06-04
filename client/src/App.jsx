@@ -10,7 +10,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode'
 import SignIn from './pages/Auth/SignIn/SignIn'
 import SingUp from './pages/Auth/SignUp/SignUp'
 import { Routes, Route } from 'react-router-dom'
-import LoginSuccess from './components/LoginSuccess'
+import LoginSuccess from './components/LoginSuccess.jsx';
 import Homes from '~/pages/Homes'
 import Boards from '~/pages/Boards'
 import OTP from '~/Components/OTP'
