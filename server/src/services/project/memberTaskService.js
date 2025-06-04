@@ -45,7 +45,7 @@ const getMemberTasksByMemberId = async (memberId) => {
                     },
                     {
                         path: 'project_id',
-                        select: 'projectName'
+                        select: 'projectName isActive'
                     }
                 ]
 
