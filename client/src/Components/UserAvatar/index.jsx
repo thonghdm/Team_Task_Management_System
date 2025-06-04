@@ -64,7 +64,7 @@ const UserAvatar = () => {
             setHasFetchedUser(false);
           } catch (refreshError) {
             if (refreshError.response?.status === 403) {
-              alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+              alert("Your session has expired, please log in again.");
               dispatch({ type: actionTypes.LOGOUT });
               navigate('/');
             }

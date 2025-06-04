@@ -35,10 +35,10 @@ export const ChatProvider = ({ children }) => {
                     const data = await messageApi.getMessages(newToken, conversationId);
                     setMessages(data);
                 } catch (refreshErr) {
-                    setError('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!');
+                    setError('Your session has expired, please log in again!');
                 }
             } else {
-                setError('Không thể tải tin nhắn!');
+                setError('Unable to load message!');
             }
         } finally {
             setLoading(false);

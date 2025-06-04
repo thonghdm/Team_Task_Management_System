@@ -5,6 +5,8 @@ import GroupIcon from '@mui/icons-material/Group';
 import { useTheme } from '@mui/material/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchAllMembers } from '~/redux/member/member-slice';
+import { useDebounce } from 'use-debounce';
+const normalize = str =>str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 // Hàm tạo avatar tự động từ tên nhóm
 const generateAvatarColor = (name) => {
@@ -35,6 +37,7 @@ const generateFallbackAvatarUrl = (name) => {
 
 const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name, email or groups...' }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
     const [userOptions, setUserOptions] = useState([]);
     const [groupOptions, setGroupOptions] = useState([]);
     const [showResults, setShowResults] = useState(false);
@@ -56,36 +59,34 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
 
     // Filter users and groups locally
     useEffect(() => {
-        if (!searchTerm.trim()) {
+        if (!debouncedSearchTerm.trim()) {
             setUserOptions([]);
             setGroupOptions([]);
             setShowResults(false);
             return;
         }
-        
         setIsSearching(true);
-        const search = searchTerm.toLowerCase();
-        
+        const search = normalize(debouncedSearchTerm);
         // Filter users
         const filteredUsers = memberData?.users?.filter(user =>
-            user._id !== userData?._id && user.is_active && !user.isAdmin &&
-            (user.displayName?.toLowerCase().includes(search) ||
-                user.email?.toLowerCase().includes(search) ||
-                user.username?.toLowerCase().includes(search))
+            user._id !== userData?._id && user.is_active  &&
+            (
+                normalize(user.displayName || '').includes(search) ||
+                normalize(user.email || '').includes(search) ||
+                normalize(user.username || '').includes(search)
+        )
         ) || [];
-        
         // Filter groups from conversations
+        console.log("cv",conversations)
         const filteredGroups = conversations
             .filter(conv => {
                 if (!conv.isGroup || !conv.groupInfo) return false;
-                
                 // Kiểm tra tên nhóm
-                const groupName = conv.groupInfo.name?.toLowerCase() || '';
+                const groupName = normalize(conv.groupInfo.name || '');
                 if (groupName.includes(search)) return true;
-                
                 // Kiểm tra tên thành viên trong nhóm
                 const memberNames = conv.participants
-                    ?.map(p => p.displayName?.toLowerCase())
+                    ?.map(p => normalize(p.displayName || ''))
                     .filter(Boolean) || [];
                 return memberNames.some(name => name.includes(search));
             })
@@ -98,12 +99,11 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
                 conversation: conv,
                 participants: conv.participants
             }));
-        
         setUserOptions(filteredUsers);
         setGroupOptions(filteredGroups);
         setShowResults(filteredUsers.length > 0 || filteredGroups.length > 0);
         setIsSearching(false);
-    }, [searchTerm, memberData, userData, conversations]);
+    }, [debouncedSearchTerm, memberData, userData, conversations]);
 
     // Hide dropdown when click outside
     useEffect(() => {
@@ -210,7 +210,7 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
                                         <ListItemAvatar>
                                             <Avatar 
                                                 src={avatarSrc} 
-                                                sx={{ bgcolor: group.avatarColor }}
+                                                sx={{ bgcolor: hasAvatarError ? theme.palette.grey[400] : group.avatarColor }}
                                                 onError={() => handleAvatarError(group._id)}
                                             >
                                                 <GroupIcon />
@@ -218,7 +218,9 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
                                         </ListItemAvatar>
                                         <ListItemText
                                             primary={<Typography variant="subtitle2">{group.name}</Typography>}
-                                            secondary={<Typography variant="caption" component="span">Group</Typography>}
+                                            secondary={<Typography variant="caption" component="span">
+                                            {group.participants?.map(p => p.displayName).join(', ')}
+                                            </Typography>}
                                         />
                                     </ListItem>
                                 );

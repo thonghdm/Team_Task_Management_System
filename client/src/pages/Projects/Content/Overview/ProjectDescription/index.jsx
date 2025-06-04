@@ -20,7 +20,7 @@ import { createAuditLog } from '~/redux/project/auditLog-slice';
 import { updateAll } from '~/apis/User/userService'
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { addNotification } from '~/redux/project/notifications-slice/index';
-
+import socket from '~/utils/socket';
 
 const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true, context, taskId = null, commentID = "", members = [], task = [], projectName = "" }) => {
   const dispatch = useDispatch();
@@ -126,6 +126,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
               }))
               await dispatch(addNotification({ accesstoken: token, data: notificationData }));
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+              socket.emit('task_updated', { taskId, projectId });
               setIsEditing(false);
             } catch (error) {
               throw error; // Rethrow error nếu không phải error code 2
@@ -171,6 +172,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
                 }
               }))
               await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
+              socket.emit('task_updated', { taskId, projectId });
               setContent(tempContent);
               setIsEditing(false);
 
@@ -210,6 +212,7 @@ const ProjectDescription = ({ initialContent, isEditable = true, isLabled = true
 
           const handleSuccess = () => {
             toast.success('Update description task successfully!');
+            socket.emit('task_updated', { taskId, projectId });
             setContent(tempContent);
             setIsEditing(false);
           };
