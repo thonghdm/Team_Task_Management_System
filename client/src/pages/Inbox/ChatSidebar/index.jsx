@@ -11,7 +11,7 @@ import messageApi from '~/apis/chat/messageApi';
 import socket from '~/utils/socket';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import GroupsIcon from '@mui/icons-material/Groups';
-import CreateGroupModal from '~/components/CreateGroupModal';
+import CreateGroupModal from '~/Components/CreateGroupModal';
 
 export const ChatSidebarContext = React.createContext();
 

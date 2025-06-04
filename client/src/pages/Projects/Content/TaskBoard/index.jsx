@@ -35,7 +35,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { updateTaskThunks } from '~/redux/project/task-slice';
-import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog } from '~/redux/project/auditlog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { ToastContainer, toast } from 'react-toastify';
 import PrioritySelector from './ChangeList/PrioritySelector';
