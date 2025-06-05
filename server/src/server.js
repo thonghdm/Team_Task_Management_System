@@ -58,10 +58,41 @@ app.use(cors({
     origin: process.env.URL_CLIENT
 }))
 
-app.use(express.static(path.join(__dirname, '../../client/dist')))
+// Log current directory and paths for debugging
+console.log('Current directory (__dirname):', __dirname)
+console.log('Attempting to serve static files from:', path.join(__dirname, '../client/dist'))
+console.log('Full absolute path:', path.resolve(__dirname, '../client/dist'))
+
+// Try multiple possible paths
+const possiblePaths = [
+    path.join(__dirname, '../client/dist'),
+    path.join(__dirname, '../../client/dist'),
+    path.join(__dirname, '../../../client/dist'),
+    path.resolve(__dirname, '../client/dist'),
+    path.resolve(__dirname, '../../client/dist')
+]
+
+// Log all possible paths
+possiblePaths.forEach((p, index) => {
+    console.log(`Path ${index + 1}:`, p)
+})
+
+// Use the first path that exists
+const staticPath = possiblePaths.find(p => {
+    try {
+        return require('fs').existsSync(p)
+    } catch (e) {
+        return false
+    }
+}) || possiblePaths[0]
+
+console.log('Using static path:', staticPath)
+app.use(express.static(staticPath))
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../client', 'dist', 'index.html'))
+    const indexPath = path.join(staticPath, 'index.html')
+    console.log('Serving index.html from:', indexPath)
+    res.sendFile(indexPath)
 })
 
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }))
