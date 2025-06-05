@@ -88,11 +88,6 @@ const groupApi = {
             const formData = new FormData();
             formData.append('avatar', avatarFile);
             formData.append('groupId', groupId);
-            
-            if (avatarFile) {
-                formData.append('avatar', avatarFile);
-            }
-            
             const response = await axios.put(
                 `${import.meta.env.VITE_URL_SERVER}/api/groups/update-avatar`,
                 formData,
@@ -101,6 +96,22 @@ const groupApi = {
                         Authorization: `Bearer ${accessToken}`,
                         'Content-Type': 'multipart/form-data',
                     },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error;
+        }
+    },
+
+    // Leave group
+    leaveGroup: async (accessToken, conversationId) => {
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_URL_SERVER}/api/groups/leave-group`,
+                { conversationId },
+                {
+                    headers: { Authorization: `Bearer ${accessToken}` },
                 }
             );
             return response.data;

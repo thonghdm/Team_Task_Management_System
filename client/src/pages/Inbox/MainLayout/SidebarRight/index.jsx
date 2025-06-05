@@ -31,7 +31,7 @@ import groupApi from '~/apis/chat/groupApi';
 import { useRefreshToken } from '~/utils/useRefreshToken';
 import { fetchChatFilesByConversationId } from '~/redux/chat/chatFile-slice';
 import socket from '~/utils/socket';
-
+import { toast } from 'react-toastify';
 // Hàm tạo avatar tự động từ tên nhóm
 const generateAvatarColor = (name) => {
     if (!name) return 'hsl(200, 70%, 60%)';
@@ -343,10 +343,10 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
                     handleMemberMenuClose();
                 } catch (refreshError) {
                     console.error('Error removing member after refresh:', refreshError);
-                    alert('Không thể xóa thành viên. Vui lòng thử lại.');
+                    toast.error('Unable to delete member. Please try again.');
                 }
             } else {
-                alert('Lỗi khi xóa thành viên: ' + (error.message || 'Unknown error'));
+                toast.error('Error while deleting member:' + (error.message || 'Unknown error'));
             }
         }
     };
@@ -398,10 +398,10 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
                     handleMemberMenuClose();
                 } catch (refreshError) {
                     console.error('Error making admin after refresh:', refreshError);
-                    alert('Không thể thêm admin. Vui lòng thử lại.');
+                    toast.error('Unable to add admin. Please try again.');
                 }
             } else {
-                alert('Lỗi khi thêm admin: ' + (error.message || 'Unknown error'));
+                toast.error('Error adding admin: ' + (error.message || 'Unknown error'));
             }
         }
     };
@@ -453,11 +453,24 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
                     handleMemberMenuClose();
                 } catch (refreshError) {
                     console.error('Error removing admin after refresh:', refreshError);
-                    alert('Không thể xóa admin. Vui lòng thử lại.');
+                    toast.error('Unable to delete admin. Please try again.');
                 }
             } else {
-                alert('Lỗi khi xóa admin: ' + (error.message || 'Unknown error'));
+                toast.error('Error when deleting admin: ' + (error.message || 'Unknown error'));
             }
+        }
+    };
+
+    const handleLeaveGroup = async () => {
+        if (!currentConversation || !currentConversation._id) return;
+        try {
+            await groupApi.leaveGroup(accesstoken, currentConversation._id);
+            toast.success('You have left the group!');
+            setTimeout(() => {
+                window.location.href = '/board/inbox/1';
+              }, 1500);
+        } catch (error) {
+            toast.error(error.message || 'Failed to leave the group!');
         }
     };
 
@@ -760,6 +773,12 @@ const SidebarRight = ({ onClose, setSelectedUserId }) => {
                 >
                     {renderFiles()}
                 </Box>
+
+                {currentConversation?.isGroup && (
+                    <Button variant="outlined" color="error" onClick={handleLeaveGroup} sx={{ mt: 2 }}>
+                        Leave group
+                    </Button>
+                )}
             </Box>
 
             {/* Modal thay đổi avatar nhóm */}

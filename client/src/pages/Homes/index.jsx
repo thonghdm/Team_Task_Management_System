@@ -43,7 +43,7 @@ const Homes = () => {
           catch (error) {
             console.log("error", error);
             if (error.status === 403) {
-              alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+              alert("Your session has expired, please log in again.");
               dispatch({
                 type: actionTypes.LOGOUT,
               });
@@ -74,6 +74,7 @@ const Homes = () => {
 
   ////
   const { success } = useSelector(state => state.taskInviteUser)
+  console.log("success", success);
   useEffect(() => {
     dispatch(getTaskByMemberIDThunk({ accesstoken, memberID: userData?._id }));
   }, [dispatch, userData?._id, accesstoken]);
@@ -99,10 +100,14 @@ const Homes = () => {
         periodStartDate = new Date(0);
     }
 
-    Array.isArray(tasks) ? tasks?.forEach(task => {
+    // Filter active projects first
+    const activeTasks = Array.isArray(tasks) 
+      ? tasks.filter(task => task?.task_id?.project_id?.isActive === true)
+      : [];
+
+    activeTasks?.forEach(task => {
       const taskEndDate = new Date(task?.task_id?.end_date);
       const taskDone = new Date(task?.task_id?.done_date);
-
       if (task?.task_id?.status === "Completed") {
         if (taskEndDate >= periodStartDate) {
           if (taskEndDate >= taskDone) {
@@ -120,7 +125,7 @@ const Homes = () => {
           upcoming.push(task);
         }
       }
-    }) : [];
+    });
 
     return { upcoming, overdue, completed };
   };

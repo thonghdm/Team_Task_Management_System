@@ -10,6 +10,10 @@ const ConversationSchema = new mongoose.Schema({
         default: false
     },
     groupInfo: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Group'
+        },
         name: {
             type: String,
             required: function() { return this.isGroup; }

@@ -69,17 +69,9 @@ const AddMemberModal = ({ open, onClose, onMemberAdded }) => {
 
         try {
             // Add members to group one by one
-            for (const member of selectedMembers) {
-                const response = await groupApi.addMemberToGroup(
-                    accesstoken,
-                    currentConversation._id,
-                    member._id
-                );
-                
-                if (!response.success) {
-                    throw new Error(response.message || 'Failed to add member');
-                }
-            }
+            await Promise.allSettled(selectedMembers.map(member =>
+                groupApi.addMemberToGroup(accesstoken, currentConversation._id, member._id)
+            ));
 
             // Success - call callback if provided
             if (onMemberAdded) {
@@ -125,40 +117,22 @@ const AddMemberModal = ({ open, onClose, onMemberAdded }) => {
                     }}
                     filterOptions={(options, { inputValue }) => {
                         if (!inputValue) return options;
-                        
+                    
                         const searchTerm = inputValue.toLowerCase();
+                    
                         return options
                             .map(option => {
                                 let score = 0;
-                                let isEmailMatch = false;
-                                let isNameMatch = false;
-                                
-                                // Check email match (highest priority)
-                                if (option.email?.toLowerCase().includes(searchTerm)) {
-                                    score += 100;
-                                    isEmailMatch = true;
-                                }
-                                
-                                // Check name match
-                                if (option.displayName?.toLowerCase().includes(searchTerm)) {
-                                    score += 50;
-                                    isNameMatch = true;
-                                }
-                                
-                                // Check username match
-                                if (option.username?.toLowerCase().includes(searchTerm)) {
-                                    score += 25;
-                                }
-                                
-                                return {
-                                    ...option,
-                                    searchScore: score,
-                                    isEmailMatch,
-                                    isNameMatch
-                                };
+                    
+                                if (option.email?.toLowerCase().includes(searchTerm)) score += 100;
+                                if (option.displayName?.toLowerCase().includes(searchTerm)) score += 50;
+                                if (option.username?.toLowerCase().includes(searchTerm)) score += 25;
+                    
+                                return { option, score };
                             })
-                            .filter(option => option.searchScore > 0)
-                            .sort((a, b) => b.searchScore - a.searchScore);
+                            .filter(entry => entry.score > 0)
+                            .sort((a, b) => b.score - a.score)
+                            .map(entry => entry.option); 
                     }}
                     renderInput={(params) => (
                         <TextField

@@ -18,7 +18,7 @@ export const useRefreshToken = () => {
             return token;
         } catch (refreshError) {
             if (refreshError.response?.status === 403) {
-                toast.error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+                toast.error("Your session has expired, please log in again.");
                 dispatch({ type: actionTypes.LOGOUT });
                 navigate('/');
             } else {

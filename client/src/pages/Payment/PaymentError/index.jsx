@@ -34,7 +34,7 @@ const theme = createTheme({
 
 const PaymentErrorModal = ({ open, onClose, errorMessage, onRetry }) => {
   // Default error message if none provided
-  const defaultErrorMessage = 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau hoặc liên hệ với bộ phận hỗ trợ của MISA.';
+  const defaultErrorMessage = 'An error occurred during payment. Please try again later or contact MISA support.';
 
   return (
     <ThemeProvider theme={theme}>
@@ -147,7 +147,7 @@ const PaymentError = () => {
   const { accesstoken, userData } = useSelector(state => state.auth);
 
   const [errorMessage, setErrorMessage] = React.useState(
-    'Đã xảy ra lỗi kết nối với cổng thanh toán. Vui lòng kiểm tra kết nối internet và thử lại.'
+    'There was an error connecting to the payment gateway. Please check your internet connection and try again..'
   );
 
 

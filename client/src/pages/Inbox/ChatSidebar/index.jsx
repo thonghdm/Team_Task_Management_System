@@ -45,16 +45,16 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
     useEffect(() => {
         const fetchList = async () => {
             if (accesstoken) {
-                try {
-                    const data = await messageApi.getConversationList(accesstoken);
-                    setConversationsLocal(data);
-                } catch (err) {
+                const result = await dispatch(fetchConversationList(accesstoken));
+                if (result.type.endsWith('fulfilled')) {
+                    setConversationsLocal(result.payload);
+                } else {
                     setConversationsLocal([]);
                 }
             }
         };
         fetchList();
-    }, [accesstoken]);
+    }, [dispatch, accesstoken]);
 
     // Auto-select first conversation when conversations are loaded and no current conversation
     useEffect(() => {
