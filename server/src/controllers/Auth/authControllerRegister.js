@@ -10,7 +10,7 @@ const authControllerRegister = {
             const { accessToken, refreshToken, userData } = result
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: false,
+                secure: (process.env.URL_CLIENT === 'http://localhost:3000') ? false : true,
                 path: '/',
                 sameSite: 'strict'
             })

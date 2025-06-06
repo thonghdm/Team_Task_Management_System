@@ -4,15 +4,15 @@ const verifyToken = require('~/middlewares/verifyToken')
 const Router = require('express').Router()
 
 Router.route('/add-free')
-    .post(subscriptionController.createNew)
+    .post(verifyToken, subscriptionController.createNew)
 Router.route('/get-subscription/:userId')
-    .get(subscriptionController.getAllByUser)
+    .get(verifyToken, subscriptionController.getAllByUser)
 
 Router.route('/user-bills/:userId')
-    .get(subscriptionController.getUserBills)
+    .get(verifyToken, subscriptionController.getUserBills)
 
 Router.route('/user-bills')
-    .get(subscriptionController.getAllBills)
+    .get(verifyToken, subscriptionController.getAllBills)
 
 
 module.exports = Router
