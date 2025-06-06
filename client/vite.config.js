@@ -5,6 +5,10 @@ import svgr from 'vite-plugin-svgr'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    base: '/',
+    build: {
+        outDir: 'dist',
+    },
     plugins: [
         react(),
         svgr({
@@ -27,6 +31,7 @@ export default defineConfig({
         port: 3000,
     },
     define: {
-        global: {}},
-    
+        global: {}
+    },
+
 })
