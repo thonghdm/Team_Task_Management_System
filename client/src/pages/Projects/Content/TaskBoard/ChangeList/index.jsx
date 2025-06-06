@@ -36,7 +36,7 @@ import { updateTaskThunks } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 
-import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog } from '~/redux/project/auditlog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 // import AnimationDone from '~/Components/AnimationDone';
 import { getTaskByMemberIDThunk } from '~/redux/project/task-slice/task-inviteUser-slice/index'

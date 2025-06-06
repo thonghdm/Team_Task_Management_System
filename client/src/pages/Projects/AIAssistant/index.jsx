@@ -36,7 +36,7 @@ import { fetchMemberProject } from '~/redux/project/projectRole-slice/memberProj
 import { useParams } from 'react-router-dom';
 import { inviteUserTask } from '~/redux/project/task-slice/task-inviteUser-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
-import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog } from '~/redux/project/auditlog-slice';
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { addNotification } from '~/redux/project/notifications-slice/index';
