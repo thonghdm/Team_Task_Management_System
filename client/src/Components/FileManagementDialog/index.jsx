@@ -19,7 +19,7 @@ import { fetchFileByIdTask, updateAttachmentByIdFileThunk } from '~/redux/projec
 import { useDispatch, useSelector } from 'react-redux'
 import { useRefreshToken } from '~/utils/useRefreshToken'
 
-import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog } from '~/redux/project/auditlog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { fetchTaskById } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
