@@ -109,7 +109,7 @@ const authController = {
             if (response.err === 0) {
                 res.clearCookie('refreshToken', {
                     httpOnly: true,
-                    secure:true
+                    secure: (process.env.URL_CLIENT === 'http://localhost:3000') ? false : true,
                 })
                 res.status(200).json({
                     err: 0,

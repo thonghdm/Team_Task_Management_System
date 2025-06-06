@@ -20,7 +20,7 @@ import { fetchTaskById } from '~/redux/project/task-slice';
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { useParams } from 'react-router-dom';
-import { createAuditLog } from '~/redux/project/auditLog-slice';
+import { createAuditLog } from '~/redux/project/auditlog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import socket from '~/utils/socket';
 

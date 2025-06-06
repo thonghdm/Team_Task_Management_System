@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build --base=./",
+        "build": "vite build",
         "lint": "eslint .",
         "preview": "vite preview"
     },
@@ -49,6 +49,7 @@
         "redux-thunk": "^2.4.1",
         "socket.io-client": "^4.8.1",
         "stripe": "^17.7.0",
+        "use-debounce": "^10.0.4",
         "vite-plugin-svgr": "^4.2.0",
         "web-vitals": "^2.1.4",
         "xlsx": "^0.18.5"
