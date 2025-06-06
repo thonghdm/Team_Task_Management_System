@@ -240,13 +240,6 @@ const ChatMessages = () => {
         }
     };
 
-    // Lấy tin nhắn khi đổi cuộc hội thoại (nếu useChat không tự fetch)
-    useEffect(() => {
-        if (currentConversation && fetchMessages) {
-            fetchMessages(currentConversation._id);
-        }
-    }, [currentConversation]);
-
     // Lắng nghe socket để nhận tin nhắn mới
     useEffect(() => {
         if (!currentConversation) return;

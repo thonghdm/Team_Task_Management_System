@@ -13,19 +13,31 @@ export const ChatProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [currentConversation, setCurrentConversation] = useState(null);
-    const { userData, accessToken } = useSelector((state) => state.auth);
+    const { userData, accesstoken } = useSelector((state) => state.auth);
     const refreshToken = useRefreshToken();
     const refreshAccessToken = useRefreshToken();
-
     // Lấy tin nhắn của cuộc trò chuyện
-    const fetchMessages = useCallback(async (conversationId, token = accessToken) => {
+    const fetchMessages = useCallback(async (conversationId, token = accesstoken) => {
+        if (!conversationId) {
+            console.error('No conversation ID provided');
+            return;
+        }
+
+        if (!userData?._id) {
+            console.error('User not authenticated');
+            return;
+        }
+
+        if (!token) {
+            console.error('No access token available');
+            return;
+        }
+        console.log('fetchMessages', conversationId, token);
         setLoading(true);
         setError(null);
         try {
             const data = await messageApi.getMessages(token, conversationId);
-            console.log("data",data);
             setMessages(data);
-            setCurrentConversation(conversationId);
         } catch (err) {
             // Nếu lỗi 401 hoặc hết hạn token
             if ((err?.response?.status === 401 || err?.err === 2) && refreshToken) {
@@ -43,7 +55,7 @@ export const ChatProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    }, [accessToken, refreshToken, refreshAccessToken]);
+    }, [accesstoken, refreshToken, refreshAccessToken]);
 
     // Gửi tin nhắn mới
     const sendMessage = useCallback((conversationId, messageData) => {
@@ -80,15 +92,44 @@ export const ChatProvider = ({ children }) => {
         ));
     }, []);
 
+    // Xử lý cập nhật conversation
+    const handleConversationUpdated = useCallback((updatedConversation) => {
+        if (currentConversation?._id === updatedConversation._id) {
+            setCurrentConversation(prev => ({
+                ...prev,
+                ...updatedConversation,
+            }));
+        }
+    }, [currentConversation]);
+
     // Cập nhật thông tin conversation hiện tại
     const updateCurrentConversation = useCallback((updatedConversation) => {
         if (!updatedConversation) {
             setCurrentConversation(null);
+            setMessages([]);
             return;
         }
-        
+
+        if (typeof updatedConversation === 'string') {
+            console.error('Invalid conversation object provided');
+            return;
+        }
+
+        if (!updatedConversation._id || !updatedConversation.participants) {
+            console.error('Invalid conversation object: missing required fields');
+            return;
+        }
         setCurrentConversation(updatedConversation);
+
     }, []);
+
+    // Fetch messages khi conversationId thay đổi thực sự
+    useEffect(() => {
+        if (currentConversation?._id) {
+            setMessages([]); // clear cũ
+            fetchMessages(currentConversation._id);
+        }
+    }, [currentConversation?._id]);
 
     // Authentication và thiết lập socket listeners
     useEffect(() => {
@@ -103,12 +144,16 @@ export const ChatProvider = ({ children }) => {
         // Xử lý tin nhắn đã xem
         socket.on('message seen', handleMessageSeen);
 
+        // Xử lý cập nhật conversation
+        socket.on('conversation updated', handleConversationUpdated);
+
         // Cleanup
         return () => {
             socket.off('new message', handleNewMessage);
             socket.off('message seen', handleMessageSeen);
+            socket.off('conversation updated', handleConversationUpdated);
         };
-    }, [userData, handleNewMessage, handleMessageSeen]);
+    }, [userData, handleNewMessage, handleMessageSeen, handleConversationUpdated]);
 
     // Tham gia vào cuộc trò chuyện khi thay đổi
     useEffect(() => {
@@ -137,7 +182,7 @@ export const ChatProvider = ({ children }) => {
         sendMessage,
         markMessageAsSeen,
         fetchMessages,
-        setCurrentConversation,
+        setCurrentConversation: updateCurrentConversation, 
         updateCurrentConversation,
         clearCurrentConversation
     };
