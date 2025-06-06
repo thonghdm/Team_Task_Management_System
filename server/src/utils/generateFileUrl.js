@@ -9,7 +9,7 @@ const generateFileUrl = (filename) => {
 };
 
 const generateChatFileUrl = (filename) => {
-    const baseUrl = process.env.URL_SERVER || 'http://localhost:5000';
+    const baseUrl = process.env.URL_SERVER;
     const url = baseUrl + `/uploads/chat/${filename}`;
     console.log('Generated chat file URL:', url);
     return url;
