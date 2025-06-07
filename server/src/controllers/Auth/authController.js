@@ -109,6 +109,8 @@ const authController = {
             if (response.err === 0) {
                 res.clearCookie('refreshToken', {
                     httpOnly: true,
+                    path: '/',
+                    sameSite: 'strict',
                     secure: (process.env.URL_CLIENT === 'http://localhost:3000') ? false : true,
                 })
                 res.status(200).json({
