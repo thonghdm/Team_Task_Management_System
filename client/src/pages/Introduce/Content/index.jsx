@@ -1,141 +1,163 @@
 import React from 'react';
-import { Container, Grid, Paper, Typography, Box, Button } from '@mui/material';
+import { Container, Typography, Box, Button, useTheme, Stack } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import img12 from '../../../../public/introduce/12.png';
 import img31 from '../../../../public/introduce/31.png';
 import img3 from '../../../../public/introduce/3.png';
 import img4 from '../../../../public/introduce/4.png';
 import img5 from '../../../../public/introduce/5.png';
+import { useNavigate } from 'react-router-dom';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 
-const StyledImg = styled('img')({});
+const StyledImg = styled('img')(({ theme }) => ({
+    transition: 'all 0.3s ease-in-out',
+    filter: theme.palette.mode === 'dark' ? 'brightness(0.8) invert(1)' : 'none',
+    '&:hover': {
+        transform: 'translateY(-2px)',
+        filter: theme.palette.mode === 'dark' ? 'brightness(1) invert(1)' : 'brightness(1.1)',
+    }
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+    textTransform: 'none',
+    fontWeight: 600,
+    borderRadius: '12px',
+    padding: '12px 32px',
+    fontSize: '1.1rem',
+    transition: 'all 0.2s ease-in-out',
+    '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: theme.palette.mode === 'dark'
+            ? '0 4px 12px rgba(0,0,0,0.3)'
+            : '0 4px 12px rgba(0,0,0,0.1)',
+    }
+}));
+
+const GradientTypography = styled(Typography)(({ theme }) => ({
+    background: theme.palette.mode === 'dark'
+        ? 'linear-gradient(45deg, #64B5F6 30%, #4FC3F7 90%)'
+        : 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    fontWeight: 700,
+}));
 
 const Content = () => {
-  return (
-    <Container maxWidth="lg" sx={{ mt: "140px" }}>
+    const theme = useTheme();
+    const navigate = useNavigate();
 
-      <Box>
-        <Typography
-          align="center"
-          variant="h2"
-          sx={{ fontWeight: "400", p: 4, color: "secondary.main" }}
-        >
-          Where work connects
-        </Typography>
+    const handleGetStarted = () => {
+        navigate('/sign-in');
+    };
 
-        <Typography
-          align="center"
-          variant="h5"
-          sx={{ mb: 6, color: "secondary.main" }}
-        >
-          Get everyone working in a single platform designed to manage any type of work.
-        </Typography>
+    const handleViewDemo = () => {
+        window.open('https://www.youtube.com/watch?v=_F9GYUJPxGw', '_blank');
+    };
 
-        <Box align="center" sx={{ mb: 3 }}
-        >
-          <Button sx={{ pt: 2, pb: 2, pr: 3, pl: 3, fontSize: 19, borderRadius: 20, mr: 2 }} variant="contained">Get started</Button>
-          <Button sx={{ pt: 2, pb: 2, pr: 3, pl: 3, fontSize: 19, borderRadius: 20 }} variant="outlined">View demo</Button>
-        </Box>
-      </Box>
+    return (
+        <Container maxWidth="lg" sx={{ 
+            mt: "140px",
+            color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'inherit'
+        }}>
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                py: 8,
+            }}>
+                <GradientTypography
+                    variant="h2"
+                    sx={{ 
+                        fontWeight: 700,
+                        mb: 3,
+                        fontSize: { xs: '2.5rem', md: '3.5rem' },
+                        lineHeight: 1.2,
+                    }}
+                >
+                    Where work connects
+                </GradientTypography>
 
-      <Box align="center" sx={{ mb: 3, mt: "170px" }}
-      >
-        <Typography
-          align="center"
-          variant="h6"
-          sx={{ mb: 3, color: "secondary.main" }}
-        >
-          Trusted by 2 million+ teams
-        </Typography>
-        <StyledImg sx={{ height: 65, mr: 2 }} src={img12} alt="monday.com" />
-        <StyledImg sx={{ height: 70, mr: 2 }} src={img31} alt="monday.com" />
-        <StyledImg sx={{ height: 70, mr: 2 }} src={img3} alt="monday.com" />
-        <StyledImg sx={{ height: 70, mr: 2 }} src={img4} alt="monday.com" />
-        <StyledImg sx={{ height: 60, mr: 2 }} src={img5} alt="monday.com" />
-      </Box>
+                <Typography
+                    variant="h5"
+                    sx={{ 
+                        mb: 6,
+                        maxWidth: '800px',
+                        color: theme.palette.mode === 'dark' 
+                            ? 'rgba(255, 255, 255, 0.7)'
+                            : 'rgba(0, 0, 0, 0.7)',
+                        fontSize: { xs: '1.1rem', md: '1.5rem' },
+                        lineHeight: 1.5,
+                    }}
+                >
+                    Get everyone working in a single platform designed to manage any type of work.
+                </Typography>
 
-      {/* <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h5">Section 1</Typography>
-            <Typography variant="body1">
-              This is the content for Section 1.
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h5">Section 2</Typography>
-            <Typography variant="body1">
-              This is the content for Section 2.
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
-      <Typography variant="body1">
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
-        [nodemon] watching extensions: js,mjs,cjs,json
-        [nodemon] starting `babel-node ./src/server.js`
-        (node:25792) [MONGODB DRIVER] Warning: useNewUrlParser is a deprecated option: useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version(Use `node --trace-warnings ...` to show where the warning was created)
-        (node:25792) [MONGODB DRIVER] Warning: useUnifiedTopology is a deprecated option: useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version
-        Server is running on the port 5000
-        Connected to MongoDB
+                <Box sx={{ 
+                    display: 'flex',
+                    gap: 2,
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    mb: 8
+                }}>
+                    <Stack direction="row" spacing={2}>
+                        <StyledButton 
+                            variant="contained"
+                            color="primary"
+                            onClick={handleGetStarted}
+                        >
+                            Get started
+                        </StyledButton>
+                        <StyledButton 
+                            variant="outlined"
+                            color="primary"
+                            onClick={handleViewDemo}
+                            startIcon={<PlayCircleOutlineIcon />}
+                        >
+                            View Demo
+                        </StyledButton>
+                    </Stack>
+                </Box>
+            </Box>
 
-      </Typography> */}
-    </Container>
-  );
+            <Box sx={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                py: 8,
+                mt: 8,
+                borderTop: `1px solid ${theme.palette.mode === 'dark' 
+                    ? 'rgba(255, 255, 255, 0.1)'
+                    : 'rgba(0, 0, 0, 0.1)'}`,
+            }}>
+                <Typography
+                    variant="h6"
+                    sx={{ 
+                        mb: 6,
+                        color: theme.palette.mode === 'dark'
+                            ? 'rgba(255, 255, 255, 0.7)'
+                            : 'rgba(0, 0, 0, 0.7)',
+                        fontWeight: 500,
+                    }}
+                >
+                    Trusted by 2 million+ teams
+                </Typography>
+                <Box sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 4,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}>
+                    <StyledImg sx={{ height: { xs: 40, sm: 50, md: 65 } }} src={img12} alt="monday.com" />
+                    <StyledImg sx={{ height: { xs: 45, sm: 55, md: 70 } }} src={img31} alt="monday.com" />
+                    <StyledImg sx={{ height: { xs: 45, sm: 55, md: 70 } }} src={img3} alt="monday.com" />
+                    <StyledImg sx={{ height: { xs: 45, sm: 55, md: 70 } }} src={img4} alt="monday.com" />
+                    <StyledImg sx={{ height: { xs: 40, sm: 50, md: 60 } }} src={img5} alt="monday.com" />
+                </Box>
+            </Box>
+        </Container>
+    );
 };
 
 export default Content;

@@ -2,20 +2,39 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
-import { TextField, InputAdornment, IconButton, Alert, AlertTitle } from '@mui/material';
+import { InputAdornment, IconButton, Alert, AlertTitle, useTheme } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import Card from '@mui/material/Card';
 import { registerWithEmail } from '~/redux/actions/authAction';
 import { useAuth } from '~/pages/Auth/SignUp/AuthContext';
+import styled from '@emotion/styled';
+import {
+    AuthCard,
+    StyledTextField,
+    StyledButton,
+    OutlinedButton,
+    StyledDivider,
+    GradientTypography,
+    getTextColor,
+} from '~/shared/styles/commonStyles';
+
+const AuthContainer = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+    backgroundColor: theme.palette.mode === 'dark' 
+        ? 'rgba(18, 18, 18, 0.95)'
+        : 'rgba(245, 245, 245, 0.95)',
+    padding: theme.spacing(2),
+}));
 
 export default function SignUp() {
+    const theme = useTheme();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { setIsSignedUp } = useAuth();
@@ -117,10 +136,24 @@ export default function SignUp() {
     };
 
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-            <Card variant="outlined" sx={{ padding: '2rem', width: '100%', maxWidth: '400px' }}>
-                <Typography component="h1" variant="h4" sx={{ width: '100%', textAlign: 'center', marginBottom: '1.5rem' }}>
-                    Sign up
+        <AuthContainer>
+            <AuthCard>
+                <GradientTypography
+                    component="h1"
+                    variant="h4"
+                    sx={{ width: '100%', textAlign: 'center', marginBottom: '1.5rem' }}
+                >
+                    Join Us Today!
+                </GradientTypography>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        textAlign: 'center',
+                        mb: 3,
+                        ...getTextColor(theme),
+                    }}
+                >
+                    Create your account and start your journey with us
                 </Typography>
                 {generalError && (
                     <Alert severity="error" sx={{ mb: 2 }}>
@@ -141,7 +174,7 @@ export default function SignUp() {
                 >
                     <FormControl>
                         <FormLabel htmlFor="name">Full name</FormLabel>
-                        <TextField
+                        <StyledTextField
                             error={!!nameError}
                             helperText={nameError}
                             id="name"
@@ -153,19 +186,12 @@ export default function SignUp() {
                             required
                             fullWidth
                             value={name}
-                            variant="outlined"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    height: '40px',
-                                    padding: '0',
-                                },
-                            }}
                             onChange={(e) => setName(e.target.value)}
                         />
                     </FormControl>
                     <FormControl>
                         <FormLabel htmlFor="email">Email</FormLabel>
-                        <TextField
+                        <StyledTextField
                             error={!!emailError}
                             helperText={emailError}
                             id="email"
@@ -176,13 +202,6 @@ export default function SignUp() {
                             required
                             fullWidth
                             value={email}
-                            variant="outlined"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    height: '40px',
-                                    padding: '0',
-                                },
-                            }}
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </FormControl>
@@ -190,7 +209,7 @@ export default function SignUp() {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <FormLabel htmlFor="password">Password</FormLabel>
                         </Box>
-                        <TextField
+                        <StyledTextField
                             error={!!passwordError}
                             helperText={passwordError}
                             name="password"
@@ -200,14 +219,8 @@ export default function SignUp() {
                             autoComplete="new-password"
                             required
                             fullWidth
-                            variant="outlined"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    height: '40px',
-                                },
-                            }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
@@ -227,7 +240,7 @@ export default function SignUp() {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
                         </Box>
-                        <TextField
+                        <StyledTextField
                             error={!!confirmPasswordError}
                             helperText={confirmPasswordError}
                             name="confirmPassword"
@@ -237,14 +250,8 @@ export default function SignUp() {
                             autoComplete="new-password"
                             required
                             fullWidth
-                            variant="outlined"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    height: '40px',
-                                },
-                            }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
@@ -260,9 +267,14 @@ export default function SignUp() {
                             }}
                         />
                     </FormControl>
-                    <Button type="submit" fullWidth variant="contained" disabled={loading}>
-                        {loading ? 'Loading...' : 'Sign up'}
-                    </Button>
+                    <StyledButton
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        disabled={loading}
+                    >
+                        {loading ? 'Creating account...' : 'Sign up'}
+                    </StyledButton>
                     <Typography sx={{ textAlign: 'center' }}>
                         Already have an account?{' '}
                         <Link href="/sign-in" variant="body2">
@@ -270,13 +282,25 @@ export default function SignUp() {
                         </Link>
                     </Typography>
                 </Box>
-                <Divider sx={{ my: 2 }}>or</Divider>
+                <StyledDivider>or</StyledDivider>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Button fullWidth variant="outlined" onClick={() => handleLogin('google')} disabled={loading}>
+                    <OutlinedButton
+                        fullWidth
+                        variant="outlined"
+                        onClick={() => handleLogin('google')}
+                        disabled={loading}
+                        startIcon={
+                            <img
+                                src="https://www.google.com/favicon.ico"
+                                alt="Google"
+                                style={{ width: 20, height: 20 }}
+                            />
+                        }
+                    >
                         Sign up with Google
-                    </Button>
+                    </OutlinedButton>
                 </Box>
-            </Card>
-        </Box>
+            </AuthCard>
+        </AuthContainer>
     );
 }

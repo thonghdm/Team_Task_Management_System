@@ -38,6 +38,8 @@ import CallNotification from './pages/Inbox/Call-video/CallNotification'
 import { CallProvider } from '~/Context/CallProvider'
 import ChatProvider from '~/Context/ChatProvider'
 
+import Contact from '~/pages/Contact'
+
 function App() {
   return (
     <AuthProvider>
@@ -48,6 +50,7 @@ function App() {
           <Route path='/' element={<Introduce />} />
           <Route path='/sign-in' element={<SignIn />} />
           <Route path='/sign-up' element={<SingUp />} />
+          <Route path='/contact' element={<Contact />} />
           <Route path="/otp" element={<ProtectedRoute><OTP /></ProtectedRoute>} />
               <Route path="/sign-up-success" element={<ProtectedRoute><SignUpSuccess /></ProtectedRoute>} />
           <Route path='/error' element={<Error />} />

@@ -1,24 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import FormLabel from '@mui/material/FormLabel';
-import FormControl from '@mui/material/FormControl';
-import { TextField, InputAdornment, IconButton } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
+import { Box, FormLabel, FormControl, InputAdornment, IconButton, Typography, useTheme } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-// import { resetPassword } from '~/redux/actions/authAction';
-import { useTheme } from '@mui/material/styles';
+import LockResetIcon from '@mui/icons-material/LockReset';
+import styled from '@emotion/styled';
 import { resetPassword, changePassword } from '~/redux/actions/authAction';
+import {
+    AuthCard,
+    StyledTextField,
+    StyledButton,
+    GradientTypography,
+    getTextColor,
+} from '~/shared/styles/commonStyles';
 
+const AuthContainer = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+    backgroundColor: theme.palette.mode === 'dark' 
+        ? 'rgba(18, 18, 18, 0.95)'
+        : 'rgba(245, 245, 245, 0.95)',
+    padding: theme.spacing(2),
+}));
+
+const PasswordIcon = styled(LockResetIcon)(({ theme }) => ({
+    fontSize: '60px',
+    color: theme.palette.primary.main,
+    marginBottom: theme.spacing(2),
+    animation: 'slideDown 0.5s ease-out',
+    '@keyframes slideDown': {
+        '0%': {
+            transform: 'translateY(-20px)',
+            opacity: 0,
+        },
+        '100%': {
+            transform: 'translateY(0)',
+            opacity: 1,
+        },
+    },
+}));
+
+const PasswordRequirements = styled(Box)(({ theme }) => ({
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+    padding: theme.spacing(1.5),
+    backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(255, 255, 255, 0.05)'
+        : 'rgba(0, 0, 0, 0.02)',
+    borderRadius: theme.shape.borderRadius,
+    textAlign: 'left',
+    '& ul': {
+        margin: 0,
+        paddingLeft: theme.spacing(2),
+        color: theme.palette.text.secondary,
+        fontSize: '0.875rem',
+    },
+    '& li': {
+        marginBottom: theme.spacing(0.5),
+    },
+}));
 
 export default function NewPassword() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const location = useLocation(); // Import and use useLocation hook
+    const location = useLocation();
     const theme = useTheme();
 
     const [password, setPassword] = useState('');
@@ -59,7 +107,6 @@ export default function NewPassword() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         setGeneralError('');
 
         if (validatePasswords()) {
@@ -76,104 +123,171 @@ export default function NewPassword() {
     const toggleConfirmPasswordVisibility = () => setShowConfirmPassword((prev) => !prev);
 
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-            <Card variant="outlined" sx={{ padding: '2rem', width: '100%', maxWidth: '400px' }}>
-                <Typography component="h1" variant="h4" sx={{ width: '100%', textAlign: 'center', marginBottom: '1.5rem' }}>
-                    Set New Password
-                </Typography>
+        <AuthContainer>
+            <AuthCard>
                 <Box
-                    component="form"
-                    onSubmit={handleSubmit}
-                    noValidate
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        width: '100%',
-                        gap: 2,
+                        alignItems: 'center',
+                        textAlign: 'center',
                     }}
                 >
-                    <FormControl>
-                        <FormLabel htmlFor="password">New Password</FormLabel>
-                        <TextField
-                            error={!!passwordError}
-                            helperText={passwordError}
-                            id="password"
-                            type={showPassword ? 'text' : 'password'}
-                            name="password"
-                            placeholder="Enter new password"
-                            autoComplete="new-password"
-                            required
-                            fullWidth
-                            value={password}
-                            variant="outlined"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    height: '40px',
-                                    padding: '0',
-                                },
-                            }}
-                            onChange={(e) => setPassword(e.target.value)}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end"  sx={{ p: 2 }}>
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={togglePasswordVisibility}
-                                            edge="end"
-                                        >
-                                            {showPassword ? <VisibilityIcon sx={{ color: theme.palette.text.primary}} /> : <VisibilityOffIcon sx={{ color: theme.palette.text.primary}} />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </FormControl>
-                    <FormControl>
-                        <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
-                        <TextField
-                            error={!!confirmPasswordError}
-                            helperText={confirmPasswordError}
-                            id="confirmPassword"
-                            type={showConfirmPassword ? 'text' : 'password'}
-                            name="confirmPassword"
-                            placeholder="Confirm new password"
-                            autoComplete="new-password"
-                            required
-                            fullWidth
-                            value={confirmPassword}
-                            variant="outlined"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    height: '40px',
-                                    padding: '0',
-                                },
-                            }}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end" sx={{ p: 2 }}>
-                                        <IconButton
-                                            aria-label="toggle confirm password visibility"
-                                            onClick={toggleConfirmPasswordVisibility}
-                                            edge="end"
-                                        >
-                                            {showConfirmPassword ? <VisibilityIcon sx={{ color: theme.palette.text.primary}} /> : <VisibilityOffIcon sx={{ color: theme.palette.text.primary}} />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </FormControl>
-                    {generalError && (
-                        <Typography color="error" variant="body2">
-                            {generalError}
-                        </Typography>
-                    )}
-                    <Button type="submit" fullWidth variant="contained">
+                    <PasswordIcon />
+                    <GradientTypography
+                        component="h1"
+                        variant="h4"
+                        sx={{ mb: 2 }}
+                    >
                         Set New Password
-                    </Button>
+                    </GradientTypography>
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            mb: 3,
+                            ...getTextColor(theme),
+                        }}
+                    >
+                        Please enter your new password below
+                    </Typography>
+
+                    <Box
+                        component="form"
+                        onSubmit={handleSubmit}
+                        noValidate
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            width: '100%',
+                            gap: 2,
+                            textAlign: 'left',
+                        }}
+                    >
+                        <FormControl>
+                            <FormLabel 
+                                htmlFor="password"
+                                sx={{ textAlign: 'left' }}
+                            >
+                                New Password
+                            </FormLabel>
+                            <StyledTextField
+                                error={!!passwordError}
+                                helperText={passwordError}
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                placeholder="Enter new password"
+                                autoComplete="new-password"
+                                required
+                                fullWidth
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={togglePasswordVisibility}
+                                                edge="end"
+                                            >
+                                                {showPassword ? (
+                                                    <VisibilityIcon sx={{ color: theme.palette.text.primary }} />
+                                                ) : (
+                                                    <VisibilityOffIcon sx={{ color: theme.palette.text.primary }} />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </FormControl>
+
+                        <FormControl>
+                            <FormLabel 
+                                htmlFor="confirmPassword"
+                                sx={{ textAlign: 'left' }}
+                            >
+                                Confirm Password
+                            </FormLabel>
+                            <StyledTextField
+                                error={!!confirmPasswordError}
+                                helperText={confirmPasswordError}
+                                id="confirmPassword"
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                name="confirmPassword"
+                                placeholder="Confirm new password"
+                                autoComplete="new-password"
+                                required
+                                fullWidth
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle confirm password visibility"
+                                                onClick={toggleConfirmPasswordVisibility}
+                                                edge="end"
+                                            >
+                                                {showConfirmPassword ? (
+                                                    <VisibilityIcon sx={{ color: theme.palette.text.primary }} />
+                                                ) : (
+                                                    <VisibilityOffIcon sx={{ color: theme.palette.text.primary }} />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </FormControl>
+
+                        <PasswordRequirements>
+                            <Typography 
+                                variant="body2" 
+                                sx={{ 
+                                    mb: 1, 
+                                    fontWeight: 500,
+                                    textAlign: 'left',
+                                }}
+                            >
+                                Password Requirements:
+                            </Typography>
+                            <ul>
+                                <li>At least 6 characters long</li>
+                                <li>Include both uppercase and lowercase letters</li>
+                                <li>Include at least one number</li>
+                                <li>Include at least one special character</li>
+                            </ul>
+                        </PasswordRequirements>
+
+                        {generalError && (
+                            <Typography
+                                color="error"
+                                variant="body2"
+                                sx={{
+                                    textAlign: 'center',
+                                    backgroundColor: theme.palette.mode === 'dark'
+                                        ? 'rgba(211, 47, 47, 0.1)'
+                                        : 'rgba(211, 47, 47, 0.05)',
+                                    padding: theme.spacing(1),
+                                    borderRadius: theme.shape.borderRadius,
+                                }}
+                            >
+                                {generalError}
+                            </Typography>
+                        )}
+
+                        <StyledButton
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 1 }}
+                        >
+                            Reset Password
+                        </StyledButton>
+                    </Box>
                 </Box>
-            </Card>
-        </Box>
+            </AuthCard>
+        </AuthContainer>
     );
 }
