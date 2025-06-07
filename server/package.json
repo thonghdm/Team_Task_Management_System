@@ -10,11 +10,12 @@
     "scripts": {
         "lint": "eslint src --ext js --report-unused-disable-directives --max-warnings 0",
         "clean": "rimraf build && mkdir build",
-        "build-babel": "babel ./src -d ./build/src",
-        "build": "npm run clean && npm run build-babel",
-        "start": "npm run production",
-        "production": "npm run build && node ./build/src/server.js",
-        "dev": "concurrently -k -n SERVER,STRIPE -c green,blue \"cross-env nodemon --exec babel-node ./src/server.js\" \"cross-env stripe listen --forward-to %URL_SERVER%/api/stripe/webhook\""
+        "build-babel": "yarn babel ./src -d ./build/src",
+        "build": "yarn clean && yarn build-babel",
+        "start": "yarn production",
+        "production": "yarn build && node ./build/src/server.js",
+        "dev": "concurrently -k -n SERVER,STRIPE -c green,blue \"cross-env nodemon --exec babel-node ./src/server.js\" \"cross-env stripe listen --forward-to %URL_SERVER%/api/stripe/webhook\"",
+        "postinstall": "yarn build"
     },
     "dependencies": {
         "@babel/cli": "^7.22.10",
