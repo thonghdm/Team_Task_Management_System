@@ -4,8 +4,7 @@ import Subscription from '~/models/SubscriptionSchema.js'
 // import User from '~/models/UserSchema.js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-const clientUrl = process.env.CLIENT_URL
-
+const clientUrl = process.env.URL_CLIENT
 
 export const createCheckoutSession = async (req, res, next) => {
     try {
