@@ -35,11 +35,12 @@ const authController = {
 
             let response = await authService.loginSuccessService(id, tokenLogin)
             if (response.accesstoken && response.refreshToken) {
-                res.cookie('refreshToken', response.refreshToken, {
+                const isProduction = process.env.NODE_ENV === 'production'
+                res.clearCookie('refreshToken', {
                     httpOnly: true,
+                    secure: isProduction,
                     path: '/',
-                    sameSite: 'strict', // CSRF protection
-                    maxAge: 7 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+                    sameSite: isProduction ? 'none' : 'strict'
                 })
 
             }
@@ -69,11 +70,15 @@ const authController = {
 
         try {
             let response = await authService.refreshTokenService(refreshToken)
+
+            const isProduction = process.env.NODE_ENV === 'production'
+
             if (response.token && response.refreshToken) {
                 res.cookie('refreshToken', response.refreshToken, {
                     httpOnly: true,
                     path: '/',
-                    sameSite: 'strict',
+                    secure: isProduction,
+                    sameSite: isProduction ? 'none' : 'strict',
                     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
                 })
                 res.status(200).json({
@@ -106,12 +111,15 @@ const authController = {
         }
         try {
             let response = await authService.logoutService(refreshToken)
+
+            const isProduction = process.env.NODE_ENV === 'production'
+
             if (response.err === 0) {
                 res.clearCookie('refreshToken', {
                     httpOnly: true,
+                    secure: isProduction,
                     path: '/',
-                    sameSite: 'strict',
-                    secure: (process.env.URL_CLIENT === 'http://localhost:3000') ? false : true,
+                    sameSite: isProduction ? 'none' : 'strict'
                 })
                 res.status(200).json({
                     err: 0,

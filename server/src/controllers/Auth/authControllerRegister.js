@@ -8,11 +8,15 @@ const authControllerRegister = {
                 return res.status(400).json({ error: result.error })
             }
             const { accessToken, refreshToken, userData } = result
+
+            const isProduction = process.env.NODE_ENV === 'production'
+
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: (process.env.URL_CLIENT === 'http://localhost:3000') ? false : true,
+                secure: isProduction,
                 path: '/',
-                sameSite: 'strict'
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                sameSite: isProduction ? 'none' : 'strict'
             })
             const userWithToken = { ...userData, accessToken }
 
