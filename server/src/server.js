@@ -52,7 +52,7 @@ app.use((req, res, next) => {
     next()
 })
 
-app.set('trust proxy', 1)
+// app.set('trust proxy', 1)
 app.use(cors({
     credentials: true,
     origin: process.env.URL_CLIENT
