@@ -36,7 +36,7 @@ const authController = {
             let response = await authService.loginSuccessService(id, tokenLogin)
             if (response.accesstoken && response.refreshToken) {
                 const isProduction = process.env.NODE_ENV === 'production'
-                res.clearCookie('refreshToken', {
+                res.cookie('refreshToken', response.refreshToken, {
                     httpOnly: true,
                     secure: isProduction,
                     path: '/',
@@ -113,7 +113,6 @@ const authController = {
             let response = await authService.logoutService(refreshToken)
 
             const isProduction = process.env.NODE_ENV === 'production'
-
             if (response.err === 0) {
                 res.clearCookie('refreshToken', {
                     httpOnly: true,
