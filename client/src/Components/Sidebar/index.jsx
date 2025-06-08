@@ -5,32 +5,24 @@ import {
   Toolbar,
   Typography,
   Button,
-  IconButton
+  IconButton,
+  useTheme,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
   Home as HomeIcon,
   AssignmentTurnedIn as TaskIcon,
   Inbox as InboxIcon,
-  BarChart as ReportingIcon,
-  Folder as PortfoliosIcon,
-  Flag as GoalsIcon,
-  Add as AddIcon,
   Chat as ChatIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
-import { useLocation } from 'react-router-dom';
-import SidebarList from '../SidebarList';
-import { useTheme } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import SidebarList from '../SidebarList';
 import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
-import { fetchProjectDetail, resetProjectDetail } from '~/redux/project/projectDetail-slide';
-
 import { getStarredThunks } from '~/redux/project/starred-slice';
-
+import { getSubscriptionByUserThunks } from '~/redux/project/subscription-slice';
 import UpgradePlan from '~/pages/UpgradePlan';
-import { getSubscriptionByUserThunks } from '~/redux/project/subscription-slice'
-
 
 const drawerWidth = 240;
 
@@ -40,6 +32,8 @@ const StyledDrawer = styled(Drawer)(({ theme, open }) => ({
   '& .MuiDrawer-paper': {
     width: drawerWidth,
     boxSizing: 'border-box',
+    backgroundColor: theme.palette.background.paper,
+    borderRight: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
   },
   whiteSpace: 'nowrap',
   boxSizing: 'border-box',
@@ -52,6 +46,7 @@ const StyledDrawer = styled(Drawer)(({ theme, open }) => ({
     '& .MuiDrawer-paper': closedMixin(theme),
   }),
 }));
+
 const openedMixin = (theme) => ({
   width: drawerWidth,
   transition: theme.transitions.create('width', {
@@ -59,8 +54,6 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: theme.palette.background.default,
-  color: theme.palette.text.primary,
 });
 
 const closedMixin = (theme) => ({
@@ -69,55 +62,93 @@ const closedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  width: theme.spacing(1),
-  backgroundColor: theme.palette.background.default,
-  color: theme.palette.text.primary,
+  width: theme.spacing(7),
 });
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
   fontSize: 12,
   textTransform: 'uppercase',
-  color: '#888',
-  fontWeight: 'bold',
+  color: theme.palette.text.secondary,
+  fontWeight: 600,
   marginTop: theme.spacing(2),
   marginBottom: theme.spacing(1),
   paddingLeft: theme.spacing(2),
+  letterSpacing: '0.5px',
 }));
+
 const TrialInfo = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  borderRadius: 5,
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+  borderRadius: 8,
   padding: theme.spacing(2),
   margin: theme.spacing(2),
+  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: theme.shadows[2],
+  },
 }));
 
 const ScrollableSection = styled(Box)(({ theme }) => ({
   maxHeight: '52vh',
   overflowY: 'auto',
   '&::-webkit-scrollbar': {
-    width: '6px',
+    width: '4px',
   },
   '&::-webkit-scrollbar-thumb': {
-    backgroundColor: theme.palette.background.paper,
-    borderRadius: '3px',
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+    borderRadius: '2px',
+  },
+  '&::-webkit-scrollbar-track': {
+    backgroundColor: 'transparent',
   },
   fontSize: '14px',
 }));
-const AddBillingButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: '#000',
-  fontWeight: 'bold',
+
+const AddButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  transition: 'all 0.2s ease-in-out',
   '&:hover': {
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+    transform: 'scale(1.1)',
   },
 }));
+
+const UpgradeButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.mode === 'dark' ? '#fff' : '#000',
+  fontWeight: 600,
+  textTransform: 'none',
+  padding: theme.spacing(1, 2),
+  borderRadius: 8,
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    backgroundColor: theme.palette.primary.dark,
+    transform: 'translateY(-2px)',
+    boxShadow: theme.shadows[2],
+  },
+}));
+
+const PlanBadge = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+  '& .MuiBox-root': {
+    width: 10,
+    height: 10,
+    borderRadius: '50%',
+    backgroundColor: theme.palette.primary.main,
+    boxShadow: `0 0 8px ${theme.palette.primary.main}`,
+  },
+}));
+
 const mainLinkData = [
   { projectName: 'Home', _id: 'home', icon: <HomeIcon />, main: 'Home' },
   { projectName: 'My tasks', _id: 'tasks', icon: <TaskIcon />, main: 'My tasks' },
   { projectName: 'Inbox', _id: 'inbox', icon: <InboxIcon />, main: 'Inbox' },
   { projectName: 'ChatAI', _id: 'chat-ai', icon: <ChatIcon />, main: 'ChatAI' },
 ];
-
-
 
 const Sidebar = ({ open }) => {
   const location = useLocation();
@@ -134,7 +165,6 @@ const Sidebar = ({ open }) => {
     }
   }, [dispatch, accesstoken, userData?._id]);
 
-
   const { starred } = useSelector((state) => state.starred);
 
   useEffect(() => {
@@ -143,33 +173,26 @@ const Sidebar = ({ open }) => {
     }
   }, [dispatch, accesstoken, userData?._id, isLoggedIn]);
 
-
-
   const convertBtoA = (B) => {
-    // Kiểm tra nếu B không phải là một mảng, trả về mảng rỗng
     if (!Array.isArray(B)) {
       console.error("Input B is not a valid array:", B);
       return [];
     }
 
-    // Duyệt qua từng phần tử của B và chuyển đổi dữ liệu
     return B.map(itemB => {
       if (!itemB || !itemB.projectId) {
-        return null; // Bỏ qua phần tử không hợp lệ
+        return null;
       }
 
       return {
-        ...itemB.projectId, // Lấy dữ liệu từ projectId trong B
-        _id: itemB.projectId?._id || null, // Kiểm tra nếu _id tồn tại
-        projectName: itemB.projectId?.projectName || "Unknown", // Kiểm tra nếu projectName tồn tại
-        isStarred: itemB.isStarred || false // Trạng thái yêu thích (đã đánh dấu) từ B
-        // Có thể thêm các trường khác nếu cần thiết
+        ...itemB.projectId,
+        _id: itemB.projectId?._id || null,
+        projectName: itemB.projectId?.projectName || "Unknown",
+        isStarred: itemB.isStarred || false
       };
-    }).filter(item => item !== null); // Loại bỏ các phần tử null do dữ liệu không hợp lệ
+    }).filter(item => item !== null);
   };
 
-
-  /////
   const [openUpgradePlan, setOpenUpgradePlan] = useState(false);
   const handleOpenUpgradePlan = () => {
     setOpenUpgradePlan(true);
@@ -178,7 +201,7 @@ const Sidebar = ({ open }) => {
   const handleCloseUpgradePlan = () => {
     setOpenUpgradePlan(false);
   };
-  /////
+
   const subscription = useSelector(state => state.subscription.subscription);
   useEffect(() => {
     const fetchUserSubscriptions = async () => {
@@ -232,7 +255,7 @@ const Sidebar = ({ open }) => {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          height: 'calc(100% - 64px)', // Subtract Toolbar height
+          height: 'calc(100% - 64px)',
           overflow: 'hidden',
         }}
       >
@@ -240,93 +263,85 @@ const Sidebar = ({ open }) => {
           <SidebarList linkData={isMainLinkData} Id={1} />
         </Box>
 
-
         <ScrollableSection>
-          {/* <Box>
-            <SectionTitle>INSIGHTS</SectionTitle>
-            <SidebarList linkData={insightsLinkData} open={open} />
-          </Box> */}
-
           <Box>
-            {projects?.projects?.length > 0 && <Box display="flex" alignItems="center" justifyContent="space-between">
-              <SectionTitle>PROJECTS</SectionTitle>
-              <IconButton onClick={() => { navigate('/projects-new'), { state: { from: location.pathname } } }}>
-                <AddIcon sx={{ width: 17, mt: "3px" }} />
-              </IconButton>
-            </Box>}
-            {projects?.projects && <SidebarList linkData={projects?.projects} isProject={true} open={open} Id={2} />}
+            {projects?.projects?.length > 0 && (
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <SectionTitle>Projects</SectionTitle>
+                <AddButton
+                  onClick={() => navigate('/projects-new', { state: { from: location.pathname } })}
+                  size="small"
+                >
+                  <AddIcon sx={{ width: 20 }} />
+                </AddButton>
+              </Box>
+            )}
+            {projects?.projects && (
+              <SidebarList linkData={projects?.projects} isProject={true} open={open} Id={2} />
+            )}
           </Box>
 
           <Box>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
-              {starred?.data.length > 0 && <SectionTitle>STARRED</SectionTitle>}
-            </Box>
-            {starred?.data && <SidebarList linkData={convertBtoA(starred?.data)} isProject={true} open={open} Id={3} />}
+            {starred?.data.length > 0 && (
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <SectionTitle>Starred</SectionTitle>
+              </Box>
+            )}
+            {starred?.data && (
+              <SidebarList
+                linkData={convertBtoA(starred?.data)}
+                isProject={true}
+                open={open}
+                Id={3}
+              />
+            )}
           </Box>
-
-          {/* <Box>
-            <SectionTitle>TEAM</SectionTitle>
-            <SidebarList linkData={teamLinkData} open={open} Id={4}/>
-          </Box> */}
         </ScrollableSection>
-
 
         <Box sx={{ marginTop: 'auto' }}>
           <TrialInfo>
-            <Box display="flex" alignItems="center" mb={1}>
-              <Box
-                sx={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  backgroundColor: theme.palette.success.main,
-                  marginRight: 1,
-                }}
-              />
-              <Typography>{isCurrentPlan} Feature</Typography>
-            </Box>
+            <PlanBadge>
+              <Box />
+              <Typography variant="subtitle2" fontWeight={600}>
+                {isCurrentPlan} Plan
+              </Typography>
+            </PlanBadge>
 
             {isCurrentPlan === 'Free' ? (
               <>
-                <Typography variant="body2" mb={1} ml={1}>Greater access to the best</Typography>
-                <AddBillingButton fullWidth variant="contained" onClick={handleOpenUpgradePlan}>
-                  Upgrade plan
-                </AddBillingButton>
+                <Typography variant="body2" color="text.secondary" mb={2}>
+                  Upgrade features premium
+                </Typography>
+                <UpgradeButton fullWidth onClick={handleOpenUpgradePlan}>
+                  Upgrade Plan
+                </UpgradeButton>
               </>
             ) : (
               <>
-                <Typography variant="body2" mb={1} ml={-1}>You're in! Experience the best</Typography>
+                <Typography variant="body2" color="text.secondary" mb={1}>
+                  Premium features unlocked
+                </Typography>
                 <Typography
+                  variant="caption"
                   sx={{
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: theme.palette.success.main,
-                    backgroundColor: theme.palette.background.default,
+                    display: 'inline-block',
                     padding: '4px 8px',
                     borderRadius: '4px',
-                    display: 'inline-block'
+                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                    color: theme.palette.primary.main,
+                    fontWeight: 500,
                   }}
-                  ml={1}
                 >
-                    {subscription?.data[0]?.end_date ? formatDate(subscription.data[0].end_date) : ''}
+                  {subscription?.data[0]?.end_date
+                    ? formatDate(subscription.data[0].end_date)
+                    : ''}
                 </Typography>
               </>
             )}
-
-
-            <UpgradePlan open={openUpgradePlan} onClose={handleCloseUpgradePlan} />
           </TrialInfo>
-          <Box textAlign="center" mb={2}>
-            <Typography
-              sx={{
-                color: (theme) => theme.palette.success.main,
-                cursor: 'pointer',
-              }}
-            >
-            </Typography>
-          </Box>
         </Box>
       </Box>
+      <UpgradePlan open={openUpgradePlan} onClose={handleCloseUpgradePlan} />
     </StyledDrawer>
   );
 };

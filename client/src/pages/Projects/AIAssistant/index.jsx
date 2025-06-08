@@ -444,7 +444,7 @@ const AIAssistant = ({ open, onClose }) => {
             fullWidth
         >
             <DialogTitle sx={{ m: 0, p: 2 }}>
-                AI Task Assignment Assistant
+            Task Assignment Assistant
                 <IconButton
                     aria-label="close"
                     onClick={handleClose}
@@ -484,7 +484,7 @@ const AIAssistant = ({ open, onClose }) => {
                         <CircularProgress size={60} thickness={4} />
                         <Typography variant="h6" color="primary.main">
                             {isLoading 
-                                ? "AI is analyzing tasks and assigning members..." 
+                                ? "Analyzing tasks and assigning members..." 
                                 : "Saving task assignments..."
                             }
                         </Typography>
@@ -498,13 +498,13 @@ const AIAssistant = ({ open, onClose }) => {
             <DialogContent dividers>
                 <Box sx={{ mb: 3 }}>
                     <Typography variant="body1" gutterBottom>
-                        Enter a prompt for AI to analyze and assign tasks to team members.
+                        Enter a prompt to analyze and assign tasks to team members.
                     </Typography>
 
                     <Box sx={{ mb: 3, display: 'flex' }}>
                         <TextField
                             fullWidth
-                            label="Enter your AI prompt"
+                            label="Enter your prompt"
                             variant="outlined"
                             value={prompt}
                             onChange={handlePromptChange}
@@ -641,7 +641,7 @@ const AIAssistant = ({ open, onClose }) => {
                 ) : (
                     <Box sx={{ display: 'flex', justifyContent: 'center', p: 3, bgcolor: '#f5f5f5' }}>
                         <Typography variant="body1" color="text.secondary">
-                            Enter a prompt and click "Get AI Suggestions" to see task assignments
+                            Enter a prompt and click "Get Suggestions" to see task assignments
                         </Typography>
                     </Box>
                 )}
@@ -651,7 +651,7 @@ const AIAssistant = ({ open, onClose }) => {
                     Close
                 </Button>
             </DialogActions>
-            <ToastContainer />
+            {/* <ToastContainer /> */}
         </Dialog>
     );
 };

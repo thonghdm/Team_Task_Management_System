@@ -358,7 +358,7 @@ const UserSearch = ({ isClickable = false }) => {
             <Button variant="contained" color="primary" onClick={handleInvite}>
                 Invite
             </Button>
-            <ToastContainer />
+            {/* <ToastContainer /> */}
         </Box>
     );
 };

@@ -44,6 +44,98 @@ import { addNotification } from '~/redux/project/notifications-slice/index';
 
 import TaskReview from '../TaskReview';
 import socket from '~/utils/socket';
+import { styled } from '@mui/material/styles';
+import { alpha } from '@mui/material/styles';
+
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialog-paper': {
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: '16px',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+    maxHeight: '90vh',
+    '&::-webkit-scrollbar': {
+      width: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: alpha(theme.palette.primary.main, 0.05),
+      borderRadius: '4px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: alpha(theme.palette.primary.main, 0.2),
+      borderRadius: '4px',
+      '&:hover': {
+        background: alpha(theme.palette.primary.main, 0.3),
+      },
+    },
+  },
+  '& .MuiDialogTitle-root': {
+    padding: theme.spacing(2.5, 3),
+    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+    background: `linear-gradient(to right, ${alpha(theme.palette.background.paper, 0.9)}, ${alpha(theme.palette.background.paper, 0.95)})`,
+    backdropFilter: 'blur(8px)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1,
+  },
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(3),
+    background: `linear-gradient(180deg, ${alpha(theme.palette.background.paper, 0.8)}, ${alpha(theme.palette.background.paper, 0.95)})`,
+  }
+}));
+
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  textTransform: 'none',
+  borderRadius: '12px',
+  padding: theme.spacing(0.75, 2),
+  fontWeight: 500,
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.15)}`,
+  },
+}));
+
+const StyledAvatar = styled(Avatar)(({ theme }) => ({
+  transition: 'all 0.2s ease-in-out',
+  cursor: 'pointer',
+  border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+  '&:hover': {
+    borderColor: theme.palette.primary.main,
+    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.15)}`,
+  },
+}));
+
+const SectionTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.primary,
+  fontWeight: 600,
+  letterSpacing: '0.5px',
+  position: 'relative',
+  paddingBottom: theme.spacing(1),
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    height: '2px',
+    background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.3)}, transparent)`,
+    borderRadius: '2px',
+  },
+}));
+
+const ContentBox = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2.5),
+  borderRadius: '12px',
+  background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.7)}, ${alpha(theme.palette.background.paper, 0.9)})`,
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  boxShadow: `0 4px 16px ${alpha(theme.palette.common.black, 0.04)}`,
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    borderColor: alpha(theme.palette.primary.main, 0.3),
+    boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.08)}`,
+  },
+}));
 
 const ChangeList = ({ open, onClose, taskId }) => {
     const theme = useTheme();
@@ -961,42 +1053,73 @@ const ChangeList = ({ open, onClose, taskId }) => {
     }, [open, projectId]);
 
     return (
-        <Dialog
+        <StyledDialog
             open={open}
             onClose={onClose}
             fullWidth
-            maxWidth="lg" // loại bỏ giới hạn chiều rộng mặc định
+            maxWidth="lg"
             PaperProps={{
-                style: { backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary },
+                style: { backgroundColor: theme.palette.background.paper },
             }}
-            className="scrollable"
-            sx={{ maxHeight: '800px!important' }}
         >
             <DialogTitle>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    {/* <Typography variant="h6">{task?.task_name}</Typography> */}
-                    <Typography >
-                        <EditableText isClickable={!isViewer} initialText={task?.task_name} onSave={handleSaveTitle} maxWidth="780px" titleColor="primary.main" />
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
-                        <Typography variant="body2" color="text.secondary">
-                            Task Review:
-                        </Typography>
-                        <TaskReview 
-                            role={currentUserRole}
-                            taskReview={task.task_review_status}
-                            status={task.status}
-                            onAccept={() => handleConfirmReviewTask('accept')}
-                            onReject={() => handleConfirmReviewTask('reject')}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                        <EditableText 
+                            isClickable={!isViewer} 
+                            initialText={task?.task_name} 
+                            onSave={handleSaveTitle} 
+                            maxWidth="780px" 
+                            titleColor="primary.main"
+                            sx={{ 
+                                fontSize: '1.25rem',
+                                fontWeight: 600,
+                                letterSpacing: '0.5px',
+                                '&:hover': {
+                                    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                                    borderRadius: '8px',
+                                }
+                            }}
                         />
+                        <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 1.5,
+                            backgroundColor: alpha(theme.palette.background.default, 0.5),
+                            padding: theme.spacing(0.75, 2),
+                            borderRadius: '12px',
+                            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                        }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                Task Review:
+                            </Typography>
+                            <TaskReview 
+                                role={currentUserRole}
+                                taskReview={task.task_review_status}
+                                status={task.status}
+                                onAccept={() => handleConfirmReviewTask('accept')}
+                                onReject={() => handleConfirmReviewTask('reject')}
+                            />
+                        </Box>
                     </Box>
-                    <IconButton onClick={onClose} sx={{ color: theme.palette.text.primary }}>
+                    <IconButton 
+                        onClick={onClose} 
+                        sx={{ 
+                            color: theme.palette.text.secondary,
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                                backgroundColor: alpha(theme.palette.error.main, 0.1),
+                                color: theme.palette.error.main,
+                                transform: 'rotate(90deg)',
+                            }
+                        }}
+                    >
                         <Close />
                     </IconButton>
                 </Box>
             </DialogTitle>
             <DialogContent dividers>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography sx={{ width: '100px' }}>Assignee</Typography>
                         {task?.assigned_to_id?.map(member => (
@@ -1137,47 +1260,95 @@ const ChangeList = ({ open, onClose, taskId }) => {
                         )}
                     </Box>
 
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Typography>Comments</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
-                        <Avatar sx={{ bgcolor: '#c9b458', width: 30, height: 30, fontSize: '0.8rem' }} src={userData?.image} />
-                        <Box
-                            sx={{
-                                border: `1px solid ${theme.palette.background.paper}`,
-                                backgroundColor: theme.palette.background.default,
-                                borderRadius: '8px',
-                                padding: 2,
-                                width: '100%',
-                                padding: "8px!important"
-                            }}
-                        >
-                            <ProjectDescription initialContent={cmt} isLabled={false} context={"comment"} taskId={taskId} members={members} task={task}/>
-                        </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <SectionTitle variant="subtitle1">Comments</SectionTitle>
+                        <ContentBox>
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                                <StyledAvatar 
+                                    sx={{ 
+                                        width: 40,
+                                        height: 40,
+                                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                    }} 
+                                    src={userData?.image} 
+                                />
+                                <Box sx={{ flex: 1 }}>
+                                    <ProjectDescription 
+                                        initialContent={cmt} 
+                                        isLabled={false} 
+                                        context={"comment"} 
+                                        taskId={taskId} 
+                                        members={members} 
+                                        task={task}
+                                    />
+                                </Box>
+                            </Box>
+                        </ContentBox>
+                        {task?.comment_id && (
+                            <Box sx={{ pl: '48px' }}>
+                                <CommentList comments={task?.comment_id} taskId={taskId} />
+                            </Box>
+                        )}
                     </Box>
 
-                    {task?.comment_id && <CommentList comments={task?.comment_id} taskId={taskId} />}
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="caption">Collaborators</Typography>
-                        {task?.assigned_to_id
-                            ?.map((user, index) => (
-                                <Avatar
-                                    sx={{ bgcolor: '#c9b458', width: 28, height: 28, fontSize: '0.7rem' }}
+                    <ContentBox sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 2,
+                        p: 2,
+                    }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            Collaborators
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                            {task?.assigned_to_id?.map((user, index) => (
+                                <StyledAvatar
                                     key={index}
+                                    sx={{ 
+                                        width: 32,
+                                        height: 32,
+                                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                    }}
                                     alt={user?.memberId?.displayName}
                                     src={user?.memberId?.image}
                                     onError={(e) => { e.target.onerror = null; e.target.src = defaultAvatar; }}
                                 />
                             ))}
-
-                        <Avatar onClick={handleOpenAvt} sx={{ bgcolor: theme.palette.background.default, color: theme.palette.text.primary, width: 28, height: 28, fontSize: '0.7rem', cursor: 'pointer' }}>+</Avatar>
-                        {isAssignedToMe(task?.assigned_to_id, userData?._id) &&
-                            <Button
+                            {!isViewer && (
+                                <StyledAvatar 
+                                    onClick={handleOpenAvt} 
+                                    sx={{ 
+                                        width: 32,
+                                        height: 32,
+                                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                        color: theme.palette.primary.main,
+                                        fontSize: '1rem',
+                                        cursor: 'pointer',
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.primary.main, 0.2),
+                                        }
+                                    }}
+                                >
+                                    +
+                                </StyledAvatar>
+                            )}
+                        </Box>
+                        {isAssignedToMe(task?.assigned_to_id, userData?._id) && (
+                            <StyledButton
                                 onClick={() => handleLeaveMemberClick(findAssignedMember(task?.assigned_to_id, userData?._id))}
-                                sx={{ color: theme.palette.text.primary, background: '#F88379', ml: 'auto' }}>Leave task</Button>
-                        }
-                    </Box>
+                                sx={{ 
+                                    color: theme.palette.error.main,
+                                    backgroundColor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': {
+                                        backgroundColor: alpha(theme.palette.error.main, 0.2),
+                                        boxShadow: `0 4px 12px ${alpha(theme.palette.error.main, 0.15)}`,
+                                    }
+                                }}
+                            >
+                                Leave task
+                            </StyledButton>
+                        )}
+                    </ContentBox>
 
                     <AddMemberDialog open={openAvt} onClose={handleCloseAvt} taskId={taskId} isClickable={!isViewer} taskData={task} />
 
@@ -1210,7 +1381,7 @@ const ChangeList = ({ open, onClose, taskId }) => {
                 lable="Are you sure you want to leave this project?"
                 onConfirm={handleConfirmLeaveMember}
             />
-        </Dialog>
+        </StyledDialog>
     );
 };
 

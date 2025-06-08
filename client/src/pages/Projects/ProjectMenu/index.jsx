@@ -33,7 +33,7 @@ import { useRefreshToken } from '~/utils/useRefreshToken'
 import { useParams } from 'react-router-dom';
 import { updateProjectThunk } from '~/redux/project/project-slice/index';
 import { fetchProjectsByMemberId } from '~/redux/project/projectArray-slice';
-import { updateStarredThunks ,getStarredThunks} from '~/redux/project/starred-slice/index';
+import { updateStarredThunks, getStarredThunks } from '~/redux/project/starred-slice/index';
 import { useNavigate } from 'react-router-dom';
 
 import AIAssistant from '../AIAssistant';
@@ -144,7 +144,7 @@ const ProjectMenu = ({ isClickable = false }) => {
                         data: data
                     }));
                     await dispatch(getStarredThunks({ accesstoken: token, memberId: userData._id }));
-                    
+
                     navigate('/board/tasks/1/mytask');
                     handleSuccess();
                 } catch (error) {
@@ -162,6 +162,11 @@ const ProjectMenu = ({ isClickable = false }) => {
     ////////////////////////////////
     const [AIAssistantOpen, setAIAssistantOpen] = useState(false);
 
+    const { members } = useSelector((state) => state.memberProject);
+    const currentUserRole = members?.members?.find(
+        member => member?.memberId?._id === userData?._id
+    )?.isRole;
+    const isAdmin = currentUserRole === 'ProjectManager';
 
     return (
         <div>
@@ -252,6 +257,10 @@ const ProjectMenu = ({ isClickable = false }) => {
 
                 {/* <StyledDivider /> */}
                 <StyledMenuItem onClick={() => {
+                    if (!isAdmin) {
+                        toast.error('You do not have permission to edit this project!');
+                        return;
+                    }
                     setAIAssistantOpen(true);
                     handleClose();
                 }}>

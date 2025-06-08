@@ -20,37 +20,17 @@ import TaskProgressChart from './TaskProgressChart';
 import ProjectAnalyticsDashboard from './ProjectAnalyticsDashboard';
 
 import { transformDataTaskDetails, getParticipantTrend, getPriorityDistribution, getStats } from '~/utils/transformDataProjectDash';
+import { styled } from '@mui/material/styles';
 
-// const stats = [
-//   {
-//     title: 'Total Lists',
-//     value: '24',
-//     subtext: '4 lists created this month',
-//     icon: <AssignmentIcon />,
-//     color: '#2196f3'
-//   },
-//   {
-//     title: 'Total Attachments',
-//     value: '12',
-//     subtext: '3 upload this month',
-//     icon: <GroupIcon />,
-//     color: '#4caf50'
-//   },
-//   {
-//     title: 'Total Tasks',
-//     value: '156',
-//     subtext: '3 tasks created this month',
-//     icon: <CheckCircleIcon />,
-//     color: '#ff9800'
-//   },
-//   {
-//     title: 'Total Labels',
-//     value: '8',
-//     subtext: '3 Labels created this month',
-//     icon: <TimelineIcon />,
-//     color: '#f44336'
-//   }
-// ];
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  '& .MuiGrid-item': {
+    transition: 'transform 0.3s ease-in-out',
+    '&:hover': {
+      transform: 'translateY(-5px)',
+    },
+  },
+}));
+
 
 function DashBoard() {
   const theme = useTheme();
@@ -90,24 +70,59 @@ function DashBoard() {
 
   const statsWithIcons = stats.map((stat, index) => ({
     ...stat,
-    icon: icons[index]
-}));
+    icon: icons[index],
+    icon1: React.cloneElement(icons[index], { sx: { fontSize: 17 } })
+  }));
 
   return (
     <>
       <Box sx={{ flexGrow: 1, mt: 3 }}>
-        <Grid container spacing={3}>
+      <StyledGrid 
+      container 
+      spacing={3}
+      sx={{
+        '& .MuiPaper-root': {
+          borderRadius: 2,
+          boxShadow: theme.shadows[4],
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            boxShadow: theme.shadows[8],
+          },
+          overflow: 'hidden',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: (props) => props.gradient,
+          }
+        }
+      }}
+    >
           {/* Thống Kê */}
           {statsWithIcons.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <StatsCard
-                title={stat.title}
-                value={stat.value}
-                subtext={stat.subtext}
-                icon={stat.icon}
-                color={stat.color}
-                background={theme.palette.background.paper}
-              />
+            <Grid item 
+            xs={12} 
+            sm={5} 
+            md={3} 
+            key={index}
+            sx={{
+              animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`,
+              '@keyframes fadeInUp': {
+                '0%': {
+                  opacity: 0,
+                  transform: 'translateY(20px)'
+                },
+                '100%': {
+                  opacity: 1,
+                  transform: 'translateY(0)'
+                }
+              }
+            }}>
+              <StatsCard {...stat} />
             </Grid>
           ))}
 
@@ -118,7 +133,7 @@ function DashBoard() {
           <Grid item xs={12} md={12}>
             <TaskProgressChart dataTaskDetails={dataTaskDetails}/>
           </Grid>
-        </Grid>
+        </StyledGrid>
       </Box>
     </>
   );
