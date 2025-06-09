@@ -19,18 +19,16 @@ import { Close } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
 import { useRefreshToken } from '~/utils/useRefreshToken'
 import { fetchFileByIdTask, updateFileByIdTaskThunk } from '~/redux/project/uploadFile-slice';
 import { useDispatch, useSelector } from 'react-redux'
 import { createAuditLog } from '~/redux/project/auditlog-slice';
 import { createAuditLog_project } from '~/redux/project/auditlog-slice/auditlog_project';
 import { fetchTaskById } from '~/redux/project/task-slice';
-
 import { fetchProjectDetail } from '~/redux/project/projectDetail-slide';
 import { useParams } from 'react-router-dom';
 import { addNotification } from '~/redux/project/notifications-slice/index';
-
+import { validateProjectFile } from '~/utils/fileValidation';
 
 const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = true, members, task }) => {
   const [link, setLink] = useState('');
@@ -39,11 +37,23 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
   const { projectId } = useParams();
   const [isUploading, setIsUploading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
+  
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+    const selectedFile = event.target.files[0];
+    
+    // Validate file before setting it
+    const validation = validateProjectFile(selectedFile);
+    if (!validation.isValid) {
+      // Reset file input on validation failure
+      event.target.value = '';
+      setFile(null);
+      setIsDisabled(true);
+      return;
+    }
+    setFile(selectedFile);
     setIsDisabled(false);
-    // console.log(event.target.files[0]);
   };
+
   ////////////////////////////////
   const refreshToken = useRefreshToken();
   const dispatch = useDispatch();
@@ -51,21 +61,31 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
 
   const handleInsert = () => {
     try {
-      
       if (!file) {
         toast.error("File is required");
         return;
       }
+      
+      // Double-check file validation before upload
+      const validation = validateProjectFile(file);
+      if (!validation.isValid) {
+        setFile(null);
+        setIsDisabled(true);
+        return;
+      }
+
       if (!isClickable) {
         toast.error("You don't have permission to upload file");
         return;
       }
+
       const fileData = {
         file: file,
         entityId: taskId,
         entityType: entityType,
         uploadedBy: userData?._id
       };
+
       const notificationData = task?.assigned_to_id
         .filter(member =>
           member.memberId._id !== userData._id &&
@@ -80,13 +100,14 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
           projectId: projectId,
           taskId: taskId,
           type: 'task_update',
-          message: `${userData.displayName} has update file from task ${task?.task_name} in project ${task?.project_id?.projectName}`
+          message: `${userData.displayName} has uploaded file "${file.name}" to task ${task?.task_name} in project ${task?.project_id?.projectName}`
         }));
+
       const uploadFileTask = async (token) => {
-        
         try {
           setIsUploading(true);
           setIsDisabled(true);
+          
           const resultAction = await dispatch(updateFileByIdTaskThunk({ accesstoken: token, file: fileData }));
           if (updateFileByIdTaskThunk.rejected.match(resultAction)) {
             if (resultAction.payload?.err === 2) {
@@ -95,6 +116,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
             }
             throw new Error('File upload failed');
           }
+          
           await dispatch(createAuditLog({
             accesstoken: token,
             data: {
@@ -105,6 +127,7 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
               old_value: fileData?.file?.name
             }
           }));
+          
           const tastData = await dispatch(fetchTaskById({ accesstoken: token, taskId }));
           await dispatch(fetchFileByIdTask({ accesstoken: token, taskId }));
           await dispatch(createAuditLog_project({
@@ -117,25 +140,29 @@ const FileUploadDialog = ({ open, onClose, taskId, entityType, isClickable = tru
               task_id: taskId,
             }
           }))
+          
           if (projectId) await dispatch(fetchProjectDetail({ accesstoken: token, projectId }));
           await dispatch(addNotification({ accesstoken: token, data: notificationData }));
-          toast.success("File upload successfully");
+          
+          toast.success(`File "${file.name}" uploaded successfully`);
           setLink('');
           setDisplayText('');
           setFile(null);
           onClose();
           
         } catch (error) {
-          throw error; // Rethrow error nếu không phải error code 2
+          toast.error(`Failed to upload file: ${error.message}`);
+          throw error;
         }
         finally {
           setIsUploading(false);
           setIsDisabled(false);
         }
       };
+      
       uploadFileTask(accesstoken);
     } catch (error) {
-      throw error;
+      toast.error('An error occurred during file upload');
     } 
   };
 
