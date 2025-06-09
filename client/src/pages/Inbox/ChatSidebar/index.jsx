@@ -12,6 +12,8 @@ import socket from '~/utils/socket';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import GroupsIcon from '@mui/icons-material/Groups';
 import CreateGroupModal from '~/Components/CreateGroupModal';
+import useGroupSocket from '~/hooks/useGroupSocket';
+import useConversationSocket from '~/hooks/useConversationSocket';
 
 export const ChatSidebarContext = React.createContext();
 
@@ -41,6 +43,8 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
     const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
     const [avatarErrors, setAvatarErrors] = useState({});
 
+    useGroupSocket(); 
+    useConversationSocket(conversationsLocal, setConversationsLocal); 
     // Fetch danh sách cuộc trò chuyện từ API khi vào trang
     useEffect(() => {
         const fetchList = async () => {
@@ -90,35 +94,6 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
         }
     }, [currentConversation]);
 
-    // Lắng nghe socket để cập nhật chatItem khi có conversation updated
-    useEffect(() => {
-        const handleConversationUpdated = (updatedConversation) => {
-
-            
-            setConversationsLocal(prev => {
-                const exists = prev.some(conv => conv._id.toString() === updatedConversation._id.toString());
-                if (exists) {
-                    const updated = prev.map(conv =>
-                        conv._id.toString() === updatedConversation._id.toString()
-                            ? { 
-                                ...conv, 
-                                lastMessage: updatedConversation.lastMessage,
-                                groupInfo: updatedConversation.isGroup ? updatedConversation.groupInfo : conv.groupInfo
-                            }
-                            : conv
-                    );
-                    return updated;
-                } else {
-                    // Thêm mới vào đầu danh sách
-                    return [updatedConversation, ...prev];
-                }
-            });
-        };
-        socket.on('conversation updated', handleConversationUpdated);      
-        return () => {
-            socket.off('conversation updated', handleConversationUpdated);
-        };
-    }, []);
 
     // Hàm cập nhật lastMessage cho conversation khi gửi tin nhắn thành công
     const updateLastMessage = useCallback((conversationId, lastMessage) => {
