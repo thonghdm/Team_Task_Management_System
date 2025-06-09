@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import messageApi from '~/apis/chat/messageApi';
 import { uploadChatFileThunk } from '~/redux/chat/chatFile-slice';
 import { useRefreshToken } from '~/utils/useRefreshToken';
+import { validateChatFile } from '~/utils/fileValidation';
 
 const ChatInput = ({ otherUserId }) => {
     const [message, setMessage] = useState('');
@@ -41,7 +42,14 @@ const ChatInput = ({ otherUserId }) => {
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
-        if (!file) return;
+        
+        // Validate file before proceeding using utility function
+        const validation = validateChatFile(file);
+        if (!validation.isValid) {
+            // Reset file input on validation failure
+            event.target.value = '';
+            return;
+        }
 
         let conversationId = currentConversation;
         
@@ -53,12 +61,14 @@ const ChatInput = ({ otherUserId }) => {
                 setCurrentConversation(conversationId);
             } catch (err) {
                 toast.error('Unable to create conversation');
+                event.target.value = '';
                 return;
             }
         }
 
         if (!conversationId) {
             toast.error('Please select a conversation');
+            event.target.value = '';
             return;
         }
 
@@ -78,10 +88,16 @@ const ChatInput = ({ otherUserId }) => {
         const uploadFileToChat = async (accesstoken) => {
             console.log('accesstoken:', accesstoken);
             try {
+                // Show loading toast
+                const loadingToast = toast.loading(`Uploading "${file.name}"...`);
+                
                 const resultAction = await dispatch(uploadChatFileThunk({ 
                     accessToken: accesstoken, 
                     fileData 
                 }));
+                
+                // Dismiss loading toast
+                toast.dismiss(loadingToast);
                 
                 if (uploadChatFileThunk.rejected.match(resultAction)) {
                     if (resultAction.payload?.err === 2) {
@@ -91,12 +107,14 @@ const ChatInput = ({ otherUserId }) => {
                     throw new Error('File upload failed');
                 }
                 
-                toast.success('File uploaded successfully');
+                toast.success(`File "${file.name}" uploaded successfully`);
                 // Reset file input
                 event.target.value = '';
             } catch (error) {
-                toast.error('Failed to upload file');
+                toast.error(`Failed to upload file: ${error.message}`);
                 console.error('Upload error:', error);
+                // Reset file input on error
+                event.target.value = '';
             }
         };
 

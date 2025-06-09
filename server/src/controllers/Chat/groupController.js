@@ -49,6 +49,35 @@ const groupController = {
             const { groupId, newMemberId } = req.body
             const adminId = req.currentUser._id
             const updatedGroup = await groupService.addMemberToGroup(groupId, newMemberId, adminId)
+            
+            if (req.io && updatedGroup) {
+                req.io.to(newMemberId.toString()).emit('added_to_group', {
+                    conversationId: updatedGroup._id,
+                    groupName: updatedGroup.groupInfo.name,
+                    addedBy: adminId,
+                    conversation: updatedGroup
+                });
+                
+
+                updatedGroup.participants.forEach(participant => {
+                    if (participant._id.toString() !== newMemberId.toString()) {
+                        req.io.to(participant._id.toString()).emit('member_added_to_group', {
+                            conversationId: updatedGroup._id,
+                            newMemberId: newMemberId,
+                            addedBy: adminId,
+                            conversation: updatedGroup
+                        });
+                    }
+                });
+                
+
+                updatedGroup.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('conversation updated', updatedGroup);
+                });
+            } else {
+                console.error('req.io not available or updatedGroup is null:', { hasIo: !!req.io, hasGroup: !!updatedGroup });
+            }
+            
             res.json({ success: true, group: updatedGroup })
         } catch (error) {
             res.status(500).json({ success: false, message: error.message })
@@ -60,6 +89,30 @@ const groupController = {
             const { groupId, memberId } = req.body
             const adminId = req.currentUser._id
             const updatedConversation = await groupService.removeMemberFromGroup(groupId, memberId, adminId)
+            
+
+            if (req.io && updatedConversation) {
+                req.io.to(memberId.toString()).emit('removed_from_group', {
+                    conversationId: updatedConversation._id,
+                    groupName: updatedConversation.groupInfo.name,
+                    removedBy: adminId
+                });
+                
+   
+                updatedConversation.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('member_removed_from_group', {
+                        conversationId: updatedConversation._id,
+                        removedMemberId: memberId,
+                        removedBy: adminId,
+                        conversation: updatedConversation
+                    });
+                });
+
+                updatedConversation.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('conversation updated', updatedConversation);
+                });
+            }
+            
             res.json({ success: true, conversation: updatedConversation })
         } catch (error) {
             res.status(500).json({ success: false, message: error.message })
@@ -71,6 +124,32 @@ const groupController = {
             const { groupId, newAdminId } = req.body
             const currentAdminId = req.currentUser._id
             const updatedConversation = await groupService.makeGroupAdmin(groupId, newAdminId, currentAdminId)
+            
+
+            if (req.io && updatedConversation) {
+   
+                req.io.to(newAdminId.toString()).emit('made_admin', {
+                    conversationId: updatedConversation._id,
+                    groupName: updatedConversation.groupInfo.name,
+                    madeBy: currentAdminId
+                });
+                
+
+                updatedConversation.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('new_admin_in_group', {
+                        conversationId: updatedConversation._id,
+                        newAdminId: newAdminId,
+                        madeBy: currentAdminId,
+                        conversation: updatedConversation
+                    });
+                });
+                
+
+                updatedConversation.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('conversation updated', updatedConversation);
+                });
+            }
+            
             res.json({ success: true, conversation: updatedConversation })
         } catch (error) {
             res.status(500).json({ success: false, message: error.message })
@@ -82,6 +161,32 @@ const groupController = {
             const { groupId, adminId } = req.body
             const currentAdminId = req.currentUser._id
             const updatedConversation = await groupService.removeGroupAdmin(groupId, adminId, currentAdminId)
+            
+
+            if (req.io && updatedConversation) {
+
+                req.io.to(adminId.toString()).emit('admin_removed', {
+                    conversationId: updatedConversation._id,
+                    groupName: updatedConversation.groupInfo.name,
+                    removedBy: currentAdminId
+                });
+                
+
+                updatedConversation.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('admin_removed_from_group', {
+                        conversationId: updatedConversation._id,
+                        removedAdminId: adminId,
+                        removedBy: currentAdminId,
+                        conversation: updatedConversation
+                    });
+                });
+                
+
+                updatedConversation.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('conversation updated', updatedConversation);
+                });
+            }
+            
             res.json({ success: true, conversation: updatedConversation })
         } catch (error) {
             res.status(500).json({ success: false, message: error.message })
@@ -92,14 +197,14 @@ const groupController = {
         upload(req, res, async function(err) {
             try {
                 if (err instanceof multer.MulterError) {
-                    // Lỗi từ multer
+
                     return res.status(400).json({ message: `Upload error: ${err.message}` });
                 } else if (err) {
-                    // Lỗi khác
+
                     return res.status(400).json({ message: err.message });
                 }
 
-                // Kiểm tra xem có file được upload không
+
                 if (!req.file) {
                     return res.status(400).json({ message: 'No file uploaded' });
                 }
@@ -107,10 +212,9 @@ const groupController = {
                 const { groupId } = req.body;
                 const userId = req.currentUser._id;
 
-                // Upload ảnh lên Cloudinary sử dụng utility function có sẵn
                 const imageResult = await uploadToCloudinary(req.file);
                 
-                // Cập nhật avatar trong database
+
                 const updatedConversation = await groupService.updateGroupAvatar(
                     groupId,
                     imageResult.url,
@@ -123,7 +227,7 @@ const groupController = {
                     groupInfo: updatedConversation.groupInfo
                 });
             } catch (error) {
-                // Xóa file tạm nếu có lỗi
+
                 if (req.file && fs.existsSync(req.file.path)) {
                     fs.unlinkSync(req.file.path);
                 }
@@ -137,6 +241,28 @@ const groupController = {
             const { conversationId } = req.body;
             const memberId = req.currentUser._id;
             const updatedConversation = await groupService.leaveGroup(conversationId, memberId);
+            
+ 
+            if (req.io && updatedConversation) {
+          
+                req.io.to(memberId.toString()).emit('left_group', {
+                    conversationId: updatedConversation._id,
+                    groupName: updatedConversation.groupInfo.name
+                });
+                
+                updatedConversation.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('member_left_group', {
+                        conversationId: updatedConversation._id,
+                        leftMemberId: memberId,
+                        conversation: updatedConversation
+                    });
+                });
+                
+                updatedConversation.participants.forEach(participant => {
+                    req.io.to(participant._id.toString()).emit('conversation updated', updatedConversation);
+                });
+            }
+            
             res.json({ success: true, conversation: updatedConversation });
         } catch (error) {
             res.status(400).json({ success: false, message: error.message });
