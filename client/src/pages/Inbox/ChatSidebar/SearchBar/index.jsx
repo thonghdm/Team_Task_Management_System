@@ -52,11 +52,11 @@ const SearchBar = ({ onUserSelect, onGroupSelect, placeholder = 'Search by name,
 
     // Fetch all members if not loaded
     useEffect(() => {
-        if (!memberData && accesstoken) {
+        if (accesstoken) {
             dispatch(fetchAllMembers({ accesstoken }));
         }
     }, [memberData, accesstoken, dispatch]);
-
+    
     // Filter users and groups locally
     useEffect(() => {
         if (!debouncedSearchTerm.trim()) {
