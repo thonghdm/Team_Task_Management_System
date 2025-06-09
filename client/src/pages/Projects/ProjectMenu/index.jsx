@@ -267,7 +267,7 @@ const ProjectMenu = ({ isClickable = false }) => {
                     <ListItemIcon>
                         <Archive fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>AI Assistant</ListItemText>
+                    <ListItemText>Assistant</ListItemText>
                 </StyledMenuItem>
 
                 <DeleteMenuItem onClick={() => setIsAlertOpen(true)}>

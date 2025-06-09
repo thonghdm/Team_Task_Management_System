@@ -298,7 +298,7 @@ const Sidebar = ({ open }) => {
           </Box>
         </ScrollableSection>
 
-        <Box sx={{ marginTop: 'auto' }}>
+        <Box sx={{ marginTop: 'auto', display: open ? 'block' : 'none' }}>
           <TrialInfo>
             <PlanBadge>
               <Box />

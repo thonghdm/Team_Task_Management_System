@@ -90,7 +90,7 @@ const PaymentErrorModal = ({ open, onClose, errorMessage, onRetry }) => {
               fontWeight="bold"
               gutterBottom
             >
-              Thanh toán thất bại
+              Your payment failed
             </Typography>
 
             <Typography
