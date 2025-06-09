@@ -189,9 +189,9 @@ const UserAvatar = () => {
         <ModeSelect />
         <Divider />
 
-        <MenuItem onClick={TransactionHistoryHandle}>
+        {!userData?.isAdmin && <MenuItem onClick={TransactionHistoryHandle}>
           <ListItemText>Transaction history</ListItemText>
-        </MenuItem>
+        </MenuItem>}
 
         {!userData?.isAdmin && <MenuItem onClick={ProfileHandle}>
           <ListItemText>Profile</ListItemText>
