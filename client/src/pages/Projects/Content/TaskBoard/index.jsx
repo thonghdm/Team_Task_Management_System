@@ -460,6 +460,12 @@ const TaskBoard = () => {
   const renderTableCell = (content, taskId, cellId, isEmpty) => {
     const isTrulyEmpty = !!isEmpty || (typeof content === 'string' && content.trim() === '.')||cellId === 'labels'||cellId === 'members';
     const handleClick = () => {
+      if (currentUserRole === 'Viewer') {
+        if (cellId === 'task_name' || cellId === 'list_name' || cellId === 'end_date' || cellId === 'comments'||cellId === 'taskReview'||cellId === 'priority'||cellId === 'status'||cellId === 'labels'||cellId === 'members') {
+          handleNameClick(taskId, cellId);
+        }
+        return;
+      }
       switch (cellId) {
         case 'task_name':
         case 'list_name':
@@ -485,14 +491,16 @@ const TaskBoard = () => {
           color: theme.palette.text.primary,
           '&:hover': { backgroundColor: theme.palette.action.hover },
           position: 'relative',
-          cursor: 'pointer'
+          cursor: currentUserRole === 'Viewer' ? 
+            (cellId === 'task_name' || cellId === 'list_name' || cellId === 'end_date' || cellId === 'comments' ? 'pointer' : 'default') 
+            : 'pointer'
         }}
         onMouseEnter={() => handleCellHover(`${taskId}-${cellId}`)}
         onMouseLeave={() => handleCellHover(null)}
         onClick={handleClick}
       >
         {content}
-        {hoveredCell === `${taskId}-${cellId}` && cellId !== 'end_date' && cellId !== 'list_name'&& cellId !== 'comments' && cellId !== 'taskReview' && (
+        {hoveredCell === `${taskId}-${cellId}` && cellId !== 'end_date' && cellId !== 'list_name'&& cellId !== 'comments' && cellId !== 'taskReview' && currentUserRole !== 'Viewer' && (
           <Tooltip title={isTrulyEmpty ? "Add" : "Expand"}>
             <IconButton
               size="small"
@@ -679,7 +687,8 @@ const currentUserRole = members?.members?.find(
                     onMouseEnter={() => handleCellHover(task.id)}
                     onMouseLeave={() => handleCellHover(null)}
                   >
-                    {hoveredCell === task.id && (
+
+                    {hoveredCell === task.id && currentUserRole !== 'Viewer' && (
                       <Tooltip>
                         <IconButton
                           size="small"
@@ -884,8 +893,8 @@ const currentUserRole = members?.members?.find(
                       role={currentUserRole}
                       taskReview={task.task_review_status}
                       status={task.status}
-                      onAccept={() => handleConfirmReviewTask('accept',task.id)}
-                      onReject={() => handleConfirmReviewTask('reject',task.id)}
+                      onAccept={currentUserRole !== 'Viewer' ? () => handleConfirmReviewTask('accept',task.id) : null}
+                      onReject={currentUserRole !== 'Viewer' ? () => handleConfirmReviewTask('reject',task.id) : null}
                     />,
                     task.id,
                     'taskReview',
@@ -901,22 +910,26 @@ const currentUserRole = members?.members?.find(
         </TableContainer>
       </Paper>
 
-      <ButtonAdd />
 
-      {renderEditDialog()}
-      <ColorPickerDialog
-        open={openColorPicker}
-        onClose={handleCloseColorPicker}
-        taskId={addLabelDialog.taskId}
-        userData={userData}
-      />
-      <AddMemberDialog
-        open={openAddMemberDialog}
-        onClose={handleCloseAddmemberDialog }
-        taskId={addMemberDialog.taskId}
-        taskData={addMemberDialog.value}
-      />
-      {/* <ToastContainer /> */}
+      {currentUserRole !== 'Viewer' && <ButtonAdd />}
+
+      {currentUserRole !== 'Viewer' && renderEditDialog()}
+      {currentUserRole !== 'Viewer' && (
+        <ColorPickerDialog
+          open={openColorPicker}
+          onClose={handleCloseColorPicker}
+          taskId={addLabelDialog.taskId}
+          userData={userData}
+        />
+      )}
+      {currentUserRole !== 'Viewer' && (
+        <AddMemberDialog
+          open={openAddMemberDialog}
+          onClose={handleCloseAddmemberDialog }
+          taskId={addMemberDialog.taskId}
+          taskData={addMemberDialog.value}
+        />
+      )}
     </>
   );
 };

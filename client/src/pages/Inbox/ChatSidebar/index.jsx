@@ -184,11 +184,11 @@ const ChatSidebar = ({ setSelectedUserId, children }) => {
                         lastMsgPrefix = 'You';
                         lastMsgContent = ' have sent a file';
                     } else {
-                        lastMsgPrefix = lastMsg.sender?.displayName || 'Someone';
+                        lastMsgPrefix = lastMsg.sender?.displayName || 'Someone make changes';
                         lastMsgContent = ' has sent a file';
                     }
                 } else {
-                    lastMsgPrefix = isSender ? 'You: ' : `${lastMsg.sender?.displayName || 'Someone'}: `;
+                    lastMsgPrefix = isSender ? 'You: ' : `${lastMsg.sender?.displayName || 'Someone make changes'}: `;
                     lastMsgContent = lastMsg.content || '';
                 }
             }
