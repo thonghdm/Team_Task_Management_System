@@ -22,6 +22,7 @@ import {
 } from '@mui/icons-material';
 import moment from 'moment';
 import useSocket from '~/utils/useSocket';
+import ChangeList from '~/pages/Projects/Content/TaskBoard/ChangeList';
 
 const ICONS = {
   alert: <NotificationsActiveIcon />,
@@ -33,15 +34,15 @@ const NotificationPanel = () => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const { accesstoken, userData } = useSelector(state => state.auth);
-  
+
   // Initialize socket hook with user ID and access token
-  const { 
-    notifications, 
-    unreadCount, 
-    markAsRead, 
-    markAllAsRead, 
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
     refreshNotifications,
-    loading 
+    loading
   } = useSocket(userData?._id, accesstoken);
 
   const handleClick = (event) => {
@@ -66,25 +67,44 @@ const NotificationPanel = () => {
     if (typeof notification.isRead === 'boolean') {
       return notification.isRead;
     }
-    
+
     if (Array.isArray(notification.isRead)) {
       return notification.isRead.includes(userData?._id);
     }
-    
+
     return false;
   };
 
+
+  ////////////////////////////////openTaskDetail
+  const [showNameMenu, setShowNameMenu] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  const handleOpenNameMenu = (task) => {
+    setSelectedTask(task);
+    setShowNameMenu(true);
+  };
+  const handleCloseNameMenu = () => {
+    setShowNameMenu(false);
+    setSelectedTask(null);
+  };
+
+  const handleNameClick = (taskId) => {
+    handleOpenNameMenu(taskId);
+  };
+  ////////////////////////////////////////////////////////////////
+
   const viewHandler = (notification) => {
-    handleMarkAsRead(notification._id);
-    
-    const { task, notiType } = notification;
-    
-    if (task && task._id) {
-      // Navigate to the task
-      // window.location.href = `/tasks/${task._id}`;
-      console.log(`Navigating to task ${task._id}: ${task.title}`);
+    handleMarkAsRead(notification._id)
+    handleNameClick(notification.taskId);
+
+    if (notification.type.toLowerCase().includes('task')) {
+      handleNameClick(notification.taskId);
     }
-    
+    else if (notification.type.toLowerCase().includes('project') || notification.type.toLowerCase().includes('change_role') || notification.type.toLowerCase().includes('delete_member')) {
+      window.location.href = `/board/${notification.projectId._id}/2/overview`;
+    }
+
     handleClose();
   };
 
@@ -103,7 +123,7 @@ const NotificationPanel = () => {
           <NotificationsIcon />
         </Badge>
       </IconButton>
-      
+
       <Popover
         id="notification-menu"
         anchorEl={anchorEl}
@@ -127,9 +147,9 @@ const NotificationPanel = () => {
         <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">Notifications</Typography>
           {unreadCount > 0 && (
-            <Typography 
-              variant="body2" 
-              color="primary" 
+            <Typography
+              variant="body2"
+              color="primary"
               sx={{ cursor: 'pointer' }}
               onClick={handleMarkAllAsRead}
             >
@@ -138,7 +158,7 @@ const NotificationPanel = () => {
           )}
         </Box>
         <Divider />
-        
+
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
             <CircularProgress size={24} />
@@ -150,8 +170,8 @@ const NotificationPanel = () => {
         ) : (
           <List sx={{ maxHeight: 300, overflow: 'auto', padding: 0 }}>
             {notifications.map((notification) => (
-              <ListItem 
-                key={notification._id} 
+              <ListItem
+                key={notification._id}
                 button
                 onClick={() => viewHandler(notification)}
                 sx={{
@@ -198,7 +218,7 @@ const NotificationPanel = () => {
             ))}
           </List>
         )}
-        
+
         <Divider />
         <Box display="flex">
           <Button
@@ -222,6 +242,9 @@ const NotificationPanel = () => {
           </Button>
         </Box>
       </Popover>
+      {showNameMenu && selectedTask && (
+        <ChangeList open={showNameMenu} onClose={handleCloseNameMenu} taskId={selectedTask} />
+      )}
     </>
   );
 };
