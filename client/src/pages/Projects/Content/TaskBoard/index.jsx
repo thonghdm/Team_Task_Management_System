@@ -22,9 +22,16 @@ import {
   Button,
   TextField,
   CircularProgress,
-  Typography
+  Typography,
+  Select,
+  FormControl,
+  InputLabel,
+  Checkbox,
+  ListItemText,
+  OutlinedInput,
+  InputAdornment
 } from '@mui/material';
-import { MoreVert as MoreVertIcon, Add as AddIcon, QuestionAnswer as QuestionAnswerIcon, ExpandMore as ExpandMoreIcon, DensityMedium as DensityMediumIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, QuestionAnswer as QuestionAnswerIcon, ExpandMore as ExpandMoreIcon, DensityMedium as DensityMediumIcon, Search as SearchIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import './styles.css';
 import ChangeList from './ChangeList';
@@ -77,6 +84,16 @@ const TaskBoard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [taskReview, setTaskReview] = useState({taskId: null, task_Review: null});
   const defaultAvatar = "/225-default-avatar.png";
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [selectedLists, setSelectedLists] = useState([]);
+  const [selectedStatuses, setSelectedStatuses] = useState([]);
+  const [selectedPriorities, setSelectedPriorities] = useState([]);
+  const [memberFilterAnchorEl, setMemberFilterAnchorEl] = useState(null);
+  const [listFilterAnchorEl, setListFilterAnchorEl] = useState(null);
+  const [statusFilterAnchorEl, setStatusFilterAnchorEl] = useState(null);
+  const [priorityFilterAnchorEl, setPriorityFilterAnchorEl] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
     const getProjectDetail = async (token) => {
       try {
@@ -164,16 +181,74 @@ const TaskBoard = () => {
     };
   }, [projectId]);
 
-  const updatedTasks = getTasksInfo.map(task => ({
+  const handleMemberFilterClick = (event) => {
+    setMemberFilterAnchorEl(event.currentTarget);
+  };
+
+  const handleListFilterClick = (event) => {
+    setListFilterAnchorEl(event.currentTarget);
+  };
+
+  const handleStatusFilterClick = (event) => {
+    setStatusFilterAnchorEl(event.currentTarget);
+  };
+
+  const handlePriorityFilterClick = (event) => {
+    setPriorityFilterAnchorEl(event.currentTarget);
+  };
+
+  const handleFilterClose = () => {
+    setMemberFilterAnchorEl(null);
+    setListFilterAnchorEl(null);
+    setStatusFilterAnchorEl(null);
+    setPriorityFilterAnchorEl(null);
+  };
+
+  const handleMemberSelect = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setSelectedMembers(typeof value === 'string' ? value.split(',') : value);
+  };
+
+
+  const uniqueLists = [...new Set(getTasksInfo.map(task => task.list_name))].filter(Boolean);
+  const uniqueStatuses = [...new Set(getTasksInfo.map(task => task.status))].filter(Boolean);
+  const uniquePriorities = [...new Set(getTasksInfo.map(task => task.priority))].filter(Boolean);
+
+
+  const filterTasks = (tasks) => {
+    return tasks.filter(task => {
+      const matchesMembers = selectedMembers.length === 0 || 
+        task.members?.some(member => selectedMembers.includes(member._id));
+      
+      const matchesList = selectedLists.length === 0 || 
+        selectedLists.includes(task.list_name);
+      
+      const matchesStatus = selectedStatuses.length === 0 || 
+        selectedStatuses.includes(task.status);
+      
+      const matchesPriority = selectedPriorities.length === 0 || 
+        selectedPriorities.includes(task.priority);
+
+      const matchesSearch = !searchQuery || 
+        task.task_name.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesMembers && matchesList && matchesStatus && matchesPriority && matchesSearch;
+    });
+  };
+
+
+  const updatedTasks = filterTasks(getTasksInfo.map(task => ({
     ...task,
     name: task.name || '.',
-    list: task.list || '.',
+    list: task.list_name || '.',
     labels: task.labels.length === 0 ? ['.'] : task.labels,
     comments: task.comments.length === 0 ? 0 : task.comments.length,
     members: task.members.length === 0 ? [] : task.members,
     dueDate: task.end_date || '.',
     task_review_status: task.task_review_status || '.',
-  }));
+  })));
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -191,10 +266,6 @@ const TaskBoard = () => {
     console.log(`Add clicked for task ${taskId}`);
     // Thêm logic xử lý khi click vào icon Add ở đây
   };
-
-  // const handleAddClickID = (taskId) => {
-  //   // Thêm logic xử lý khi click vào icon Add ở đây
-  // };
 
   // Handle Name click
   const handleOpenNameMenu = (task) => {
@@ -217,6 +288,7 @@ const TaskBoard = () => {
     // Tìm task hiện tại từ updatedTasks
     const currentTask = updatedTasks.find(task => task.id === taskId);
     console.log("currentTask", currentTask);
+    console.log("TaskInfo", getTasksInfo);
     // Set giá trị ban đầu dựa trên loại chỉnh sửa
     switch (type) {
       case 'task_name':
@@ -618,52 +690,129 @@ const TaskBoard = () => {
 const currentUserRole = members?.members?.find(
   member => member?.memberId?._id === userData?._id
 )?.isRole;
-
+const shortenId = (id) => {
+  if (!id) return '';
+  if (id.length <= 8) return id;
+  return `${id.slice(0, 2)}...${id.slice(-5)}`;
+}; 
   return (
     <>
       <Paper elevation={3} sx={{ mt: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <TextField
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            size="small"
+            sx={{ 
+              width: '300px',
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: theme.palette.background.paper,
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
         <TableContainer className="scrollable" sx={{ borderColor: theme.palette.divider, maxHeight: 640 }}>
           <Table stickyHeader aria-label="sticky table" sx={{ borderColor: theme.palette.divider }}>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold', textAlign: 'center' }}>No.</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold', textAlign: 'center' }}>ID</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Task</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>List</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Status</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Priority</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Labels</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Members</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Comment</TableCell>
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
-                  Due date
-                  {/* <IconButton
-                    aria-label="more"
-                    id="long-button"
-                    aria-controls={Boolean(anchorEl) ? 'long-menu' : undefined}
-                    aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
-                    aria-haspopup="true"
-                    onClick={handleClick}
-                    sx={{ color: theme.palette.text.primary }}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
-                  <Menu
-                    id="long-menu"
-                    MenuListProps={{
-                      'aria-labelledby': 'long-button',
-                    }}
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleClose}
-                  >
-                    <MenuItem onClick={handleClose}>Sort ascending</MenuItem>
-                    <MenuItem onClick={handleClose}>Sort descending</MenuItem>
-                  </Menu> */}
-                </TableCell>  
-                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
-                Task Review
+                <TableCell 
+                  sx={{ 
+                    color: theme.palette.text.primary, 
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: theme.palette.action.hover }
+                  }}
+                  onClick={handleListFilterClick}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    List
+                    {selectedLists.length > 0 && (
+                      <Chip 
+                        label={selectedLists.length} 
+                        size="small" 
+                        color="primary"
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Box>
                 </TableCell>
-
+                <TableCell 
+                  sx={{ 
+                    color: theme.palette.text.primary, 
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: theme.palette.action.hover }
+                  }}
+                  onClick={handleStatusFilterClick}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    Status
+                    {selectedStatuses.length > 0 && (
+                      <Chip 
+                        label={selectedStatuses.length} 
+                        size="small" 
+                        color="primary"
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Box>
+                </TableCell>
+                <TableCell 
+                  sx={{ 
+                    color: theme.palette.text.primary, 
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: theme.palette.action.hover }
+                  }}
+                  onClick={handlePriorityFilterClick}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    Priority
+                    {selectedPriorities.length > 0 && (
+                      <Chip 
+                        label={selectedPriorities.length} 
+                        size="small" 
+                        color="primary"
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Box>
+                </TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Labels</TableCell>
+                <TableCell 
+                  sx={{ 
+                    color: theme.palette.text.primary, 
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: theme.palette.action.hover }
+                  }}
+                  onClick={handleMemberFilterClick}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    Members
+                    {selectedMembers.length > 0 && (
+                      <Chip 
+                        label={selectedMembers.length} 
+                        size="small" 
+                        color="primary"
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Box>
+                </TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Comment</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Due Date</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>Task Review</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -717,7 +866,7 @@ const currentUserRole = members?.members?.find(
                         </IconButton>
                       </Tooltip>
                     )}
-                    {index + 1} {/* Display the sequence number instead of task.id */}
+                    {shortenId(task.id)} {/* Display the sequence number instead of task.id */}
                   </TableCell>
                   {renderTableCell(
                     <Box sx={{ maxWidth: "400px", overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
@@ -930,6 +1079,157 @@ const currentUserRole = members?.members?.find(
           taskData={addMemberDialog.value}
         />
       )}
+
+      <Menu
+        anchorEl={memberFilterAnchorEl}
+        open={Boolean(memberFilterAnchorEl)}
+        onClose={handleFilterClose}
+        PaperProps={{
+          style: {
+            maxHeight: 300,
+            width: 250,
+          },
+        }}
+      >
+        <FormControl sx={{ m: 1, width: '90%' }}>
+          <InputLabel>Filter by Members</InputLabel>
+          <Select
+            multiple
+            value={selectedMembers}
+            onChange={(e) => setSelectedMembers(e.target.value)}
+            input={<OutlinedInput label="Filter by Members" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => {
+                  const member = members?.members?.find(m => m.memberId._id === value);
+                  return (
+                    <Chip 
+                      key={value} 
+                      label={member?.memberId?.displayName || 'Unknown'} 
+                      size="small"
+                    />
+                  );
+                })}
+              </Box>
+            )}
+          >
+            {members?.members?.map((member) => (
+              <MenuItem key={member.memberId._id} value={member.memberId._id}>
+                <Checkbox checked={selectedMembers.indexOf(member.memberId._id) > -1} />
+                <ListItemText primary={member.memberId.displayName} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Menu>
+
+      <Menu
+        anchorEl={listFilterAnchorEl}
+        open={Boolean(listFilterAnchorEl)}
+        onClose={handleFilterClose}
+        PaperProps={{
+          style: {
+            maxHeight: 300,
+            width: 250,
+          },
+        }}
+      >
+        <FormControl sx={{ m: 1, width: '90%' }}>
+          <InputLabel>Filter by Lists</InputLabel>
+          <Select
+            multiple
+            value={selectedLists}
+            onChange={(e) => setSelectedLists(e.target.value)}
+            input={<OutlinedInput label="Filter by Lists" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip key={value} label={value} size="small" />
+                ))}
+              </Box>
+            )}
+          >
+            {uniqueLists.map((list) => (
+              <MenuItem key={list} value={list}>
+                <Checkbox checked={selectedLists.indexOf(list) > -1} />
+                <ListItemText primary={list} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Menu>
+
+      <Menu
+        anchorEl={statusFilterAnchorEl}
+        open={Boolean(statusFilterAnchorEl)}
+        onClose={handleFilterClose}
+        PaperProps={{
+          style: {
+            maxHeight: 300,
+            width: 250,
+          },
+        }}
+      >
+        <FormControl sx={{ m: 1, width: '90%' }}>
+          <InputLabel>Filter by Status</InputLabel>
+          <Select
+            multiple
+            value={selectedStatuses}
+            onChange={(e) => setSelectedStatuses(e.target.value)}
+            input={<OutlinedInput label="Filter by Status" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip key={value} label={value} size="small" />
+                ))}
+              </Box>
+            )}
+          >
+            {uniqueStatuses.map((status) => (
+              <MenuItem key={status} value={status}>
+                <Checkbox checked={selectedStatuses.indexOf(status) > -1} />
+                <ListItemText primary={status} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Menu>
+
+      <Menu
+        anchorEl={priorityFilterAnchorEl}
+        open={Boolean(priorityFilterAnchorEl)}
+        onClose={handleFilterClose}
+        PaperProps={{
+          style: {
+            maxHeight: 300,
+            width: 250,
+          },
+        }}
+      >
+        <FormControl sx={{ m: 1, width: '90%' }}>
+          <InputLabel>Filter by Priority</InputLabel>
+          <Select
+            multiple
+            value={selectedPriorities}
+            onChange={(e) => setSelectedPriorities(e.target.value)}
+            input={<OutlinedInput label="Filter by Priority" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip key={value} label={value} size="small" />
+                ))}
+              </Box>
+            )}
+          >
+            {uniquePriorities.map((priority) => (
+              <MenuItem key={priority} value={priority}>
+                <Checkbox checked={selectedPriorities.indexOf(priority) > -1} />
+                <ListItemText primary={priority} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Menu>
     </>
   );
 };
