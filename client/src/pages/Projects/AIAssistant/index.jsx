@@ -155,7 +155,6 @@ const AIAssistant = ({ open, onClose }) => {
 
             // Send data to API
             const response = await AiAssignTasks(formattedAssignments);
-
             // Update assignments with the response data
             if (response?.assignments) {
                 setAssignments({ tasks: response.assignments });
@@ -163,6 +162,7 @@ const AIAssistant = ({ open, onClose }) => {
 
         } catch (error) {
             console.error('Error getting AI assignments:', error);
+            toast.error(`Failed to get AI assignments: ${error.message || 'Unknown error'}`);
         } finally {
             setIsLoading(false);
         }
