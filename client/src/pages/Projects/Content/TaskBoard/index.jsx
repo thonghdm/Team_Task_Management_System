@@ -93,6 +93,7 @@ const TaskBoard = () => {
   const [statusFilterAnchorEl, setStatusFilterAnchorEl] = useState(null);
   const [priorityFilterAnchorEl, setPriorityFilterAnchorEl] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   useEffect(() => {
     const getProjectDetail = async (token) => {
@@ -698,26 +699,135 @@ const shortenId = (id) => {
   return (
     <>
       <Paper elevation={3} sx={{ mt: 2, backgroundColor: 'background.default', color: 'text.primary' }}>
-        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <TextField
-            placeholder="Search tasks..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            size="small"
+        <Box sx={{ 
+          p: 3, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          gap: 2,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: '8px 8px 0 0'
+        }}>
+          <Typography 
+            variant="h6" 
             sx={{ 
-              width: '300px',
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: theme.palette.background.paper,
-              }
+              fontWeight: 600,
+              color: theme.palette.text.primary
             }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
+          >
+            Task Board
+          </Typography>
+
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2
+          }}>
+            {showSearch && (
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                maxWidth: '350px',
+                position: 'relative',
+                animation: 'slideIn 0.3s ease-out'
+              }}>
+                <TextField
+                  placeholder="Search tasks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  size="small"
+                  sx={{ 
+                    width: '350px',
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: theme.palette.background.default,
+                      borderRadius: '12px',
+                      transition: 'all 0.2s ease-in-out',
+                      '&:hover': {
+                        backgroundColor: theme.palette.action.hover,
+                        boxShadow: `0 2px 8px ${theme.palette.action.hover}`
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: theme.palette.background.paper,
+                        boxShadow: `0 4px 12px ${theme.palette.primary.main}20`
+                      }
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.divider,
+                      transition: 'border-color 0.2s ease-in-out'
+                    },
+                    '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.primary.main
+                    },
+                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.primary.main,
+                      borderWidth: '2px'
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon 
+                          sx={{ 
+                            color: searchQuery ? theme.palette.primary.main : theme.palette.text.secondary,
+                            transition: 'color 0.2s ease-in-out'
+                          }} 
+                        />
+                      </InputAdornment>
+                    ),
+                    endAdornment: searchQuery && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setSearchQuery('')}
+                          sx={{ 
+                            color: theme.palette.text.secondary,
+                            '&:hover': { color: theme.palette.error.main }
+                          }}
+                        >
+                          <Box component="span" sx={{ fontSize: '16px' }}>×</Box>
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Box>
+            )}
+            
+            {showSearch && searchQuery && (
+              <Chip
+                label={`${updatedTasks.length} result${updatedTasks.length !== 1 ? 's' : ''}`}
+                size="small"
+                color="primary"
+                variant="outlined"
+                sx={{ 
+                  fontWeight: 500
+                }}
+              />
+            )}
+
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setShowSearch(!showSearch)}
+              startIcon={<SearchIcon />}
+              sx={{
+                borderRadius: '8px',
+                textTransform: 'none',
+                fontWeight: 500,
+                borderColor: theme.palette.divider,
+                color: theme.palette.text.primary,
+                minWidth: 'auto',
+                px: 2,
+                '&:hover': {
+                  borderColor: theme.palette.primary.main,
+                  backgroundColor: theme.palette.primary.main + '08'
+                }
+              }}
+            >
+              {showSearch ? 'Hide' : 'Search'}
+            </Button>
+          </Box>
         </Box>
         <TableContainer className="scrollable" sx={{ borderColor: theme.palette.divider, maxHeight: 640 }}>
           <Table stickyHeader aria-label="sticky table" sx={{ borderColor: theme.palette.divider }}>
